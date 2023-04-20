@@ -1,6 +1,14 @@
 <!DOCTYPE html>
-@php($site_direction = \App\Models\BusinessSetting::where('key', 'site_direction')->first())
-@php($site_direction = $site_direction->value ?? 'ltr')
+<?php
+    $site_direction = session()->get('site_direction');
+    // if (env('APP_MODE') == 'demo') {
+    //     $site_direction = session()->get('site_direction');
+    // }else{
+    //     $site_direction = \App\Models\BusinessSetting::where('key', 'site_direction')->first();
+    //     $site_direction = $site_direction->value ?? 'ltr';
+    // }
+
+?>
 <html dir="{{ $site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $site_direction === 'rtl'?'active':'' }}">
 <head>
     <!-- Required Meta Tags Always Come First -->

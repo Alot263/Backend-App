@@ -16,6 +16,7 @@ use App\CentralLogics\ProductLogic;
 use App\Models\Store;
 use App\Mail\PlaceOrder;
 use App\Models\BusinessSetting;
+use App\Models\DMVehicle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -168,6 +169,7 @@ class POSController extends Controller
             'floor' => $request->floor,
             'road' => $request->road,
             'house' => $request->house,
+            'distance' => $request->distance??0,
             'delivery_fee' => $request->delivery_fee?:0,
             'longitude' => (string)$request->longitude,
             'latitude' => (string)$request->latitude,
@@ -467,6 +469,21 @@ class POSController extends Controller
             Toastr::error(translate('messages.customer_wallet_disable_warning'));
         }
 
+        $distance_data = isset($address) ? $address['distance'] : 0;
+
+        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+        })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where(function ($query) use ($distance_data) {
+                    $query->where('starting_coverage_area', '>=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+                });
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        $vehicle_id = (isset($data) ? $data->id  : null);
+
         $store = Store::find($request->store_id);
         $cart = $request->session()->get('cart');
 
@@ -481,6 +498,7 @@ class POSController extends Controller
         if (Order::find($order->id)) {
             $order->id = Order::latest()->first()->id + 1;
         }
+        $order->distance = isset($address) ? $address['distance'] : 0;
         $order->payment_status = $request->type == 'wallet'?'paid':'unpaid';
         $order->order_status = $request->type == 'wallet'?'confirmed':'pending';
         $order->order_type = 'delivery';
@@ -488,6 +506,7 @@ class POSController extends Controller
         $order->store_id = $store->id;
         $order->module_id = $store->module_id;
         $order->user_id = $request->user_id;
+        $order->vehicle_id = $vehicle_id;
         $order->delivery_charge = isset($address)?$address['delivery_fee']:0;
         $order->original_delivery_charge = isset($address)?$address['delivery_fee']:0;
         $order->delivery_address = isset($address)?json_encode($address):null;
@@ -614,6 +633,14 @@ class POSController extends Controller
             $order->order_amount = $total_price + $tax_a + $order->delivery_charge;
             $order->adjusment = $request->amount - ($total_price + $total_tax_amount + $order->delivery_charge);
             $order->payment_method = $request->type == 'wallet'?'wallet':'cash_on_delivery';
+
+            $max_cod_order_amount = BusinessSetting::where('key', 'max_cod_order_amount')->first();
+            $max_cod_order_amount_value=  $max_cod_order_amount ? $max_cod_order_amount->value : 0;
+            if( $max_cod_order_amount_value > 0 && $order->payment_method == 'cash_on_delivery' && $order->order_amount > $max_cod_order_amount_value){
+            Toastr::error(translate('messages.You can not Order more then ').$max_cod_order_amount_value .Helpers::currency_symbol().' '. translate('messages.on COD order.')  );
+            return back();
+            }
+
             if($request->type == 'wallet'){
                 if($request->user_id){
 
@@ -752,6 +779,29 @@ class POSController extends Controller
             info($ex);
         }
         Toastr::success(translate('customer_added_successfully'));
-        return back();
+        return back();  
+    }
+
+    public function extra_charge(Request $request)
+    {
+        $distance_data = $request->distancMileResult ?? 1;
+
+        // $data= Vehicle::where('starting_coverage_area','<=' , $distance )->where('maximum_coverage_area','>=', $distance)->first();
+        // if(!$data){
+        //     $data= Vehicle::where('maximum_coverage_area','>=', $distance)->first();
+        //         if(!$data){
+        //         $data= Vehicle::orderBy('maximum_coverage_area','DESC')->first();
+        //         }
+        // }
+        $data=  DMVehicle::active()->where(function($query)use($distance_data) {
+                $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
+            })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '>=', $distance_data);
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+            return response()->json($extra_charges,200);
     }
 }

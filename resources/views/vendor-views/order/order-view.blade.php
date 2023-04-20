@@ -2,12 +2,18 @@
 
 @section('title', translate('messages.Order Details'))
 
+<style>
+    .select2-container--open {
+    z-index: 99999999999999;
+}
+</style>
 
 @section('content')
     <?php
+    $reasons=\App\Models\OrderCancelReason::where('status', 1)->where('user_type' ,'store' )->get();
+    $tax_included =0;
     if (count($order->details) > 0) {
         $campaign_order = $order->details[0]->campaign ? true : false;
-        $tax_included =0;
     }
     ?>
     <div class="content container-fluid">
@@ -71,6 +77,13 @@
                                             class="fz--10 badge badge-soft-warning">{{ date('d M Y ' . config('timeformat'), strtotime($order['schedule_at'])) }}</label>
                                     </h6>
                                 @endif
+                                @if($order['cancellation_reason'])
+                                <h6>
+                                    <span class="text-danger">{{ translate('messages.order_cancellation_reason') }} :</span>
+                                    {{ $order['cancellation_reason'] }}
+                                </h6>
+                                @endif
+    
                                 @if ($order['order_note'])
                                     <h6>
                                         {{ translate('messages.order') }} {{ translate('messages.note') }} :
@@ -480,6 +493,9 @@
                         $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount;
                         
                         $total_tax_amount = $order['total_tax_amount'];
+                        if($order->tax_status == 'included'){
+                                $total_tax_amount=0;
+                            }
                         $tax_included = \App\Models\BusinessSetting::where(['key'=>'tax_included'])->first() ?  \App\Models\BusinessSetting::where(['key'=>'tax_included'])->first()->value : 0;
                         
                         $store_discount_amount = $order['store_discount_amount'];
@@ -595,8 +611,7 @@
                                     @if (config('canceled_by_store'))
                                         <div class="col-6">
                                             <a class="btn btn--danger w-100 fz--13 px-2 {{ $order['order_status'] == 'pending' ? '' : 'd-none' }}"
-                                                onclick="order_status_change_alert('{{ route('vendor.order.status', ['id' => $order['id'], 'order_status' => 'canceled']) }}', '{{ translate('messages.order_canceled_confirmation') }}')"
-                                                href="javascript:">{{ translate('messages.cancel') }}</a>
+                                            onclick="cancelled_status()">{{ translate('Cancel Order') }}</a>
                                         </div>
                                     @endif
                                 </div>
@@ -995,6 +1010,43 @@
 @endsection
 @push('script_2')
     <script>
+        function cancelled_status() {
+            Swal.fire({
+                title: '{{ translate('messages.are_you_sure') }}',
+                text: '{{ translate('messages.Change status to canceled ?') }}',
+                type: 'warning',
+                html:
+                `   <select class="form-control js-select2-custom mx-1" name="reason" id="reason">
+                    @foreach ($reasons as $r)
+                        <option value="{{ $r->reason }}">
+                            {{ $r->reason }}
+                        </option>
+                    @endforeach
+
+                    </select>`,
+                showCancelButton: true,
+                cancelButtonColor: 'default',
+                confirmButtonColor: '#FC6A57',
+                cancelButtonText: '{{ translate('messages.no') }}',
+                confirmButtonText: '{{ translate('messages.yes') }}',
+                reverseButtons: true,
+                onOpen: function () {
+                        $('.js-select2-custom').select2({
+                            minimumResultsForSearch: 5,
+                            width: '100%',
+                            placeholder: "Select Reason",
+                            language: "en",
+                        });
+                    }
+            }).then((result) => {
+                if (result.value) {
+                    // console.log(result);
+                    var reason = document.getElementById('reason').value;
+                    location.href = '{!! route('vendor.order.status', ['id' => $order['id'],'order_status' => 'canceled']) !!}&reason='+reason,'{{ translate('Change status to canceled ?') }}';
+                }
+            })
+        }
+
         function order_status_change_alert(route, message, verification) {
             if (verification) {
                 Swal.fire({

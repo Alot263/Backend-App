@@ -10,6 +10,7 @@ use App\Models\Item;
 use App\Models\Store;
 use App\Models\Review;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\CentralLogics\Helpers;
 use App\CentralLogics\ProductLogic;
@@ -429,7 +430,8 @@ class ItemController extends Controller
                 array_push($food_variations, $temp_variation);
             }
         }
-
+        $slug = Str::slug($request->name[array_search('en', $request->lang)]);
+        $item->slug = $item->slug? $item->slug :"{$slug}{$item->id}";
         $item->food_variations = json_encode($food_variations);
         $item->variations = $request->has('attribute_id') ? json_encode($variations) : json_encode([]);
         $item->price = $request->price;
@@ -585,13 +587,20 @@ class ItemController extends Controller
     }
     public function get_categories(Request $request)
     {
+        $key = explode(' ', $request['q']);
         $cat = Category::when(isset($request->module_id), function ($query) use ($request) {
             $query->where('module_id', $request->module_id);
-        })
+            })
             ->when($request->sub_category, function ($query) {
                 $query->where('position', '>', '0');
             })
-            ->where(['parent_id' => $request->parent_id])->get([DB::raw('id, name as text')]);
+            ->where(['parent_id' => $request->parent_id])
+            ->when(isset($key),function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->where('name', 'like', "%{$value}%");
+                }
+            })
+            ->get([DB::raw('id, name as text')]);
 
         return response()->json($cat);
     }

@@ -16,6 +16,7 @@ use App\Scopes\StoreScope;
 use App\Models\StoreWallet;
 use Illuminate\Http\Request;
 use App\Models\StoreSchedule;
+use Illuminate\Support\Str;
 use App\CentralLogics\Helpers;
 use App\Models\WithdrawRequest;
 use App\CentralLogics\StoreLogic;
@@ -162,6 +163,8 @@ class VendorController extends Controller
         $vendor->password = strlen($request->password)>1?bcrypt($request->password):$store->vendor->password;
         $vendor->save();
 
+        $slug = Str::slug($request->name);
+        $store->slug = $store->slug? $store->slug :"{$slug}{$store->id}";
         $store->email = $request->email;
         $store->phone = $request->phone;
         $store->logo = $request->has('logo') ? Helpers::update('store/', $store->logo, 'png', $request->file('logo')) : $store->logo;
@@ -383,7 +386,9 @@ class VendorController extends Controller
             return $query->module($request->query('module_id'));
         })
         ->module(Config::get('module.current_module_id'))
-        ->with('vendor','module')->get();
+        ->with('vendor','module')
+        ->orderBy('id','DESC')
+        ->get();
         if($request->type == 'excel'){
             return (new FastExcel(Helpers::export_stores($stores)))->download('Stores.xlsx');
         }elseif($request->type == 'csv'){
@@ -540,8 +545,8 @@ class VendorController extends Controller
             'minimum_order'=>'required',
             'comission'=>'required',
             'tax'=>'required',
-            'minimum_delivery_time' => 'required|regex:/^([0-9]{2})$/|min:2|max:2',
-            'maximum_delivery_time' => 'required|regex:/^([0-9]{2})$/|min:2|max:2',
+            'minimum_delivery_time' => 'required|regex:/^([0-9]{1})$/|min:1|max:2',
+            'maximum_delivery_time' => 'required|regex:/^([0-9]{1})$/|min:1|max:2|gt:minimum_delivery_time',
         ]);
 
         if($request->comission_status)

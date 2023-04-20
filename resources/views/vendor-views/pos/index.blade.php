@@ -426,32 +426,48 @@
                                                     distanceMile + Number.EPSILON) *
                                                 100) / 100;
                                             console.log(distancMileResult);
-                                            <?php
-                                            $per_km_shipping_charge = (float) \App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
-                                            $minimum_shipping_charge = (float) \App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
-                                            // $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
-                                            ?>
+                                            document.getElementById('distance').value = distancMileResult;
+                                        <?php
+                                        $module_wise_delivery_charge = $store_data->zone->modules()->where('modules.id', $store_data->module_id)->first();
+                                        if ($module_wise_delivery_charge) {
+                                            $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
+                                            $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
+                                            $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge??0;
+                                        } else {
+                                            $per_km_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
+                                            $minimum_shipping_charge = (float)\App\Models\BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
+                                            $maximum_shipping_charge = 0;
+                                        }
 
-                                            var original_delivery_charge = (
-                                                    distancMileResult *
-                                                    {{ $per_km_shipping_charge }} >
-                                                    {{ $minimum_shipping_charge }}) ?
-                                                distancMileResult *
-                                                {{ $per_km_shipping_charge }} :
-                                                {{ $minimum_shipping_charge }};
-                                            var delivery_charge = Math.round((
-                                                original_delivery_charge +
-                                                Number.EPSILON) * 100) / 100;
-                                            document.getElementById('delivery_fee')
-                                                .value = delivery_charge;
-                                            $('#delivery_fee').siblings('strong').html(
-                                                delivery_charge +
-                                                '{{ \App\CentralLogics\Helpers::currency_symbol() }}'
-                                                );
+                                        // $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
 
-                                            console.log(Math.round((
-                                                original_delivery_charge +
-                                                Number.EPSILON) * 100) / 100);
+                                        ?>
+
+                                        $.get({
+                                                url: '{{ route('vendor.pos.extra_charge') }}',
+                                                dataType: 'json',
+                                                data: {
+                                                    distancMileResult: distancMileResult,
+                                                },
+                                                success: function(data) {
+                                                    extra_charge = data;
+                                                    var original_delivery_charge =  (distancMileResult * {{$per_km_shipping_charge}} > {{$minimum_shipping_charge}}) ? distancMileResult * {{$per_km_shipping_charge}} : {{$minimum_shipping_charge}};
+                                                    var delivery_amount = ({{ $maximum_shipping_charge }} > {{ $minimum_shipping_charge }} && original_delivery_charge + extra_charge > {{ $maximum_shipping_charge }} ? {{ $maximum_shipping_charge }} : original_delivery_charge + extra_charge);
+                                                    var delivery_charge =Math.round(( delivery_amount + Number.EPSILON) * 100) / 100;
+                                                document.getElementById('delivery_fee').value = delivery_charge;
+                                                $('#delivery_fee').siblings('strong').html(delivery_charge + '{{ \App\CentralLogics\Helpers::currency_symbol() }}');
+
+                                                },
+                                                error:function(){
+                                                    var original_delivery_charge =  (distancMileResult * {{$per_km_shipping_charge}} > {{$minimum_shipping_charge}}) ? distancMileResult * {{$per_km_shipping_charge}} : {{$minimum_shipping_charge}};
+
+                                                    var delivery_charge =Math.round((
+                                                ({{ $maximum_shipping_charge }} > {{ $minimum_shipping_charge }} && original_delivery_charge  > {{ $maximum_shipping_charge }} ? {{ $maximum_shipping_charge }} : original_delivery_charge)
+                                                + Number.EPSILON) * 100) / 100;
+                                                document.getElementById('delivery_fee').value = delivery_charge;
+                                                $('#delivery_fee').siblings('strong').html(delivery_charge + '{{ \App\CentralLogics\Helpers::currency_symbol() }}');
+                                                }
+                                            });
                                         });
 
                                     }

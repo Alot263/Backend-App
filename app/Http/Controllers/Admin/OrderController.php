@@ -196,9 +196,21 @@ class OrderController extends Controller
         }])->where(['id' => $id])->first();
         if (isset($order)) {
             if (isset($order->store)) {
-                $deliveryMen = DeliveryMan::where('zone_id', $order->store->zone_id)->available()->active()->get();
+                $deliveryMen = DeliveryMan::where('zone_id', $order->store->zone_id)
+                ->where(function($query)use($order){
+                            $query->where('vehicle_id',$order->dm_vehicle_id)->orWhereNull('vehicle_id');
+                    })->available()->active()->get();
             } else {
-                $deliveryMen = isset($order->zone_id) ? DeliveryMan::where('zone_id', $order->zone_id)->zonewise()->available()->active()->get() : [];
+                // $deliveryMen = isset($order->zone_id) ? DeliveryMan::where('zone_id', $order->zone_id)->zonewise()->available()->active()->get() : [];
+
+                if($order->store !== null){
+                    $deliveryMen = isset($order->zone_id) ? DeliveryMan::where('zone_id', $order->store->zone_id)->where(function($query)use($order){
+                            $query->where('vehicle_id',$order->dm_vehicle_id)->orWhereNull('vehicle_id');
+                    })
+                    ->available()->active()->get():[];
+                } else{
+                    $deliveryMen = DeliveryMan::where('zone_id', '=', NULL)->where('vehicle_id',$order->dm_vehicle_id)->active()->get();
+                }
             }
             $category = $request->query('category_id', 0);
             // $sub_category = $request->query('sub_category', 0);
@@ -321,6 +333,10 @@ class OrderController extends Controller
 
     public function status(Request $request)
     {
+        $request->validate([
+            'reason'=>'required_if:order_status,canceled'
+        ]);
+
         $order = Order::with(['details', 'store' => function ($query) {
             return $query->withCount('orders');
         }, 'details.item' => function ($query) {
@@ -429,6 +445,8 @@ class OrderController extends Controller
                 Toastr::warning(translate('messages.you_can_not_cancel_a_completed_order'));
                 return back();
             }
+            $order->cancellation_reason = $request->reason;
+            $order->canceled_by = 'admin';
             if (config('module.' . $order->module->module_type)['stock']) {
                 foreach ($order->details as $detail) {
                     $variant = json_decode($detail['variation'], true);

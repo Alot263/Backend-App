@@ -61,16 +61,18 @@
                     @php($modules = \App\Models\Module::Active()->get())
                     @foreach ($modules as $module)   
                     @if ($module->module_type != 'parcel')
+                    @php($unassigned = \App\Models\Order::whereHas('module', function($query) use($module){
+                                        $query->where('module_id', $module->id);
+                                    })->SearchingForDeliveryman()->OrderScheduledIn(30)->StoreOrder()->count())
+                    @php($ongoing = \App\Models\Order::whereHas('module', function($query) use($module){
+                                        $query->where('module_id', $module->id);
+                                    })->Ongoing()->OrderScheduledIn(30)->StoreOrder()->count() )
                     <li class="navbar-vertical-aside-has-menu {{ Request::is("admin/dispatch/list/{$module->id}*") ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ $module->module_name }}">
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                 {{ $module->module_name }}
                                 <span class="badge badge-soft-info badge-pill ml-1">
-                                    {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                        $query->where('module_id', $module->id);
-                                    })->SearchingForDeliveryman()->OrderScheduledIn(30)->StoreOrder()->count() + \App\Models\Order::whereHas('module', function($query) use($module){
-                                        $query->where('module_id', $module->id);
-                                    })->Ongoing()->OrderScheduledIn(30)->StoreOrder()->count() }}
+                                    {{ $unassigned + $unassigned }}
 
                                 </span>
                             </span>
@@ -82,9 +84,7 @@
                                     <span class="text-truncate sidebar--badge-container">
                                         {{translate('messages.unassigned_orders')}}
                                         <span class="badge badge-soft-info badge-pill ml-1">
-                                            {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                                $query->where('module_id', $module->id);
-                                            })->SearchingForDeliveryman()->OrderScheduledIn(30)->StoreOrder()->count() }}
+                                            {{ $unassigned }}
                                         </span>
                                     </span>
                                 </a>
@@ -95,9 +95,7 @@
                                     <span class="text-truncate sidebar--badge-container">
                                         {{ translate('messages.ongoingOrders') }}
                                         <span class="badge badge-soft-light badge-pill ml-1">
-                                            {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                                $query->where('module_id', $module->id);
-                                            })->Ongoing()->OrderScheduledIn(30)->StoreOrder()->count() }}
+                                            {{ $unassigned }}
                                         </span>
                                     </span>
                                 </a>
@@ -105,16 +103,18 @@
                         </ul>
                     </li>
                     @else
+                    @php($unassigned = \App\Models\Order::whereHas('module', function($query) use($module){
+                                        $query->where('module_id', $module->id);
+                                    })->SearchingForDeliveryman()->OrderScheduledIn(30)->ParcelOrder()->count())
+                    @php($ongoing = \App\Models\Order::whereHas('module', function($query) use($module){
+                                        $query->where('module_id', $module->id);
+                                    })->Ongoing()->OrderScheduledIn(30)->ParcelOrder()->count() )
                     <li class="navbar-vertical-aside-has-menu {{ Request::is("admin/dispatch/parcel/list/{$module->id}*") ? 'active' : '' }}">
                         <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ $module->module_name }}">
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                 {{ $module->module_name }}
                                 <span class="badge badge-soft-light badge-pill ml-1">
-                                    {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                        $query->where('module_id', $module->id);
-                                    })->SearchingForDeliveryman()->OrderScheduledIn(30)->ParcelOrder()->count() + \App\Models\Order::whereHas('module', function($query) use($module){
-                                        $query->where('module_id', $module->id);
-                                    })->Ongoing()->OrderScheduledIn(30)->ParcelOrder()->count() }}
+                                    {{ $unassigned + $ongoing }}
                                 </span>
                             </span>
                         </a>
@@ -125,9 +125,7 @@
                                     <span class="text-truncate sidebar--badge-container">
                                         {{translate('messages.unassigned_orders')}}
                                         <span class="badge badge-soft-info badge-pill ml-1">
-                                            {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                                $query->where('module_id', $module->id);
-                                            })->SearchingForDeliveryman()->OrderScheduledIn(30)->ParcelOrder()->count() }}
+                                            {{ $unassigned }}
                                         </span>
                                     </span>
                                 </a>
@@ -138,9 +136,7 @@
                                     <span class="text-truncate sidebar--badge-container">
                                         {{ translate('messages.ongoingOrders') }}
                                         <span class="badge badge-soft-light badge-pill ml-1">
-                                            {{ \App\Models\Order::whereHas('module', function($query) use($module){
-                                                $query->where('module_id', $module->id);
-                                            })->Ongoing()->OrderScheduledIn(30)->ParcelOrder()->count() }}
+                                            {{ $ongoing }}
                                         </span>
                                     </span>
                                 </a>

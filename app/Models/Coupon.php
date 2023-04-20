@@ -12,13 +12,23 @@ class Coupon extends Model
         'max_discount' => 'float',
         'discount' => 'float',
         'limit'=>'integer',
+        'store_id'=>'integer',
+        // 'customer_id'=>'integer',
+        'status'=>'integer',
+        'id'=>'integer',
+        'total_uses'=>'integer',
     ];
 
     public function module()
     {
         return $this->belongsTo(Module::class);
     }
-    
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', '=', 1);

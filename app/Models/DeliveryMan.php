@@ -20,6 +20,7 @@ class DeliveryMan extends Authenticatable
         'earning'=>'float',
         'store_id'=>'integer',
         'current_orders'=>'integer',
+        'vehicle_id'=>'integer',
     ];
 
     protected $hidden = [
@@ -30,6 +31,11 @@ class DeliveryMan extends Authenticatable
     public function userinfo()
     {
         return $this->hasOne(UserInfo::class,'deliveryman_id', 'id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(DMVehicle::class);
     }
 
     public function wallet()

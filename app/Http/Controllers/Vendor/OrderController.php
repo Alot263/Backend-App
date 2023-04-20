@@ -124,7 +124,8 @@ class OrderController extends Controller
     {
         $request->validate([
             'id' => 'required',
-            'order_status' => 'required|in:confirmed,processing,handover,delivered,canceled'
+            'order_status' => 'required|in:confirmed,processing,handover,delivered,canceled',
+            'reason' =>'required_if:order_status,canceled',
         ],[
             'id.required' => 'Order id is required!'
         ]);
@@ -221,6 +222,12 @@ class OrderController extends Controller
                 $dm->current_orders = $dm->current_orders>1?$dm->current_orders-1:0;
                 $dm->save();
             }
+            if($request->order_status == 'canceled'){
+
+                $order->cancellation_reason = $request->reason;
+                $order->canceled_by = 'store';
+            }
+
         }
 
         if($request->order_status == 'delivered')

@@ -538,4 +538,32 @@ class ItemController extends Controller
 
         return response()->json($storage, 200);
     }
+
+
+    public function recommended(Request $request)
+    {
+        if(!$request->vendor->stores[0]->item_section)
+        {
+            return response()->json([
+                'errors'=>[
+                    ['code'=>'unauthorized', 'message'=>translate('messages.permission_denied')]
+                ]
+            ],403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'status' => 'required|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $product = Item::find($request->id);
+        $product->recommended = $request->status;
+        $product->save();
+
+        return response()->json(['message' => translate('messages.product_recommended_status_updated')], 200);
+
+    }
 }

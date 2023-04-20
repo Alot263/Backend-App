@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\DB;
 use App\CentralLogics\ProductLogic;
 use App\CentralLogics\CustomerLogic;
 use App\Http\Controllers\Controller;
+use App\Models\DMVehicle;
+use App\Models\OrderCancelReason;
 use App\Models\ParcelCategory;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
@@ -77,10 +79,27 @@ class OrderController extends Controller
         }
 
         $coupon = null;
+        $coupon_created_by = null;
         $delivery_charge = null;
         $schedule_at = $request->schedule_at ? \Carbon\Carbon::parse($request->schedule_at) : now();
         $store = null;
         $free_delivery_by = null;
+        $distance_data = $request->distance;
+
+        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+        })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '>=', $distance_data);
+            })
+            ->orderBy('starting_coverage_area')->first();
+        // if(!$data){
+
+        //     $data=DMVehicle::active()->latest()->first();
+        // }
+
+        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        $vehicle_id = (isset($data) ? $data->id  : null);
         if ($request->order_type !== 'parcel') {
             if ($request->schedule_at && $schedule_at < now()) {
                 return response()->json([
@@ -125,6 +144,12 @@ class OrderController extends Controller
                                 ['code' => 'coupon', 'message' => translate('messages.coupon_expire')]
                             ]
                         ], 407);
+                    } else if ($staus == 408) {
+                        return response()->json([
+                            'errors' => [
+                                ['code' => 'coupon', 'message' => translate('messages.You_are_not_eligible_for_this_coupon')]
+                            ]
+                        ], 403);
                     } else if ($staus == 406) {
                         return response()->json([
                             'errors' => [
@@ -138,6 +163,13 @@ class OrderController extends Controller
                             ]
                         ], 404);
                     }
+
+                    $coupon_created_by = $coupon->created_by;
+                    if ($coupon->coupon_type == 'free_delivery') {
+                        $delivery_charge = 0;
+                        $free_delivery_by =  $coupon_created_by;
+                        $coupon_created_by = null;
+                    }
                 } else {
                     return response()->json([
                         'errors' => [
@@ -150,21 +182,56 @@ class OrderController extends Controller
             if ($module_wise_delivery_charge) {
                 $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
                 $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
+                $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge;
             } else {
                 $per_km_shipping_charge = (float)BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
                 $minimum_shipping_charge = (float)BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
             }
-            $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
-            if ($request['order_type'] != 'take_away' && !$store->free_delivery && !isset($delivery_charge)) {
-                if ($store->self_delivery_system) {
-                    $per_km_shipping_charge = $store->per_km_shipping_charge;
-                    $minimum_shipping_charge = $store->minimum_shipping_charge;
-                    $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
-                    $delivery_charge = $original_delivery_charge;
+
+            if ($request['order_type'] != 'take_away' && !$store->free_delivery &&  !isset($delivery_charge) &&  $store->self_delivery_system == 1) {
+                $per_km_shipping_charge = $store->per_km_shipping_charge;
+                $minimum_shipping_charge = $store->minimum_shipping_charge;
+                $maximum_shipping_charge = $store->maximum_shipping_charge;
+                $extra_charges = 0;
+                $vehicle_id = null;
+            }
+
+            if ($store->free_delivery || $free_delivery_by == 'vendor') {
+                $per_km_shipping_charge = $store->per_km_shipping_charge;
+                $minimum_shipping_charge = $store->minimum_shipping_charge;
+                $maximum_shipping_charge = $store->maximum_shipping_charge;
+                $extra_charges = 0;
+                $vehicle_id = null;
+            }
+
+            $original_delivery_charge = (($request->distance * $per_km_shipping_charge) > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge  : $minimum_shipping_charge;
+
+            if ($request['order_type'] == 'take_away') {
+                $per_km_shipping_charge = 0;
+                $minimum_shipping_charge = 0;
+                $maximum_shipping_charge = 0;
+                $extra_charges = 0;
+                $distance_data = 0;
+                $vehicle_id = null;
+                $original_delivery_charge = 0;
+            }
+
+            if ($maximum_shipping_charge  >= $minimum_shipping_charge  && $original_delivery_charge >  $maximum_shipping_charge) {
+                $original_delivery_charge = $maximum_shipping_charge;
+            } else {
+                $original_delivery_charge = $original_delivery_charge;
+            }
+
+            if (!isset($delivery_charge)) {
+                $delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
+                if ($maximum_shipping_charge  >= $minimum_shipping_charge  && $delivery_charge >  $maximum_shipping_charge) {
+                    $delivery_charge = $maximum_shipping_charge;
                 } else {
-                    $delivery_charge = !isset($delivery_charge) ? $original_delivery_charge : $delivery_charge;
+                    $delivery_charge = $delivery_charge;
                 }
             }
+            $original_delivery_charge = $original_delivery_charge + $extra_charges;
+            $delivery_charge = $delivery_charge + $extra_charges;
         } else {
             $parcel_category = ParcelCategory::findOrFail($request->parcel_category_id);
             if ($parcel_category->parcel_per_km_shipping_charge && $parcel_category->parcel_minimum_shipping_charge) {
@@ -176,7 +243,7 @@ class OrderController extends Controller
             }
             // $per_km_shipping_charge = (float)BusinessSetting::where(['key' => 'parcel_per_km_shipping_charge'])->first()->value;
             // $minimum_shipping_charge = (float)BusinessSetting::where(['key' => 'parcel_minimum_shipping_charge'])->first()->value;
-            $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
+            $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge + $extra_charges : $minimum_shipping_charge;
         }
 
         $zone = null;
@@ -220,7 +287,7 @@ class OrderController extends Controller
         $order->user_id = $request->user()->id;
         $order->order_amount = $request['order_amount'];
         $order->payment_status = $request['payment_method'] == 'wallet' ? 'paid' : 'unpaid';
-        $order->order_status = $request['payment_method'] == 'digital_payment' ? 'failed' : ($request->payment_method == 'wallet' ? 'confirmed' : 'pending');
+        $order->order_status = $request['payment_method'] == 'digital_payment' ? 'pending' : ($request->payment_method == 'wallet' ? 'confirmed' : 'pending');
         $order->coupon_code = $request['coupon_code'];
         $order->payment_method = $request->payment_method;
         $order->transaction_reference = null;
@@ -240,6 +307,7 @@ class OrderController extends Controller
         if ($request['payment_method'] == 'wallet') {
             $order->confirmed = now();
         }
+        $order->dm_vehicle_id = $vehicle_id;
         $order->pending = now();
         $order->order_attachment = $request->has('order_attachment') ? Helpers::upload('order/', 'png', $request->file('order_attachment')) : null;
         $order->distance = $request->distance;
@@ -260,9 +328,9 @@ class OrderController extends Controller
                 if ($c['item_campaign_id'] != null) {
                     $product = ItemCampaign::with('module')->active()->find($c['item_campaign_id']);
                     if ($product) {
-                        if($product->module->module_type == 'food' && $product->food_variations){
+                        if ($product->module->module_type == 'food' && $product->food_variations) {
                             $product_variations = json_decode($product->food_variations, true);
-                            $variations=[];
+                            $variations = [];
                             if (count($product_variations)) {
                                 $variation_data = Helpers::get_varient($product_variations, $c['variation']);
                                 $price = $product['price'] + $variation_data['price'];
@@ -272,8 +340,8 @@ class OrderController extends Controller
                             }
                             $product->tax = $store->tax;
                             $product = Helpers::product_data_formatting($product, false, false, app()->getLocale());
-                            $addon_data = Helpers::calculate_addon_price(\App\Models\AddOn::whereIn('id',$c['add_on_ids'])->get(), $c['add_on_qtys']);
-        
+                            $addon_data = Helpers::calculate_addon_price(\App\Models\AddOn::whereIn('id', $c['add_on_ids'])->get(), $c['add_on_qtys']);
+
                             $or_d = [
                                 'item_id' => null,
                                 'item_campaign_id' => $c['item_campaign_id'],
@@ -292,9 +360,9 @@ class OrderController extends Controller
                             ];
                             $order_details[] = $or_d;
                             $total_addon_price += $or_d['total_add_on_price'];
-                            $product_price += $price*$or_d['quantity'];
-                            $store_discount_amount += $or_d['discount_on_item']*$or_d['quantity'];
-                        }else{
+                            $product_price += $price * $or_d['quantity'];
+                            $store_discount_amount += $or_d['discount_on_item'] * $or_d['quantity'];
+                        } else {
                             if (count(json_decode($product['variations'], true)) > 0) {
                                 $variant_data = Helpers::variation_price($product, json_encode($c['variation']));
                                 $price = $variant_data['price'];
@@ -311,14 +379,14 @@ class OrderController extends Controller
                                         ]
                                     ], 406);
                                 }
-    
+
                                 $product_data[] = [
                                     'item' => clone $product,
                                     'quantity' => $c['quantity'],
                                     'variant' => count($c['variation']) > 0 ? $c['variation'][0]['type'] : null
                                 ];
                             }
-    
+
                             $product->tax = $store->tax;
                             $product = Helpers::product_data_formatting($product, false, false, app()->getLocale());
                             $addon_data = Helpers::calculate_addon_price(\App\Models\AddOn::whereIn('id', $c['add_on_ids'])->get(), $c['add_on_qtys']);
@@ -452,8 +520,10 @@ class OrderController extends Controller
                     }
                 }
             }
+            $order->discount_on_product_by = 'vendor';
             $store_discount = Helpers::get_store_discount($store);
             if (isset($store_discount)) {
+                $order->discount_on_product_by = 'admin';
                 if ($product_price + $total_addon_price < $store_discount['min_purchase']) {
                     $store_discount_amount = 0;
                 }
@@ -465,18 +535,18 @@ class OrderController extends Controller
             $coupon_discount_amount = $coupon ? CouponLogic::get_discount($coupon, $product_price + $total_addon_price - $store_discount_amount) : 0;
             $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount;
 
-            $tax = ($store->tax > 0)?$store->tax:0;
+            $tax = ($store->tax > 0) ? $store->tax : 0;
             $order->tax_status = 'excluded';
-    
-            $tax_included =BusinessSetting::where(['key'=>'tax_included'])->first() ?  BusinessSetting::where(['key'=>'tax_included'])->first()->value : 0;
-            if ($tax_included ==  1){
+
+            $tax_included = BusinessSetting::where(['key' => 'tax_included'])->first() ?  BusinessSetting::where(['key' => 'tax_included'])->first()->value : 0;
+            if ($tax_included ==  1) {
                 $order->tax_status = 'included';
             }
-    
-            $total_tax_amount=Helpers::product_tax($total_price,$tax,$order->tax_status =='included');
-    
-            $tax_a=$order->tax_status =='included'?0:$total_tax_amount;
-            
+
+            $total_tax_amount = Helpers::product_tax($total_price, $tax, $order->tax_status == 'included');
+
+            $tax_a = $order->tax_status == 'included' ? 0 : $total_tax_amount;
+
             if ($store->minimum_order > $product_price + $total_addon_price) {
                 return response()->json([
                     'errors' => [
@@ -502,12 +572,12 @@ class OrderController extends Controller
                 if ($coupon->coupon_type == 'free_delivery') {
                     if ($coupon->min_purchase <= $product_price + $total_addon_price - $store_discount_amount) {
                         $order->delivery_charge = 0;
-                        $free_delivery_by = 'admin';
+                        $free_delivery_by = $coupon->created_by;
                     }
                 }
                 $coupon->increment('total_uses');
             }
-
+            $order->coupon_created_by = $coupon_created_by;
             $order->coupon_discount_amount = round($coupon_discount_amount, config('round_up_to_digit'));
             $order->coupon_discount_title = $coupon ? $coupon->title : '';
 
@@ -540,7 +610,7 @@ class OrderController extends Controller
                 ]
             ], 203);
         }
-        if (isset($module_wise_delivery_charge ) && $request->payment_method == 'cash_on_delivery' && $module_wise_delivery_charge->pivot->maximum_cod_order_amount && $order->order_amount > $module_wise_delivery_charge->pivot->maximum_cod_order_amount) {
+        if (isset($module_wise_delivery_charge) && $request->payment_method == 'cash_on_delivery' && $module_wise_delivery_charge->pivot->maximum_cod_order_amount && $order->order_amount > $module_wise_delivery_charge->pivot->maximum_cod_order_amount) {
             return response()->json([
                 'errors' => [
                     ['code' => 'order_amount', 'message' => translate('messages.amount_crossed_maximum_cod_order_amount')]
@@ -610,10 +680,23 @@ class OrderController extends Controller
         }
 
         $coupon = null;
+        $coupon_created_by = null;
         $delivery_charge = null;
         $schedule_at = $request->schedule_at ? \Carbon\Carbon::parse($request->schedule_at) : now();
         $store = null;
         $free_delivery_by = null;
+        $distance_data = $request->distance;
+
+        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+        })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '>=', $distance_data);
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        $vehicle_id = (isset($data) ? $data->id  : null);
         if ($request->schedule_at && $schedule_at < now()) {
             return response()->json([
                 'errors' => [
@@ -670,6 +753,13 @@ class OrderController extends Controller
                         ]
                     ], 404);
                 }
+
+                $coupon_created_by = $coupon->created_by;
+                if ($coupon->coupon_type == 'free_delivery') {
+                    $delivery_charge = 0;
+                    $free_delivery_by =  $coupon_created_by;
+                    $coupon_created_by = null;
+                }
             } else {
                 return response()->json([
                     'errors' => [
@@ -682,22 +772,56 @@ class OrderController extends Controller
         if ($module_wise_delivery_charge) {
             $per_km_shipping_charge = $module_wise_delivery_charge->pivot->per_km_shipping_charge;
             $minimum_shipping_charge = $module_wise_delivery_charge->pivot->minimum_shipping_charge;
+            $maximum_shipping_charge = $module_wise_delivery_charge->pivot->maximum_shipping_charge;
         } else {
             $per_km_shipping_charge = (float)BusinessSetting::where(['key' => 'per_km_shipping_charge'])->first()->value;
             $minimum_shipping_charge = (float)BusinessSetting::where(['key' => 'minimum_shipping_charge'])->first()->value;
         }
-        $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
-        if ($request['order_type'] != 'take_away' && !$store->free_delivery && !isset($delivery_charge)) {
-            if ($store->self_delivery_system) {
-                $per_km_shipping_charge = $store->per_km_shipping_charge;
-                $minimum_shipping_charge = $store->minimum_shipping_charge;
-                $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
-                $delivery_charge = $original_delivery_charge;
+
+        if ($request['order_type'] != 'take_away' && !$store->free_delivery &&  !isset($delivery_charge) &&  $store->self_delivery_system == 1) {
+            $per_km_shipping_charge = $store->per_km_shipping_charge;
+            $minimum_shipping_charge = $store->minimum_shipping_charge;
+            $maximum_shipping_charge = $store->maximum_shipping_charge;
+            $extra_charges = 0;
+            $vehicle_id = null;
+        }
+
+        if ($store->free_delivery || $free_delivery_by == 'vendor') {
+            $per_km_shipping_charge = $store->per_km_shipping_charge;
+            $minimum_shipping_charge = $store->minimum_shipping_charge;
+            $maximum_shipping_charge = $store->maximum_shipping_charge;
+            $extra_charges = 0;
+            $vehicle_id = null;
+        }
+
+        $original_delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge  : $minimum_shipping_charge;
+
+        if ($request['order_type'] == 'take_away') {
+            $per_km_shipping_charge = 0;
+            $minimum_shipping_charge = 0;
+            $maximum_shipping_charge = 0;
+            $extra_charges = 0;
+            $distance_data = 0;
+            $vehicle_id = null;
+            $original_delivery_charge = 0;
+        }
+
+        if ($maximum_shipping_charge  >= $minimum_shipping_charge  && $original_delivery_charge >  $maximum_shipping_charge) {
+            $original_delivery_charge = $maximum_shipping_charge;
+        } else {
+            $original_delivery_charge = $original_delivery_charge;
+        }
+
+        if (!isset($delivery_charge)) {
+            $delivery_charge = ($request->distance * $per_km_shipping_charge > $minimum_shipping_charge) ? $request->distance * $per_km_shipping_charge : $minimum_shipping_charge;
+            if ($maximum_shipping_charge  >= $minimum_shipping_charge  && $delivery_charge >  $maximum_shipping_charge) {
+                $delivery_charge = $maximum_shipping_charge;
             } else {
-                $delivery_charge = !isset($delivery_charge) ? $original_delivery_charge : $delivery_charge;
+                $delivery_charge = $delivery_charge;
             }
         }
-        
+        $original_delivery_charge = $original_delivery_charge + $extra_charges;
+        $delivery_charge = $delivery_charge + $extra_charges;
 
         $zone = null;
         if ($request->latitude && $request->longitude) {
@@ -734,7 +858,7 @@ class OrderController extends Controller
                 array_push($img_names, $image_name);
             }
             $images = $img_names;
-        }else{
+        } else {
             $images = null;
         }
 
@@ -766,6 +890,7 @@ class OrderController extends Controller
         $order->pending = now();
         $order->order_attachment = json_encode($images);
         $order->distance = $request->distance;
+        $order->dm_vehicle_id = $vehicle_id;
         $order->prescription_order = 1;
         $order->created_at = now();
         $order->updated_at = now();
@@ -777,9 +902,10 @@ class OrderController extends Controller
         } else {
             $order->dm_tips = 0;
         }
-
+        $order->discount_on_product_by = 'vendor';
         $store_discount = Helpers::get_store_discount($store);
         if (isset($store_discount)) {
+            $order->discount_on_product_by = 'admin';
             if ($product_price + $total_addon_price < $store_discount['min_purchase']) {
                 $store_discount_amount = 0;
             }
@@ -791,17 +917,17 @@ class OrderController extends Controller
         $coupon_discount_amount = $coupon ? CouponLogic::get_discount($coupon, $product_price + $total_addon_price - $store_discount_amount) : 0;
         $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount;
 
-        $tax = ($store->tax > 0)?$store->tax:0;
+        $tax = ($store->tax > 0) ? $store->tax : 0;
         $order->tax_status = 'excluded';
 
-        $tax_included =BusinessSetting::where(['key'=>'tax_included'])->first() ?  BusinessSetting::where(['key'=>'tax_included'])->first()->value : 0;
-        if ($tax_included ==  1){
+        $tax_included = BusinessSetting::where(['key' => 'tax_included'])->first() ?  BusinessSetting::where(['key' => 'tax_included'])->first()->value : 0;
+        if ($tax_included ==  1) {
             $order->tax_status = 'included';
         }
 
-        $total_tax_amount=Helpers::product_tax($total_price,$tax,$order->tax_status =='included');
+        $total_tax_amount = Helpers::product_tax($total_price, $tax, $order->tax_status == 'included');
 
-        $tax_a=$order->tax_status =='included'?0:$total_tax_amount;
+        $tax_a = $order->tax_status == 'included' ? 0 : $total_tax_amount;
 
         $free_delivery_over = BusinessSetting::where('key', 'free_delivery_over')->first()->value;
         if (isset($free_delivery_over)) {
@@ -820,11 +946,12 @@ class OrderController extends Controller
             if ($coupon->coupon_type == 'free_delivery') {
                 if ($coupon->min_purchase <= $product_price + $total_addon_price - $store_discount_amount) {
                     $order->delivery_charge = 0;
-                    $free_delivery_by = 'admin';
+                    $free_delivery_by = $coupon->created_by;
                 }
             }
             $coupon->increment('total_uses');
         }
+        $order->coupon_created_by = $coupon_created_by;
 
         $order->coupon_discount_amount = round($coupon_discount_amount, config('round_up_to_digit'));
         $order->coupon_discount_title = $coupon ? $coupon->title : '';
@@ -938,13 +1065,13 @@ class OrderController extends Controller
 
         $order = Order::with('details', 'parcel_category')->where('user_id', $request->user()->id)->find($request->order_id);
 
-        $details = isset($order->details)?$order->details:null;
+        $details = isset($order->details) ? $order->details : null;
         if ($details != null && $details->count() > 0) {
             $details = Helpers::order_details_data_formatting($details);
             return response()->json($details, 200);
         } else if ($order->order_type == 'parcel' || $order->prescription_order == 1) {
             $order->delivery_address = json_decode($order->delivery_address, true);
-            if($order->prescription_order && $order->order_attachment){
+            if ($order->prescription_order && $order->order_attachment) {
                 $order->order_attachment = json_decode($order->order_attachment, true);
             }
             return response()->json(($order), 200);
@@ -959,6 +1086,14 @@ class OrderController extends Controller
 
     public function cancel_order(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'reason' => 'required|max:255'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
         $order = Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->Notpos()->first();
         if (!$order) {
             return response()->json([
@@ -966,7 +1101,7 @@ class OrderController extends Controller
                     ['code' => 'order', 'message' => translate('messages.not_found')]
                 ]
             ], 403);
-        } else if ($order->order_status == 'pending') {
+        } else if ($order->order_status == 'pending' || $order->order_status == 'failed'|| $order->order_status == 'canceled') {
             if (config('module.' . $order->module->module_type)['stock']) {
                 foreach ($order->details as $detail) {
                     $variant = json_decode($detail['variation'], true);
@@ -979,6 +1114,8 @@ class OrderController extends Controller
             }
             $order->order_status = 'canceled';
             $order->canceled = now();
+            $order->cancellation_reason = $request->reason;
+            $order->canceled_by = 'customer';
             $order->save();
             Helpers::send_order_notification($order);
             return response()->json(['message' => translate('messages.order_canceled_successfully')], 200);
@@ -1116,5 +1253,23 @@ class OrderController extends Controller
         return response()->json([
             'refund_reasons' => $refund_reasons
         ], 200);
+    }
+
+    public function cancellation_reason(Request $request)
+    {
+        $limit = $request->query('limit', 25);
+        $offset = $request->query('offset', 25);
+
+        $reasons = OrderCancelReason::where('status', 1)->when($request->type, function ($query) use ($request) {
+            $query->where('user_type', $request->type);
+        })->paginate($limit, ['*'], 'page', $offset);
+
+        $data = [
+            'total_size' => $reasons->total(),
+            'limit' => $limit,
+            'offset' => $offset,
+            'data' => $reasons->items()
+        ];
+        return response()->json($data, 200);
     }
 }

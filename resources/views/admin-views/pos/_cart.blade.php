@@ -295,6 +295,7 @@
                                         {{ translate('* pin the address in the map to calculate delivery fee') }}
                                     </span>
                                     <div>
+                                        <input type="hidden" name="distance" id="distance">
                                         <span>{{ translate('Delivery fee') }} :</span>
                                         <input type="hidden" name="delivery_fee" id="delivery_fee" value="{{ $old ? $old['delivery_fee'] : '' }}">
                                         <strong>{{ $old ? $old['delivery_fee'] : 0 }} {{ \App\CentralLogics\Helpers::currency_symbol() }}</strong>

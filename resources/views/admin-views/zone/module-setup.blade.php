@@ -63,16 +63,19 @@
                 <div class="col-md-12">
                     <div class="delivery_charge_options" id="delivery_charge_options">
                         <div class="row gy-1" id="mod-label">
-                            <div class="col-sm-3">
+                            <div class="col-sm-4">
                                 <label for="">{{ translate('messages.Module Name') }}</label>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <label for="">{{ translate('messages.per_km_delivery_charge') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <label for="">{{ translate('messages.Minimum delivery charge') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
+                                <label for="">{{ translate('messages.Maximum delivery charge') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
+                            </div>
+                            <div class="col-sm-2">
                                 <label for="">{{ translate('maximum_cod_order_amount') }} ({{ \App\CentralLogics\Helpers::currency_symbol() }})</label>
                             </div>
                         </div>
@@ -80,49 +83,61 @@
                             @foreach ($zone->modules as $module)
                             @if ($module->module_type == 'parcel')
                             <div class="row gy-1 module-row" id="module_{{ $module->id }}">
-                                <div class="col-sm-3"><input type="text" class="form-control"
+                                <div class="col-sm-4"><input type="text" class="form-control"
                                         value="{{ $module->module_name }}"
                                         placeholder="{{ translate('messages.choice_title') }}" readonly></div>
-                                <div class="col-sm-3"><input type="number" class="form-control"
+                                <div class="col-sm-2"><input type="number" class="form-control"
                                         name="module_data[{{ $module->id }}][per_km_shipping_charge]" step=".01"
                                         min="0" placeholder="{{ translate('Set charge from parcel category') }}"
                                         data-toggle="tooltip" data-placement="right"
                                         data-original-title="{{ translate('messages.You have to set category wise charge from parcel category') }}" readonly></div>
-                                <div class="col-sm-3"><input type="number" step=".01" min="0"
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
                                         class="form-control"
                                         name="module_data[{{ $module->id }}][minimum_shipping_charge]"
                                         placeholder="{{ translate('Set charge from parcel category') }}"
                                         data-toggle="tooltip" data-placement="right"
                                         data-original-title="{{ translate('messages.You have to set category wise charge from parcel category') }}" readonly></div>
-                                <div class="col-sm-3"><input type="number" step=".01" min="0"
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
+                                        class="form-control"
+                                        name="module_data[{{ $module->id }}][maximum_shipping_charge]"
+                                        placeholder="{{ translate('Set charge from parcel category') }}"
+                                        data-toggle="tooltip" data-placement="right"
+                                        data-original-title="{{ translate('messages.You have to set category wise charge from parcel category') }}" readonly></div>
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
                                     class="form-control"
                                     name="module_data[{{ $module->id }}][maximum_cod_order_amount]"
                                     placeholder="{{ translate('set_maximum_cod_order_amount') }}"
                                     title="{{ translate('set_maximum_cod_order_amount') }}"
-                                    value="{{ $module->pivot->maximum_cod_order_amount }}" required></div>
+                                    value="{{ $module->pivot->maximum_cod_order_amount }}"></div>
                             </div>
                             @else
                             <div class="row gy-1 module-row" id="module_{{ $module->id }}">
-                                <div class="col-sm-3"><input type="text" class="form-control"
+                                <div class="col-sm-4"><input type="text" class="form-control"
                                         value="{{ $module->module_name }}"
                                         placeholder="{{ translate('messages.choice_title') }}" readonly></div>
-                                <div class="col-sm-3"><input type="number" class="form-control"
+                                <div class="col-sm-2"><input type="number" class="form-control"
                                         name="module_data[{{ $module->id }}][per_km_shipping_charge]" step=".01"
                                         min="0" placeholder="{{ translate('messages.per_km_delivery_charge') }}"
                                         title="{{ translate('messages.per_km_delivery_charge') }}"
                                         value="{{ $module->pivot->per_km_shipping_charge }}" required></div>
-                                <div class="col-sm-3"><input type="number" step=".01" min="0"
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
                                         class="form-control"
                                         name="module_data[{{ $module->id }}][minimum_shipping_charge]"
                                         placeholder="{{ translate('messages.Minimum delivery charge') }}"
                                         title="{{ translate('messages.Minimum delivery charge') }}"
                                         value="{{ $module->pivot->minimum_shipping_charge }}" required></div>
-                                <div class="col-sm-3"><input type="number" step=".01" min="0"
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
+                                        class="form-control"
+                                        name="module_data[{{ $module->id }}][maximum_shipping_charge]"
+                                        placeholder="{{ translate('messages.maximum delivery charge') }}"
+                                        title="{{ translate('messages.maximum delivery charge') }}"
+                                        value="{{ $module->pivot->maximum_shipping_charge }}" ></div>
+                                <div class="col-sm-2"><input type="number" step=".01" min="0"
                                         class="form-control"
                                         name="module_data[{{ $module->id }}][maximum_cod_order_amount]"
                                         placeholder="{{ translate('set_maximum_cod_order_amount') }}"
                                         title="{{ translate('set_maximum_cod_order_amount') }}"
-                                        value="{{ $module->pivot->maximum_cod_order_amount }}" required></div>
+                                        value="{{ $module->pivot->maximum_cod_order_amount }}"></div>
                             </div>
                             @endif
                             @endforeach
@@ -183,28 +198,32 @@
             let n = name;
             $('#delivery_charge_options').append(
                 '<div class="row gy-1 module-row" id="module_' + i +
-                '"><div class="col-sm-3"><input type="text" class="form-control" value="' + n +
-                '" placeholder="{{ translate('messages.choice_title') }}" readonly></div><div class="col-sm-3"><input type="number" class="form-control" name="module_data[' +
+                '"><div class="col-sm-4"><input type="text" class="form-control" value="' + n +
+                '" placeholder="{{ translate('messages.choice_title') }}" readonly></div><div class="col-sm-2"><input type="number" class="form-control" name="module_data[' +
                 i +
-                '][per_km_shipping_charge]" step=".01" min="0" placeholder="{{ translate('messages.per_km_delivery_charge') }}" title="{{ translate('messages.per_km_delivery_charge') }}" required></div><div class="col-sm-3"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
+                '][per_km_shipping_charge]" step=".01" min="0" placeholder="{{ translate('messages.per_km_delivery_charge') }}" title="{{ translate('messages.per_km_delivery_charge') }}" required></div><div class="col-sm-2"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
                 i +
-                '][minimum_shipping_charge]" placeholder="{{ translate('messages.Minimum delivery charge') }}" title="{{ translate('messages.Minimum delivery charge') }}" required></div><div class="col-sm-3"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
+                '][minimum_shipping_charge]" placeholder="{{ translate('messages.Minimum delivery charge') }}" title="{{ translate('messages.Minimum delivery charge') }}" required></div><div class="col-sm-2"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
                 i +
-                '][maximum_cod_order_amount]" placeholder="{{ translate('set_maximum_cod_order_amount') }}" title="{{ translate('set_maximum_cod_order_amount') }}" required></div></div>'
+                '][maximum_shipping_charge]" placeholder="{{ translate('messages.maximum delivery charge') }}" title="{{ translate('messages.maximum delivery charge') }}"></div><div class="col-sm-2"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
+                i +
+                '][maximum_cod_order_amount]" placeholder="{{ translate('set_maximum_cod_order_amount') }}" title="{{ translate('set_maximum_cod_order_amount') }}"></div></div>'
             );
         }
         function add_parcel_module(i, name) {
             let n = name;
             $('#delivery_charge_options').append(
                 '<div class="row gy-1 module-row" id="module_' + i +
-                '"><div class="col-sm-3"><input type="text" class="form-control" value="' + n +
-                '" placeholder="{{ translate('messages.choice_title') }}" readonly></div><div class="col-sm-3"><input type="number" name="module_data[' +
+                '"><div class="col-sm-4"><input type="text" class="form-control" value="' + n +
+                '" placeholder="{{ translate('messages.choice_title') }}" readonly></div><div class="col-sm-2"><input type="number" name="module_data[' +
                 i +
-                '][per_km_shipping_charge]" class="form-control" step=".01" min="0" placeholder="{{ translate('Set charge from parcel category') }}" value="" title="{{ translate('messages.per_km_delivery_charge') }}" readonly></div><div class="col-sm-3"><input type="number" name="module_data[' +
+                '][per_km_shipping_charge]" class="form-control" step=".01" min="0" placeholder="{{ translate('Set charge from parcel category') }}" value="" title="{{ translate('messages.per_km_delivery_charge') }}" readonly></div><div class="col-sm-2"><input type="number" name="module_data[' +
                 i +
-                '][minimum_shipping_charge]" step=".01" min="0" class="form-control" placeholder="{{ translate('Set charge from parcel category') }}" value="" title="{{ translate('messages.Minimum delivery charge') }}" readonly></div><div class="col-sm-3"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
+                '][minimum_shipping_charge]" step=".01" min="0" class="form-control" placeholder="{{ translate('Set charge from parcel category') }}" value="" title="{{ translate('messages.Minimum delivery charge') }}" readonly></div><div class="col-sm-2"><input type="number" name="module_data[' +
                 i +
-                '][maximum_cod_order_amount]" placeholder="{{ translate('set_maximum_cod_order_amount') }}" title="{{ translate('set_maximum_cod_order_amount') }}" required></div></div>'
+                '][maximum_shipping_charge]" step=".01" min="0" class="form-control" placeholder="{{ translate('Set charge from parcel category') }}" value="" title="{{ translate('messages.maximum delivery charge') }}" readonly></div><div class="col-sm-2"><input type="number" step=".01" min="0" class="form-control" name="module_data[' +
+                i +
+                '][maximum_cod_order_amount]" placeholder="{{ translate('set_maximum_cod_order_amount') }}" title="{{ translate('set_maximum_cod_order_amount') }}"></div></div>'
             );
         }
     </script>

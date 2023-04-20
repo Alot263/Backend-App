@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-@php($site_direction = \App\Models\BusinessSetting::where('key', 'site_direction')->first())
-@php($site_direction = $site_direction->value ?? 'ltr')
+<?php
+    if (env('APP_MODE') == 'demo') {
+        $site_direction = session()->get('site_direction_vendor');
+    }else{
+        $site_direction = session()->has('vendor_site_direction')?session()->get('vendor_site_direction'):'ltr';
+    }
+
+?>
 <html dir="{{ $site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}"  class="{{ $site_direction === 'rtl'?'active':'' }}">
 <head>
     <meta charset="utf-8">
@@ -27,11 +33,12 @@
 </head>
 
 <body class="footer-offset">
-    {{-- <div class="direction-toggle">
+    @if (env('APP_MODE')=='demo')
+    <div class="direction-toggle">
         <i class="tio-settings"></i>
         <span></span>
-    </div> --}}
-
+    </div>  
+    @endif
 {{--loader--}}
 <div class="container">
     <div class="row">
@@ -112,35 +119,48 @@
     </script>
 @endif
 <!-- Toggle Direction Init -->
-{{-- <script>
+<script>
+
     $(document).on('ready', function(){
-
+        // $('body').css('overflow','')
         $(".direction-toggle").on("click", function () {
-            setDirection(localStorage.getItem("direction"));
-        });
-
-        function setDirection(direction) {
-            if (direction == "rtl") {
-                localStorage.setItem("direction", "ltr");
-                $("html").attr('dir', 'ltr');
-            $(".direction-toggle").find('span').text('Toggle RTL')
-            } else {
-                localStorage.setItem("direction", "rtl");
-                $("html").attr('dir', 'rtl');
-            $(".direction-toggle").find('span').text('Toggle LTR')
+            if($('html').hasClass('active')){
+                $('html').removeClass('active')
+                setDirection(1);
+            }else {
+                setDirection(0);
+                $('html').addClass('active')
             }
-        }
-
-        if (localStorage.getItem("direction") == "rtl") {
-            $("html").attr('dir', "rtl");
+        });
+        if ($('html').attr('dir') == "rtl") {
             $(".direction-toggle").find('span').text('Toggle LTR')
         } else {
-            $("html").attr('dir', "ltr");
             $(".direction-toggle").find('span').text('Toggle RTL')
         }
 
-    })
-</script> --}}
+        function setDirection(status) {
+            if (status == 1) {
+                $("html").attr('dir', 'ltr');
+                $(".direction-toggle").find('span').text('Toggle RTL')
+            } else {
+                $("html").attr('dir', 'rtl');
+                $(".direction-toggle").find('span').text('Toggle LTR')
+            }
+            $.get({
+                    url: '{{ route('vendor.site_direction') }}',
+                    dataType: 'json',
+                    data: {
+                        status: status,
+                    },
+                    success: function() {
+                        alert(ok);
+                    },
+
+                });
+            }
+        });
+
+</script>
 <!-- JS Plugins Init. -->
 <script>
     $(document).on('ready', function () {
@@ -435,7 +455,10 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
         }
         });
         function check_order() {
-            location.href = '{{url('/')}}/store-panel/order/list/'+order_type;
+            if(order_type){
+                location.href = '{{url('/')}}/store-panel/order/list/'+order_type;
+            }
+            location.href = '{{url('/')}}/store-panel/order/list/all';
         }
 
         startFCM();
@@ -452,6 +475,11 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
             ProgressBar: true
         });
     }
+    function set_time_filter(url, id) {
+            var nurl = new URL(url);
+            nurl.searchParams.set('filter', id);
+            location.href = nurl;
+        }
 </script>
 
 <!-- IE Support -->

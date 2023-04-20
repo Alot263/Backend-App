@@ -207,6 +207,8 @@
                     <!-- End Order -->
                     @endif
 
+
+
                     <li class="nav-item">
                         <small
                             class="nav-subtitle">{{translate('messages.item')}} {{translate('messages.management')}}</small>
@@ -382,6 +384,20 @@
                     @endif
                     <!-- End Campaign -->
 
+                                                        <!-- Coupon -->
+                @if (\App\CentralLogics\Helpers::employee_module_permission_check('coupon'))
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('store-panel/coupon*') ? 'active' : '' }}">
+                <a class="js-navbar-vertical-aside-menu-link nav-link"
+                    href="{{ route('vendor.coupon.add-new') }}"
+                    title="{{ translate('messages.coupons') }}">
+                    <i class="tio-ticket nav-icon"></i>
+                    <span
+                        class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.coupons') }}</span>
+                </a>
+                </li>
+                @endif
+                <!-- End Coupon -->
+
                     <!-- Business Section-->
                     <li class="nav-item">
                         <small class="nav-subtitle"
@@ -461,6 +477,20 @@
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                 {{__('messages.Chat')}}
                             </span>
+                        </a>
+                    </li>
+                    @endif
+
+                    <li class="nav-item">
+                        <small class="nav-subtitle" title="{{translate('messages.Report')}} {{translate('messages.section')}}">{{translate('messages.Report')}} {{translate('messages.section')}}</small>
+                        <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+                    </li>
+                    
+                    @if(\App\CentralLogics\Helpers::employee_module_permission_check('report'))
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor/report/expense-report') ? 'active' : '' }}">
+                        <a class="nav-link " href="{{ route('vendor.report.expense-report') }}" title="{{ translate('messages.expense_report') }}">
+                            <span class="tio-money nav-icon"></span>
+                            <span class="text-truncate">{{ translate('messages.expense_report') }}</span>
                         </a>
                     </li>
                     @endif

@@ -18,7 +18,7 @@
                 </span>
             </h1>
             <div class="__page-header-txt">
-                This report shows the delivery fee for all orders whose delivery fee is free for using "free delivery over" or "free delivery coupon".
+                {{ translate('This report will show all the orders in which the admin discount has been used. The admin discount are: Free delivery over, store discount, Coupon discount & item discounts(partial according to order commission).') }}
             </div>
 
         </div>
@@ -189,6 +189,7 @@
                                 <th class="border-0">{{translate('messages.order_id')}}</th>
                                 <th class="border-0">{{translate('Date & Time')}}</th>
                                 <th class="border-0">{{ translate('Expense Type') }}</th>
+                                <th class="text-center" >{{ translate('Customer Name') }}</th>
                                 <th class="border-0 text-right pr-xl-5">
                                     <div class="pr-xl-5">
                                         {{translate('expense amount')}}
@@ -201,17 +202,29 @@
                             <tr>
                                 <td scope="row">{{$key+$expense->firstItem()}}</td>
                                 <td>
+                                    @if ($exp->order)
+                                        
                                     <div>
-                                        {{$exp['order_id']}}
+                                        <a
+                                            href="{{ route('admin.order.details', ['id' => $exp->order->id,'module_id'=>$exp->order->module_id]) }}">{{ $exp['order_id'] }}</a>
                                     </div>
+                                    @endif
                                 </td>
                                 <td>
-                                    {{$exp->created_at->format('Y-m-d '.config('timeformat'))}}
+                                    {{date('Y-m-d '.config('timeformat'),strtotime($exp->created_at))}}
                                 </td>
                                 <td><label class="text-uppercase">{{translate("messages.{$exp['type']}")}}</label></td>
+                                <td class="text-center">
+                                    @if (isset($exp->order->customer))
+                                    {{ $exp->order->customer->f_name.' '.$exp->order->customer->l_name }}
+                                    @else
+                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+
+                                    @endif
+                                </td>
                                 <td class="text-right pr-xl-5">
                                     <div class="pr-xl-5">
-                                        {{$exp['amount']}}
+                                        {{\App\CentralLogics\Helpers::format_currency($exp['amount'])}}
                                     </div>
                                 </td>
                             </tr>

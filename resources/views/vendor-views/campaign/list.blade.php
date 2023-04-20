@@ -51,6 +51,7 @@
                             <th class="border-0 w-25p">{{translate('messages.date_duration')}}</th>
                             <th class="border-0 w-25p">{{translate('messages.time_duration')}}</th>
                             <th class="border-0 text-center">{{translate('messages.status')}}</th>
+                            <th class="border-0 text-center">{{translate('messages.action')}}</th>
                         </tr>
                     </thead>
 
@@ -74,27 +75,55 @@
                             <td>
                                 <span class="bg-gradient-light text-dark">{{$campaign->start_time?date(config('timeformat'),strtotime($campaign->start_time)). ' - ' .date(config('timeformat'),strtotime($campaign->end_time)): 'N/A'}}</span>
                             </td>
-                            <td class="text-center">
                             <?php
-                                $store_ids = [];
-                                foreach($campaign->stores as $store)
+                            $store_ids = [];
+                            $store_status = '--';
+                            foreach($campaign->stores as $store)
                                 {
+                                    if ($store->id == $store_id && $store->pivot) {
+                                        $store_status = $store->pivot->campaign_status;
+                                    }
                                     $store_ids[] = $store->id;
                                 }
-                            ?>
-                                @if(in_array($store_id,$store_ids))
-                                <!-- <button type="button" onclick="location.href='{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}'" title="You are already joined. Click to out from the campaign." class="btn btn-outline-danger">Out</button> -->
-                                <span type="button" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_out_from_campaign')}}')" title="You are already joined. Click to out from the campaign." class="badge btn--danger text-white">{{translate('messages.leave')}}</span>
-                                <form action="{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}"
-                                        method="GET" id="campaign-{{$campaign['id']}}">
-                                    @csrf
-                                </form>
+                             ?>
+                            <td class="text-capitalize">
+                                @if ($store_status == 'pending')
+                                    <span class="badge badge-soft-info">
+                                        {{ translate('messages.not_approved') }}
+                                    </span>
+                                @elseif($store_status == 'confirmed')
+                                    <span class="badge badge-soft-success">
+                                        {{ translate('messages.confirmed') }}
+                                    </span>
+                                @elseif($store_status == 'rejected')
+                                    <span class="badge badge-soft-danger">
+                                        {{ translate('messages.rejected') }}
+                                    </span>
                                 @else
-                                <span type="button" class="badge btn--primary text-white" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_join_campaign')}}')" title="Click to join the campaign">{{translate('messages.join')}}</span>
-                                <form action="{{route('vendor.campaign.add-store',[$campaign['id'],$store_id])}}"
-                                        method="GET" id="campaign-{{$campaign['id']}}">
-                                    @csrf
-                                </form>
+                                    <span class="badge badge-soft-info">
+                                        {{ translate(str_replace('_', ' ', $store_status)) }}
+                                    </span>
+                                @endif
+
+                            </td>
+                            <td class="text-center">
+                                @if ($store_status == 'rejected')
+                                    <span class="badge badge-pill badge-danger">{{ translate('Rejected') }}</span>
+                                @else
+                                    @if(in_array($store_id,$store_ids))
+                                    <!-- <button type="button" onclick="location.href='{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}'" title="You are already joined. Click to out from the campaign." class="btn btn-outline-danger">Out</button> -->
+                                    <span type="button" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_out_from_campaign')}}')" title="You are already joined. Click to out from the campaign." class="badge btn--danger text-white">{{translate('messages.leave')}}</span>
+                                    <form action="{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}"
+                                            method="GET" id="campaign-{{$campaign['id']}}">
+                                        @csrf
+                                    </form>
+                                    @else
+                                    <span type="button" class="badge btn--primary text-white" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_join_campaign')}}')" title="Click to join the campaign">{{translate('messages.join')}}</span>
+                                    <form action="{{route('vendor.campaign.add-store',[$campaign['id'],$store_id])}}"
+                                            method="GET" id="campaign-{{$campaign['id']}}">
+                                        @csrf
+                                    </form>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

@@ -73,6 +73,7 @@ class BusinessSettingsController extends Controller
         // $store->delivery_charge = $store->self_delivery_system?$request->delivery_charge: $store->delivery_charge;
         $store->minimum_shipping_charge = $store->self_delivery_system?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
         $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        $store->maximum_shipping_charge = $store?$request->maximum_delivery_charge??0: $store->maximum_delivery_charge;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->name = $request->name;
         $store->address = $request->address;

@@ -104,6 +104,7 @@ class Helpers
                     $item['available_date_ends'] = $item->end_date->format('Y-m-d');
                     unset($item['end_date']);
                 }
+                $item['recommended'] =(int) $item->recommended;
                 $categories = [];
                 foreach (json_decode($item['category_ids']) as $value) {
                     $categories[] = ['id' => (string)$value->id, 'position' => $value->position];
@@ -129,6 +130,7 @@ class Helpers
                 $item['tax'] = $item->store->tax;
                 $item['rating_count'] = (int)($item->rating ? array_sum(json_decode($item->rating, true)) : 0);
                 $item['avg_rating'] = (float)($item->avg_rating ? $item->avg_rating : 0);
+                $item['recommended'] =(int) $item->recommended;
 
                 if ($trans) {
                     $item['translations'][] = [
@@ -502,9 +504,9 @@ class Helpers
 
                 $item['delivery_address'] = $item->delivery_address ? json_decode($item->delivery_address, true) : null;
                 $item['details_count'] = (int)$item->details->count();
-                if($item['prescription_order'] && $item['order_attachment']){
-                    $item['order_attachment'] = json_decode($item['order_attachment'], true);
-                }
+                // if($item['prescription_order'] && $item['order_attachment']){
+                //     $item['order_attachment'] = json_decode($item['order_attachment'], true);
+                // }
                 unset($item['details']);
                 array_push($storage, $item);
             }
@@ -535,9 +537,9 @@ class Helpers
             }
             $data['delivery_address'] = $data->delivery_address ? json_decode($data->delivery_address, true) : null;
             $data['details_count'] = (int)$data->details->count();
-            if($data['prescription_order'] && $data['order_attachment']){
-                $data['order_attachment'] = json_decode($data['order_attachment'], true);
-            }
+            // if($data['prescription_order'] && $data['order_attachment']){
+            //     $data['order_attachment'] = json_decode($data['order_attachment'], true);
+            // }
             unset($data['details']);
         }
         return $data;
@@ -750,6 +752,7 @@ class Helpers
 
     public static function send_push_notif_to_topic($data, $topic, $type,$web_push_link = null)
     {
+        info([$data, $topic, $type, $web_push_link]);
         $key = BusinessSetting::where(['key' => 'push_notification_key'])->first()->value;
 
         $url = "https://fcm.googleapis.com/fcm/send";
@@ -1244,8 +1247,15 @@ class Helpers
                         'image' => '',
                     ];
                     if($order->zone){
-
-                        self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                        if($order->dm_vehicle_id){
+                            
+                            $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
+                            self::send_push_notif_to_topic($data, $topic, 'order_request');
+                            self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                        }else{
+                            self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                        }
+                        
                     }
                 }
                 // self::send_push_notif_to_topic($data, 'admin_message', 'order_request', url('/').'/admin/order/list/all');
@@ -1261,8 +1271,14 @@ class Helpers
                     'image' => '',
                 ];
                 if($order->zone){
-
-                    self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    if($order->dm_vehicle_id){
+                        
+                        $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
+                        self::send_push_notif_to_topic($data, $topic, 'order_request');
+                        self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    }else{
+                        self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    }
                 }
                 // self::send_push_notif_to_topic($data, 'admin_message', 'order_request');
             }
@@ -1361,8 +1377,14 @@ class Helpers
                     self::send_push_notif_to_topic($data, "restaurant_dm_" . $order->store_id, 'order_request');
                 } else
                  {if($order->zone){
-
-                     self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    if($order->dm_vehicle_id){
+                        
+                        $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
+                        self::send_push_notif_to_topic($data, $topic, 'order_request');
+                        self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    }else{
+                        self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
+                    }
                  }
                 }
             }
@@ -1821,6 +1843,12 @@ class Helpers
     {
         if (strpos(url()->current(), '/api')) {
             $lang = App::getLocale();
+        } elseif (strpos(url()->current(), '/admin') && session()->has('local')) {
+            $lang = session('local');
+        } elseif (strpos(url()->current(), '/store-panel') && session()->has('vendor_local')) {
+            $lang = session('vendor_local');
+        } elseif (session()->has('landing_local')) {
+            $lang = session('landing_local');
         } elseif (session()->has('local')) {
             $lang = session('local');
         } else {
@@ -2106,13 +2134,17 @@ class Helpers
     public static function export_expense_wise_report($collection){
         $data = [];
         foreach($collection as $key=>$item){
+            if(isset($item->order->customer)){
+                            $customer_name= $item->order->customer->f_name.' '.$item->order->customer->l_name;
+                                }
             $data[] = [
                 'SL'=>$key+1,
-                 translate('messages.id') => $item['id'],
-                 translate('messages.type') => $item['type'],
-                 translate('messages.amount') => $item['amount'],
-                 translate('messages.order_id') => $item['order_id'],
-                 translate('messages.expense_date') =>  $item['created_at']->format('Y/m/d ' . config('timeformat')),
+                translate('messages.order_id') => $item['order_id'],
+                translate('messages.expense_date') =>  $item['created_at'],
+                // translate('messages.expense_date') =>  $item->created_at->format('Y-m-d '.config('timeformat')),
+                translate('messages.type') => str::title( str_replace('_', ' ',  $item['type'])),
+                translate('messages.customer_name') => $customer_name,
+                translate('messages.amount') => $item['amount'],
             ];
         }
         return $data;
@@ -2176,15 +2208,18 @@ class Helpers
         return $output;
     }
 
-    public static function expenseCreate($amount,$type,$datetime,$order_id,$description='')
+    public static function expenseCreate($amount,$type,$datetime,$order_id,$created_by,$store_id=null,$description='',$delivery_man_id=null)
     {
         $expense = new Expense();
         $expense->amount = $amount;
-        $expense->order_id = $order_id;
         $expense->type = $type;
+        $expense->order_id = $order_id;
+        $expense->created_by = $created_by;
+        $expense->store_id = $store_id;
+        $expense->delivery_man_id = $delivery_man_id;
         $expense->description = $description;
-        $expense->created_at = $datetime;
-        $expense->updated_at = $datetime;
+        $expense->created_at = now();
+        $expense->updated_at = now();
         return $expense->save();
     }
 
@@ -2406,7 +2441,7 @@ class Helpers
 
         foreach ($locales as $locale) {
             $locale_region = explode('-',$locale);
-            if (strtoupper($country_code) == $locale_region[1]) {
+            if ($country_code == $locale_region[0]) {
                 return $locale_region[0];
             }
         }
@@ -2595,9 +2630,79 @@ class Helpers
         return $language;
     }
 
+    public static function vendor_language_load()
+    {
+        if (\session()->has('vendor_language_settings')) {
+            $language = \session('vendor_language_settings');
+        } else {
+            $language = BusinessSetting::where('key', 'system_language')->first();
+            \session()->put('vendor_language_settings', $language);
+        }
+        return $language;
+    }
+
+    public static function landing_language_load()
+    {
+        if (\session()->has('landing_language_settings')) {
+            $language = \session('landing_language_settings');
+        } else {
+            $language = BusinessSetting::where('key', 'system_language')->first();
+            \session()->put('landing_language_settings', $language);
+        }
+        return $language;
+    }
+
 
     public static function product_tax($price , $tax, $is_include=false){
         $price_tax = ($price * $tax) / (100 + ($is_include?$tax:0)) ;
         return $price_tax;
+    }
+
+    public static function apple_client_secret(){
+        // Set up the necessary variables
+        $keyId = 'U7KA7F82UM';
+        $teamId = '7WSYLQ8Y87';
+        $clientId = 'com.sixamtech.sixamMartApp';
+        $privateKey = file_get_contents('AuthKey_U7KA7F82UM.p8'); // Should be a string containing the contents of the private key file.
+
+        // Create the JWT header
+        $header = [
+            'alg' => 'ES256',
+            'kid' => $keyId,
+        ];
+
+        // Create the JWT payload
+        $payload = [
+            'iss' => $teamId,
+            'iat' => time(),
+            'exp' => time() + 86400 * 180, // 180 days in seconds
+            'aud' => 'https://appleid.apple.com',
+            'sub' => $clientId,
+        ];
+
+        // Encode the JWT header and payload
+        $base64Header = base64_encode(json_encode($header));
+        $base64Payload = base64_encode(json_encode($payload));
+
+        // Create the signature using the private key and the SHA-256 algorithm
+        $dataToSign = $base64Header . '.' . $base64Payload;
+        $signature = '';
+        openssl_sign($dataToSign, $signature, $privateKey, 'sha256');
+
+        // Encode the signature
+        $base64Signature = base64_encode($signature);
+
+        // Create the Apple Client Secret key
+        $clientSecret = $base64Header . '.' . $base64Payload . '.' . $base64Signature;
+
+        // Output the key
+        return $clientSecret;
+    }
+
+    public static function error_formater($key, $mesage, $errors = [])
+    {
+        $errors[] = ['code' => $key, 'message' => $mesage];
+
+        return $errors;
     }
 }

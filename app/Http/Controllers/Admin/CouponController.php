@@ -30,6 +30,7 @@ class CouponController extends Controller
             'store_ids' => 'required_if:coupon_type,store_wise'
         ]);
         $data  = '';
+        $customer_id  = $request->customer_ids ?? ['all'];
         if($request->coupon_type == 'zone_wise')
         {
             $data = $request->zone_ids;
@@ -51,7 +52,9 @@ class CouponController extends Controller
             'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
             'discount_type' => $request->discount_type??'',
             'status' => 1,
+            'created_by' => 'admin',
             'data' => json_encode($data),
+            'customer_id' => json_encode($customer_id),
             'module_id'=>Config::get('module.current_module_id'),
             'created_at' => now(),
             'updated_at' => now()
@@ -89,7 +92,7 @@ class CouponController extends Controller
         {
             $data = $request->store_ids;
         }
-
+        $customer_id  = $request->customer_ids ?? ['all'];
         DB::table('coupons')->where(['id' => $id])->update([
             'title' => $request->title,
             'code' => $request->code,
@@ -102,6 +105,7 @@ class CouponController extends Controller
             'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
             'discount_type' => $request->discount_type??'',
             'data' => json_encode($data),
+            'customer_id' => json_encode($customer_id),
             'updated_at' => now()
         ]);
 

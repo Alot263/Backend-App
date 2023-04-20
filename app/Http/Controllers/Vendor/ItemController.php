@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use App\CentralLogics\ProductLogic;
 use App\Http\Controllers\Controller;
@@ -285,6 +286,20 @@ class ItemController extends Controller
         return back();
     }
 
+    public function recommended(Request $request)
+    {
+        if(!Helpers::get_store_data()->item_section)
+        {
+            Toastr::warning(translate('messages.permission_denied'));
+            return back();
+        }
+        $product = Item::find($request->id);
+        $product->recommended = $request->status;
+        $product->save();
+        Toastr::success(translate('Item recommendation updated!'));
+        return back();
+    }
+
     public function update(Request $request, $id)
     {
         if(!Helpers::get_store_data()->item_section)
@@ -451,7 +466,8 @@ class ItemController extends Controller
                 array_push($food_variations, $temp_variation);
             }
         }
-
+        $slug = Str::slug($request->name[array_search('en', $request->lang)]);
+        $p->slug = $p->slug? $p->slug :"{$slug}-{$p->id}";
         $p->food_variations = json_encode($food_variations);
         $p->variations = json_encode($variations);
         $p->price = $request->price;

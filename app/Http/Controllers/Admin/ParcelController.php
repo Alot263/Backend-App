@@ -123,7 +123,9 @@ class ParcelController extends Controller
             return $query->withCount('orders');
         }])->where(['id' => $id])->ParcelOrder()->first();
         if (isset($order)) {
-            $deliveryMen = DeliveryMan::withOutGlobalScope(ZoneScope::class)->where('zone_id',$order->zone_id)->available()->active()->get();
+            $deliveryMen = DeliveryMan::withOutGlobalScope(ZoneScope::class)->where('zone_id',$order->zone_id)->where(function($query)use($order){
+                $query->where('vehicle_id',$order->dm_vehicle_id)->orWhereNull('vehicle_id');
+        })->available()->active()->get();
             $category = $request->query('category_id', 0);
             $categories = [];
             $products = [];

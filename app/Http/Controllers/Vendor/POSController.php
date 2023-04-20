@@ -15,6 +15,7 @@ use App\CentralLogics\Helpers;
 use App\CentralLogics\ProductLogic;
 use App\Mail\PlaceOrder;
 use App\Models\BusinessSetting;
+use App\Models\DMVehicle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
@@ -150,6 +151,7 @@ class POSController extends Controller
             'floor' => $request->floor,
             'road' => $request->road,
             'house' => $request->house,
+            'distance' => $request->distance??0,
             'delivery_fee' => $request->delivery_fee?:0,
             'longitude' => (string)$request->longitude,
             'latitude' => (string)$request->latitude,
@@ -450,7 +452,6 @@ class POSController extends Controller
             }
             $address = $request->session()->get('address');
         }
-
         $store = Helpers::get_store_data();
         $cart = $request->session()->get('cart');
 
@@ -460,6 +461,20 @@ class POSController extends Controller
 
         $order_details = [];
         $product_data = [];
+        $distance_data = isset($address) ? $address['distance'] : 0;
+
+        $data =  DMVehicle::active()->where(function ($query) use ($distance_data) {
+            $query->where('starting_coverage_area', '<=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+        })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where(function ($query) use ($distance_data) {
+                    $query->where('starting_coverage_area', '>=', $distance_data)->where('maximum_coverage_area', '>=', $distance_data);
+                });
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+        $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        $vehicle_id = (isset($data) ? $data->id  : null);
         $order = new Order();
         $order->id = 100000 + Order::all()->count() + 1;
         if (Order::find($order->id)) {
@@ -477,10 +492,12 @@ class POSController extends Controller
         if($order->order_type == 'take_away'){
             $order->delivered = now();
         }
+        $order->distance = isset($address) ? $address['distance'] : 0;
         $order->payment_method = $request->type;
         $order->store_id = $store->id;
         $order->module_id = Helpers::get_store_data()->module_id;
         $order->user_id = $request->user_id;
+        $order->vehicle_id = $vehicle_id;
         $order->delivery_charge = isset($address)?$address['delivery_fee']:0;
         $order->original_delivery_charge = isset($address)?$address['delivery_fee']:0;
         $order->delivery_address = isset($address)?json_encode($address):null;
@@ -724,5 +741,21 @@ class POSController extends Controller
         }
         Toastr::success(translate('customer_added_successfully'));
         return back();
+    }
+
+    public function extra_charge(Request $request)
+    {
+        $distance_data = $request->distancMileResult ?? 1;
+
+        $data=  DMVehicle::active()->where(function($query)use($distance_data) {
+                $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
+            })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '>=', $distance_data);
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+            return response()->json($extra_charges,200);
     }
 }

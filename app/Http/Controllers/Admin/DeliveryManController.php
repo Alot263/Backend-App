@@ -165,10 +165,12 @@ class DeliveryManController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:delivery_men',
             'zone_id' => 'required',
             'earning' => 'required',
+            'vehicle_id' => 'required',
             'password'=>'required|min:6',
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'zone_id.required' => translate('messages.select_a_zone'),
+            'vehicle_id.required' => translate('messages.select_a_vehicle'),
             'earning.required' => translate('messages.select_dm_type')
         ]);
 
@@ -196,6 +198,7 @@ class DeliveryManController extends Controller
         $dm->phone = $request->phone;
         $dm->identity_number = $request->identity_number;
         $dm->identity_type = $request->identity_type;
+        $dm->vehicle_id = $request->vehicle_id;
         $dm->zone_id = $request->zone_id;
         $dm->identity_image = $identity_image;
         $dm->image = $image_name;
@@ -294,9 +297,11 @@ class DeliveryManController extends Controller
             'identity_number' => 'required|max:30',
             'email' => 'required|unique:delivery_men,email,'.$id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$id,
+            'vehicle_id' => 'required',
             'earning' => 'required',
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
+            'vehicle_id.required' => translate('messages.select_a_vehicle'),
             'earning.required' => translate('messages.select_dm_type')
         ]);
 
@@ -329,6 +334,7 @@ class DeliveryManController extends Controller
         $delivery_man->email = $request->email;
         $delivery_man->phone = $request->phone;
         $delivery_man->identity_number = $request->identity_number;
+        $delivery_man->vehicle_id = $request->vehicle_id;
         $delivery_man->identity_type = $request->identity_type;
         $delivery_man->zone_id = $request->zone_id;
         $delivery_man->identity_image = $identity_image;

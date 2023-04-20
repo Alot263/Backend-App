@@ -1,9 +1,10 @@
 <?php
 
 use App\CentralLogics\Helpers;
+use App\Library\ClientSecret;
 use App\Models\NotificationMessage;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'HomeController@index')->name('home');
+Route::get('lang/{locale}', 'HomeController@lang')->name('lang');
 Route::get('terms-and-conditions', 'HomeController@terms_and_conditions')->name('terms-and-conditions');
 Route::get('about-us', 'HomeController@about_us')->name('about-us');
 Route::get('contact-us', 'HomeController@contact_us')->name('contact-us');
@@ -130,6 +132,21 @@ Route::any('liqpay-callback/{order_id}', 'LiqPayController@callback')->name('liq
 
 
 Route::get('/test', function () {
+    // $apple_login=\App\Models\BusinessSetting::where(['key'=>'apple_login'])->first();
+    // if($apple_login){
+    //     $apple_login = json_decode($apple_login->value)[0];
+    // }
+    // $keyContent = file_get_contents('storage/app/public/apple-login/'.$apple_login->service_file);
+    // $keyContent = file_get_contents('AppleServiceId.p8');
+    // dd($keyContent);
+//     $clientId = 'com.sixamtech.6amMart';
+// $teamId   = '7WSYLQ8Y87';
+// $keyId    = 'U7KA7F82UM';
+// $certPath = url('/'). '/app/Library/AuthKey_U7KA7F82UM.p8';
+
+// $clientSecret = new ClientSecret($clientId, $teamId, $keyId, $certPath);
+
+// dd($clientSecret->generate());
     dd('Hello tester');
 });
 

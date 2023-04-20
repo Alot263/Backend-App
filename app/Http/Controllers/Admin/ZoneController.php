@@ -79,6 +79,13 @@ class ZoneController extends Controller
             'cash_on_delivery' => 'required_without:digital_payment',
             'digital_payment' => 'required_without:cash_on_delivery',
         ]);
+        
+        foreach($request->module_data as $data){
+            if(isset($data['maximum_shipping_charge']) && ((int)$data['maximum_shipping_charge'] < (int)$data['minimum_shipping_charge'])){
+                Toastr::error(translate('Maximum delivery charge must be greater than minimum delivery charge.'));
+                return back();
+            }
+        }
         $zone=Zone::findOrFail($id);
         $zone->cash_on_delivery = $request->cash_on_delivery?1:0;
         $zone->digital_payment = $request->digital_payment?1:0;

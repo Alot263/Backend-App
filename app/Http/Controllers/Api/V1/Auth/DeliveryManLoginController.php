@@ -8,6 +8,7 @@ use App\Models\DeliveryMan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class DeliveryManLoginController extends Controller
 {
@@ -51,7 +52,15 @@ class DeliveryManLoginController extends Controller
             $delivery_man->auth_token = $token;
             $delivery_man->save();
 
-            return response()->json(['token' => $token, 'zone_wise_topic'=>$delivery_man->type=='zone_wise'?$delivery_man->zone->deliveryman_wise_topic:'restaurant_dm_'.$delivery_man->store_id], 200);
+            if(isset($delivery_man->zone)){
+                if($delivery_man->vehicle_id){
+
+                    $topic = 'delivery_man_'.$delivery_man->zone->id.'_'.$delivery_man->vehicle_id;
+                }else{
+                    $topic = $delivery_man->type=='zone_wise'?$delivery_man->zone->deliveryman_wise_topic:'restaurant_dm_'.$delivery_man->store_id;
+                }
+            }
+            return response()->json(['token' => $token, 'topic'=> isset($topic)?$topic:'No_topic_found'], 200);
         } else {
             $errors = [];
             array_push($errors, ['code' => 'auth-001', 'message' => 'Unauthorized.']);
@@ -71,11 +80,13 @@ class DeliveryManLoginController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
             'password'=>'required|min:6',
             'zone_id' => 'required',
+            'vehicle_id' => 'required',
             'earning' => 'required'
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'zone_id.required' => translate('messages.select_a_zone'),
-            'earning.required' => translate('messages.select_dm_type')
+            'earning.required' => translate('messages.select_dm_type'),
+            'vehicle_id.required' => translate('messages.select_a_vehicle'),
         ]);
 
         if ($validator->fails()) {
@@ -107,6 +118,7 @@ class DeliveryManLoginController extends Controller
         $dm->identity_number = $request->identity_number;
         $dm->identity_type = $request->identity_type;
         $dm->identity_image = $identity_image;
+        $dm->vehicle_id = $request->vehicle_id;
         $dm->image = $image_name;
         $dm->status = 0;
         $dm->active = 0;
@@ -114,7 +126,15 @@ class DeliveryManLoginController extends Controller
         $dm->zone_id = $request->zone_id;
         $dm->earning = $request->earning;
         $dm->password = bcrypt($request->password);
+        
         $dm->save();
+        try{
+            if(config('mail.status')){
+                Mail::to($request->email)->send(new \App\Mail\SelfRegistration('pending', $dm->f_name.' '.$dm->l_name));
+            }
+        }catch(\Exception $ex){
+            info($ex);
+        }
 
         return response()->json(['message' => translate('messages.deliveryman_added_successfully')], 200);
     }

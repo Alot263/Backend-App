@@ -91,13 +91,13 @@
                                     <label class="form-check-label qcont text-dark" for="coupon">{{translate('messages.coupon')}}</label>
                                 </div>
                             </div>
-                            <div class="check-item">
+                            {{-- <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="custom_role" class="form-check-input"
                                            id="custom_role"  {{in_array('custom_role',(array)json_decode($role['modules']))?'checked':''}}>
                                     <label class="form-check-label qcont text-dark" for="custom_role">{{translate('messages.custom_role')}}</label>
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="customerList" class="form-check-input"

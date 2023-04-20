@@ -34,6 +34,11 @@
                     <div>
                         {{ date('d/M/Y ' . config('timeformat'), strtotime($order['created_at'])) }}
                     </div>
+                    <div>
+                        @if ($order->store->gst_status)
+                            <span>{{ translate('Gst No') }}</span> <span>:</span> <span>{{ $order->store->gst_code }}</span>
+                    @endif
+                    </div>
                 </div>
                 <div class="order-info-details">
                     <div class="row mt-3">

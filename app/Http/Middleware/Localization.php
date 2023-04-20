@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 
 class Localization
 {
@@ -16,8 +17,18 @@ class Localization
      */
     public function handle($request, Closure $next)
     {
-        if (session()->has('local')) {
-            App::setLocale(session()->get('local'));
+        if ($request->is('store-panel/*')) {
+            if (session()->has('vendor_local')) {
+                App::setLocale(session()->get('vendor_local'));
+            }
+        }elseif($request->is('admin/*')){
+            if (session()->has('local')) {
+                App::setLocale(session()->get('local'));
+            }
+        }else{
+            if (session()->has('landing_local')) {
+                App::setLocale(session()->get('landing_local'));
+            }
         }
         return $next($request);
     }

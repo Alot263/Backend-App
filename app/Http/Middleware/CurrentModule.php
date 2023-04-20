@@ -28,11 +28,14 @@ class CurrentModule
 
         $module_id = Config::get('module.current_module_id');
         $module_id = is_array($module_id)?null:$module_id;
-        $module = isset($module_id)?Module::find($module_id):Module::find(1);
-
+        $module = isset($module_id)?Module::find($module_id):Module::active()->get()->first();
+        
         if ($module) {
             Config::set('module.current_module_id', $module->id);
             Config::set('module.current_module_type', $module->module_type);
+        }else{
+            Config::set('module.current_module_id', null);
+            Config::set('module.current_module_type', 'settings');
         }
         if (Request::is('admin/users*')) {
             Config::set('module.current_module_id', null);
@@ -50,6 +53,7 @@ class CurrentModule
             Config::set('module.current_module_id', null);
             Config::set('module.current_module_type', 'settings');
         }
+
         return $next($request);
     }
 }

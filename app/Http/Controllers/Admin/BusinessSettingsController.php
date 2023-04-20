@@ -14,6 +14,7 @@ use Brian2694\Toastr\Facades\Toastr;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class BusinessSettingsController extends Controller
 {
@@ -260,6 +261,16 @@ class BusinessSettingsController extends Controller
                 'value' => $request['closing_day']
             ]);
         }
+
+        // DB::table('business_settings')->updateOrInsert(['key' => 'max_otp_hit'], [
+        //     'value' => $request['max_otp_hit']
+        // ]);
+        // DB::table('business_settings')->updateOrInsert(['key' => 'max_otp_hit_time'], [
+        //     'value' => $request['max_otp_hit_time']
+        // ]);
+        // DB::table('business_settings')->updateOrInsert(['key' => 'otp_interval_time'], [
+        //     'value' => $request['otp_interval_time']
+        // ]);
 
 
         Toastr::success(translate('messages.successfully_updated_to_changes_restart_app'));
@@ -622,6 +633,32 @@ class BusinessSettingsController extends Controller
         DB::table('business_settings')->updateOrInsert(['key' => 'app_url_ios'], [
             'value' => $request['app_url_ios']
         ]);
+
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_minimum_version_android_store'], [
+            'value' => $request['app_minimum_version_android_store']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_url_android_store'], [
+            'value' => $request['app_url_android_store']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_minimum_version_ios_store'], [
+            'value' => $request['app_minimum_version_ios_store']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_url_ios_store'], [
+            'value' => $request['app_url_ios_store']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_minimum_version_android_deliveryman'], [
+            'value' => $request['app_minimum_version_android_deliveryman']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_url_android_deliveryman'], [
+            'value' => $request['app_url_android_deliveryman']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_minimum_version_ios_deliveryman'], [
+            'value' => $request['app_minimum_version_ios_deliveryman']
+        ]);
+        DB::table('business_settings')->updateOrInsert(['key' => 'app_url_ios_deliveryman'], [
+            'value' => $request['app_url_ios_deliveryman']
+        ]);
+
         Toastr::success(translate('messages.app_settings_updated'));
         return back();
     }
@@ -653,6 +690,10 @@ class BusinessSettingsController extends Controller
             return view('admin-views.business-settings.landing-page-settings.backgroundChange');
         } else if ($tab == 'web-app') {
             return view('admin-views.business-settings.landing-page-settings.web-app');
+        }else if ($tab == 'react') {
+            return view('admin-views.business-settings.landing-page-settings.react');
+        } else if ($tab == 'react-feature') {
+            return view('admin-views.business-settings.landing-page-settings.react_feature');
         }
     }
 
@@ -989,6 +1030,199 @@ class BusinessSettingsController extends Controller
                 'value' => json_encode($data)
             ]);
             Toastr::success(translate('messages.web_app_landing_page_settings'));
+        }else if ($tab == 'react_header') {
+            $data = null;
+            $image = BusinessSetting::where('key', 'react_header_banner')->first();
+            if ($image) {
+                $data = $image->value;
+            }
+            $image_name =$data ?? \Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+            if ($request->has('react_header_banner')) {
+                // $image_name = ;
+                $data = Helpers::update('react_landing/', $image_name, 'png', $request->file('react_header_banner')) ?? null;
+            }
+            DB::table('business_settings')->updateOrInsert(['key' => 'react_header_banner'], [
+                'value' => $data
+            ]);
+            Toastr::success(translate('Landing page header banner updated'));
+        } else if ($tab == 'hero-section') {
+            $data = [];
+            $hero_section = BusinessSetting::where('key','hero_section')->first();
+            $data = [
+                'hero_section_heading' => $request->hero_section_heading ?? $hero_section['hero_section_heading'] ,
+                'hero_section_slogan' => $request->hero_section_slogan ?? $hero_section['hero_section_slogan'],
+                'hero_section_short_description' => $request->hero_section_short_description ?? $hero_section['hero_section_short_description'],
+            ];
+            DB::table('business_settings')->updateOrInsert(['key' => 'hero_section'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_hero_section_updated'));
+        }else if ($tab == 'full-banner') {
+            $data = [];
+            $banner_section_full = BusinessSetting::where('key','banner_section_full')->first();
+            $imageName = null;
+            if($banner_section_full){
+                $data = json_decode($banner_section_full->value, true);
+                $imageName =$data['banner_section_img_full'] ?? null;
+            }
+            if ($request->has('banner_section_img_full'))   {
+                if (empty($imageName)) {
+                    $imageName = Helpers::upload('react_landing/', 'png', $request->file('banner_section_img_full'));
+                    }  else{
+                    $imageName= Helpers::update('react_landing/', $data['banner_section_img_full'], 'png', $request->file('banner_section_img_full')) ;
+                    }
+            }
+            $data = [
+                'banner_section_img_full' => $imageName,
+                'full_banner_section_title' => $request->full_banner_section_title ?? $banner_section_full['full_banner_section_title'] ,
+                'full_banner_section_sub_title' => $request->full_banner_section_sub_title ?? $banner_section_full['full_banner_section_sub_title'],
+            ];
+            DB::table('business_settings')->updateOrInsert(['key' => 'banner_section_full'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_banner_section_updated'));
+        } else if ($tab == 'delivery-service-section') {
+            $data = [];
+            $delivery_service_section = BusinessSetting::where('key','delivery_service_section')->first();
+            $imageName = null;
+            if($delivery_service_section){
+                $data = json_decode($delivery_service_section->value, true);
+                $imageName =$data['delivery_service_section_image'] ?? null;
+            }
+            if ($request->has('delivery_service_section_image'))   {
+                if (empty($imageName)) {
+                    $imageName = Helpers::upload('react_landing/', 'png', $request->file('delivery_service_section_image'));
+                    }  else{
+                    $imageName= Helpers::update('react_landing/', $data['delivery_service_section_image'], 'png', $request->file('delivery_service_section_image')) ;
+                    }
+            }
+            $data = [
+                'delivery_service_section_image' => $imageName,
+                'delivery_service_section_title' => $request->delivery_service_section_title ?? $delivery_service_section['delivery_service_section_title'] ,
+                'delivery_service_section_description' => $request->delivery_service_section_description ?? $delivery_service_section['delivery_service_section_description'],
+            ];
+            DB::table('business_settings')->updateOrInsert(['key' => 'delivery_service_section'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_delivery_service_section_updated'));
+        }
+        else if ($tab == 'discount-banner') {
+            $data = [];
+            $discount_banner = BusinessSetting::where('key','discount_banner')->first();
+            $imageName = null;
+            if($discount_banner){
+                $data = json_decode($discount_banner->value, true);
+                $imageName =$data['img'] ?? null;
+            }
+            if ($request->has('img'))   {
+                if (empty($imageName)) {
+                    $imageName = Helpers::upload('react_landing/', 'png', $request->file('img'));
+                    }  else{
+                    $imageName= Helpers::update('react_landing/', $data['img'], 'png', $request->file('img')) ;
+                    }
+            }
+            $data = [
+                'img' => $imageName,
+                'title' => $request->title ?? $discount_banner['title'] ,
+                'sub_title' => $request->sub_title ?? $discount_banner['sub_title'],
+            ];
+            DB::table('business_settings')->updateOrInsert(['key' => 'discount_banner'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_discount_banner_section_updated'));
+        }
+        else if ($tab == 'banner-section-half') {
+
+            $data = [];
+            $imageName = null;
+            $banner_section_half = BusinessSetting::where('key', 'banner_section_half')->first();
+            if ($banner_section_half) {
+                $data = json_decode($banner_section_half->value, true);
+            }
+
+            foreach($request->banner_section_half  as $key => $value){
+
+                if($request->hasfile("banner_section_half.{$key}.img")){
+                    if(isset( $data[$key]['img']) && Storage::disk('public')->exists( 'react_landing/'. $data[$key]['img'])){
+                        Storage::disk('public')->delete('react_landing/'. $data[$key]['img']);
+                    }
+
+                    $value['img']=Helpers::upload('react_landing/','png', $request->file("banner_section_half.{$key}.img"));
+                }elseif(isset($data[$key]['img'])){
+                    $value['img']=$data[$key]['img'];
+                }else{
+                    $value['img']=null;
+                }
+                $data[$key]=$value;
+            }
+
+            DB::table('business_settings')->updateOrInsert(['key' => 'banner_section_half'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_banner_section_updated'));
+        } else if ($tab == 'app_section_image') {
+            $data = null;
+            $image = BusinessSetting::where('key', 'app_section_image')->first();
+            if ($image) {
+                $data = $image->value;
+            }
+            $image_name =$data ?? \Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+            if ($request->has('app_section_image')) {
+                $data = Helpers::update('react_landing/', $image_name, 'png', $request->file('app_section_image')) ?? null;
+            }
+            DB::table('business_settings')->updateOrInsert(['key' => 'app_section_image'], [
+                'value' => $data
+            ]);
+            Toastr::success(translate('App section image updated'));
+        } else if ($tab == 'footer_logo') {
+            $data = null;
+            $image = BusinessSetting::where('key', 'footer_logo')->first();
+            if ($image) {
+                $data = $image->value;
+            }
+            $image_name =$data ?? \Carbon\Carbon::now()->toDateString() . "-" . uniqid() . ".png";
+            if ($request->has('footer_logo')) {
+                $data = Helpers::update('react_landing/', $image_name, 'png', $request->file('footer_logo')) ?? null;
+            }
+            DB::table('business_settings')->updateOrInsert(['key' => 'footer_logo'], [
+                'value' => $data
+            ]);
+            Toastr::success(translate('Footer logo updated'));
+        }  else if ($tab == 'react-feature') {
+            $data = [];
+            $imageName = null;
+            $feature = BusinessSetting::where('key', 'react_feature')->first();
+            if ($feature) {
+                $data = json_decode($feature->value, true);
+            }
+            if ($request->has('image')) {
+                $imageName=Helpers::upload('react_landing/feature/','png', $request->file('image')) ;
+            }
+            array_push($data, [
+                'img' => $imageName,
+                'title' => $request->feature_title,
+                'feature_description' => $request->feature_description
+            ]);
+
+            DB::table('business_settings')->updateOrInsert(['key' => 'react_feature'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.landing_page_feature_updated'));
+        }  else if ($tab == 'app-download-button') {
+            $data = [];
+            $feature = BusinessSetting::where('key', 'app_download_button')->first();
+            if ($feature) {
+                $data = json_decode($feature->value, true);
+            }
+            array_push($data, [
+                'button_text' => $request->button_text,
+                'link' => $request->link
+            ]);
+
+            DB::table('business_settings')->updateOrInsert(['key' => 'app_download_button'], [
+                'value' => json_encode($data)
+            ]);
+            Toastr::success(translate('messages.app_download_button_updated'));
         }
         return back();
     }
@@ -1003,7 +1237,7 @@ class BusinessSettingsController extends Controller
         $item = BusinessSetting::where('key', $tab)->first();
         $data = $item ? json_decode($item->value, true) : null;
         if ($data && array_key_exists($key, $data)) {
-            if ($data[$key]['img'] && file_exists(public_path('assets/landing/image') . $data[$key]['img'])) {
+            if (isset($data[$key]['img']) && file_exists(public_path('assets/landing/image') . $data[$key]['img'])) {
                 unlink(public_path('assets/landing/image') . $data[$key]['img']);
             }
             array_splice($data, $key, 1);
@@ -1016,6 +1250,7 @@ class BusinessSettingsController extends Controller
         Toastr::error(translate('messages.not_found'));
         return back();
     }
+
 
     public function currency_index()
     {
@@ -1577,8 +1812,14 @@ class BusinessSettingsController extends Controller
             Helpers::insert_business_settings_key('social_login', '[{"login_medium":"google","client_id":"","client_secret":"","status":"0"},{"login_medium":"facebook","client_id":"","client_secret":"","status":""}]');
             $data = BusinessSetting::where('key', 'social_login')->first();
         }
+        $apple = BusinessSetting::where('key', 'apple_login')->first();
+        if (!$apple) {
+            Helpers::insert_business_settings_key('apple_login', '[{"login_medium":"apple","client_id":"","client_secret":"","team_id":"","key_id":"","service_file":"","redirect_url":"","status":""}]');
+            $apple = BusinessSetting::where('key', 'apple_login')->first();
+        }
+        $appleLoginServices = json_decode($apple->value, true);
         $socialLoginServices = json_decode($data->value, true);
-        return view('admin-views.business-settings.social-login.view', compact('socialLoginServices'));
+        return view('admin-views.business-settings.social-login.view', compact('socialLoginServices','appleLoginServices'));
     }
 
     public function updateSocialLogin($service, Request $request)
@@ -1599,6 +1840,37 @@ class BusinessSettingsController extends Controller
             }
         }
         BusinessSetting::where('key', 'social_login')->update([
+            'value' => $credential_array
+        ]);
+
+        Toastr::success(translate('messages.credential_updated', ['service' => $service]));
+        return redirect()->back();
+    }
+    public function updateAppleLogin($service, Request $request)
+    {
+        $appleLogin = BusinessSetting::where('key', 'apple_login')->first();
+        $credential_array = [];
+        if($request->hasfile('service_file')){
+            $fileName = Helpers::upload('apple-login/', 'p8', $request->file('service_file'));
+        }
+        foreach (json_decode($appleLogin['value'], true) as $key => $data) {
+            if ($data['login_medium'] == $service) {
+                $cred = [
+                    'login_medium' => $service,
+                    'client_id' => $request['client_id'],
+                    'client_secret' => $request['client_secret'],
+                    'status' => $request['status'],
+                    'team_id' => $request['team_id'],
+                    'key_id' => $request['key_id'],
+                    'service_file' => isset($fileName)?$fileName:$data['service_file'],
+                    'redirect_url' => $request['redirect_url'],
+                ];
+                array_push($credential_array, $cred);
+            } else {
+                array_push($credential_array, $data);
+            }
+        }
+        BusinessSetting::where('key', 'apple_login')->update([
             'value' => $credential_array
         ]);
 
@@ -1649,6 +1921,10 @@ class BusinessSettingsController extends Controller
 
 
     public function site_direction(Request $request){
+        if (env('APP_MODE') == 'demo') {
+            session()->put('site_direction', ($request->status == 1?'ltr':'rtl'));
+            return response()->json();
+        }
         if($request->status == 1){
             DB::table('business_settings')->updateOrInsert(['key' => 'site_direction'], [
                 'value' => 'ltr'

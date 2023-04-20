@@ -60,7 +60,11 @@ class EmployeeController extends Controller
     {
         $e = VendorEmployee::where('store_id', Helpers::get_store_id())->where(['id' => $id])->first();
         $rls = EmployeeRole::where('store_id',Helpers::get_store_id())->get();
-        return view('vendor-views.employee.edit', compact('rls', 'e'));
+        if (auth('vendor_employee')->id()  != $e['id']){
+            return view('vendor-views.employee.edit', compact('rls', 'e'));
+        }
+        Toastr::warning(translate('messages.access_denied'));
+        return back();
     }
 
     public function update(Request $request, $id)

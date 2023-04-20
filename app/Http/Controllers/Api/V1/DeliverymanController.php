@@ -79,6 +79,9 @@ class DeliverymanController extends Controller
         } else {
             $pass = $dm->password;
         }
+
+        $dm->vehicle_id = $request->vehicle_id ??  $dm->vehicle_id ?? null;
+
         $dm->f_name = $request->f_name;
         $dm->l_name = $request->l_name;
         $dm->email = $request->email;
@@ -151,7 +154,9 @@ class DeliverymanController extends Controller
                 $query->whereIn('order_status', ['confirmed','processing','handover'])->orWhere('order_type','parcel');
             });
         }
-
+        if(isset($dm->vehicle_id )){
+            $orders = $orders->where('dm_vehicle_id',$dm->vehicle_id);
+        }
         $orders = $orders->dmOrder()
         ->Notpos()
         ->OrderScheduledIn(30)
@@ -269,6 +274,7 @@ class DeliverymanController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
             'status' => 'required|in:confirmed,canceled,picked_up,delivered,handover',
+            'reason' =>'required_if:status,canceled',
         ]);
 
         $validator->sometimes('otp', 'required', function ($request) {
@@ -309,7 +315,16 @@ class DeliverymanController extends Controller
             ], 403);
         }
 
-        if(Config::get('order_delivery_verification')==1 && $request['status']=='delivered' && $order->otp != $request['otp'])
+        if(Config::get('order_delivery_verification')==1 && $order->payment_method=='cash_on_delivery' && $order->charge_payer=='sender' && $request['status']=='picked_up' && $order->otp != $request['otp'])
+        {
+            return response()->json([
+                'errors' => [
+                    ['code' => 'otp', 'message' => 'Not matched']
+                ]
+            ], 406);
+        }
+        
+        if(Config::get('order_delivery_verification')==1 && $order->payment_method=='cash_on_delivery' &&  $request['status']=='delivered' && $order->otp != $request['otp'])
         {
             return response()->json([
                 'errors' => [
@@ -371,6 +386,8 @@ class DeliverymanController extends Controller
                 $dm->current_orders = $dm->current_orders>1?$dm->current_orders-1:0;
                 $dm->save();
             }
+            $order->cancellation_reason = $request->reason;
+            $order->canceled_by = 'deliveryman';
         }
         else if($order->order_type == 'parcel' && $request->status == 'handover')
         {
@@ -397,7 +414,11 @@ class DeliverymanController extends Controller
         }
         $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
 
-        $order = Order::with(['details','parcel_category'])->where(['delivery_man_id' => $dm['id'], 'id' => $request['order_id']])->dmOrder()->first();
+        $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
+        $order = Order::with(['details'])->where('id',$request['order_id'])->where(function($query) use($dm){
+            $query->WhereNull('delivery_man_id')
+                ->orWhere('delivery_man_id', $dm['id']);
+        })->Notpos()->first();
         if(!$order)
         {
             return response()->json([

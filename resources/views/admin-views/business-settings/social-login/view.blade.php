@@ -72,6 +72,80 @@
                     </div>
             @endforeach
             @endif
+            @if (isset($appleLoginServices))
+            @foreach ($appleLoginServices as $appleLoginService)
+                    <div class="col-md-6 mt-4">
+                        <div class="card">
+                            <div class="card-body text-{{Session::get('direction') === "rtl" ? 'right' : 'left'}}">
+                                <div class="flex-between">
+                                    <h4 class="text-center">{{translate('messages.'.$appleLoginService['login_medium'])}}</h4>
+                                    <div class="btn cursor-pointer btn-dark p-2" data-toggle="modal" data-target="#{{$appleLoginService['login_medium']}}-modal">
+                                        <i class="tio-info-outined"></i> {{translate('messages.credentials_setup')}}
+                                    </div>
+                                    {{-- <button onclick="checkAppleFile()" class="btn btn-secondary">
+                                        {{ translate('Check Service Id file') }}
+                                    </button> --}}
+                                </div>
+                                <form
+                                    action="{{route('admin.apple-login.update',[$appleLoginService['login_medium']])}}"
+                                    method="post" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="form-group mb-2 mt-5">
+                                        <input type="radio" name="status"
+                                               value="1" {{$appleLoginService['status']==1?'checked':''}}>
+                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.active')}}</label>
+                                        <br>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <input type="radio" name="status"
+                                               value="0" {{$appleLoginService['status']==0?'checked':''}}>
+                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.inactive')}}</label>
+                                        <br>
+                                    </div>
+                                    {{-- <div class="form-group mb-2">
+                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.callback_uri')}}</label>
+                                        <span class="btn btn-secondary btn-sm m-2" onclick="copyToClipboard('#id_{{$appleLoginService['login_medium']}}')"><i class="tio-copy"></i> {{translate('messages.copy_uri')}}</span>
+                                        <br>
+                                        <span class="form-control h-unset" id="id_{{$appleLoginService['login_medium']}}">{{ url('/') }}/customer/auth/login/{{$appleLoginService['login_medium']}}/callback</span>
+                                    </div> --}}
+                                    <div class="form-group mb-2">
+                                        <label
+                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.client_id')}}</label><br>
+                                        <input type="text" class="form-control" name="client_id"
+                                               value="{{ $appleLoginService['client_id'] }}">
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label
+                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.team_id')}}</label><br>
+                                        <input type="text" class="form-control" name="team_id"
+                                               value="{{ $appleLoginService['team_id'] }}">
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label
+                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.key_id')}}</label><br>
+                                        <input type="text" class="form-control" name="key_id"
+                                               value="{{ $appleLoginService['key_id'] }}">
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label
+                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.service_file')}} {{ $appleLoginService['service_file']?translate('(Already Exists)'):'' }}</label><br>
+                                        <input type="file" accept=".p8" class="form-control" name="service_file"
+                                               value="{{ 'storage/app/public/apple-login/'.$appleLoginService['service_file'] }}">
+                                    </div>
+                                    {{-- <div class="form-group mb-2">
+                                        <label
+                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.redirect_url')}}</label><br>
+                                        <input type="text" class="form-control" name="redirect_url"
+                                               value="{{ $appleLoginService['redirect_url'] }}">
+                                    </div> --}}
+                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
+                                            class="btn btn--primary mb-2">{{translate('messages.save')}}</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+            @endforeach
+            @endif
         </div>
     </div>
             {{-- Modal Starts--}}
@@ -140,6 +214,34 @@
                 </div>
             </div>
         </div>
+        <!-- Apple -->
+        <div class="modal fade" id="apple-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content {{Session::get('direction') === "rtl" ? 'text-right' : 'text-left'}}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">{{translate('messages.apple_api_set_instruction')}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"><b></b>
+                        <ol>
+                            <li>{{translate('Go to Apple Developer page')}} (<a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank">{{translate('messages.click_here')}}</a>)</li>
+                            <li>{{translate('Here in top left corner you can see the')}} <b>{{ translate('Team ID') }}</b> {{ translate('[Apple_Deveveloper_Account_Name - Team_ID]')}}</li>
+                            <li>{{translate('Click Plus icon -> select App IDs -> click on Continue')}}</li>
+                            <li>{{translate('Put a description and also identifier (identifier that used for app) and this is the')}} <b>{{ translate('Client ID') }}</b> </li>
+                            <li>{{translate('Click Continue and Download the file in device named AuthKey_ID.p8 (Store it safely and it is used for push notification)')}} </li>
+                            <li>{{translate('Again click Plus icon -> select Service IDs -> click on Continue')}} </li>
+                            <li>{{translate('Push a description and also identifier and Continue')}} </li>
+                            <li>{{translate('Download the file in device named')}} <b>{{ translate('AuthKey_KeyID.p8') }}</b> {{translate('[This is the Service Key ID file and also after AuthKey_ that is the Key ID]')}}</li>
+                        </ol>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">{{translate('messages.close')}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <!-- Twitter -->
         <div class="modal fade" id="twitter-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -171,6 +273,22 @@
             $temp.remove();
 
             toastr.success("{{translate('Copied to the clipboard')}}");
+        }
+        function checkAppleFile() {
+            <?php
+            if (file_exists('AppleServiceId.p8')) {
+                $file = 1;
+            } else {
+                $file = 0;
+            }
+            ?>
+            var file = {{ $file }};
+            console.log(file);
+            if(file === 1){
+                toastr.success("{{translate('File Exists')}}");
+            }else{
+                toastr.error("{{translate('File not found')}}");
+            }
         }
     </script>
 

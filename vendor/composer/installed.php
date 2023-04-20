@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/laravel',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => '2ed4dfc99c09ec70d8492c9aa0389e98b1a52170',
+        'pretty_version' => 'dev-version_2.0.1',
+        'version' => 'dev-version_2.0.1',
+        'reference' => 'f57b9fc2a04cad9f37bb3bc0f9aa4bfba0b56675',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -247,6 +247,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'fgrosse/phpasn1' => array(
+            'pretty_version' => 'v2.5.0',
+            'version' => '2.5.0.0',
+            'reference' => '42060ed45344789fb9f21f9f1864fc47b9e3507b',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../fgrosse/phpasn1',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'fideloper/proxy' => array(
             'pretty_version' => '4.4.2',
             'version' => '4.4.2.0',
@@ -266,9 +275,9 @@
             'dev_requirement' => true,
         ),
         'firebase/php-jwt' => array(
-            'pretty_version' => 'v6.3.2',
-            'version' => '6.3.2.0',
-            'reference' => 'ea7dda77098b96e666c5ef382452f94841e439cd',
+            'pretty_version' => 'v6.4.0',
+            'version' => '6.4.0.0',
+            'reference' => '4dd1e007f22a927ac77da5a3fbb067b42d3bc224',
             'type' => 'library',
             'install_path' => __DIR__ . '/../firebase/php-jwt',
             'aliases' => array(),
@@ -620,9 +629,9 @@
             'dev_requirement' => false,
         ),
         'laravel/laravel' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '2ed4dfc99c09ec70d8492c9aa0389e98b1a52170',
+            'pretty_version' => 'dev-version_2.0.1',
+            'version' => 'dev-version_2.0.1',
+            'reference' => 'f57b9fc2a04cad9f37bb3bc0f9aa4bfba0b56675',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1427,6 +1436,24 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'spomky-labs/aes-key-wrap' => array(
+            'pretty_version' => 'v6.0.0',
+            'version' => '6.0.0.0',
+            'reference' => '97388255a37ad6fb1ed332d07e61fa2b7bb62e0d',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spomky-labs/aes-key-wrap',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'spomky-labs/base64url' => array(
+            'pretty_version' => 'v2.0.4',
+            'version' => '2.0.4.0',
+            'reference' => '7752ce931ec285da4ed1f4c5aa27e45e097be61d',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spomky-labs/base64url',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'stripe/stripe-php' => array(
             'pretty_version' => 'v7.128.0',
             'version' => '7.128.0.0',
@@ -2000,6 +2027,15 @@
                 0 => 'v5.4.19',
             ),
         ),
+        'thecodingmachine/safe' => array(
+            'pretty_version' => 'v1.3.3',
+            'version' => '1.3.3.0',
+            'reference' => 'a8ab0876305a4cdaef31b2350fcb9811b5608dbc',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../thecodingmachine/safe',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'theseer/tokenizer' => array(
             'pretty_version' => '1.2.1',
             'version' => '1.2.1.0',
@@ -2089,6 +2125,177 @@
             'install_path' => __DIR__ . '/../vonage/nexmo-bridge',
             'aliases' => array(),
             'dev_requirement' => false,
+        ),
+        'web-token/encryption-pack' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-bundle' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-checker' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-console' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-core' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-easy' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-aescbc' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-aesgcm' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-aesgcmkw' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-aeskw' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-dir' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-ecdh-es' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-experimental' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-pbes2' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-encryption-algorithm-rsa' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-framework' => array(
+            'pretty_version' => 'v2.2.11',
+            'version' => '2.2.11.0',
+            'reference' => '643cced197e32471418bd89e7a44b69fd04eb9de',
+            'type' => 'symfony-bundle',
+            'install_path' => __DIR__ . '/../web-token/jwt-framework',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'web-token/jwt-key-mgmt' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-nested-token' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-ecdsa' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-eddsa' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-experimental' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-hmac' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-none' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-signature-algorithm-rsa' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/jwt-util-ecc' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
+        ),
+        'web-token/signature-pack' => array(
+            'dev_requirement' => false,
+            'replaced' => array(
+                0 => 'v2.2.11',
+            ),
         ),
         'webmozart/assert' => array(
             'pretty_version' => '1.11.0',

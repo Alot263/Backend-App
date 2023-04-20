@@ -78,6 +78,17 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group col-md-4 col-lg-3 col-sm-6" id="customer_wise" style="display: {{$coupon['coupon_type'] =='zone_wise' || $coupon['coupon_type'] =='first_order' ?'none':'block'}}">
+                            <label class="input-label" for="select_customer">{{translate('messages.select_customer')}}</label>
+                            <select name="customer_ids[]" id="select_customer"
+                                class="form-control js-select2-custom"
+                                multiple="multiple" placeholder="{{translate('messages.select_customer')}}">
+                                <option value="all" {{in_array('all', json_decode($coupon->customer_id))?'selected':''}}>{{translate('messages.all')}} </option>
+                                @foreach(\App\Models\User::get(['id','f_name','l_name']) as $user)
+                                <option value="{{$user->id}}" {{in_array($user->id, json_decode($coupon->customer_id))?'selected':''}}>{{$user->f_name.' '.$user->l_name}}</option>
+                            @endforeach
+                            </select>
+                        </div>
                         <div class="col-md-4 col-lg-3 col-sm-6">
                             <div class="form-group m-0">
                                 <label class="input-label" for="exampleFormControlInput1">{{translate('messages.code')}}</label>
@@ -229,22 +240,26 @@
             {
                 $('#store_wise').hide();
                 $('#zone_wise').show();
+                $('#customer_wise').hide();
             }
             else if(coupon_type=='store_wise')
             {
                 $('#store_wise').show();
                 $('#zone_wise').hide();
+                $('#customer_wise').show();
             }
             else if(coupon_type=='first_order')
             {
                 $('#zone_wise').hide();
                 $('#store_wise').hide();
+                $('#customer_wise').hide();
                 $('#coupon_limit').val(1);
                 $('#coupon_limit').attr("readonly","true");
             }
             else{
                 $('#zone_wise').hide();
                 $('#store_wise').hide();
+                $('#customer_wise').show();
                 $('#coupon_limit').val('');
                 $('#coupon_limit').removeAttr("readonly");
             }

@@ -165,8 +165,10 @@
 
                                                     @endif
                                                 @endif
+                                                @if (env('APP_MODE') != 'demo')
                                                 <a class="dropdown-item"
                                                     href="{{route('admin.business-settings.language.translate',[$data['code']])}}">{{translate('Translate')}}</a>
+                                                @endif
                                             </div>
                                         </div>
                                     </td>
@@ -392,7 +394,8 @@
                                         <div class="form-group">
                                             <label for="message-text"
                                                    class="col-form-label">{{translate('language')}}</label>
-                                                   <select name="code" id="lang_code" class="form-control js-select2-custom" disabled>
+                                                   <input type="hidden" name="code" value="{{ $data['code'] }}">
+                                                   <select id="lang_code" class="form-control js-select2-custom" disabled>
                                                     {{-- <option value="en" {{ $data['code']== 'en'?'selected':'' }}>English</option> --}}
                                                     <option value="af" {{ $data['code']== 'af'?'selected':'' }}>Afrikaans</option>
                                                     <option value="sq" {{ $data['code']== 'sq'?'selected':'' }}>Albanian - shqip</option>

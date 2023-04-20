@@ -27,7 +27,7 @@
                 {{$review->rating}} <i class="tio-star"></i>
             </label>
         </td>
-        <td>
+        {{-- <td>
             <label class="toggle-switch toggle-switch-sm" for="reviewCheckbox{{$review->id}}">
                 <input type="checkbox" onclick="status_form_alert('status-{{$review['id']}}','{{$review->status?translate('messages.you_want_to_hide_this_review_for_customer'):translate('messages.you_want_to_show_this_review_for_customer')}}', event)" class="toggle-switch-input" id="reviewCheckbox{{$review->id}}" {{$review->status?'checked':''}}>
                 <span class="toggle-switch-label">
@@ -36,7 +36,7 @@
             </label>
             <form action="{{route('admin.users.delivery-man.reviews.status',[$review['id'],$review->status?0:1])}}" method="get" id="status-{{$review['id']}}">
             </form>
-        </td>
+        </td> --}}
     </tr>
 @endif
 @endforeach

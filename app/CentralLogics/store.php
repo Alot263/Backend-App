@@ -120,7 +120,13 @@ class StoreLogic
         ->when(config('module.current_module_data'), function($query){
             $query->module(config('module.current_module_data')['id']);
         })
-        ->active()->whereId($store_id)->first();
+        ->when(is_numeric($store_id),function ($qurey) use($store_id){
+            $qurey->where('id', $store_id);
+        })
+        ->when(!is_numeric($store_id),function ($qurey) use($store_id){
+            $qurey->where('slug', $store_id);
+        })
+        ->first();
     }
 
     public static function calculate_store_rating($ratings)

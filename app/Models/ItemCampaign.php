@@ -74,4 +74,29 @@ class ItemCampaign extends Model
             }]);
         });
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($itemcampaign) {
+            $itemcampaign->slug = $itemcampaign->generateSlug($itemcampaign->title);
+            $itemcampaign->save();
+        });
+    }
+    private function generateSlug($name)
+    {
+        $slug = Str::slug($name);
+        if ($max_slug = static::where('slug', 'like',"{$slug}%")->latest('id')->value('slug')) {
+            
+            if($max_slug == $slug) return "{$slug}-2";
+
+            $max_slug = explode('-',$max_slug);
+            $count = array_pop($max_slug);
+            if (isset($count) && is_numeric($count)) {
+                $max_slug[]= ++$count;
+                return implode('-', $max_slug);
+            }
+        }
+        return $slug;
+    } 
 }

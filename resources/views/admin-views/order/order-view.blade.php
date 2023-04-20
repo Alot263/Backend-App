@@ -1,12 +1,17 @@
 @extends('layouts.admin.app')
 
 @section('title', translate('Order Details'))
-
+<style>
+    .select2-container--open {
+    z-index: 99999999999999;
+}
+</style>
 
 @section('content')
     <?php
     $deliverman_tips = 0;
     $campaign_order = isset($order->details[0]->campaign) ? true : false;
+    $reasons=\App\Models\OrderCancelReason::where('status', 1)->where('user_type' ,'admin' )->get();
     $parcel_order = $order->order_type == 'parcel' ? true : false;
     $tax_included =0;
     ?>
@@ -99,6 +104,16 @@
                                             {{ translate('messages.show_locations_on_map') }}</button>
                                     </h5>
                                 </div>
+                                @if($order['cancellation_reason'])
+                                    <h6 class="text-capitalize my-2 ml-2">
+                                        <span class="text-danger">{{ translate('messages.Cancelled_By') }} :</span>
+                                        {{ $order['canceled_by'] }}
+                                    </h6>
+                                    <h6 class=" my-2 ml-2">
+                                        <span class="text-danger">{{ translate('messages.order_cancellation_reason') }} :</span>
+                                        {{ $order['cancellation_reason'] }}
+                                    </h6>
+                                @endif
                                 @if ($order['order_note'])
                                     <h6>
                                         {{ translate('messages.order') }} {{ translate('messages.note') }} :
@@ -172,6 +187,8 @@
                                     <span>{{ translate('messages.payment') }} {{ translate('messages.method') }}</span> <span>:</span>
                                     <span>{{ translate(str_replace('_', ' ', $order['payment_method'])) }}</span>
                                 </h6>
+                                @if ($order['payment_method'] == 'digital_payment')
+                                    
                                 <h6 class="">
                                     @if ($order['transaction_reference'] == null)
                                         <span>{{ translate('messages.reference') }} {{ translate('messages.code') }}</span> <span>:</span>
@@ -184,6 +201,7 @@
                                         <span>{{ $order['transaction_reference'] }}</span>
                                     @endif
                                 </h6>
+                                @endif
                                 <h6 class="text-capitalize">
                                     <span>{{ translate('Order Type') }}</span>
                                     <span>:</span> <label
@@ -1040,8 +1058,7 @@
                                                 onclick="route_alert('{{ route('admin.order.status', ['id' => $order['id'], 'order_status' => 'delivered']) }}','{{ translate('Change status to delivered (payment status will be paid if not)?') }}')"
                                                 href="javascript:">{{ translate('messages.delivered') }}</a>
                                             <a class="dropdown-item {{ $order['order_status'] == 'canceled' ? 'active' : '' }}"
-                                                onclick="route_alert('{{ route('admin.order.status', ['id' => $order['id'], 'order_status' => 'canceled']) }}','{{ translate('Change status to canceled ?') }}')"
-                                                href="javascript:">{{ translate('messages.canceled') }}</a>
+                                            onclick="cancelled_status()">{{ translate('messages.canceled') }}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -1897,6 +1914,12 @@
         src="https://maps.googleapis.com/maps/api/js?key={{ \App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value }}&libraries=places&v=3.45.8">
     </script>
     <script>
+            // INITIALIZATION OF SELECT2
+        // =======================================================
+        $('.js-select2-custom').each(function () {
+            var select2 = $.HSCore.components.HSSelect2.init($(this));
+        });
+
         function addDeliveryMan(id) {
             $.ajax({
                 type: "GET",
@@ -1924,6 +1947,42 @@
                 CloseButton: true,
                 ProgressBar: true
             });
+        }
+        function cancelled_status() {
+            Swal.fire({
+                title: '{{ translate('messages.are_you_sure') }}',
+                text: '{{ translate('messages.Change status to canceled ?') }}',
+                type: 'warning',
+                html:
+                `   <select class="form-control js-select2-custom mx-1" name="reason" id="reason">
+                    @foreach ($reasons as $r)
+                        <option value="{{ $r->reason }}">
+                            {{ $r->reason }}
+                        </option>
+                    @endforeach
+
+                    </select>`,
+                showCancelButton: true,
+                cancelButtonColor: 'default',
+                confirmButtonColor: '#FC6A57',
+                cancelButtonText: '{{ translate('messages.no') }}',
+                confirmButtonText: '{{ translate('messages.yes') }}',
+                reverseButtons: true,
+                onOpen: function () {
+                        $('.js-select2-custom').select2({
+                            minimumResultsForSearch: 5,
+                            width: '100%',
+                            placeholder: "Select Reason",
+                            language: "en",
+                        });
+                    }
+            }).then((result) => {
+                if (result.value) {
+                    // console.log(result);
+                    var reason = document.getElementById('reason').value;
+                    location.href = '{!! route('admin.order.status', ['id' => $order['id'],'order_status' => 'canceled']) !!}&reason='+reason,'{{ translate('Change status to canceled ?') }}';
+                }
+            })
         }
     </script>
     <script>

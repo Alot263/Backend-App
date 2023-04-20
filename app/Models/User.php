@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'login_medium',
+        'ref_by',
         'social_id'
     ];
 
@@ -52,6 +53,7 @@ class User extends Authenticatable
         'order_count' => 'integer',
         'wallet_balance' => 'float',
         'loyalty_point' => 'integer',
+        'ref_by' => 'integer',
     ];
 
 

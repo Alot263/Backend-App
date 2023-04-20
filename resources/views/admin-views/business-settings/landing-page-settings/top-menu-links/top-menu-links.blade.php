@@ -58,4 +58,9 @@
             href="{{ route('admin.business-settings.landing-page-settings', 'web-app') }}"
             aria-disabled="true">{{ translate('messages.web_app') }}</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ Request::is('admin/business-settings/landing-page-settings/react') ? 'active' : '' }}"
+            href="{{ route('admin.business-settings.landing-page-settings', 'react') }}"
+            aria-disabled="true">{{ translate('react_landing_page') }}</a>
+    </li>
 </ul>

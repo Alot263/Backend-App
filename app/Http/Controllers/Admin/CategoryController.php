@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
@@ -101,7 +102,8 @@ class CategoryController extends Controller
             'name' => 'required|max:100',
         ]);
         $category = Category::find($id);
-
+        $slug = Str::slug($request->name[array_search('en', $request->lang)]);
+        $category->slug = $category->slug? $category->slug :"{$slug}{$category->id}";
         $category->name = $request->name[array_search('en', $request->lang)];
         $category->image = $request->has('image') ? Helpers::update('category/', $category->image, 'png', $request->file('image')) : $category->image;
         $category->save();

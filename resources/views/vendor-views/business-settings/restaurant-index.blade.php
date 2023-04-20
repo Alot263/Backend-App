@@ -163,7 +163,7 @@
                     <div class="row">
                         <div class="form-group mb-0 col-md-4">
                             <label class="input-label text-capitalize" for="title">{{translate('messages.minimum')}} {{translate('messages.order')}} {{translate('messages.amount')}}</label>
-                            <input type="number" name="minimum_order" step="0.01" min="0" max="100000" class="form-control" placeholder="100" value="{{$store->minimum_order??'0'}}">
+                            <input type="number" name="minimum_order" step="0.01" min="0" max="100000" class="form-control" placeholder="100" value="{{$store->minimum_order??'0'}}" required>
                         </div>
                         @if (config('module.'.$store->module->module_type)['order_place_to_schedule_interval'])
                         <div class="form-group mb-0 col-md-4">
@@ -206,10 +206,21 @@
                                 <input type="number" name="per_km_delivery_charge" step="0.01" min="0" max="100000" class="form-control" placeholder="100" value="{{$store->per_km_shipping_charge??'0'}}">
                             </div>
                         </div>
+                        <div class="col-sm-{{$store->self_delivery_system?'4':'6'}} col-12">
+                            <div class="form-group mt-3">
+                                <label class="input-label text-capitalize" for="title">{{translate('messages.maximum_delivery_charge')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})
+                                    <span data-toggle="tooltip" data-placement="right" data-original-title="{{translate('It will add a limite on total delivery charge.') }}"
+                                    class="input-label-secondary"><img
+                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                        alt="{{ translate('messages.maximum_delivery_charge') }}"></span>
+                                </label>
+                                <input type="number" name="maximum_shipping_charge" step="0.01" min="0" max="999999999" class="form-control" placeholder="10000" value="{{$store->maximum_shipping_charge??''}}">
+                            </div>
+                        </div>
                         @endif
 
-                        {{-- <div class="col-sm-{{$store->self_delivery_system?'4':'6'}}">
-                            <div class="form-group mb-0 p-2 border">
+                        <div class="col-sm-{{$store->self_delivery_system?'4':'6'}}">
+                            <div class="form-group mb-0 p-2">
                                 <label class="d-flex justify-content-between switch toggle-switch-sm text-dark" for="gst_status">
                                     <span>{{translate('messages.gst')}} <span class="input-label-secondary" title="{{translate('messages.gst_status_warning')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.gst_status_warning')}}"></span></span>
                                     <input type="checkbox" class="toggle-switch-input" name="gst_status" id="gst_status" value="1" {{$store->gst_status?'checked':''}}>
@@ -219,7 +230,7 @@
                                 </label>
                                 <input type="text" id="gst" name="gst" class="form-control" value="{{$store->gst_code}}" {{isset($store->gst_status)?'':'readonly'}}>
                             </div>
-                        </div> --}}
+                        </div>
                         <div class="col-12">
                             <div class="btn--container mt-3 justify-content-end">
                                 <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>

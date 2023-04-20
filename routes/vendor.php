@@ -17,10 +17,12 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
     /*authentication*/
 
     Route::group(['middleware' => ['vendor']], function () {
+        Route::get('lang/{locale}', 'LanguageController@lang')->name('lang');
         Route::get('/', 'DashboardController@dashboard')->name('dashboard');
         Route::get('/get-store-data', 'DashboardController@store_data')->name('get-store-data');
         Route::post('/store-token', 'DashboardController@updateDeviceToken')->name('store.token');
         Route::get('/reviews', 'ReviewController@index')->name('reviews')->middleware('module:reviews');
+        Route::get('site_direction', 'BusinessSettingsController@site_direction_vendor')->name('site_direction');
 
 
         Route::group(['prefix' => 'pos', 'as' => 'pos.'], function () {
@@ -45,6 +47,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
                 Route::get('order-details/{id}', 'POSController@order_details')->name('order-details');
                 Route::get('invoice/{id}', 'POSController@generate_invoice');
                 Route::post('customer-store', 'POSController@customer_store')->name('customer-store');
+                Route::get('data', 'POSController@extra_charge')->name('extra_charge');
             });
         });
 
@@ -114,6 +117,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('view/{id}', 'ItemController@view')->name('view');
             Route::get('remove-image', 'ItemController@remove_image')->name('remove-image');
             Route::get('get-categories', 'ItemController@get_categories')->name('get-categories');
+            Route::get('recommended/{id}/{status}', 'ItemController@recommended')->name('recommended');
 
             //Mainul
             Route::get('get-variations', 'ItemController@get_variations')->name('get-variations');
@@ -148,15 +152,16 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
         });
 
 
-        // Route::group(['prefix' => 'coupon', 'as' => 'coupon.', 'middleware' => ['module:coupon']], function () {
-        //     Route::get('add-new', 'CouponController@add_new')->name('add-new');
-        //     Route::post('store', 'CouponController@store')->name('store');
-        //     Route::get('update/{id}', 'CouponController@edit')->name('update');
-        //     Route::post('update/{id}', 'CouponController@update');
-        //     Route::get('status/{id}/{status}', 'CouponController@status')->name('status');
-        //     Route::delete('delete/{id}', 'CouponController@delete')->name('delete');
-        // });
-
+        Route::group(['prefix' => 'coupon', 'as' => 'coupon.', 'middleware' => ['module:coupon']], function () {
+            Route::get('add-new', 'CouponController@add_new')->name('add-new');
+            Route::post('store', 'CouponController@store')->name('store');
+            Route::get('update/{id}', 'CouponController@edit')->name('update');
+            Route::post('update/{id}', 'CouponController@update');
+            Route::get('status/{id}/{status}', 'CouponController@status')->name('status');
+            Route::delete('delete/{id}', 'CouponController@delete')->name('delete');
+            Route::post('search', 'CouponController@search')->name('search');
+        });
+        
         Route::group(['prefix' => 'addon', 'as' => 'addon.', 'middleware' => ['module:addon']], function () {
             Route::get('add-new', 'AddOnController@index')->name('add-new');
             Route::post('store', 'AddOnController@store')->name('store');
@@ -212,6 +217,13 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('list', 'ConversationController@list')->name('list');
             Route::post('store/{user_id}/{user_type}', 'ConversationController@store')->name('store');
             Route::get('view/{conversation_id}/{user_id}', 'ConversationController@view')->name('view');
+        });
+
+        Route::group(['prefix' => 'report', 'as' => 'report.', 'middleware' => ['module:report']], function () {
+            Route::post('set-date', 'ReportController@set_date')->name('set-date');
+            Route::get('expense-report', 'ReportController@expense_report')->name('expense-report');
+            Route::get('expense-export', 'ReportController@expense_export')->name('expense-export');
+            Route::post('expense-report-search', 'ReportController@expense_search')->name('expense-report-search');
         });
 
     });

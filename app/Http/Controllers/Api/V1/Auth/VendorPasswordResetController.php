@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
+use Carbon\CarbonInterval;
+use App\Models\BusinessSetting;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
@@ -55,6 +58,62 @@ class VendorPasswordResetController extends Controller
         $data = DB::table('password_resets')->where(['token' => $request['reset_token'],'email'=>$request->email])->first();
         if (isset($data) || (env('APP_MODE')=='demo'&& $request['reset_token'] == '1234' )) {
             return response()->json(['message'=>translate("OTP found, you can proceed")], 200);
+        } else{
+            // $otp_hit = BusinessSetting::where('key', 'max_otp_hit')->first();
+            // $max_otp_hit =isset($otp_hit) ? $otp_hit->value : 5 ;
+            $max_otp_hit = 5;
+            // $otp_hit_time = BusinessSetting::where('key', 'max_otp_hit_time')->first();
+            // $max_otp_hit_time = isset($otp_hit_time) ? $otp_hit_time->value : 30 ;
+            $max_otp_hit_time = 60; // seconds
+            $temp_block_time = 600; // seconds
+            $verification_data= DB::table('password_resets')->where('email', $request->email)->first();
+
+
+            if(isset($verification_data)){
+                $time= $temp_block_time - Carbon::parse($verification_data->temp_block_time)->DiffInSeconds();
+
+                if(isset($verification_data->temp_block_time ) && Carbon::parse($verification_data->temp_block_time)->DiffInSeconds() <= $temp_block_time){
+                    $time= $temp_block_time - Carbon::parse($verification_data->temp_block_time)->DiffInSeconds();
+
+                    $errors = [];
+                    array_push($errors, ['code' => 'otp_block_time', 'message' => translate('messages.please_try_again_after_').CarbonInterval::seconds($time)->cascade()->forHumans()
+                ]);
+                return response()->json([
+                    'errors' => $errors
+                ], 405);
+                }
+
+                if($verification_data->is_temp_blocked == 1 && Carbon::parse($verification_data->created_at)->DiffInSeconds() >= $max_otp_hit_time){
+                    DB::table('password_resets')->updateOrInsert(['email' => $request->email],
+                        [
+                            'otp_hit_count' => 0,
+                            'is_temp_blocked' => 0,
+                            'temp_block_time' => null,
+                            'created_at' => now(),
+                        ]);
+                    }
+
+                if($verification_data->otp_hit_count >= $max_otp_hit &&  Carbon::parse($verification_data->created_at)->DiffInSeconds() < $max_otp_hit_time &&  $verification_data->is_temp_blocked == 0){
+
+                    DB::table('password_resets')->updateOrInsert(['email' => $request->email],
+                        [
+                        'is_temp_blocked' => 1,
+                        'temp_block_time' => now(),
+                        'created_at' => now(),
+                        ]);
+                    $errors = [];
+                    array_push($errors, ['code' => 'otp_temp_blocked', 'message' => translate('messages.Too_many_attemps') ]);
+                    return response()->json([
+                        'errors' => $errors
+                    ], 405);
+                }
+            }
+            DB::table('password_resets')->updateOrInsert(['email' => $request->email],
+            [
+                'otp_hit_count' => DB::raw('otp_hit_count + 1'),
+                'created_at' => now(),
+                'temp_block_time' => null,
+            ]);
         }
         return response()->json(['errors' => [
             ['code' => 'reset_token', 'message' => 'Invalid OTP.']

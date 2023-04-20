@@ -98,6 +98,7 @@ class DeliveryManController extends Controller
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
             'password'=>'required|min:6',
+            'vehicle_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -130,6 +131,7 @@ class DeliveryManController extends Controller
         $dm->identity_type = $request->identity_type;
         $dm->store_id =  $request->vendor->stores[0]->id;
         $dm->identity_image = $identity_image;
+        $dm->vehicle_id = $request->vehicle_id;
         $dm->image = $image_name;
         $dm->active = 0;
         $dm->earning = 0;
@@ -205,6 +207,7 @@ class DeliveryManController extends Controller
             'email' => 'required|unique:delivery_men,email,'.$id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$id,
             'password'=>'nullable|min:6',
+            'vehicle_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -249,6 +252,7 @@ class DeliveryManController extends Controller
         $delivery_man->identity_number = $request->identity_number;
         $delivery_man->identity_type = $request->identity_type;
         $delivery_man->identity_image = $identity_image;
+        $delivery_man->vehicle_id = $request->vehicle_id;
         $delivery_man->image = $image_name;
 
         $delivery_man->password = strlen($request->password)>1?bcrypt($request->password):$delivery_man['password'];

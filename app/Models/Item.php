@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
-use App\Scopes\StoreScope;
 use App\Scopes\ZoneScope;
+use App\Scopes\StoreScope;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use function PHPUnit\Framework\returnSelf;
 
 class Item extends Model
 {
@@ -28,9 +31,16 @@ class Item extends Model
         'images'=>'array',
         'module_id'=>'integer',
         'stock'=>'integer',
+        "min_price" => 'float',
+        "max_price" => 'float'
     ];
 
     protected $appends = ['unit_type'];
+
+    public function scopeRecommended($query)
+    {
+        return $query->where('recommended',1);
+    }
 
     public function translations()
     {
@@ -57,6 +67,11 @@ class Item extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class)->latest();
+    }
+
+    public function whislists()
+    {
+        return $this->hasMany(Wishlist::class);
     }
 
     public function unit()
@@ -124,5 +139,30 @@ class Item extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($item) {
+            $item->slug = $item->generateSlug($item->name);
+            $item->save();
+        });
+    }
+    private function generateSlug($name)
+    {
+        $slug = Str::slug($name);
+        if ($max_slug = static::where('slug', 'like',"{$slug}%")->latest('id')->value('slug')) {
+            
+            if($max_slug == $slug) return "{$slug}-2";
+
+            $max_slug = explode('-',$max_slug);
+            $count = array_pop($max_slug);
+            if (isset($count) && is_numeric($count)) {
+                $max_slug[]= ++$count;
+                return implode('-', $max_slug);
+            }
+        }
+        return $slug;
+    }    
     
 }

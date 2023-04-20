@@ -2,6 +2,7 @@
 
 namespace App\CentralLogics;
 
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Store;
 use Carbon\Carbon;
@@ -31,6 +32,7 @@ class CouponLogic
 
         $start_date = Carbon::parse($coupon->start_date);
         $expire_date = Carbon::parse($coupon->expire_date);
+        $customer_ids=json_decode($coupon->customer_id, true);
 
         $today = Carbon::now();
 
@@ -50,6 +52,11 @@ class CouponLogic
         {  
             return 404;   
         }
+
+        if((!in_array("all", $customer_ids) && !in_array($user_id,$customer_ids)) ){
+            return 408; //unauthorized user
+            }
+            
         else if($coupon->coupon_type == 'zone_wise')
         {
             if(json_decode($coupon->data, true)){

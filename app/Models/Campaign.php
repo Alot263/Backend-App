@@ -38,7 +38,7 @@ class Campaign extends Model
     }
     public function stores()
     {
-        return $this->belongsToMany(Store::class);
+        return $this->belongsToMany(Store::class)->withPivot('campaign_status');
     }
 
     public function scopeActive($query)

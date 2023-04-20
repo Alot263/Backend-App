@@ -31,11 +31,18 @@ class BusinessSettingsController extends Controller
             'gst.required_if' => translate('messages.gst_can_not_be_empty'),
         ]);
 
+        if(isset($request->maximum_shipping_charge) && ($request->minimum_delivery_charge > $request->maximum_shipping_charge)){
+            Toastr::error(translate('Maximum delivery charge must be greater than minimum delivery charge.'));
+                return back();
+        }
+
         $store->minimum_order = $request->minimum_order;
         $store->gst = json_encode(['status'=>$request->gst_status, 'code'=>$request->gst]);
         // $store->delivery_charge = $store->self_delivery_system?$request->delivery_charge??0: $store->delivery_charge;
         $store->minimum_shipping_charge = $store->self_delivery_system?$request->minimum_delivery_charge??0: $store->minimum_shipping_charge;
         $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
+        $store->maximum_shipping_charge = $store->self_delivery_system?$request->maximum_shipping_charge??0: $store->maximum_shipping_charge;
         $store->order_place_to_schedule_interval = $request->order_place_to_schedule_interval;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->save();
@@ -125,5 +132,11 @@ class BusinessSettingsController extends Controller
         return response()->json([
             'view' => view('vendor-views.business-settings.partials._schedule', compact('store'))->render(),
         ]);
+    }
+
+
+    public function site_direction_vendor(Request $request){
+        session()->put('site_direction_vendor', ($request->status == 1?'ltr':'rtl'));
+        return response()->json();
     }
 }

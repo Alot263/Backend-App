@@ -74,6 +74,93 @@
                     </form>
                 </div>
                 <div class="col-sm-12 col-xl-12">
+                <div
+                class="card my-2">
+                <div class="card-header">
+                    <h3 class="mt-2 mb-3">Download buttons</h3>
+                </div>
+                   <div class="card-body">
+                       <form action="{{ route('admin.business-settings.landing-page-settings', 'app-download-button') }}" method="POST"
+                           enctype="multipart/form-data">
+                           @php($button = \App\Models\BusinessSetting::where(['key' => 'app_download_button'])->first())
+                           @php($button = isset($button->value) ? json_decode($button->value, true) : [])
+                           @csrf
+       
+                           <div
+       
+                           class="row gy-3">
+                               <div class="col-lg-6">
+                                   <div class="form-group">
+                                       <label class="input-label" for="button_text">{{ translate('messages.button_text') }}</label>
+                                       <input type="text" id="button_text" name="button_text" class="form-control h--45px"
+                                           placeholder="{{ translate('Ex: Button text') }}">
+                                   </div>
+                               </div>
+                               <div class="col-lg-6">
+                                   <div class="form-group">
+                                       <label class="input-label" for="link">{{ translate('messages.link') }}</label>
+                                       <input type="url" id="link" name="link" class="form-control h--45px"
+                                           placeholder="{{ translate('Ex: Link') }}">
+                                   </div>
+                               </div>
+                           </div>
+                           <div
+                            class="form-group mt-3">
+                               <div class="btn--container justify-content-end">
+                                   <button type="submit" class="btn btn--primary">{{ translate('messages.submit') }}</button>
+                               </div>
+                           </div>
+       
+                       </form>
+                   </div>
+                       <div class="col-12">
+                           <table class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
+                               <thead>
+                                   <tr>
+                                       <th scope="col">{{ translate('messages.sl') }}</th>
+                                       <th scope="col">{{ translate('messages.button_text') }}</th>
+                                       <th scope="col">{{ translate('messages.link') }}</th>
+                                       <th scope="col" class="text-center">{{ translate('messages.action') }}</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   @if ($button)
+                                       @foreach ($button as $key => $button_item)
+                                           <tr>
+                                               <th scope="row">{{ $key + 1 }}</th>
+                                               <td>{{ $button_item['button_text'] }}</td>
+                                               <td>{{ $button_item['link'] }}</td>
+                                               <td>
+                                                   <div class="btn--container justify-content-center">
+                                                       <a class="btn btn--danger btn-outline-danger action-btn" href="javascript:"
+                                                           onclick="form_alert('feature-{{ $key }}','{{ translate('messages.Want_to_delete_this_item') }}')"
+                                                           data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.delete') }}"><i class="tio-delete-outlined"></i>
+                                                       </a>
+                                                   </div>
+                                                   <form
+                                                       action="{{ route('admin.business-settings.landing-page-settings-delete', ['tab' => 'app_download_button', 'key' => $key]) }}"
+                                                       method="post" id="feature-{{ $key }}">
+                                                       @csrf
+                                                       @method('delete')
+                                                   </form>
+                                               </td>
+                                           </tr>
+                                       @endforeach
+                                   @endif
+                               </tbody>
+                           </table>
+                           @if(!$button )
+                           <div class="empty--data">
+                               <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                               <h5>
+                                   {{translate('no_data_found')}}
+                               </h5>
+                           </div>
+                           @endif
+                       </div>
+               </div>
+               </div>
+                <div class="col-sm-12 col-xl-12">
                     <div class="card">
                         <div class="card-body">
                             <h3 class="mt-2 mb-3">Counter Section</h3>

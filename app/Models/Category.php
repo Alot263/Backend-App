@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Category extends Model
 {
@@ -26,6 +27,12 @@ class Category extends Model
     {
         return $this->belongsTo(Module::class);
     }
+
+    public function products()
+    {
+        return $this->hasMany(Item::class);
+    }
+
     
     public function scopeModule($query, $module_id)
     {
@@ -35,6 +42,11 @@ class Category extends Model
     public function scopeActive($query)
     {
         return $query->where('status', '=', 1);
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', '=', 1);
     }
 
     public function childes()
@@ -55,4 +67,29 @@ class Category extends Model
             }]);
         });
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($category) {
+            $category->slug = $category->generateSlug($category->name);
+            $category->save();
+        });
+    }
+    private function generateSlug($name)
+    {
+        $slug = Str::slug($name);
+        if ($max_slug = static::where('slug', 'like',"{$slug}%")->latest('id')->value('slug')) {
+            
+            if($max_slug == $slug) return "{$slug}-2";
+
+            $max_slug = explode('-',$max_slug);
+            $count = array_pop($max_slug);
+            if (isset($count) && is_numeric($count)) {
+                $max_slug[]= ++$count;
+                return implode('-', $max_slug);
+            }
+        }
+        return $slug;
+    } 
 }

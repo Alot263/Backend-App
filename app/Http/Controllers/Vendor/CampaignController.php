@@ -14,7 +14,7 @@ class CampaignController extends Controller
 {
     function list()
     {
-        $campaigns=Campaign::with('stores')->latest()->module(Helpers::get_store_data()->module_id)->paginate(config('default_pagination'));
+        $campaigns=Campaign::with('stores')->running()->latest()->module(Helpers::get_store_data()->module_id)->paginate(config('default_pagination'));
         return view('vendor-views.campaign.list',compact('campaigns'));
     }
 
@@ -33,7 +33,7 @@ class CampaignController extends Controller
     }
     public function addstore(Campaign $campaign, $store)
     {
-        $campaign->stores()->attach($store);
+        $campaign->stores()->attach($store,['campaign_status' => 'pending']);
         $campaign->save();
         Toastr::success(translate('messages.store_added_to_campaign'));
         return back();

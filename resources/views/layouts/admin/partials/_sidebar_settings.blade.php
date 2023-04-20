@@ -86,6 +86,21 @@
                         <span class="text-truncate">{{ translate('messages.notification_settings') }}</span>
                     </a>
                 </li>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/order-cancel-reasons') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.business-settings.order-cancel-reasons.index') }}" title="{{ translate('messages.order_cancellation_reasons') }}">
+                        <span class="tio-appointment-cancelled nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.order_cancellation_reasons') }}</span>
+                    </a>
+                </li>
+
+                {{-- <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/order-cancel-reasons') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.order-cancel-reasons.index') }}" title="{{translate('messages.order_cancellation_reasons')}}">
+                        <i class="tio-settings nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                            {{translate('messages.order_cancellation_reasons')}}
+                        </span>
+                    </a>
+                </li> --}}
 
                 @endif
                 <!-- End Business Settings -->

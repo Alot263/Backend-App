@@ -51,6 +51,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     Route::get('module', 'ModuleController@index');
 
     Route::post('newsletter/subscribe','NewsletterController@index');
+    Route::get('landing-page', 'ConfigController@landing_page');
 
     Route::group(['prefix' => 'delivery-man'], function () {
         Route::get('last-location', 'DeliverymanController@get_last_location');
@@ -98,6 +99,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::put('update-profile', 'VendorController@update_profile');
         Route::get('current-orders', 'VendorController@get_current_orders');
         Route::get('completed-orders', 'VendorController@get_completed_orders');
+        Route::get('canceled-orders', 'VendorController@get_canceled_orders');
         Route::get('all-orders', 'VendorController@get_all_orders');
         Route::put('update-order-status', 'VendorController@update_order_status');
         Route::put('update-order-amount', 'VendorController@edit_order_amount');
@@ -111,6 +113,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('get-items-list', 'VendorController@get_items');
         Route::put('update-bank-info', 'VendorController@update_bank_info');
         Route::post('request-withdraw', 'VendorController@request_withdraw');
+        Route::get('get-expense', 'ReportController@expense_report');
 
         //remove account
         Route::delete('remove-account', 'VendorController@remove_account');
@@ -126,6 +129,16 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         // Attributes
         Route::get('attributes', 'AttributeController@list');
 
+        // Addon
+        Route::group(['prefix'=>'coupon'], function(){
+            Route::get('list', 'CouponController@list');
+            Route::get('view', 'CouponController@view');
+            Route::post('store', 'CouponController@store')->name('store');
+            Route::post('update', 'CouponController@update');
+            Route::post('status', 'CouponController@status')->name('status');
+            Route::post('delete', 'CouponController@delete')->name('delete');
+            Route::post('search', 'CouponController@search')->name('search');
+        });
         // Addon
         Route::group(['prefix'=>'addon'], function(){
             Route::get('/', 'AddOnController@list');
@@ -157,7 +170,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('status', 'ItemController@status');
             Route::POST('search', 'ItemController@search');
             Route::get('reviews', 'ItemController@reviews');
-
+            Route::get('recommended', 'ItemController@recommended');
         });
 
         // POS
@@ -184,7 +197,14 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('place-api-details', 'ConfigController@place_api_details');
         Route::get('geocode-api', 'ConfigController@geocode_api');
     });
+    
+    Route::group(['prefix' => 'testimonial'], function () {
+        Route::get('/', 'TestimonialController@get_tetimonial_lists');
 
+    });
+
+    Route::get('customer/order/cancellation-reasons', 'OrderController@cancellation_reason');
+    
     Route::group(['middleware'=>['module-check']], function(){
         Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
             Route::get('notifications', 'NotificationController@get_notifications');
@@ -254,6 +274,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::get('related-items/{item_id}', 'ItemController@get_related_products');
             Route::get('reviews/{item_id}', 'ItemController@get_product_reviews');
             Route::get('rating/{item_id}', 'ItemController@get_product_rating');
+            Route::get('recommended', 'ItemController@get_recommended');
             Route::post('reviews/submit', 'ItemController@submit_product_review')->middleware('auth:api');
         });
 
@@ -291,4 +312,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
         Route::get('parcel-category','ParcelCategoryController@index');
     });
+    Route::get('vehicle/extra_charge', 'ConfigController@extra_charge');
+
+    Route::get('get-vehicles', 'ConfigController@get_vehicles');
 });

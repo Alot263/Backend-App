@@ -389,6 +389,7 @@ if (isset($cart['paid'])) {
                                 </span>
                                 <div>
                                     <span>{{ translate('Delivery fee') }} :</span>
+                                    <input type="hidden" name="distance" id="distance">
                                     <input type="hidden" name="delivery_fee" id="delivery_fee"
                                         value="{{ $old ? $old['delivery_fee'] : '' }}">
                                     <strong>{{ $old ? $old['delivery_fee'] : 0 }}

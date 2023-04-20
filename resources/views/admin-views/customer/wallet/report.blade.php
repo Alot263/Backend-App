@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',__('messages.customer_wallet').' '.__('messages.report'))
+@section('title',translate('messages.customer_wallet').' '.translate('messages.report'))
 
 @push('css_or_js')
 
@@ -15,7 +15,7 @@
                     <img src="{{asset('/public/assets/admin/img/wallet.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                     {{__('messages.customer_wallet')}} {{__('messages.report')}}
+                     {{translate('messages.customer_wallet')}} {{translate('messages.report')}}
                 </span>
             </h1>
         </div>
@@ -27,33 +27,33 @@
                     <span class="card-header-icon">
                         <i class="tio-filter-outlined"></i>
                     </span>
-                    <span>{{__('messages.filter')}} {{__('messages.options')}}</span>
+                    <span>{{translate('messages.filter')}} {{translate('messages.options')}}</span>
                 </h4>
             </div>
             <div class="card-body">
                 <form action="{{route('admin.users.customer.wallet.report')}}" method="get">
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <input type="date" name="from" id="from_date" value="{{request()->get('from')}}" class="form-control" title="{{__('messages.from')}} {{__('messages.date')}}">
+                            <input type="date" name="from" id="from_date" value="{{request()->get('from')}}" class="form-control" title="{{translate('messages.from')}} {{translate('messages.date')}}">
                         </div>
                         <div class="col-sm-6">
-                            <input type="date" name="to" id="to_date" value="{{request()->get('to')}}" class="form-control" title="{{ucfirst(__('messages.to'))}} {{__('messages.date')}}">
+                            <input type="date" name="to" id="to_date" value="{{request()->get('to')}}" class="form-control" title="{{ucfirst(translate('messages.to'))}} {{translate('messages.date')}}">
                         </div>
                         <div class="col-sm-6">
                             @php
                             $transaction_status=request()->get('transaction_type');
                             @endphp
-                            <select name="transaction_type" id="" class="form-control" title="{{__('messages.select')}} {{__('messages.transaction_type')}}">
-                                <option value="">{{__('messages.all')}}</option>
-                                <option value="add_fund_by_admin" {{isset($transaction_status) && $transaction_status=='add_fund_by_admin'?'selected':''}} >{{__('messages.add_fund_by_admin')}}</option>
-                                <!-- <option value="add_fund" {{isset($transaction_status) && $transaction_status=='add_fund'?'selected':''}}>{{__('messages.add_fund_by_customer')}}</option> -->
-                                <option value="order_refund" {{isset($transaction_status) && $transaction_status=='order_refund'?'selected':''}}>{{__('messages.refund_order')}}</option>
-                                <option value="loyalty_point" {{isset($transaction_status) && $transaction_status=='loyalty_point'?'selected':''}}>{{__('messages.customer_loyalty_point')}}</option>
-                                <option value="order_place" {{isset($transaction_status) && $transaction_status=='order_place'?'selected':''}}>{{__('messages.order_place')}}</option>
+                            <select name="transaction_type" id="" class="form-control" title="{{translate('messages.select')}} {{translate('messages.transaction_type')}}">
+                                <option value="">{{translate('messages.all')}}</option>
+                                <option value="add_fund_by_admin" {{isset($transaction_status) && $transaction_status=='add_fund_by_admin'?'selected':''}} >{{translate('messages.add_fund_by_admin')}}</option>
+                                <!-- <option value="add_fund" {{isset($transaction_status) && $transaction_status=='add_fund'?'selected':''}}>{{translate('messages.add_fund_by_customer')}}</option> -->
+                                <option value="order_refund" {{isset($transaction_status) && $transaction_status=='order_refund'?'selected':''}}>{{translate('messages.refund_order')}}</option>
+                                <option value="loyalty_point" {{isset($transaction_status) && $transaction_status=='loyalty_point'?'selected':''}}>{{translate('messages.customer_loyalty_point')}}</option>
+                                <option value="order_place" {{isset($transaction_status) && $transaction_status=='order_place'?'selected':''}}>{{translate('messages.order_place')}}</option>
                             </select>
                         </div>
                         <div class="col-sm-6">
-                            <select id='customer' name="customer_id" data-placeholder="{{__('messages.select_customer')}}" class="js-data-example-ajax form-control" title="{{__('messages.select_customer')}}">
+                            <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select_customer')}}" class="js-data-example-ajax form-control" title="{{translate('messages.select_customer')}}">
                                 @if (request()->get('customer_id') && $customer_info = \App\Models\User::find(request()->get('customer_id')))
                                     <option value="{{$customer_info->id}}" selected>{{$customer_info->f_name.' '.$customer_info->l_name}}({{$customer_info->phone}})</option>
                                 @endif
@@ -61,8 +61,8 @@
                         </div>
                         <div class="col-12">
                             <div class="btn--container justify-content-end">
-                                <button type="reset" class="btn btn--reset">{{__('messages.reset')}}</button>
-                                <button type="submit" class="btn btn--primary"><i class="tio-filter-list mr-1"></i>{{__('messages.filter')}}</button>
+                                <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
+                                <button type="submit" class="btn btn--primary"><i class="tio-filter-list mr-1"></i>{{translate('messages.filter')}}</button>
                             </div>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
                     <span class="card-header-icon">
                         <i class="tio-document-text-outlined"></i>
                     </span>
-                    <span>{{__('messages.summary')}}</span>
+                    <span>{{translate('messages.summary')}}</span>
                 </h4>
             </div>
             <div class="card-body">
@@ -89,7 +89,7 @@
                     <!--Debit earned-->
                     <div class="col-sm-4">
                         <div class="resturant-card dashboard--card card--bg-1">
-                            <h4 class="title">{{__('messages.debit')}}</h4>
+                            <h4 class="title">{{translate('messages.debit')}}</h4>
                             <span class="subtitle">
                                 {{\App\CentralLogics\Helpers::format_currency($debit)}}
                             </span>
@@ -100,7 +100,7 @@
                     <!--credit earned-->
                     <div class="col-sm-4">
                         <div class="resturant-card dashboard--card card--bg-2">
-                            <h4 class="title">{{__('messages.credit')}}</h4>
+                            <h4 class="title">{{translate('messages.credit')}}</h4>
                             <span class="subtitle">
                                 {{\App\CentralLogics\Helpers::format_currency($credit)}}
                             </span>
@@ -111,7 +111,7 @@
                     <!--balance earned-->
                     <div class="col-sm-4">
                         <div class="resturant-card dashboard--card card--bg-3">
-                            <h4 class="title">{{__('messages.balance')}}</h4>
+                            <h4 class="title">{{translate('messages.balance')}}</h4>
                             <span class="subtitle">
                                 {{\App\CentralLogics\Helpers::format_currency($balance)}}
                             </span>
@@ -133,7 +133,7 @@
                     <span class="card-header-icon">
                         <i class="tio-dollar-outlined"></i>
                     </span>
-                    <span>{{__('messages.transactions')}}</span>
+                    <span>{{translate('messages.transactions')}}</span>
                 </h4>
             </div>
             <!-- End Header -->
@@ -145,16 +145,16 @@
                         class="table table-thead-bordered table-align-middle card-table table-nowrap">
                         <thead class="thead-light">
                             <tr>
-                                <th class="border-0">{{__('sl')}}</th>
-                                <th class="border-0">{{__('messages.transaction')}} {{__('messages.id')}}</th>
-                                <th class="border-0">{{__('messages.customer')}}</th>
-                                <th class="border-0">{{__('messages.credit')}}</th>
-                                <th class="border-0">{{__('messages.debit')}}</th>
-                                <th class="border-0">{{__('messages.balance')}}</th>
-                                <th class="border-0">{{__('messages.transaction_type')}}</th>
-                                <th class="border-0">{{__('messages.reference')}}</th>
-                                <!-- <th>{{__('messages.admin_bonus')}}</th> -->
-                                <th class="border-0">{{__('messages.created_at')}}</th>
+                                <th class="border-0">{{translate('sl')}}</th>
+                                <th class="border-0">{{translate('messages.transaction')}} {{translate('messages.id')}}</th>
+                                <th class="border-0">{{translate('messages.customer')}}</th>
+                                <th class="border-0">{{translate('messages.credit')}}</th>
+                                <th class="border-0">{{translate('messages.debit')}}</th>
+                                <th class="border-0">{{translate('messages.balance')}}</th>
+                                <th class="border-0">{{translate('messages.transaction_type')}}</th>
+                                <th class="border-0">{{translate('messages.reference')}}</th>
+                                <!-- <th>{{translate('messages.admin_bonus')}}</th> -->
+                                <th class="border-0">{{translate('messages.created_at')}}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -162,7 +162,7 @@
                             <tr scope="row">
                                 <td >{{$k+$transactions->firstItem()}}</td>
                                 <td>{{$wt->transaction_id}}</td>
-                                <td><a href="{{route('admin.users.customer.view',['user_id'=>$wt->user_id])}}">{{Str::limit($wt->user?$wt->user->f_name.' '.$wt->user->l_name:__('messages.not_found'),20,'...')}}</a></td>
+                                <td><a href="{{route('admin.users.customer.view',['user_id'=>$wt->user_id])}}">{{Str::limit($wt->user?$wt->user->f_name.' '.$wt->user->l_name:translate('messages.not_found'),20,'...')}}</a></td>
                                 <td>{{$wt->credit}}</td>
                                 <td>{{$wt->debit}}</td>
                                 <td>{{$wt->balance}}</td>

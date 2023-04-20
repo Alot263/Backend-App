@@ -55,6 +55,17 @@
                         {{ translate('messages.management') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
+                <li
+                    class="navbar-vertical-aside-has-menu {{ Request::is('admin/users/delivery-man/vehicle/*') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                        href="{{ route('admin.users.delivery-man.vehicle.list') }}"
+                        title="{{ translate('messages.vehicles_category') }}">
+                        <i class="tio-car nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                            {{ translate('messages.vehicles_category') }}
+                        </span>
+                    </a>
+                </li>
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/users/delivery-man/add') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.users.delivery-man.add') }}" title="{{ translate('messages.add_delivery_man') }}">
                         <i class="tio-running nav-icon"></i>

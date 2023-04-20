@@ -873,6 +873,24 @@
                                             min="0" max="100" step="0.01" value="{{ $delivery_charge_comission ? $delivery_charge_comission->value: 0 }}">
                                     </div>
                                 </div>
+                                {{-- <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($max_otp_hit = \App\Models\BusinessSetting::where('key', 'max_otp_hit')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="input-label text-capitalize d-flex alig-items-center"
+                                        for="max_otp_hit">{{translate('messages.Max_Number_of_Otp_Verification_in_a_Row')}}</label>
+                                            <input type="number" name="max_otp_hit" class="form-control" id="max_otp_hit"
+                                            min="0" max="100" step="0.01" value="{{ $max_otp_hit ? $max_otp_hit->value: 0 }}">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($otp_interval_time = \App\Models\BusinessSetting::where('key', 'otp_interval_time')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="input-label text-capitalize d-flex alig-items-center"
+                                        for="otp_interval_time">{{translate('messages.otp_verification_interval_time')}} ({{ translate('messages.seconds') }})</label>
+                                            <input type="number" name="otp_interval_time" class="form-control" id="otp_interval_time"
+                                            min="0" max="100" step="0.01" value="{{ $otp_interval_time ? $otp_interval_time->value: 0 }}">
+                                    </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>

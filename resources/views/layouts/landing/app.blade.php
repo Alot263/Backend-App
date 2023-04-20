@@ -1,7 +1,17 @@
 @php($background_Change = \App\Models\BusinessSetting::where(['key' => 'backgroundChange'])->first())
 @php($background_Change = isset($background_Change->value) ? json_decode($background_Change->value, true) : null)
 <!DOCTYPE html>
-<html lang="en">
+<?php
+    $landing_site_direction = session()->get('landing_site_direction');
+    // if (env('APP_MODE') == 'demo') {
+    //     $landing_site_direction = session()->get('landing_site_direction');
+    // }else{
+    //     $landing_site_direction = \App\Models\BusinessSetting::where('key', 'landing_site_direction')->first();
+    //     $landing_site_direction = $landing_site_direction->value ?? 'ltr';
+    // }
+
+?>
+<html dir="{{ $landing_site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8" />
@@ -54,7 +64,7 @@
                         onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
                     src="{{ asset('storage/app/public/business/' . $fav) }}" alt="">
                     </a>
-                    <ul class="menu me-lg-4">
+                    <ul class="menu">
                         <li>
                             <a href="{{route('home')}}" class="{{ Request::is('/') ? 'active' : '' }}"><span>{{ translate('messages.home') }}</span></a>
                         </li>
@@ -77,14 +87,44 @@
                                 </div>
                         @endif
                     </ul>
-                    <div class="nav-toggle d-lg-none ms-auto me-3 me-sm-4">
+                    <div class="nav-toggle d-lg-none ms-auto me-3">
                         <span></span>
                         <span></span>
                         <span></span>
                     </div>
+                    @php( $local = session()->has('landing_local')?session('landing_local'):'en')
+                    @php($lang = \App\Models\BusinessSetting::where('key', 'system_language')->first())
+                    @if ($lang)  
+                        <div class="dropdown--btn-hover position-relative">
+                            <a class="dropdown--btn border-0 px-3 header--btn text-capitalize d-flex" href="javascript:void(0)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20">
+                                    <path d="M16.555 5.412a8.028 8.028 0 00-3.503-2.81 14.899 14.899 0 011.663 4.472 8.547 8.547 0 001.84-1.662zM13.326 7.825a13.43 13.43 0 00-2.413-5.773 8.087 8.087 0 00-1.826 0 13.43 13.43 0 00-2.413 5.773A8.473 8.473 0 0010 8.5c1.18 0 2.304-.24 3.326-.675zM6.514 9.376A9.98 9.98 0 0010 10c1.226 0 2.4-.22 3.486-.624a13.54 13.54 0 01-.351 3.759A13.54 13.54 0 0110 13.5c-1.079 0-2.128-.127-3.134-.366a13.538 13.538 0 01-.352-3.758zM5.285 7.074a14.9 14.9 0 011.663-4.471 8.028 8.028 0 00-3.503 2.81c.529.638 1.149 1.199 1.84 1.66zM17.334 6.798a7.973 7.973 0 01.614 4.115 13.47 13.47 0 01-3.178 1.72 15.093 15.093 0 00.174-3.939 10.043 10.043 0 002.39-1.896zM2.666 6.798a10.042 10.042 0 002.39 1.896 15.196 15.196 0 00.174 3.94 13.472 13.472 0 01-3.178-1.72 7.973 7.973 0 01.615-4.115zM10 15c.898 0 1.778-.079 2.633-.23a13.473 13.473 0 01-1.72 3.178 8.099 8.099 0 01-1.826 0 13.47 13.47 0 01-1.72-3.178c.855.151 1.735.23 2.633.23zM14.357 14.357a14.912 14.912 0 01-1.305 3.04 8.027 8.027 0 004.345-4.345c-.953.542-1.971.981-3.04 1.305zM6.948 17.397a8.027 8.027 0 01-4.345-4.345c.953.542 1.971.981 3.04 1.305a14.912 14.912 0 001.305 3.04z" />
+                                </svg>
+                                @foreach(json_decode($lang['value'],true) as $data)
+                                @if($data['code']==$local)
+                                            <span class="me-1">{{$data['code']}}</span>
+                                        @endif
+                                    @endforeach
+                            </a>
+                            <ul class="dropdown-list py-0" style="min-width:120px; top:100%">
+                                @foreach(json_decode($lang['value'],true) as $key =>$data)
+                                @if($data['status']==1)
+                                    <li class="py-0">
+                                        <a class="" href="{{route('lang',[$data['code']])}}">
+                                            {{$data['code']}}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider my-0">
+                                    </li>
+                                @endif
+                            @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     @if ($toggle_dm_registration || $toggle_store_registration)
                     <div class="dropdown--btn-hover position-relative">
-                        <a class="dropdown--btn header--btn text-capitalize" href="javascript:void(0)">
+                        <a class="dropdown--btn header--btn text-capitalize d-flex align-items-center" href="javascript:void(0)">
                             <span class="me-1">Join us</span>
                             <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -301,6 +341,146 @@
 
 
     @stack('script_2')
+
+
+    <script>
+
+        $(".main-category-slider").owlCarousel({
+            loop: true,
+            nav: false,
+            dots: true,
+            items: 1,
+            margin: 12,
+            autoplay: true,
+            rtl: {{ $landing_site_direction === 'rtl'?'true':'false' }},
+        });
+        $(".testimonial-slider").owlCarousel({
+            loop: true,
+            margin: 22,
+            responsiveClass: true,
+            nav: false,
+            dots: false,
+            loop: true,
+            autoplay: true,
+            autoplayTimeout: 2000,
+            autoplayHoverPause: true,
+            items: 1,
+            rtl: {{ $landing_site_direction === 'rtl'?'true':'false' }},
+            responsive: {
+                768: {
+                    items: 2,
+                },
+                992: {
+                    items: 3,
+                },
+                1200: {
+                    items: 3,
+                },
+            },
+        });
+        $(".owl-prev").html('<i class="fas fa-angle-left">');
+        $(".owl-next").html('<i class="fas fa-angle-right">');
+        var sync1 = $("#sync1");
+        var sync2 = $("#sync2");
+        var thumbnailItemClass = ".owl-item";
+        var slides = sync1
+            .owlCarousel({
+                startPosition: 12,
+                items: 1,
+                loop: false,
+                margin: 0,
+                mouseDrag: true,
+                touchDrag: true,
+                pullDrag: false,
+                scrollPerPage: true,
+                autoplayHoverPause: false,
+                nav: false,
+                dots: false,
+                // center: true,
+                rtl: {{ $landing_site_direction === 'rtl'?'true':'false' }},
+            })
+            .on("changed.owl.carousel", syncPosition);
+
+        function syncPosition(el) {
+            $owl_slider = $(this).data("owl.carousel");
+            var loop = $owl_slider.options.loop;
+
+            if (loop) {
+                var count = el.item.count - 1;
+                var current = Math.round(
+                    el.item.index - el.item.count / 2 - 0.5
+                );
+                if (current < 0) {
+                    current = count;
+                }
+                if (current > count) {
+                    current = 0;
+                }
+            } else {
+                var current = el.item.index;
+            }
+
+            var owl_thumbnail = sync2.data("owl.carousel");
+            var itemClass = "." + owl_thumbnail.options.itemClass;
+
+            var thumbnailCurrentItem = sync2
+                .find(itemClass)
+                .removeClass("synced")
+                .eq(current);
+            thumbnailCurrentItem.addClass("synced");
+
+            if (!thumbnailCurrentItem.hasClass("active")) {
+                var duration = 500;
+                sync2.trigger("to.owl.carousel", [current, duration, true]);
+            }
+        }
+        var thumbs = sync2
+            .owlCarousel({
+                startPosition: 12,
+                items: 2,
+                loop: false,
+                margin: 10,
+                autoplay: false,
+                nav: false,
+                dots: false,
+                // center: true,
+                mouseDrag: true,
+                touchDrag: true,
+                rtl: {{ $landing_site_direction === 'rtl'?'true':'false' }},
+                responsive: {
+                    400: {
+                        items: 3,
+                    },
+                    768: {
+                        items: 5,
+                    },
+                    1200: {
+                        items: 6,
+                    },
+                },
+                onInitialized: function (e) {
+                    var thumbnailCurrentItem = $(e.target)
+                        .find(thumbnailItemClass)
+                        .eq(this._current);
+                    thumbnailCurrentItem.addClass("synced");
+                },
+            })
+            .on("click", thumbnailItemClass, function (e) {
+                e.preventDefault();
+                var duration = 500;
+                var itemIndex = $(e.target).parents(thumbnailItemClass).index();
+                sync1.trigger("to.owl.carousel", [itemIndex, duration, true]);
+            })
+            .on("changed.owl.carousel", function (el) {
+                var number = el.item.index;
+                $owl_slider = sync1.data("owl.carousel");
+                $owl_slider.to(number, 500, true);
+            });
+        sync1.owlCarousel();
+
+    </script>
+
+
 </body>
 
 </html>

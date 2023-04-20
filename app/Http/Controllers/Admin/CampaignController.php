@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Campaign;
 use App\Models\ItemCampaign;
 use App\Models\Store;
+use Illuminate\Support\Str;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -442,7 +443,8 @@ class CampaignController extends Controller
                 array_push($food_variations, $temp_variation);
             }
         }
-
+        $slug = Str::slug($request->title[array_search('en', $request->lang)]);
+        $campaign->slug = $campaign->slug? $campaign->slug :"{$slug}{$campaign->id}";
         $campaign->title = $request->title[array_search('en', $request->lang)];
         $campaign->description = $request->description[array_search('en', $request->lang)];
         $campaign->image = $request->has('image') ? Helpers::update('campaign/', $campaign->image, 'png', $request->file('image')) : $campaign->image;
@@ -516,7 +518,11 @@ class CampaignController extends Controller
     {   
         if($type=='basic')
         {
-            $campaign = Campaign::findOrFail($campaign);
+            $campaign = Campaign::Running()->where('id',$campaign)->first();
+            if(!$campaign){
+                Toastr::error(translate('messages.campaign_is_expired'));
+                return back();
+            }
             $stores = $campaign->stores()->paginate(config('default_pagination'));
             $store_ids = []; 
             foreach($campaign->stores as $store)
@@ -578,7 +584,16 @@ class CampaignController extends Controller
     }
     public function addstore(Request $request, Campaign $campaign)
     {
-        $campaign->stores()->attach($request->store_id);
+        $campaign->stores()->attach($request->store_id,['campaign_status' => 'confirmed']);
+        $campaign->save();
+        Toastr::success(translate('messages.store_added_to_campaign'));
+        return back();
+    }
+
+    public function store_confirmation($campaign,$store_id,$status)
+    {
+        $campaign = Campaign::findOrFail($campaign);
+        $campaign->stores()->updateExistingPivot($store_id,['campaign_status' => $status]);
         $campaign->save();
         Toastr::success(translate('messages.store_added_to_campaign'));
         return back();

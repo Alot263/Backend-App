@@ -349,7 +349,8 @@
                 </tr>
                 <tr>
                     <td>{{translate('messages.store_discount')}}</td>
-                    <td>{{ \App\CentralLogics\Helpers::format_currency($order_transaction->order->store_discount_amount) }}</td>
+                    <td>{{ \App\CentralLogics\Helpers::format_currency($order_transaction->discount_amount_by_store) }}</td>
+                    {{-- <td>{{ \App\CentralLogics\Helpers::format_currency($order_transaction->order->store_discount_amount) }}</td> --}}
                 </tr>
                 <tr>
                     <td>{{translate('messages.admin_commission')}}</td>

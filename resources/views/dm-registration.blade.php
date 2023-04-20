@@ -94,6 +94,20 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-sm-6 col-12">
+                                    <div class="form-group">
+                                      <label class="input-label"
+                                                for="exampleFormControlInput1">{{ translate('messages.Vehicle') }}</label>
+                                            <select name="vehicle_id" class="form-control js-select2-custom h--45px" required
+                                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.vehicle') }}">
+                                                <option value="" readonly="true" hidden="true">{{ translate('messages.select') }} {{ translate('messages.vehicle') }}</option>
+                                                @foreach (\App\Models\DMVehicle::where('status',1)->get(['id','type']) as $v)
+                                                            <option value="{{ $v->id }}" >{{ $v->type }}
+                                                            </option>
+                                                @endforeach
+                                            </select>
+                                    </div>
+                                </div>
                                 <div class="col-sm-6">
                                     <div class="form-group mb-3">
                                         <label class="input-label"

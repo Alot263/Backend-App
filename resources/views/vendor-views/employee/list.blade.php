@@ -119,6 +119,7 @@
                             <td>{{$e['phone']}}</td>
                             <td>{{$e->role?$e->role['name']:translate('messages.role_deleted')}}</td>
                             <td>
+                                @if (auth('vendor_employee')->id()  != $e['id'])
                                 <div class="btn--container justify-content-center">
                                     <a class="btn action-btn btn--primary btn-outline-primary"
                                         href="{{route('vendor.employee.edit',[$e['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.Employee')}}"><i class="tio-edit"></i>
@@ -131,6 +132,7 @@
                                         method="post" id="employee-{{$e['id']}}">
                                     @csrf @method('delete')
                                 </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
+    Route::get('zone/get-coordinates/{id}', 'ZoneController@get_coordinates')->name('zone.get-coordinates');
     /*authentication*/
     Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
         Route::get('login', 'LoginController@login')->name('login');
@@ -139,6 +140,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::delete('item/delete/{campaign}', 'CampaignController@delete_item')->name('delete-item');
             Route::post('basic-search', 'CampaignController@searchBasic')->name('searchBasic');
             Route::post('item-search', 'CampaignController@searchItem')->name('searchItem');
+            Route::get('store-confirmation/{campaign}/{id}/{status}', 'CampaignController@store_confirmation')->name('store_confirmation');
         });
 
         Route::group(['prefix' => 'coupon', 'as' => 'coupon.', 'middleware' => ['module:coupon']], function () {
@@ -350,6 +352,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('business-setup/{tab?}', 'BusinessSettingsController@business_index')->name('business-setup');
             Route::get('config-setup', 'BusinessSettingsController@config_setup')->name('config-setup');
             Route::post('config-update', 'BusinessSettingsController@config_update')->name('config-update');
+            Route::get('react-setup', 'BusinessSettingsController@react_setup')->name('react-setup');
+            Route::post('react-update', 'BusinessSettingsController@react_update')->name('react-update');
             Route::post('update-setup', 'BusinessSettingsController@business_setup')->name('update-setup');
             Route::post('update-dm', 'BusinessSettingsController@update_dm')->name('update-dm');
             Route::get('app-settings', 'BusinessSettingsController@app_settings')->name('app-settings');
@@ -438,6 +442,13 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 Route::get('delete/{lang}', 'LanguageController@delete')->name('delete');
                 Route::any('auto-translate/{lang}', 'LanguageController@auto_translate')->name('auto-translate');
             });
+
+            Route::get('order-cancel-reasons/status/{id}/{status}', 'OrderCancelReasonController@status')->name('order-cancel-reasons.status');
+            Route::get('order-cancel-reasons', 'OrderCancelReasonController@index')->name('order-cancel-reasons.index');
+            Route::post('order-cancel-reasons/store', 'OrderCancelReasonController@store')->name('order-cancel-reasons.store');
+            Route::put('order-cancel-reasons/update', 'OrderCancelReasonController@update')->name('order-cancel-reasons.update');
+            Route::delete('order-cancel-reasons/destroy', 'OrderCancelReasonController@destroy')->name('order-cancel-reasons.destroy');
+    
         });
         Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.'], function () {
             //module
@@ -541,6 +552,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                 Route::get('invoice/{id}', 'POSController@generate_invoice');
                 Route::post('customer-store', 'POSController@customer_store')->name('customer-store');
                 Route::post('add-delivery-address', 'POSController@addDeliveryInfo')->name('add-delivery-address');
+                Route::get('data', 'POSController@extra_charge')->name('extra_charge');
             });
         });
 
@@ -604,7 +616,9 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('view', 'BusinessSettingsController@viewSocialLogin')->name('view');
             Route::post('update/{service}', 'BusinessSettingsController@updateSocialLogin')->name('update');
         });
-        Route::get('zone/get-coordinates/{id}', 'ZoneController@get_coordinates')->name('zone.get-coordinates');
+        Route::group(['prefix' => 'apple-login', 'as' => 'apple-login.'], function () {
+            Route::post('update/{service}', 'BusinessSettingsController@updateAppleLogin')->name('update');
+        });
         Route::get('store/report', function () {
             return view('store_report');
         });
@@ -652,6 +666,18 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                     Route::get('message/{conversation_id}/{user_id}', 'DeliveryManController@conversation_view')->name('message-view');
                     Route::get('{user_id}/message/list', 'DeliveryManController@conversation_list')->name('message-list');
                     Route::get('messages/details', 'DeliveryManController@get_conversation_list')->name('message-list-search');
+
+                    Route::group(['prefix' => 'vehicle', 'as' => 'vehicle.'], function () {
+                        Route::get('list', 'DmVehicleController@list')->name('list');
+                        Route::get('add', 'DmVehicleController@create')->name('create');
+                        Route::get('status/{vehicle}/{status}', 'DmVehicleController@status')->name('status');
+                        Route::get('edit/{vehicle}', 'DmVehicleController@edit')->name('edit');
+                        Route::post('store', 'DmVehicleController@store')->name('store');
+                        Route::post('update/{vehicle}', 'DmVehicleController@update')->name('update');
+                        Route::delete('delete', 'DmVehicleController@destroy')->name('delete');
+                        Route::get('view/{vehicle}', 'DmVehicleController@view')->name('view');
+            
+                    });
                 });
             });
             // Subscribed customer Routes

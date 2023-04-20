@@ -151,7 +151,7 @@ class SslCommerzPaymentController extends Controller
         if ($order_detials->callback != null) {
             return redirect($order_detials->callback . '&status=cancel');
         }
-        return \redirect()->route('payment-cancel');
+        return \redirect()->route('payment-fail');
     }
 
     public function ipn(Request $request)

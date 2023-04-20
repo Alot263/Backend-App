@@ -10,6 +10,7 @@ use Gregwar\Captcha\CaptchaBuilder;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
 
 class DeliveryManController extends Controller
 {
@@ -68,11 +69,13 @@ class DeliveryManController extends Controller
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
             'zone_id' => 'required',
+            'vehicle_id' => 'required',
             'earning' => 'required',
             'password'=>'required|min:6',
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'zone_id.required' => translate('messages.select_a_zone'),
+            'vehicle_id.required' => translate('messages.select_a_vehicle'),
             'earning.required' => translate('messages.select_dm_type')
         ]);
 
@@ -100,6 +103,7 @@ class DeliveryManController extends Controller
         $dm->phone = $request->phone;
         $dm->identity_number = $request->identity_number;
         $dm->identity_type = $request->identity_type;
+        $dm->vehicle_id = $request->vehicle_id;
         $dm->zone_id = $request->zone_id;
         $dm->identity_image = $identity_image;
         $dm->image = $image_name;
@@ -108,7 +112,13 @@ class DeliveryManController extends Controller
         $dm->password = bcrypt($request->password);
         $dm->application_status= 'pending';
         $dm->save();
-
+        try{
+            if(config('mail.status')){
+                Mail::to($request->email)->send(new \App\Mail\SelfRegistration('pending', $dm->f_name.' '.$dm->l_name));
+            }
+        }catch(\Exception $ex){
+            info($ex);
+        }
         Toastr::success(translate('messages.application_placed_successfully'));
         return back();
     }

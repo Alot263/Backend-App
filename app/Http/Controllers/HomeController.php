@@ -119,4 +119,21 @@ class HomeController extends Controller
         }
         return $config;
     }
+
+    public function lang($local)
+    {
+        $direction = BusinessSetting::where('key', 'site_direction')->first();
+        $direction = $direction->value ?? 'ltr';
+        $language = BusinessSetting::where('key', 'system_language')->first();
+        foreach (json_decode($language['value'], true) as $key => $data) {
+            if ($data['code'] == $local) {
+                $direction = isset($data['direction']) ? $data['direction'] : 'ltr';
+            }
+        }
+        session()->forget('landing_language_settings');
+        Helpers::landing_language_load();
+        session()->put('landing_site_direction', $direction);
+        session()->put('landing_local', $local);
+        return redirect()->back();
+    }
 }

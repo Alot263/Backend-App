@@ -57,12 +57,12 @@
                                                    id="value-{{$count}}"
                                                    value="{{$value}}">
                                         </td>
-                                        {{-- <td class="__w-100px">
+                                        <td class="__w-100px">
                                             <button type="button"
                                                     onclick="auto_translate('{{$key}}',{{$count}})"
                                                     class="btn btn-ghost-success btn-block"><i class="tio-globe"></i>
                                             </button>
-                                        </td> --}}
+                                        </td>
                                         <td class="__w-100px">
                                             <button type="button"
                                                     onclick="update_lang('{{$key}}',$('#value-{{$count}}').val())"

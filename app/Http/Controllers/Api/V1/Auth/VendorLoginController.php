@@ -107,7 +107,7 @@ class VendorLoginController extends Controller
         $status = BusinessSetting::where('key', 'toggle_store_registration')->first();
         if(!isset($status) || $status->value == '0')
         {
-            return response()->json(['errors' => Helpers::error_formater('self-registration', translate('messages.store_self_registration_disabled'))]);
+            return response()->json(['errors' => Helpers::error_processor('self-registration', translate('messages.store_self_registration_disabled'))]);
         }
 
         $validator = Validator::make($request->all(), [

@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Vendor;
 use App\Scopes\ZoneScope;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 class Store extends Model
 {
@@ -175,7 +176,7 @@ class Store extends Model
     protected static function booted()
     {
         static::addGlobalScope(new ZoneScope);
-    }
+    }   
 
     public function scopeType($query, $type)
     {
@@ -191,4 +192,32 @@ class Store extends Model
         return $query;
 
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::created(function ($store) {
+            $store->slug = $store->generateSlug($store->name);
+            $store->save();
+        });
+    }
+    
+    private function generateSlug($name)
+    {
+        $slug = Str::slug($name);
+        if ($max_slug = static::where('slug', 'like',"{$slug}%")->latest('id')->value('slug')) {
+            
+            if($max_slug == $slug) return "{$slug}-2";
+
+            $max_slug = explode('-',$max_slug);
+            $count = array_pop($max_slug);
+            if (isset($count) && is_numeric($count)) {
+                $max_slug[]= ++$count;
+                return implode('-', $max_slug);
+            }
+        }
+        return $slug;
+    } 
+
+    
 }

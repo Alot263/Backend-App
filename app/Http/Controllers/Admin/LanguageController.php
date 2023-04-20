@@ -29,7 +29,6 @@ class LanguageController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         // $request->validate([
         //     'name' => 'required',
         // ], [
@@ -328,9 +327,10 @@ class LanguageController extends Controller
         session()->forget('language_settings');
         Helpers::language_load();
         session()->put('local', $local);
-        DB::table('business_settings')->updateOrInsert(['key' => 'site_direction'], [
-            'value' => $direction
-        ]);
+        session()->put('site_direction', $direction);
+        // DB::table('business_settings')->updateOrInsert(['key' => 'site_direction'], [
+        //     'value' => $direction
+        // ]);
         return redirect()->back();
     }
 }

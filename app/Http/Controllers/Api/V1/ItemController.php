@@ -159,9 +159,18 @@ class ItemController extends Controller
 
     public function get_product($id)
     {
-
         try {
-            $item = ProductLogic::get_product($id);
+            $item = Item::withCount('whislists')->active()
+            ->when(config('module.current_module_data'), function($query){
+                $query->module(config('module.current_module_data')['id']);
+            })
+            ->when(is_numeric($id),function ($qurey) use($id){
+                $qurey-> where('id', $id);
+            })
+            ->when(!is_numeric($id),function ($qurey) use($id){
+                $qurey-> where('slug', $id);
+            })
+            ->first();
             $item = Helpers::product_data_formatting($item, false, false, app()->getLocale());
             return response()->json($item, 200);
         } catch (\Exception $e) {
@@ -189,6 +198,30 @@ class ItemController extends Controller
         return response()->json([
             'errors' => ['code' => 'product-001', 'message' => translate('messages.not_found')]
         ], 404);
+    }
+
+    public function get_recommended(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [];
+            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'store_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $type = $request->query('type', 'all');
+
+        $zone_id= $request->header('zoneId');
+        $items = ProductLogic::recommended_items($zone_id, $request->store_id,$request['limit'], $request['offset'], $type);
+        $items['items'] = Helpers::product_data_formatting($items['items'], true, false, app()->getLocale());
+        return response()->json($items, 200);
     }
 
     public function get_set_menus()

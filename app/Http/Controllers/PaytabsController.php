@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CentralLogics\Helpers;
+use App\Models\BusinessSetting;
 use App\Models\Order;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class PaytabsController extends Controller
         $order = Order::with(['details','customer'])->where(['id' => session('order_id'), 'user_id'=>session('customer_id')])->first();
 
         $value = $order->order_amount;
-
+        $currency=BusinessSetting::where('key', 'currency')->first();
         $user = $order->customer;
 
         $plugin = new Paytabs();
@@ -78,8 +79,8 @@ class PaytabsController extends Controller
         $data = [
             "tran_type" => "sale",
             "tran_class" => "ecom",
-            "cart_id" => $order->id,
-            "cart_currency" => "EGP",
+            "cart_id" => 'pay-'.$order->id,
+            "cart_currency" => isset($currency) ? $currency->value : "EGP",
             "cart_amount" => round($value,2),
             "cart_description" => "products",
             "paypage_lang" => "en",

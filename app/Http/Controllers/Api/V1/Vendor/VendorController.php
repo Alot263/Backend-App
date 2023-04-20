@@ -191,10 +191,42 @@ class VendorController extends Controller
         return response()->json($data, 200);
     }
 
+    public function get_canceled_orders(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'limit' => 'required',
+            'offset' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $vendor = $request['vendor'];
+
+        $paginator = Order::whereHas('store.vendor', function($query) use($vendor){
+            $query->where('id', $vendor->id);
+        })
+        ->with('customer')
+        ->where('order_status', 'canceled')
+        ->Notpos()
+        ->latest()
+        ->paginate($request['limit'], ['*'], 'page', $request['offset']);
+        $orders= Helpers::order_data_formatting($paginator->items(), true);
+        $data = [
+            'total_size' => $paginator->total(),
+            'limit' => $request['limit'],
+            'offset' => $request['offset'],
+            'orders' => $orders
+        ];
+        return response()->json($data, 200);
+    }
+
     public function update_order_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',
+            'reason' =>'required_if:status,canceled',
             'status' => 'required|in:confirmed,processing,handover,delivered,canceled'
         ]);
 
@@ -302,6 +334,8 @@ class VendorController extends Controller
                 $dm->current_orders = $dm->current_orders>1?$dm->current_orders-1:0;
                 $dm->save();
             }
+            $order->cancellation_reason=$request->reason;
+            $order->canceled_by='store';
         }
 
         $order->order_status = $request['status'];
@@ -450,6 +484,7 @@ class VendorController extends Controller
 
         foreach ($campaigns as $item) {
             $store_ids = count($item->stores)?$item->stores->pluck('id')->toArray():[];
+            $store_joining_status = count($item->stores)?$item->stores->pluck('pivot')->toArray():[];
             if($item->start_date)
             {
                 $item['available_date_starts']=$item->start_date->format('Y-m-d');
@@ -465,6 +500,14 @@ class VendorController extends Controller
                 $translate = array_column($item['translations']->toArray(), 'value', 'key');
                 $item['title'] = $translate['title'];
                 $item['description'] = $translate['description'];
+            }
+
+            $item['vendor_status'] = null;
+            foreach($store_joining_status as $status){
+                if($status['store_id'] == $store_id){
+                    $item['vendor_status'] =  $status['campaign_status'];
+                }
+
             }
 
             $item['is_joined'] = in_array($store_id, $store_ids)?true:false;

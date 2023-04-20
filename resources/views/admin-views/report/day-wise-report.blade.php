@@ -165,7 +165,7 @@
                                     ->when(request('module_id'), function ($query) {
                                         return $query->module(request('module_id'));
                                     })
-                                    ->whereIn('order_status', ['delivered','refund_requested'])
+                                    ->whereIn('order_status', ['delivered','refund_requested','refund_request_canceled'])
                                     ->when(isset($store), function ($query) use ($store) {
                                         return $query->where('store_id', $store->id);
                                     })
@@ -301,7 +301,8 @@
                                         ]);
                                     })
                                     ->Notpos()
-                                    ->sum(DB::raw('order_amount - original_delivery_charge'));
+                                    // ->sum(DB::raw('order_amount - original_delivery_charge'));
+                                    ->sum(DB::raw('order_amount - delivery_charge - dm_tips'));
                             @endphp
                             <a class="__card-3 h-100" href="#">
                                 <img src="{{ asset('/public/assets/admin/img/report/new/trx3.png') }}" class="icon"
@@ -508,7 +509,7 @@
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_charge) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order_amount) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->admin_expense) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order->store_discount_amount) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->discount_amount_by_store) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission + $ot->admin_expense) - $ot->delivery_fee_comission) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_fee_comission) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission)) }}</td>

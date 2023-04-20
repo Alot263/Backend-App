@@ -181,6 +181,7 @@
                             <th class="border-0 w-20p">{{translate('messages.name')}}</th>
                             <th class="border-0 w-20p">{{translate('messages.category')}}</th>
                             <th class="border-0">{{translate('messages.price')}}</th>
+                            <th class="border-0 text-center">{{translate('messages.Recommended')}}</th>
                             <th class="border-0 text-center">{{translate('messages.status')}}</th>
                             <th class="border-0 text-center">{{translate('messages.action')}}</th>
                         </tr>
@@ -205,6 +206,18 @@
                             <td>
                                 <div class="mw--85px">
                                     {{\App\CentralLogics\Helpers::format_currency($item['price'])}}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex">
+                                    <div class="mx-auto">
+                                        <label class="toggle-switch toggle-switch-sm mr-2"  data-toggle="tooltip" data-placement="top" title="{{ translate('messages.Recommend_to_customers') }}" for="recCheckbox{{$item->id}}">
+                                            <input type="checkbox" onclick="location.href='{{route('vendor.item.recommended',[$item['id'],$item->recommended?0:1])}}'"class="toggle-switch-input" id="recCheckbox{{$item->id}}" {{$item->recommended?'checked':''}}>
+                                            <span class="toggle-switch-label">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
                             </td>
                             <td>

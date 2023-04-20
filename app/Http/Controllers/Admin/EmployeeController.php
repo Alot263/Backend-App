@@ -60,12 +60,16 @@ class EmployeeController extends Controller
         $em = Admin::zone()->with(['role'])->where('role_id', '!=','1')->latest()->paginate(config('default_pagination'));
         return view('admin-views.employee.list', compact('em'));
     }
-
+    
     public function edit($id)
     {
         $e = Admin::zone()->where('role_id', '!=','1')->where(['id' => $id])->first();
         $rls = AdminRole::whereNotIn('id', [1])->get();
-        return view('admin-views.employee.edit', compact('rls', 'e'));
+        if (auth('admin')->id()  != $e['id']){
+            return view('admin-views.employee.edit', compact('rls', 'e'));
+        }
+        Toastr::warning(translate('messages.access_denied'));
+        return back();
     }
 
     public function update(Request $request, $id)

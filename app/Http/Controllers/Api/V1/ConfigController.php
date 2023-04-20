@@ -6,6 +6,7 @@ use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessSetting;
 use App\Models\Currency;
+use App\Models\DMVehicle;
 use App\Models\Module;
 use App\Models\SocialMedia;
 use App\Models\Zone;
@@ -27,7 +28,7 @@ class ConfigController extends Controller
 
     public function configuration()
     {
-        $key = ['currency_code','cash_on_delivery','digital_payment','default_location','free_delivery_over','business_name','logo','address','phone','email_address','country','currency_symbol_position','app_minimum_version_android','app_url_android','app_minimum_version_ios','app_url_ios','customer_verification','schedule_order','order_delivery_verification','per_km_shipping_charge','minimum_shipping_charge','show_dm_earning','canceled_by_deliveryman','canceled_by_store','timeformat','toggle_veg_non_veg','toggle_dm_registration','toggle_store_registration','schedule_order_slot_duration','parcel_per_km_shipping_charge','parcel_minimum_shipping_charge','web_app_landing_page_settings','footer_text','landing_page_links','loyalty_point_exchange_rate', 'loyalty_point_item_purchase_point', 'loyalty_point_status', 'loyalty_point_minimum_point', 'wallet_status', 'dm_tips_status', 'ref_earning_status','ref_earning_exchange_rate','refund_active_status','refund','cancelation','shipping_policy','prescription_order_status','tax_included','icon'];
+        $key = ['currency_code','cash_on_delivery','digital_payment','default_location','free_delivery_over','business_name','logo','address','phone','email_address','country','currency_symbol_position','app_minimum_version_android','app_url_android','app_minimum_version_ios','app_url_ios','app_url_android_store','app_minimum_version_ios_store','app_url_ios_store','app_minimum_version_ios_deliveryman','app_url_ios_deliveryman','app_minimum_version_android_deliveryman','app_minimum_version_android_store', 'app_url_android_deliveryman', 'customer_verification','schedule_order','order_delivery_verification','per_km_shipping_charge','minimum_shipping_charge','show_dm_earning','canceled_by_deliveryman','canceled_by_store','timeformat','toggle_veg_non_veg','toggle_dm_registration','toggle_store_registration','schedule_order_slot_duration','parcel_per_km_shipping_charge','parcel_minimum_shipping_charge','web_app_landing_page_settings','footer_text','landing_page_links','loyalty_point_exchange_rate', 'loyalty_point_item_purchase_point', 'loyalty_point_status', 'loyalty_point_minimum_point', 'wallet_status', 'dm_tips_status', 'ref_earning_status','ref_earning_exchange_rate','refund_active_status','refund','cancelation','shipping_policy','prescription_order_status','tax_included','icon'];
 
         $settings =  array_column(BusinessSetting::whereIn('key',$key)->get()->toArray(), 'value', 'key');
 
@@ -58,6 +59,19 @@ class ConfigController extends Controller
             ];
             array_push($social_login, $config);
         }
+        $apple_login = [];
+        $apples = Helpers::get_business_settings('apple_login');
+        if(isset($apples)){
+            foreach (Helpers::get_business_settings('apple_login') as $apple) {
+                $config = [
+                    'login_medium' => $apple['login_medium'],
+                    'status' => (boolean)$apple['status'],
+                    'client_id' => $apple['client_id']
+                ];
+                array_push($apple_login, $config);
+            }
+        }
+
         return response()->json([
             'business_name' => $settings['business_name'],
             // 'business_open_time' => $settings['business_open_time'],
@@ -87,15 +101,25 @@ class ConfigController extends Controller
                 'module_image_url' => asset('storage/app/public/module'),
                 'parcel_category_image_url' => asset('storage/app/public/parcel_category'),
                 'landing_page_image_url' => asset('public/assets/landing/image'),
+                'react_landing_page_images' => asset('storage/app/public/react_landing') ,
+                'react_landing_page_feature_images' => asset('storage/app/public/react_landing/feature') ,
             ],
             'country' => $settings['country'],
             'default_location'=> [ 'lat'=> $default_location?$default_location['lat']:'23.757989', 'lng'=> $default_location?$default_location['lng']:'90.360587' ],
             'currency_symbol' => $currency_symbol,
             'currency_symbol_direction' => $settings['currency_symbol_position'],
-            'app_minimum_version_android' => (integer)$settings['app_minimum_version_android'],
+            'app_minimum_version_android' => (float)$settings['app_minimum_version_android'],
             'app_url_android' => $settings['app_url_android'],
-            'app_minimum_version_ios' => (integer)$settings['app_minimum_version_ios'],
+            'app_minimum_version_ios' => (float)$settings['app_minimum_version_ios'],
             'app_url_ios' => $settings['app_url_ios'],
+            'app_minimum_version_android_store' => (float)(isset($settings['app_minimum_version_android_store']) ? $settings['app_minimum_version_android_store'] : 0),
+            'app_url_android_store' => (isset($settings['app_url_android_store']) ? $settings['app_url_android_store'] : null),
+            'app_minimum_version_ios_store' => (float)(isset($settings['app_minimum_version_ios_store']) ? $settings['app_minimum_version_ios_store'] : 0),
+            'app_url_ios_store' => (isset($settings['app_url_ios_store']) ? $settings['app_url_ios_store'] : null),
+            'app_minimum_version_android_deliveryman' => (float)(isset($settings['app_minimum_version_android_deliveryman']) ? $settings['app_minimum_version_android_deliveryman'] : 0),
+            'app_url_android_deliveryman' => (isset($settings['app_url_android_deliveryman']) ? $settings['app_url_android_deliveryman'] : null),
+            'app_minimum_version_ios_deliveryman' => (float)(isset($settings['app_minimum_version_ios_deliveryman']) ? $settings['app_minimum_version_ios_deliveryman'] : 0),
+            'app_url_ios_deliveryman' => (isset($settings['app_url_ios_deliveryman']) ? $settings['app_url_ios_deliveryman'] : null),
             'customer_verification' => (boolean)$settings['customer_verification'],
             'prescription_order_status' => isset($settings['prescription_order_status'])?(boolean)$settings['prescription_order_status']:false,
             'schedule_order' => (boolean)$settings['schedule_order'],
@@ -114,6 +138,7 @@ class ConfigController extends Controller
             'timeformat' => (string)$settings['timeformat'],
             'language' => $lang_array,
             'social_login' => $social_login,
+            'apple_login' => $apple_login,
             'toggle_veg_non_veg' => (boolean)$settings['toggle_veg_non_veg'],
             'toggle_dm_registration' => (boolean)$settings['toggle_dm_registration'],
             'toggle_store_registration' => (boolean)$settings['toggle_store_registration'],
@@ -238,5 +263,53 @@ class ConfigController extends Controller
         }
         $response = Http::get('https://maps.googleapis.com/maps/api/geocode/json?latlng='.$request->lat.','.$request->lng.'&key='.$this->map_api_key);
         return $response->json();
+    }
+
+    public function landing_page(){
+        $key =['react_header_banner','banner_section_full','banner_section_half' ,'footer_logo','app_section_image',
+        'react_feature','app_download_button' ,'discount_banner','landing_page_links','delivery_service_section','hero_section','download_app_section','landing_page_text'];
+        $settings =  array_column(BusinessSetting::whereIn('key', $key)->get()->toArray(), 'value', 'key');
+        return  response()->json(
+            [
+                'react_header_banner'=>(isset($settings['react_header_banner']) )  ? $settings['react_header_banner'] : null ,
+                'app_section_image'=> (isset($settings['app_section_image'])) ? $settings['app_section_image']  : null,
+                'footer_logo'=> (isset($settings['footer_logo'])) ? $settings['footer_logo'] : null,
+                'banner_section_full'=> (isset($settings['banner_section_full']) )  ? json_decode($settings['banner_section_full'], true) : null ,
+                'banner_section_half'=>(isset($settings['banner_section_half']) )  ? json_decode($settings['banner_section_half'], true) : [],
+                'react_feature'=> (isset($settings['react_feature'])) ? json_decode($settings['react_feature'], true) : [],
+                'app_download_button'=> (isset($settings['app_download_button'])) ? json_decode($settings['app_download_button'], true) : [],
+                'discount_banner'=> (isset($settings['discount_banner'])) ? json_decode($settings['discount_banner'], true) : null,
+                'landing_page_links'=> (isset($settings['landing_page_links'])) ? json_decode($settings['landing_page_links'], true) : null,
+                'hero_section'=> (isset($settings['hero_section'])) ? json_decode($settings['hero_section'], true) : null,
+                'delivery_service_section'=> (isset($settings['delivery_service_section'])) ? json_decode($settings['delivery_service_section'], true) : null,
+                'download_app_section'=> (isset($settings['download_app_section'])) ? json_decode($settings['download_app_section'], true) : null,
+                'landing_page_text'=> (isset($settings['landing_page_text'])) ? json_decode($settings['landing_page_text'], true) : null,
+        ]);
+    }
+
+    public function extra_charge(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'distance' => 'required',
+        ]);
+        if ($validator->errors()->count() > 0) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $distance_data = $request->distance ?? 1;
+        $data=DMVehicle::active()->where(function($query)use($distance_data) {
+                $query->where('starting_coverage_area','<=' , $distance_data )->where('maximum_coverage_area','>=', $distance_data);
+            })
+            ->orWhere(function ($query) use ($distance_data) {
+                $query->where('starting_coverage_area', '>=', $distance_data);
+            })
+            ->orderBy('starting_coverage_area')->first();
+
+            $extra_charges = (float) (isset($data) ? $data->extra_charges  : 0);
+        return response()->json($extra_charges,200);
+    }
+
+    public function get_vehicles(Request $request){
+        $data = DMVehicle::active()->get(['id','type']);
+        return response()->json($data, 200);
     }
 }

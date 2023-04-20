@@ -149,7 +149,20 @@
             <!-- Body -->
             <div class="card-body">
                 <div class="row gy-3 align-items-center">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+
+                        <h2 class="title">{{ translate('Vehicle Information') }}</h2>
+                            @if (isset($dm->vehicle))
+                            <div>{{ translate('Vehicle_Type') }} : {{ $dm->vehicle->type}}</div>
+                            <div>{{ translate('Vehicle_Extra_Charges') }} : {{ $dm->vehicle->extra_charges}}</div>
+                            <div>{{ translate('Vehicle_minimum_coverage_area') }} : {{ $dm->vehicle->starting_coverage_area}}</div>
+                            <div>{{ translate('Vehicle_maximum_coverage_area') }} : {{ $dm->vehicle->maximum_coverage_area}}</div>
+                            @else
+                            <div>{{ translate('No_vehicle_data_found') }}</div>
+                            @endif
+
+                    </div>
+                    <div class="col-md-4">
                         <div class="d-flex align-items-center justify-content-center">
                             <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120"
                                  onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
@@ -243,7 +256,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <ul class="list-unstyled list-unstyled-py-2 mb-0 rating--review-right py-3">
 
                         @php($total=$dm->reviews->count())

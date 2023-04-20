@@ -25,6 +25,7 @@ class Order extends Model
         'store_id' => 'integer',
         'details_count' => 'integer',
         'module_id' => 'integer',
+        'dm_vehicle_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'original_delivery_charge'=>'float',
