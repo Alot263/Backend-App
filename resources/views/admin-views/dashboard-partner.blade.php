@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="row g-2" id="order_stats">
-                    <div class="col-sm-6 col-lg-4">
+                    <div class="col-sm-6 col-lg-6">
                         <div class="__dashboard-card-2">
                             <img src="{{asset('/public/assets/admin/img/dashboard/grocery/orders.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.orders') }}</h6>
@@ -68,7 +68,7 @@
                             <div class="subtxt">{{ $data['new_orders'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-4">
+                    <div class="col-sm-6 col-lg-6">
                         <div class="__dashboard-card-2">
                             <img src="{{asset('/public/assets/admin/img/dashboard/grocery/stores.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('Delivery Partners') }}</h6>
