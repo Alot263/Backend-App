@@ -2563,4 +2563,6 @@
   'delivery_company settings updated!' => 'Delivery company settings updated!',
   'edit_delivery_company' => 'Edit delivery company',
   'order_cancellation_reasons' => 'Order cancellation reasons',
+  'Delivery Partner' => 'Delivery Partner',
+  'Business Partner' => 'Business Partner',
 );
