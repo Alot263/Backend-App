@@ -2565,4 +2565,5 @@
   'order_cancellation_reasons' => 'Order cancellation reasons',
   'Delivery Partner' => 'Delivery Partner',
   'Business Partner' => 'Business Partner',
+  'Delivery Partners' => 'Delivery Partners',
 );
