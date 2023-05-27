@@ -60,15 +60,7 @@
                     </div>
                 </div>
                 <div class="row g-2" id="order_stats">
-                    <div class="col-sm-6 col-lg-3">
-                        <div class="__dashboard-card-2">
-                            <img src="{{asset('/public/assets/admin/img/dashboard/grocery/items.svg')}}" alt="dashboard/grocery">
-                            <h6 class="name">{{ translate('messages.items') }}</h6>
-                            <h3 class="count">{{ $data['total_items'] }}</h3>
-                            <div class="subtxt">{{ $data['new_items'] }} {{ translate('newly added') }}</div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="__dashboard-card-2">
                             <img src="{{asset('/public/assets/admin/img/dashboard/grocery/orders.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.orders') }}</h6>
@@ -76,7 +68,7 @@
                             <div class="subtxt">{{ $data['new_orders'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="__dashboard-card-2">
                             <img src="{{asset('/public/assets/admin/img/dashboard/grocery/stores.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('Grocery Stores') }}</h6>
@@ -84,7 +76,7 @@
                             <div class="subtxt">{{ $data['new_stores'] }} {{ translate('newly added') }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3">
+                    <div class="col-sm-6 col-lg-4">
                         <div class="__dashboard-card-2">
                             <img src="{{asset('/public/assets/admin/img/dashboard/grocery/customers.svg')}}" alt="dashboard/grocery">
                             <h6 class="name">{{ translate('messages.customers') }}</h6>
