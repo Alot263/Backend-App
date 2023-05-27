@@ -2311,6 +2311,7 @@
   'e-Cab' => 'E-Cab',
   'e-Shop' => 'E-Shop',
   'top selling stores' => 'Top selling stores',
+  'top delivery partners' => 'Top Delivery Partners',
   'order : ' => 'Order : ',
   'most rated stores' => 'Most rated stores',
   'top selling products' => 'Top selling products',

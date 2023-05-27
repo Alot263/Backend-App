@@ -9,6 +9,7 @@
   'account_transaction_removed' => 'Account transaction removed!',
   'access_denied' => 'Access Denied !',
   'access_token' => 'Access Token',
+  'top delivery partners' => 'Top Delivery Partners',
   'add' => 'Add',
   'add_new_item' => 'Add new item',
   'add_delivery_man' => 'Add Delivery Man',

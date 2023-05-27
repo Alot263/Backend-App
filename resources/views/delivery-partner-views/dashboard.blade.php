@@ -166,21 +166,7 @@
                 <!-- End Card -->
             </div>
 
-            <div class="col-lg-6 mt-3">
-                <!-- Card -->
-                <div class="card h-100" id="top-selling-items-view">
-                    @include('delivery-partner-views.partials._top-selling-items',['top_sell'=>$data['top_sell']])
-                </div>
-                <!-- End Card -->
-            </div>
 
-            <div class="col-lg-6 mt-3">
-                <!-- Card -->
-                <div class="card h-100" id="top-rated-items-view">
-                    @include('delivery-partner-views.partials._most-rated-items',['most_rated_items'=>$data['most_rated_items']])
-                </div>
-                <!-- End Card -->
-            </div>
 
 
         </div>

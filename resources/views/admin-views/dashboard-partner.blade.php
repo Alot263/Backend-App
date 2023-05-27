@@ -169,12 +169,12 @@
                         <div class="d-flex flex-wrap justify-content-between align-items-center __gap-12px">
                             <div class="__gross-amount" id="gross_sale">
                                 <h6>{{\App\CentralLogics\Helpers::format_currency(array_sum($total_sell))}}</h6>
-                                <span>{{ translate('messages.Gross Sale') }}</span>
+                                <span>{{ translate('messages.Gross Revenue') }}</span>
                             </div>
                             <div class="chart--label __chart-label p-0 move-left-100 ml-auto">
                                 <span class="indicator chart-bg-2"></span>
                                 <span class="info">
-                                    {{ translate('sale') }} ({{ date("Y") }})
+                                    {{ translate('revenue') }} ({{ date("Y") }})
                                 </span>
                             </div>
                             <select class="custom-select border-0 text-center w-auto ml-auto" name="commission_overview"
@@ -273,39 +273,24 @@
                 </div>
             </div>
 
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <!-- Card -->
                 <div class="card h-100" id="top-restaurants-view">
-                    @include('admin-views.partials._top-restaurants',['top_restaurants'=>$data['top_restaurants']])
+                    @include('admin-views.partials._top-partners',['top_restaurants'=>$data['top_restaurants']])
                 </div>
                 <!-- End Card -->
             </div>
 
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <!-- Card -->
                 <div class="card h-100" id="popular-restaurants-view">
-                    @include('admin-views.partials._popular-restaurants',['popular'=>$data['popular']])
+                    @include('admin-views.partials._popular-partners',['popular'=>$data['popular']])
                 </div>
                 <!-- End Card -->
             </div>
 
-            <div class="col-lg-4 col-md-6">
-                <!-- Card -->
-                <div class="card h-100" id="top-selling-foods-view">
-                    @include('admin-views.partials._top-selling-foods',['top_sell'=>$data['top_sell']])
-                </div>
-                <!-- End Card -->
-            </div>
 
-            <div class="col-lg-4 col-md-6">
-                <!-- Card -->
-                <div class="card h-100" id="top-rated-foods-view">
-                    @include('admin-views.partials._top-rated-foods',['top_rated_foods'=>$data['top_rated_foods']])
-                </div>
-                <!-- End Card -->
-            </div>
-
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <!-- Card -->
                 <div class="card h-100" id="top-deliveryman-view">
                     @include('admin-views.partials._top-deliveryman',['top_deliveryman'=>$data['top_deliveryman']])
@@ -313,7 +298,7 @@
                 <!-- End Card -->
             </div>
 
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-6 col-md-6">
                 <!-- Card -->
                 <div class="card h-100" id="top-customer-view">
                     @include('admin-views.partials._top-customer',['top_customers'=>$data['top_customers']])
