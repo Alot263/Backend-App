@@ -2,6 +2,7 @@
 
 namespace App\CentralLogics;
 
+use App\CentralLogics\StoreLogic;
 use App\Models\Zone;
 use App\Models\AddOn;
 use App\Models\Order;
@@ -11,7 +12,6 @@ use App\Models\Currency;
 use App\Models\DMReview;
 use Illuminate\Support\Carbon;
 use App\Models\BusinessSetting;
-use App\CentralLogics\StoreLogic;
 use App\Models\Expense;
 use App\Models\NotificationMessage;
 use App\Models\User;
@@ -448,6 +448,32 @@ class Helpers
         return $data;
     }
 
+    public static function delivery_company_data_formatting($data, $multi_data = false)
+    {
+        $storage = [];
+        if ($multi_data == true) {
+            foreach ($data as $item) {
+                $ratings = StoreLogic::calculate_store_rating($item['rating']);
+                unset($item['rating']);
+                $item['avg_rating'] = $ratings['rating'];
+                $item['rating_count'] = $ratings['total'];
+                unset($item['campaigns']);
+                unset($item['pivot']);
+                array_push($storage, $item);
+            }
+            $data = $storage;
+        } else {
+            $ratings = StoreLogic::calculate_store_rating($data['rating']);
+            unset($data['rating']);
+            $data['avg_rating'] = $ratings['rating'];
+            $data['rating_count'] = $ratings['total'];
+            unset($data['campaigns']);
+            unset($data['pivot']);
+        }
+
+        return $data;
+    }
+
     public static function wishlist_data_formatting($data, $multi_data = false)
     {
         $items = [];
@@ -625,7 +651,7 @@ class Helpers
         if(!request()->is('/api*')){
             $currency = session()->get('currency_code');
         }
-       
+
         return $currency;
     }
 
@@ -964,7 +990,7 @@ class Helpers
         return $lowest_price;
     }
 
-    public static function get_store_discount($store)
+    public static function get_store_discount($store): ?array
     {
         if ($store->discount) {
             if (date('Y-m-d', strtotime($store->discount->start_date)) <= now()->format('Y-m-d') && date('Y-m-d', strtotime($store->discount->end_date)) >= now()->format('Y-m-d') && date('H:i', strtotime($store->discount->start_time)) <= now()->format('H:i') && date('H:i', strtotime($store->discount->end_time)) >= now()->format('H:i')) {
@@ -977,7 +1003,19 @@ class Helpers
         }
         return null;
     }
-
+    public static function get_delivery_company_discount($delivery_company)
+    {
+        if ($delivery_company->discount) {
+            if (date('Y-m-d', strtotime($delivery_company->discount->start_date)) <= now()->format('Y-m-d') && date('Y-m-d', strtotime($delivery_company->discount->end_date)) >= now()->format('Y-m-d') && date('H:i', strtotime($delivery_company->discount->start_time)) <= now()->format('H:i') && date('H:i', strtotime($delivery_company->discount->end_time)) >= now()->format('H:i')) {
+                return [
+                    'discount' => $delivery_company->discount->discount,
+                    'min_purchase' => $delivery_company->discount->min_purchase,
+                    'max_discount' => $delivery_company->discount->max_discount
+                ];
+            }
+        }
+        return null;
+    }
     public static function max_earning()
     {
         $data = Order::where(['order_status' => 'delivered'])->select('id', 'created_at', 'order_amount')
@@ -1237,6 +1275,19 @@ class Helpers
                             'updated_at' => now()
                         ]);
                     }
+                    if($order->delivery_company && $order->delivery_company->partner){
+                        self::send_push_notif_to_device($order->delivery_company->partner->firebase_token, $data);
+                        $web_push_link = url('/').'/delivery-company-panel/order/list/all';
+                        self::send_push_notif_to_topic($data, "delivery_company_panel_{$order->delivery_company_id}_message", 'new_order', $web_push_link);
+                        DB::table('user_notifications')->insert([
+                            'data' => json_encode($data),
+                            'partner_id' => $order->delivery_company->partner_id,
+                            'module_id' => $order->module_id,
+                            'order_type' => $order->order_type,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
                 } else {
                     $data = [
                         'title' => translate('messages.order_push_title'),
@@ -1248,14 +1299,14 @@ class Helpers
                     ];
                     if($order->zone){
                         if($order->dm_vehicle_id){
-                            
+
                             $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
                             self::send_push_notif_to_topic($data, $topic, 'order_request');
                             self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
                         }else{
                             self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
                         }
-                        
+
                     }
                 }
                 // self::send_push_notif_to_topic($data, 'admin_message', 'order_request', url('/').'/admin/order/list/all');
@@ -1272,7 +1323,7 @@ class Helpers
                 ];
                 if($order->zone){
                     if($order->dm_vehicle_id){
-                        
+
                         $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
                         self::send_push_notif_to_topic($data, $topic, 'order_request');
                         self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
@@ -1307,6 +1358,19 @@ class Helpers
                 }
             }
 
+            if($order->delivery_company && $order->delivery_company->partner){
+                self::send_push_notif_to_device($order->delivery_company->partner->firebase_token, $data);
+                $web_push_link = url('/').'/delivery_company-panel/order/list/all';
+                self::send_push_notif_to_topic($data, "delivery_company_panel_{$order->delivery_company_id}_message", 'new_order', $web_push_link);
+                // self::send_push_notif_to_topic($data, 'admin_message', 'order_request');
+                DB::table('user_notifications')->insert([
+                    'data' => json_encode($data),
+                    'vendor_id' => $order->delivery_company->partner_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
             if (!$order->scheduled && (($order->order_type == 'take_away' && $order->order_status == 'pending') || ($order->payment_method != 'cash_on_delivery' && $order->order_status == 'confirmed'))) {
                 $data = [
                     'title' => translate('messages.order_push_title'),
@@ -1322,6 +1386,18 @@ class Helpers
                     DB::table('user_notifications')->insert([
                         'data' => json_encode($data),
                         'vendor_id' => $order->store->vendor_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                if($order->delivery_company && $order->delivery_company->partner){
+                    self::send_push_notif_to_device($order->delivery_company->partner->firebase_token, $data);
+                    $web_push_link = url('/').'/delivery-company-panel/order/list/all';
+                    self::send_push_notif_to_topic($data, "delivery_company_panel_{$order->store_id}_message", 'new_order', $web_push_link);
+                    DB::table('user_notifications')->insert([
+                        'data' => json_encode($data),
+                        'partner_id' => $order->delivery_company->partner_id,
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
@@ -1360,6 +1436,18 @@ class Helpers
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
+
+                        if($order->delivery_company && $order->delivery_company->vendor){
+                            self::send_push_notif_to_device($order->delivery_company->partner->firebase_token, $data);
+                            $web_push_link = url('/').'/delivery-company-panel/order/list/all';
+                            self::send_push_notif_to_topic($data, "delivery_company_panel_{$order->delivery_company_id}_message", 'new_order', $web_push_link);
+                            DB::table('user_notifications')->insert([
+                                'data' => json_encode($data),
+                                'partner_id' => $order->delivery_company->partner_id,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                        }
                     }
                 }
             }
@@ -1378,7 +1466,7 @@ class Helpers
                 } else
                  {if($order->zone){
                     if($order->dm_vehicle_id){
-                        
+
                         $topic = 'delivery_man_'.$order->zone_id.'_'.$order->dm_vehicle_id;
                         self::send_push_notif_to_topic($data, $topic, 'order_request');
                         self::send_push_notif_to_topic($data, $order->zone->deliveryman_wise_topic, 'order_request');
@@ -1487,12 +1575,30 @@ class Helpers
         return auth('vendor')->user()->stores[0]->id;
     }
 
+	public static function get_delivery_company_id()
+	{
+		if (auth('partner_employee')->check()) {
+			return auth('partner_employee')->user()->delivery_company->id;
+		}
+		return auth('partner')->user()->delivery_companies[0]->id;
+	}
+
     public static function get_vendor_id()
     {
         if (auth('vendor')->check()) {
             return auth('vendor')->id();
         } else if (auth('vendor_employee')->check()) {
             return auth('vendor_employee')->user()->vendor_id;
+        }
+        return 0;
+    }
+
+    public static function get_partner_id()
+    {
+        if (auth('partner')->check()) {
+            return auth('partner')->id();
+        } else if (auth('partner_employee')->check()) {
+            return auth('partner_employee')->user()->partner_id;
         }
         return 0;
     }
@@ -1507,14 +1613,39 @@ class Helpers
         return 0;
     }
 
+    public static function get_partner_data()
+    {
+        if (auth('partner')->check()) {
+            return auth('partner')->user();
+        } else if (auth('partner_employee')->check()) {
+            return auth('partner_employee')->user()->partner;
+        }
+        return 0;
+    }
+
     public static function get_loggedin_user()
     {
         if (auth('vendor')->check()) {
             return auth('vendor')->user();
-        } else if (auth('vendor_employee')->check()) {
+        }
+        else if (auth('partner')->check()) {
+            return auth('partner')->user();
+        }
+        else if (auth('partner_employee')->check()) {
+            return auth('partner_employee')->user();
+        }
+        else if (auth('vendor_employee')->check()) {
             return auth('vendor_employee')->user();
         }
         return 0;
+    }
+
+    public static function get_delivery_company_data()
+    {
+        if (auth('partner_employee')->check()) {
+            return auth('partner_employee')->user()->delivery_company;
+        }
+        return auth('partner')->user()->delivery_companies[0];
     }
 
     public static function get_store_data()
@@ -1524,6 +1655,7 @@ class Helpers
         }
         return auth('vendor')->user()->stores[0];
     }
+
 
     public static function upload(string $dir, string $format, $image = null)
     {
@@ -1595,7 +1727,36 @@ class Helpers
                 return config('module.' . auth('vendor')->user()->stores[0]->module->module_type)['add_on'];
             }
             return true;
-        } else if (auth('vendor_employee')->check()) {
+        }
+        else if (auth('partner')->check()) {
+            if ($mod_name == 'reviews') {
+                return auth('partner')->user()->delivery_companies[0]->reviews_section;
+            } else if ($mod_name == 'deliveryman') {
+                return auth('partner')->user()->delivery_companies[0]->self_delivery_system;
+            } else if ($mod_name == 'pos') {
+                return auth('partner')->user()->delivery_companies[0]->pos_system;
+            } else if ($mod_name == 'addon') {
+                return config('module.' . auth('partner')->user()->delivery_companies[0]->module->module_type)['add_on'];
+            }
+            return true;
+        }
+        else if (auth('partner_employee')->check()) {
+            $permission = auth('partner_employee')->user()->role->modules;
+            if (isset($permission) && in_array($mod_name, (array)json_decode($permission)) == true) {
+                if ($mod_name == 'reviews') {
+                    return auth('partner_employee')->user()->delivery_company->reviews_section;
+                } else if ($mod_name == 'deliveryman') {
+                    return auth('partner_employee')->user()->delivery_company->self_delivery_system;
+                } else if ($mod_name == 'pos') {
+                    return auth('partner_employee')->user()->delivery_company->pos_system;
+                } else if ($mod_name == 'addon') {
+                    return config('module.' . auth('partner_employee')->user()->delivery_company->module->module_type)['add_on'];
+                }
+                return true;
+            }
+        }
+
+        else if (auth('vendor_employee')->check()) {
             $permission = auth('vendor_employee')->user()->role->modules;
             if (isset($permission) && in_array($mod_name, (array)json_decode($permission)) == true) {
                 if ($mod_name == 'reviews') {
@@ -1847,6 +2008,8 @@ class Helpers
             $lang = session('local');
         } elseif (strpos(url()->current(), '/store-panel') && session()->has('vendor_local')) {
             $lang = session('vendor_local');
+        } elseif (strpos(url()->current(), '/delivery-company-panel') && session()->has('partner_local')) {
+            $lang = session('partner_local');
         } elseif (session()->has('landing_local')) {
             $lang = session('landing_local');
         } elseif (session()->has('local')) {
@@ -1993,6 +2156,22 @@ class Helpers
         return $data;
     }
 
+	public static function export_delivery_company_withdraw($collection): array
+	{
+		$data = [];
+		$status = ['pending','approved','denied'];
+		foreach($collection as $key=>$item){
+			$data[] = [
+				'SL'=>$key+1,
+				translate('messages.amount') => $item->amount,
+				translate('messages.store') => isset($item->vendor) ? $item->vendor->stores[0]->name : '',
+				translate('messages.request_time') => date('Y-m-d '.config('timeformat'),strtotime($item->created_at)),
+				translate('messages.status') => isset($status[$item->approved])?translate("messages.".$status[$item->approved]):"",
+			];
+		}
+		return $data;
+	}
+
     public static function export_account_transaction($collection){
         $data = [];
         foreach($collection as $key=>$item){
@@ -2054,6 +2233,21 @@ class Helpers
         return $data;
     }
 
+    public static function export_delivery_company_item($collection){
+        $data = [];
+        foreach($collection as $key=>$item){
+            $data[] = [
+                'SL'=>$key+1,
+                translate('messages.id') => $item['id'],
+                translate('messages.name') => $item['name'],
+                translate('messages.type') => $item->category?$item->category->name:'',
+                translate('messages.price') => $item['price'],
+                translate('messages.status') => $item['status'],
+            ];
+        }
+        return $data;
+    }
+
     public static function export_stores($collection){
         $data = [];
         foreach($collection as $key=>$item){
@@ -2068,6 +2262,25 @@ class Helpers
                  translate('messages.zone') => $item->zone?$item->zone->name:'',
                  translate('messages.featured') => $item['featured'],
                  translate('messages.status') => $item['status'],
+            ];
+        }
+        return $data;
+    }
+
+    public static function export_delivery_companies($collection){
+        $data = [];
+        foreach($collection as $key=>$item){
+            $data[] = [
+                'SL'=>$key+1,
+                translate('messages.id') => $item['id'],
+                translate('messages.delivery_company_name') => $item['name'],
+                translate('messages.delivery_company_phone') => $item['phone'],
+                translate('messages.module') => $item->module->module_name,
+                translate('messages.owner_name') => $item->partner->f_name.' '.$item->partner->l_name,
+                translate('messages.owner_phone') => $item->partner->phone,
+                translate('messages.zone') => $item->zone?$item->zone->name:'',
+                translate('messages.featured') => $item['featured'],
+                translate('messages.status') => $item['status'],
             ];
         }
         return $data;
@@ -2109,19 +2322,19 @@ class Helpers
                  translate('messages.order_id') => $item['order_id'],
                  translate('messages.store')=>$item->order->store?$item->order->store->name:translate('messages.invalid'),
                  translate('messages.customer_name')=>$item->order->customer?$item->order->customer['f_name'].' '.$item->order->customer['l_name']:translate('messages.invalid').' '.translate('messages.customer').' '.translate('messages.data'),
-                 translate('total_item_amount')=>\App\CentralLogics\Helpers::format_currency($item->order['order_amount'] - $item->order['dm_tips']-$item->order['delivery_charge'] - $item['tax'] + $item->order['coupon_discount_amount'] + $item->order['store_discount_amount']),
-                 translate('item_discount')=>\App\CentralLogics\Helpers::format_currency($item->order->details->sum('discount_on_item')),
-                 translate('coupon_discount')=>\App\CentralLogics\Helpers::format_currency($item->order['coupon_discount_amount']),
-                 translate('discounted_amount')=>\App\CentralLogics\Helpers::format_currency($item->order['coupon_discount_amount'] + $item->order['store_discount_amount']),
-                 translate('messages.tax')=>\App\CentralLogics\Helpers::format_currency($item->order['total_tax_amount']),
-                 translate('messages.delivery_charge')=>\App\CentralLogics\Helpers::format_currency($item['delivery_charge']),
-                 translate('messages.total_order_amount') => \App\CentralLogics\Helpers::format_currency($item['order_amount']),
-                 translate('messages.admin_discount') => \App\CentralLogics\Helpers::format_currency($item['admin_expense']),
-                 translate('messages.store_discount') => \App\CentralLogics\Helpers::format_currency($item->order['store_discount_amount']),
-                 translate('messages.admin_commission') => \App\CentralLogics\Helpers::format_currency(($item->admin_commission + $item->admin_expense) - $item->delivery_fee_comission),
-                 translate('Comission on delivery fee') => \App\CentralLogics\Helpers::format_currency($item['delivery_fee_comission']),
-                 translate('admin_net_income') => \App\CentralLogics\Helpers::format_currency($item['admin_commission']),
-                 translate('store_net_income') => \App\CentralLogics\Helpers::format_currency($item['store_amount'] - $item['tax']),
+                 translate('total_item_amount')=> Helpers::format_currency($item->order['order_amount'] - $item->order['dm_tips']-$item->order['delivery_charge'] - $item['tax'] + $item->order['coupon_discount_amount'] + $item->order['store_discount_amount']),
+                 translate('item_discount')=> Helpers::format_currency($item->order->details->sum('discount_on_item')),
+                 translate('coupon_discount')=> Helpers::format_currency($item->order['coupon_discount_amount']),
+                 translate('discounted_amount')=> Helpers::format_currency($item->order['coupon_discount_amount'] + $item->order['store_discount_amount']),
+                 translate('messages.tax')=> Helpers::format_currency($item->order['total_tax_amount']),
+                 translate('messages.delivery_charge')=> Helpers::format_currency($item['delivery_charge']),
+                 translate('messages.total_order_amount') => Helpers::format_currency($item['order_amount']),
+                 translate('messages.admin_discount') => Helpers::format_currency($item['admin_expense']),
+                 translate('messages.store_discount') => Helpers::format_currency($item->order['store_discount_amount']),
+                 translate('messages.admin_commission') => Helpers::format_currency(($item->admin_commission + $item->admin_expense) - $item->delivery_fee_comission),
+                 translate('Comission on delivery fee') => Helpers::format_currency($item['delivery_fee_comission']),
+                 translate('admin_net_income') => Helpers::format_currency($item['admin_commission']),
+                 translate('store_net_income') => Helpers::format_currency($item['store_amount'] - $item['tax']),
                  translate('messages.amount_received_by') => $item['received_by'],
                  translate('messages.payment_method')=>translate(str_replace('_', ' ', $item->order['payment_method'])),
                  translate('messages.payment_status') => $item->status ? translate("messages.refunded") : translate("messages.completed"),
@@ -2160,10 +2373,10 @@ class Helpers
                  translate('messages.module') =>$item->module ? $item->module->module_name : '',
                  translate('messages.store') => $item->store ? $item->store->name : '',
                  translate('messages.order') => $item->orders_count,
-                 translate('messages.price') => \App\CentralLogics\Helpers::format_currency($item->price),
-                 translate('messages.total_amount_sold') => \App\CentralLogics\Helpers::format_currency($item->orders_sum_price),
-                 translate('messages.total_discount_given') => \App\CentralLogics\Helpers::format_currency($item->orders_sum_discount_on_item),
-                 translate('messages.average_sale_value') => $item->orders_count>0? \App\CentralLogics\Helpers::format_currency(($item->orders_sum_price-$item->orders_sum_discount_on_item)/$item->orders_count):0 ,
+                 translate('messages.price') => Helpers::format_currency($item->price),
+                 translate('messages.total_amount_sold') => Helpers::format_currency($item->orders_sum_price),
+                 translate('messages.total_discount_given') => Helpers::format_currency($item->orders_sum_discount_on_item),
+                 translate('messages.average_sale_value') => $item->orders_count>0? Helpers::format_currency(($item->orders_sum_price-$item->orders_sum_discount_on_item)/$item->orders_count):0 ,
                  translate('messages.average_ratings') => round($item->avg_rating,1),
             ];
         }
@@ -2637,6 +2850,17 @@ class Helpers
         } else {
             $language = BusinessSetting::where('key', 'system_language')->first();
             \session()->put('vendor_language_settings', $language);
+        }
+        return $language;
+    }
+
+    public static function partner_language_load()
+    {
+        if (\session()->has('partner_language_settings')) {
+            $language = \session('partner_language_settings');
+        } else {
+            $language = BusinessSetting::where('key', 'system_language')->first();
+            \session()->put('partner_language_settings', $language);
         }
         return $language;
     }

@@ -2318,6 +2318,7 @@
   'Failed Orders' => 'Failed Orders',
   'category_setup' => 'Category setup',
   'delivery_fee_setup' => 'Delivery fee setup',
+  'add_delivery_partner' => 'Add delivery partner',
   'tags' => 'Tags',
   'foods' => 'Foods',
   'restaurants' => 'Restaurants',

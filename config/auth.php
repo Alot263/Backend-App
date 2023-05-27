@@ -50,12 +50,21 @@ return [
             'driver' => 'session',
             'provider' => 'vendors',
         ],
-        
+
+        'partner' => [
+            'driver' => 'session',
+            'provider' => 'partners',
+        ],
+
         'vendor_employee' => [
             'driver' => 'session',
             'provider' => 'vendor_employees',
         ],
 
+        'partner_employee' => [
+            'driver' => 'session',
+            'provider' => 'partner_employees',
+        ],
         'api' => [
             'driver' => 'passport',
             'provider' => 'users',
@@ -103,9 +112,19 @@ return [
             'model' => App\Models\Vendor::class,
         ],
 
+        'partners' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Partner::class,
+        ],
+
         'vendor_employees' => [
             'driver' => 'eloquent',
             'model' => App\Models\VendorEmployee::class,
+        ],
+
+        'partner_employees' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PartnerEmployee::class,
         ],
 
         'delivery_men' => [
@@ -142,19 +161,35 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
         'vendor_employees' => [
             'provider' => 'vendor_employees',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],
-        
+
+        'partner_employees' => [
+            'provider' => 'partner_employees',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
         'vendors' => [
             'provider' => 'vendors',
             'table' => 'password_resets',
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        'partner' => [
+            'provider' => 'partners',
+            'table' => 'password_resets',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+
         'delivery_men' => [
             'provider' => 'delivery_men',
             'table' => 'password_resets',

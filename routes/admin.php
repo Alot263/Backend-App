@@ -44,12 +44,62 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
 
         Route::group(['prefix' => 'parcel', 'as' => 'parcel.', 'middleware' => ['module:parcel']], function () {
             Route::get('category/status/{id}/{status}', 'ParcelCategoryController@status')->name('category.status');
+            Route::get('add', 'DeliveryPartnerController@index')->name('add');
             Route::resource('category', 'ParcelCategoryController');
             Route::get('orders/{status}', 'ParcelController@orders')->name('orders');
             Route::get('details/{id}', 'ParcelController@order_details')->name('order.details');
             Route::get('settings', 'ParcelController@settings')->name('settings');
             Route::post('settings', 'ParcelController@update_settings')->name('update.settings');
             Route::get('dispatch/{status}', 'ParcelController@dispatch_list')->name('list');
+
+        });
+
+        Route::group(['prefix' => 'partner', 'as' => 'partner.', 'middleware' => ['module:partner']], function () {
+            Route::get('category/status/{id}/{status}', 'ParcelCategoryController@status')->name('category.status');
+            Route::get('add', 'DeliveryPartnerController@index')->name('add');
+            Route::get('pending-requests', 'DeliveryPartnerController@pending_requests')->name('pending-requests');
+            Route::get('deny-requests', 'DeliveryPartnerController@deny_requests')->name('deny-requests');
+            Route::resource('category', 'ParcelCategoryController');
+            Route::get('orders/{status}', 'ParcelController@orders')->name('orders');
+            Route::get('details/{id}', 'ParcelController@order_details')->name('order.details');
+            Route::get('settings', 'ParcelController@settings')->name('settings');
+            Route::post('settings', 'ParcelController@update_settings')->name('update.settings');
+            Route::get('dispatch/{status}', 'ParcelController@dispatch_list')->name('list');
+
+            Route::group(['middleware' => ['module:partner']], function () {
+                Route::get('update-application/{id}/{status}', 'DeliveryPartnerController@update_application')->name('application');
+                Route::get('add', 'DeliveryPartnerController@index')->name('add');
+                Route::post('store', 'DeliveryPartnerController@store')->name('store');
+                Route::get('edit/{id}', 'DeliveryPartnerController@edit')->name('edit');
+                Route::post('update/{store}', 'DeliveryPartnerController@update')->name('update');
+                Route::post('discount/{store}', 'DeliveryPartnerController@discountSetup')->name('discount');
+                Route::post('update-settings/{store}', 'DeliveryPartnerController@updateStoreSettings')->name('update-settings');
+                Route::delete('delete/{store}', 'DeliveryPartnerController@destroy')->name('delete');
+                Route::delete('clear-discount/{store}', 'DeliveryPartnerController@cleardiscount')->name('clear-discount');
+                // Route::get('view/{store}', 'VendorController@view')->name('view_tab');
+                Route::get('view/{store}/{tab?}/{sub_tab?}', 'DeliveryPartnerController@view')->name('view');
+                Route::get('list', 'DeliveryPartnerController@list')->name('list');
+                Route::get('pending-requests', 'DeliveryPartnerController@pending_requests')->name('pending-requests');
+                Route::get('deny-requests', 'DeliveryPartnerController@deny_requests')->name('deny-requests');
+                Route::post('search', 'DeliveryPartnerController@search')->name('search');
+                Route::get('export', 'DeliveryPartnerController@export')->name('export');
+                Route::get('export/cash/{type}/{delivery_company_id}', 'DeliveryPartnerController@cash_export')->name('cash_export');
+                Route::get('export/order/{type}/{delivery_company_id}', 'DeliveryPartnerController@order_export')->name('order_export');
+                Route::get('export/withdraw/{type}/{delivery_company_id}', 'DeliveryPartnerController@withdraw_trans_export')->name('withdraw_trans_export');
+                Route::get('status/{partner}/{status}', 'DeliveryPartnerController@status')->name('status');
+                Route::get('featured/{partner}/{status}', 'DeliveryPartnerController@featured')->name('featured');
+                Route::get('toggle-settings-status/{partner}/{status}/{menu}', 'DeliveryPartnerController@store_status')->name('toggle-settings');
+                Route::post('status-filter', 'DeliveryPartnerController@status_filter')->name('status-filter');
+
+                //Import and export
+                Route::get('bulk-import', 'DeliveryPartnerController@bulk_import_index')->name('bulk-import');
+                Route::post('bulk-import', 'DeliveryPartnerController@bulk_import_data');
+                Route::get('bulk-export', 'DeliveryPartnerController@bulk_export_index')->name('bulk-export-index');
+                Route::post('bulk-export', 'DeliveryPartnerController@bulk_export_data')->name('bulk-export');
+                //Store shcedule
+                Route::post('add-schedule', 'DeliveryPartnerController@add_schedule')->name('add-schedule');
+                Route::get('remove-schedule/{store_schedule}', 'DeliveryPartnerController@remove_schedule')->name('remove-schedule');
+            });
         });
 
         Route::group(['prefix' => 'dashboard-stats', 'as' => 'dashboard-stats.'], function () {
@@ -237,6 +287,60 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             // message
             Route::get('message/{conversation_id}/{user_id}', 'VendorController@conversation_view')->name('message-view');
             Route::get('message/list', 'VendorController@conversation_list')->name('message-list');
+        });
+
+        Route::group(['prefix' => 'delivery-company', 'as' => 'delivery-company.'], function () {
+            Route::get('get-delivery-companies-data/{store}', 'DeliveryPartnerController@get_delivery_company_data')->name('get-delivery-companies-data');
+            Route::get('delivery-company-filter/{id}', 'DeliveryPartnerController@store_filter')->name('deliverycompanyfilter');
+            Route::get('get-account-data/{delivery_companies}', 'DeliveryPartnerController@get_account_data')->name('storefilter');
+            Route::get('get-delivery-companies', 'DeliveryPartnerController@get_stores')->name('get-delivery-companies');
+            Route::get('get-addons', 'DeliveryPartnerController@get_addons')->name('get_addons');
+            Route::group(['middleware' => ['module:delivery_company']], function () {
+                Route::get('update-application/{id}/{status}', 'DeliveryPartnerController@update_application')->name('application');
+                Route::get('add', 'DeliveryPartnerController@index')->name('add');
+                Route::post('delivery-company', 'DeliveryPartnerController@delivery_company')->name('delivery-company');
+                Route::get('edit/{id}', 'DeliveryPartnerController@edit')->name('edit');
+                Route::post('update/{delivery_company}', 'DeliveryPartnerController@update')->name('update');
+                Route::post('discount/{delivery_company}', 'DeliveryPartnerController@discountSetup')->name('discount');
+                Route::post('update-settings/{delivery_company}', 'DeliveryPartnerController@updateDeliveryCompanySettings')->name('update-settings');
+                Route::delete('delete/{delivery_company}', 'DeliveryPartnerController@destroy')->name('delete');
+                Route::delete('clear-discount/{delivery_company}', 'DeliveryPartnerController@cleardiscount')->name('clear-discount');
+                // Route::get('view/{delivery_company}', 'VendorController@view')->name('view_tab');
+                Route::get('view/{delivery_company}/{tab?}/{sub_tab?}', 'DeliveryPartnerController@view')->name('view');
+                Route::get('list', 'DeliveryPartnerController@list')->name('list');
+                Route::get('pending-requests', 'DeliveryPartnerController@pending_requests')->name('pending-requests');
+                Route::get('deny-requests', 'VendorController@deny_requests')->name('deny-requests');
+                Route::post('search', 'DeliveryPartnerController@search')->name('search');
+                Route::get('export', 'DeliveryPartnerController@export')->name('export');
+                Route::get('export/cash/{type}/{delivery_company_id}', 'DeliveryPartnerController@cash_export')->name('cash_export');
+                Route::get('export/order/{type}/{delivery_company_id}', 'DeliveryPartnerController@order_export')->name('order_export');
+                Route::get('export/withdraw/{type}/{delivery_company_id}', 'DeliveryPartnerController@withdraw_trans_export')->name('withdraw_trans_export');
+                Route::get('status/{delivery_company}/{status}', 'DeliveryPartnerController@status')->name('status');
+                Route::get('featured/{delivery_company}/{status}', 'DeliveryPartnerController@featured')->name('featured');
+                Route::get('toggle-settings-status/{delivery_company}/{status}/{menu}', 'DeliveryPartnerController@store_status')->name('toggle-settings');
+                Route::post('status-filter', 'DeliveryPartnerController@status_filter')->name('status-filter');
+
+                //Import and export
+                Route::get('bulk-import', 'DeliveryPartnerController@bulk_import_index')->name('bulk-import');
+                Route::post('bulk-import', 'DeliveryPartnerController@bulk_import_data');
+                Route::get('bulk-export', 'DeliveryPartnerController@bulk_export_index')->name('bulk-export-index');
+                Route::post('bulk-export', 'DeliveryPartnerController@bulk_export_data')->name('bulk-export');
+                //Store shcedule
+                Route::post('add-schedule', 'DeliveryPartnerController@add_schedule')->name('add-schedule');
+                Route::get('remove-schedule/{delivery_company_schedule}', 'DeliveryPartnerController@remove_schedule')->name('remove-schedule');
+            });
+
+            Route::group(['middleware' => ['module:withdraw_list']], function () {
+                Route::post('withdraw-status/{id}', 'DeliveryPartnerController@withdrawStatus')->name('withdraw_status');
+                Route::get('withdraw_list', 'DeliveryPartnerController@withdraw')->name('withdraw_list');
+                Route::post('withdraw_search', 'DeliveryPartnerController@withdraw_search')->name('withdraw_search');
+                Route::get('withdraw_export', 'DeliveryPartnerController@withdraw_export')->name('withdraw_export');
+                Route::get('withdraw-view/{withdraw_id}/{seller_id}', 'DeliveryPartnerController@withdraw_view')->name('withdraw_view');
+            });
+
+            // message
+            Route::get('message/{conversation_id}/{user_id}', 'DeliveryPartnerController@conversation_view')->name('message-view');
+            Route::get('message/list', 'DeliveryPartnerController@conversation_list')->name('message-list');
         });
 
         Route::group(['prefix' => 'addon', 'as' => 'addon.', 'middleware' => ['module:addon']], function () {
@@ -448,7 +552,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('order-cancel-reasons/store', 'OrderCancelReasonController@store')->name('order-cancel-reasons.store');
             Route::put('order-cancel-reasons/update', 'OrderCancelReasonController@update')->name('order-cancel-reasons.update');
             Route::delete('order-cancel-reasons/destroy', 'OrderCancelReasonController@destroy')->name('order-cancel-reasons.destroy');
-    
+
         });
         Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.'], function () {
             //module
@@ -676,7 +780,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
                         Route::post('update/{vehicle}', 'DmVehicleController@update')->name('update');
                         Route::delete('delete', 'DmVehicleController@destroy')->name('delete');
                         Route::get('view/{vehicle}', 'DmVehicleController@view')->name('view');
-            
+
                     });
                 });
             });

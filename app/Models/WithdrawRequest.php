@@ -18,6 +18,10 @@ class WithdrawRequest extends Model
         return $this->belongsTo(Vendor::class);
     }
 
+    public function partner(){
+        return $this->belongsTo(Partner::class);
+    }
+
     protected static function booted()
     {
         static::addGlobalScope(new ZoneScope);

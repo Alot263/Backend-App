@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\DeliveryCompanyScope;
 use App\Scopes\ZoneScope;
 use App\Scopes\StoreScope;
 use Illuminate\Support\Str;
@@ -14,7 +15,7 @@ use function PHPUnit\Framework\returnSelf;
 class Item extends Model
 {
     use HasFactory;
-    
+
     protected $casts = [
         'tax' => 'float',
         'price' => 'float',
@@ -98,7 +99,7 @@ class Item extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
-    
+
     public function orders()
     {
         return $this->hasMany(OrderDetail::class);
@@ -109,7 +110,12 @@ class Item extends Model
         if(auth('vendor')->check() || auth('vendor_employee')->check())
         {
             static::addGlobalScope(new StoreScope);
-        } 
+        }
+
+        if(auth('partner')->check() || auth('partner_employee')->check())
+        {
+            static::addGlobalScope(new DeliveryCompanyScope());
+        }
 
         static::addGlobalScope(new ZoneScope);
 
@@ -131,7 +137,7 @@ class Item extends Model
         {
             return $query->where('veg', false);
         }
-        
+
         return $query;
     }
 
@@ -152,7 +158,7 @@ class Item extends Model
     {
         $slug = Str::slug($name);
         if ($max_slug = static::where('slug', 'like',"{$slug}%")->latest('id')->value('slug')) {
-            
+
             if($max_slug == $slug) return "{$slug}-2";
 
             $max_slug = explode('-',$max_slug);
@@ -163,6 +169,6 @@ class Item extends Model
             }
         }
         return $slug;
-    }    
-    
+    }
+
 }

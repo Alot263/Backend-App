@@ -68,6 +68,8 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'vendor' => \App\Http\Middleware\VendorMiddleware::class,
         'vendor.api' => \App\Http\Middleware\VendorTokenIsValid::class,
+        'partner' => \App\Http\Middleware\PartnerMiddleware::class,
+        'partner.api' => \App\Http\Middleware\PartnerTokenIsValid::class,
         'dm.api' => \App\Http\Middleware\DmTokenIsValid::class,
         'module' => \App\Http\Middleware\ModulePermissionMiddleware::class,
         'installation-check' => InstallationMiddleware::class,

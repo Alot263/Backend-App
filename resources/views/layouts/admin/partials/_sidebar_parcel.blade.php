@@ -49,7 +49,7 @@
                     </li>
                     <!-- End Dashboards -->
 
-                    
+
                     <!-- Orders -->
                     @if (\App\CentralLogics\Helpers::module_permission_check('order'))
                     <li class="nav-item">
@@ -300,6 +300,62 @@
                     </li>
                     @endif
                     <!--End Product Section -->
+
+                    <!-- Delivery Partner Section -->
+                    <li class="nav-item">
+                        <small class="nav-subtitle" title="{{ translate('messages.delivery') }} {{ translate('messages.section') }}">{{ translate('messages.partner') }}
+                            {{ translate('messages.management') }}</small>
+                        <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+                    </li>
+
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-company/pending-requests') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.delivery-company.pending-requests') }}" title="{{ translate('messages.pending') }} {{ translate('messages.requests') }}">
+                            <span class="tio-calendar-note nav-icon"></span>
+                            <span class="text-truncate position-relative overflow-visible">
+                            {{ translate('messages.new_delivery_companies') }}
+                                @php($new_str = \App\Models\DeliveryCompany::whereHas('partner', function($query){
+                                    return $query->where('status', null);
+                                })->module(Config::get('module.current_module_id'))->get())
+                                @if (count($new_str)>0)
+
+                                    <span class="btn-status btn-status-danger border-0 size-8px"></span>
+                                @endif
+                        </span>
+                        </a>
+                    </li>
+
+                    @if (\App\CentralLogics\Helpers::module_permission_check('partner'))
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-company/add') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.delivery-company.add') }}" title="{{ translate('messages.add_delivery_company') }}">
+                            <i class="tio-add-circle nav-icon"></i>
+                            <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                            {{ translate('messages.add_delivery_company') }}
+                        </span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-company/list') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.delivery-company.list') }}" title="{{ translate('messages.delivery_companies') }} {{ translate('messages.list') }}">
+                            <span class="tio-layout nav-icon"></span>
+                            <span class="text-truncate">{{ translate('messages.delivery_companies') }}
+                                {{ translate('list') }}</span>
+                        </a>
+                    </li>
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-company/bulk-import') ? 'active' : '' }}">
+                        <a class="nav-link " href="{{ route('admin.delivery-company.bulk-import') }}" title="{{ translate('messages.bulk_import') }}">
+                            <span class="tio-publish nav-icon"></span>
+                            <span class="text-truncate text-capitalize">{{ translate('messages.bulk_import') }}</span>
+                        </a>
+                    </li>
+                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-company/bulk-export') ? 'active' : '' }}">
+                        <a class="nav-link " href="{{ route('admin.delivery-company.bulk-export-index') }}" title="{{ translate('messages.bulk_export') }}">
+                            <span class="tio-download-to nav-icon"></span>
+                            <span class="text-truncate text-capitalize">{{ translate('messages.bulk_export') }}</span>
+                        </a>
+                    </li>
+                @endif
+
+                    <!--Delivery Partner Section -->
 
 
                 <li class="__sidebar-hs-unfold px-2">

@@ -21,7 +21,13 @@ class Localization
             if (session()->has('vendor_local')) {
                 App::setLocale(session()->get('vendor_local'));
             }
-        }elseif($request->is('admin/*')){
+        }
+        else if ($request->is('delivery-company-panel/*')) {
+            if (session()->has('partner_local')) {
+                App::setLocale(session()->get('partner_local'));
+            }
+        }
+        elseif($request->is('admin/*')){
             if (session()->has('local')) {
                 App::setLocale(session()->get('local'));
             }

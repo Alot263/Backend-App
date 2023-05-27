@@ -20,6 +20,12 @@ class ModulePermissionMiddleware
         if (auth('admin')->check() && Helpers::module_permission_check($module)) {
             return $next($request);
         }
+        else if (auth('partner_employee')->check() || auth('partner')->check()) {
+            if(Helpers::employee_module_permission_check($module))
+            {
+                return $next($request);
+            }
+        }
         else if (auth('vendor_employee')->check() || auth('vendor')->check()) {
             if(Helpers::employee_module_permission_check($module))
             {

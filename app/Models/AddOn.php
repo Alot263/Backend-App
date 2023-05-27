@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\DeliveryCompanyScope;
 use App\Scopes\StoreScope;
 use App\Scopes\ZoneScope;
 use Illuminate\Database\Eloquent\Model;
@@ -37,7 +38,12 @@ class AddOn extends Model
         if(auth('vendor')->check() || auth('vendor_employee')->check())
         {
             static::addGlobalScope(new StoreScope);
-        } 
+        }
+
+        if(auth('partner')->check() || auth('partner_employee')->check())
+        {
+            static::addGlobalScope(new DeliveryCompanyScope());
+        }
         static::addGlobalScope(new ZoneScope);
 
         static::addGlobalScope('translate', function (Builder $builder) {

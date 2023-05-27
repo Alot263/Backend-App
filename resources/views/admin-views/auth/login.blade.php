@@ -61,6 +61,14 @@
                                     {{translate('messages.store')}} {{translate('messages.login')}}
                                 </a>
                             </p>
+
+                            <p></p>
+
+                            <p class="mb-0">{{translate('messages.want')}} {{translate('messages.to')}} {{translate('messages.login')}} {{translate('messages.your')}} {{translate('messages.delivery_companies')}}?
+                                <a href="{{route('partner.auth.login')}}">
+                                    {{translate('messages.delivery_company')}} {{translate('messages.login')}}
+                                </a>
+                            </p>
                             <span class="badge badge-soft-info">( {{translate('messages.admin_or_employee_signin')}} )</span>
                         </div>
                     </div>
@@ -117,7 +125,7 @@
 
                     {{-- recaptcha --}}
                     @php($recaptcha = \App\CentralLogics\Helpers::get_business_settings('recaptcha'))
-                    @if(isset($recaptcha) && $recaptcha['status'] == 1)
+                    @if(isset($recaptcha) && $recaptcha['status'] == 1 && FALSE)
                         <div id="recaptcha_element" class="w-100" data-type="image"></div>
                         <br/>
                     @else
@@ -151,7 +159,7 @@
                 @endif
             </div>
             <!-- End Card -->
-                
+
         </div>
     </div>
 </main>

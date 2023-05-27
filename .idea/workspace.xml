@@ -5,11 +5,240 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8de7019d-e2bb-4d1b-9272-623980507709" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/installation/backup/database.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/installation/backup/public.zip" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/CentralLogics/DeliveryCompanyLogic.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Admin/DeliveryPartnerController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Auth/PartnerLoginController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Auth/PartnerPasswordResetController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/AddOnController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/AttributeController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/BusinessSettingsController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/CategoryController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/ConversationController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/CouponController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/DeliveryManController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/ItemController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/POSController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/PartnerController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/ReportController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/V1/Partner/UnitController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/DeliveryPartnerController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/AddOnController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/Auth/EmployeeLoginController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/Auth/LoginController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/BannerController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/BusinessSettingsController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/CampaignController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/CategoryController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/ConversationController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/CouponController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/CustomRoleController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/DashboardController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/DeliveryManController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/EmployeeController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/ItemController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/LanguageController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/OrderController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/POSController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/ProfileController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/ReportController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/RestaurantController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/ReviewController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/SystemController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Controllers/Partner/WalletController.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Middleware/PartnerMiddleware.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Http/Middleware/PartnerTokenIsValid.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Models/DeliveryCompany.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Models/DeliveryCompanySchedule.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Models/DeliveryCompanyWallet.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Models/Partner.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Models/PartnerEmployee.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/Scopes/DeliveryCompanyScope.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/100x100/6.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/DeliveryCompanies.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/active-delivery-company.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/add-delivery-company.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/close-delivery-company.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/assets/admin/img/total-delivery-company.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/bulk-export.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/bulk-import.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/deny_requests.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/pending_requests.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/conversations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/discount.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/order.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_conversation_list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_conversations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_header.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_order.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_product.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/_schedule.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/cash_transaction.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/digital_transaction.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/partials/withdraw_transaction.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/product.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/review.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/settings.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/admin-views/delivery-partner/view/transaction.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/addon/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/addon/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/auth/login.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/auth/register.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/business-settings/partials/_schedule.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/business-settings/restaurant-index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/business-settings/terms-and-conditions.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/campaign/item_list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/campaign/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/campaign/partials/_item_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/campaign/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/category/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/category/partials/_sub_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/category/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/category/sub-index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/coupon/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/coupon/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/coupon/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/custom-role/create.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/custom-role/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/custom-role/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/dashboard.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/partials/_transation.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/reviews-list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/view/info.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/delivery-man/view/transaction.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/employee/add-new.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/employee/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/employee/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/employee/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/messages/data.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/messages/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/messages/partials/_conversations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/order/invoice.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/order/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/order/order-view-old.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/order/order-view.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/order/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/partials/_dashboard-order-stats.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/partials/_most-rated-items.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/partials/_top-selling-items.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/_address.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/_cart.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/_quick-view-cart-item.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/_quick-view-data.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/_single_product.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/order/invoice.blade copy.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/order/invoice.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/order/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/order/order-view.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/pos/order/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/bulk-export.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/bulk-import.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_choices.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_edit-combinations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_new_variations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_update_stock.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/partials/_variant-combinations.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/stock_limit_list.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/product/view.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/profile/bankEdit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/profile/bankView.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/profile/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/profile/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/profile/view.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/report/expense-report.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/report/partials/_expense_table.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/review/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/shop/edit.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/shop/shopInfo.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/wallet/index.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner-views/wallet/withdraw-view.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/bootstrap-4.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/default.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/semantic-ui.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/simple-bootstrap-4.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/simple-default.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/simple-tailwind.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/delivery-partner/pagination/tailwind.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/layouts/partner/app.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/layouts/partner/partials/_footer.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/layouts/partner/partials/_front-settings.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/layouts/partner/partials/_header.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/views/layouts/partner/partials/_sidebar.blade.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/routes/partner.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/stackfood.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/stackfood.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/installation/database.sql" beforeDir="false" afterPath="$PROJECT_DIR$/installation/database.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/installation/public.zip" beforeDir="false" afterPath="$PROJECT_DIR$/installation/public.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/CentralLogics/helpers.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/CentralLogics/helpers.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Kernel.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Kernel.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/Authenticate.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/Authenticate.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/Localization.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/Localization.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/ModulePermissionMiddleware.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/ModulePermissionMiddleware.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/RedirectIfAuthenticated.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/RedirectIfAuthenticated.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/AddOn.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/AddOn.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Coupon.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Coupon.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/Item.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/Item.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/UserInfo.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/UserInfo.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Models/WithdrawRequest.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Models/WithdrawRequest.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Providers/RouteServiceProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Providers/RouteServiceProvider.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Providers/RouteServiceProvider.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/Providers/RouteServiceProvider.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/auth.php" beforeDir="false" afterPath="$PROJECT_DIR$/config/auth.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/seeders/AdminSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeders/AdminSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70b31e958.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70b31e958.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70e868a0b.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70e868a0b.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70ff90bd7.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa70ff90bd7.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa711855315.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa711855315.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa712b2ec7f.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa712b2ec7f.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa715a53b4e.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa715a53b4e.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa71cc2943b.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa71cc2943b.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa71e1e6ca1.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa71e1e6ca1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa724faf007.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa724faf007.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa74d662a1d.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa74d662a1d.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa750f330b8.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa750f330b8.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa752d42a81.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa752d42a81.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7563eed5e.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7563eed5e.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa75894bac1.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa75894bac1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa75ffec5dd.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa75ffec5dd.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa761fc4b9f.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa761fc4b9f.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa77ff1bd5b.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa77ff1bd5b.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa77ff1c080.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa77ff1c080.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7887cb01d.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7887cb01d.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7887cb372.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7887cb372.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa78e4a72d9.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa78e4a72d9.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa78e4a7731.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa78e4a7731.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7914b418f.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7914b418f.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7914b484e.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7914b484e.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa79e2a67d9.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa79e2a67d9.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa79fd7f5ee.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa79fd7f5ee.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a18bded6.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a18bded6.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a306916a.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a306916a.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a47e52ca.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a47e52ca.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a784fed7.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63fa7a784fed7.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63faa709afb84.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63faa709afb84.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63faa717a076a.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/landing/image/2023-02-25-63faa717a076a.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/lang/ar/messages.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/lang/ar/messages.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/lang/bn/messages.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/lang/bn/messages.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/lang/en/messages.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/lang/en/messages.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/admin-views/auth/login.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/admin-views/auth/login.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/admin-views/business-settings/db-index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/admin-views/business-settings/db-index.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/layouts/admin/partials/_sidebar_parcel.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/layouts/admin/partials/_sidebar_parcel.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/admin.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/web.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/web.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/storage/app/__MACOSX/public/business/2022-03-22-6239a7c93f3c8.png" beforeDir="false" afterPath="$PROJECT_DIR$/storage/app/__MACOSX/public/business/2022-03-22-6239a7c93f3c8.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_classmap.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/autoload_classmap.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vendor/composer/autoload_static.php" beforeDir="false" afterPath="$PROJECT_DIR$/vendor/composer/autoload_static.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,20 +253,30 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/composer.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/.env" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/resources/views/welcome.blade.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/app/Providers/ConfigServiceProvider.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/app/Http/Controllers/Api/V2/LsLibController.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/app/Providers/ConfigServiceProvider.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/app/Providers/RouteServiceProvider.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/composer.json" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/resources/views/admin-views/partials/_top-restaurants.blade.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/resources/views/welcome.blade.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" root2="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/routes/api/v2/api.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/storage/logs/laravel.log" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/vendor/laravelpkg/laravelchk/src/Http/Controllers/LaravelchkController.php" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="PhpWorkspaceProjectConfiguration">
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
+  <component name="PhpDebugGeneral" listening_started="true" />
+  <component name="PhpServers">
+    <servers>
+      <server host="localhost/alot263" id="dd9398e5-a07a-4e2a-869c-f1d44cbf6e0c" name="xampp" />
+    </servers>
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP">
     <include_path>
       <path value="$PROJECT_DIR$/vendor/nunomaduro/collision" />
       <path value="$PROJECT_DIR$/vendor/intervention/image" />
@@ -203,6 +442,23 @@
       <path value="$PROJECT_DIR$/vendor/symfony/http-client-contracts" />
       <path value="$PROJECT_DIR$/vendor/laminas/laminas-zendframework-bridge" />
       <path value="$PROJECT_DIR$/vendor/mollie/mollie-api-php" />
+      <path value="$PROJECT_DIR$/vendor/thecodingmachine/safe" />
+      <path value="$PROJECT_DIR$/vendor/fgrosse/phpasn1" />
+      <path value="$PROJECT_DIR$/vendor/spomky-labs/base64url" />
+      <path value="$PROJECT_DIR$/vendor/spomky-labs/aes-key-wrap" />
+      <path value="$PROJECT_DIR$/vendor/web-token/jwt-framework" />
+      <path value="$PROJECT_DIR$/vendor/friendsofphp/proxy-manager-lts" />
+      <path value="$PROJECT_DIR$/vendor/setasign/fpdi" />
+      <path value="$PROJECT_DIR$/vendor/league/uri-interfaces" />
+      <path value="$PROJECT_DIR$/vendor/league/uri" />
+      <path value="$PROJECT_DIR$/vendor/mpdf/mpdf" />
+      <path value="$PROJECT_DIR$/vendor/symfony/symfony" />
+      <path value="$PROJECT_DIR$/vendor/symfony/contracts" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-intl-icu" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-uuid" />
+      <path value="$PROJECT_DIR$/vendor/twig/twig" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-code" />
+      <path value="$PROJECT_DIR$/vendor/psr/link" />
     </include_path>
   </component>
   <component name="ProjectId" id="1so3PMyTUJvxPdKFIlLR0f0vb9q" />
@@ -213,38 +469,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/installation" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
-    <property name="vue.rearranger.settings.migration" value="true" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Applications/XAMPP/xamppfiles/htdocs/alot263/resources/views/layouts&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/installation" />
-      <recent name="$PROJECT_DIR$/installation/backup" />
-      <recent name="$PROJECT_DIR$/public/assets/landing/image" />
-      <recent name="$PROJECT_DIR$/routes" />
+      <recent name="$PROJECT_DIR$/resources/views/layouts" />
+      <recent name="$PROJECT_DIR$/app/Http/Controllers/Api/V1" />
+      <recent name="$PROJECT_DIR$/app/Http/Controllers" />
       <recent name="$PROJECT_DIR$/resources/views" />
+      <recent name="$PROJECT_DIR$/routes" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/installation/backup" />
       <recent name="$PROJECT_DIR$/app/Http/Controllers/Api/V2" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="PHP Remote Debug.alot263">
     <configuration name="phpunit.xml" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
       <TestRunner scope="XML" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="PhpRemoteDebugRunConfigurationType" factoryName="PHP Remote Debug" filter_connections="NOT_FILTER">
+      <method v="2" />
+    </configuration>
+    <configuration name="alot263" type="PhpRemoteDebugRunConfigurationType" factoryName="PHP Remote Debug" filter_connections="FILTER" server_name="xampp" session_id="PHPSTORM">
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="PHP Remote Debug.alot263" />
+      <item itemvalue="PHPUnit.phpunit.xml" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -286,11 +550,26 @@
       <workItem from="1630593998936" duration="7885000" />
       <workItem from="1630742509256" duration="11000" />
       <workItem from="1630746551123" duration="2315000" />
+      <workItem from="1682745667236" duration="39151000" />
+      <workItem from="1682795528085" duration="421000" />
+      <workItem from="1682795976620" duration="88000" />
+      <workItem from="1682796246734" duration="147000" />
+      <workItem from="1682796452797" duration="346000" />
+      <workItem from="1682796918344" duration="199000" />
+      <workItem from="1682874684061" duration="17305000" />
+      <workItem from="1683309396956" duration="1713000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="javascript:npm:prettier" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:tailwindcss" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:webpack" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:vue" />
+    <option featureType="dependencySupport" implementationName="javascript:npm:postcss" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -305,5 +584,41 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Http/Controllers/DeliveryPartnerController.php</url>
+          <line>24</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/resources/views/delivery-partner-views/auth/login.blade.php</url>
+          <line>355</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/resources/views/delivery-partner-views/auth/login.blade.php</url>
+          <line>3</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/resources/views/delivery-partner-views/auth/login.blade.php</url>
+          <line>1</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/routes/partner.php</url>
+          <line>5</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/routes/partner.php</url>
+          <line>7</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

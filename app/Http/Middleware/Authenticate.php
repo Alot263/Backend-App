@@ -25,6 +25,10 @@ class Authenticate extends Middleware
         {
             return route('vendor.auth.login');
         }
+        else if ($request->is('partner/*'))
+        {
+            return route('partner.auth.login');
+        }
         else
         {
             return route('/');

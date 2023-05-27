@@ -29,21 +29,26 @@ class Coupon extends Model
         return $this->belongsTo(Store::class, 'store_id');
     }
 
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class, 'store_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', '=', 1);
     }
-    
+
     public function scopeModule($query, $module_id)
     {
         return $query->where('module_id', $module_id);
     }
-    
+
     // protected static function booted()
     // {
     //     if(auth('vendor')->check())
     //     {
     //         static::addGlobalScope(new StoreScope);
-    //     } 
+    //     }
     // }
 }

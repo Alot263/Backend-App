@@ -56,13 +56,18 @@
 @push('script_2')
 <script>
     var store_dependent = ['stores','store_schedule', 'discounts'];
+    var delivery_company_dependent = ['delivery_companies','delivery_company_schedule', 'discounts'];
     var order_dependent = ['order_delivery_histories','d_m_reviews', 'delivery_histories', 'track_deliverymen', 'order_details', 'reviews'];
-    var zone_dependent = ['stores','vendors', 'orders'];
+    var zone_dependent = ['stores','vendors', 'orders', 'partners'];
     $(document).ready(function () {
         $('.form-check-input').on('change', function(event){
             if($(this).is(':checked')){
                 if(event.target.id == 'zones' || event.target.id == 'stores' || event.target.id == 'vendors') {
                     checked_stores(true);
+                }
+
+                if(event.target.id == 'zones' || event.target.id == 'delivery_companies' || event.target.id == 'partners') {
+                    checked_delivery_companies(true);
                 }
 
                 if(event.target.id == 'zones' || event.target.id == 'orders') {
@@ -74,7 +79,14 @@
                         console.log('store_checked');
                         $(this).prop('checked', true);
                     }
-                } else if(order_dependent.includes(event.target.id)) {
+                }
+                else if(delivery_company_dependent.includes(event.target.id)) {
+                    if(check_delivery_company() || check_zone()){
+                        console.log('delivery_checked');
+                        $(this).prop('checked', true);
+                    }
+                }
+                else if(order_dependent.includes(event.target.id)) {
                     if(check_orders() || check_zone()){
                         $(this).prop('checked', true);
                     }
@@ -105,7 +117,15 @@
 
     }
 
-    function checked_orders(status) {
+    function checked_delivery_companies(status) {
+        delivery_company_dependent.forEach(function(value){
+            $('#'+value).prop('checked', status);
+        });
+        $('#partners').prop('checked', status);
+
+
+
+        function checked_orders(status) {
         order_dependent.forEach(function(value){
             $('#'+value).prop('checked', status);
         });
@@ -138,6 +158,13 @@
         return false;
     }
 
+    function check_delivery_company() {
+        if($('#delivery_companies').is(':checked') || $('#partners').is(':checked')) {
+            toastr.warning("{{translate('messages.table_unchecked_warning',['table'=>'delivery_companies/partners'])}}");
+            return true;
+        }
+        return false;
+    }
 </script>
 
 <script>

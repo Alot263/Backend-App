@@ -18,8 +18,8 @@ class AdminSeeder extends Seeder
         DB::table('admins')->insert([
             'id' => 1,
             'f_name' => 'Master Admin',
-            'l_name' => 'Khandakar',
-            'phone' => '01759412381',
+            'l_name' => 'Solivatore',
+            'phone' => '0639691493',
             'email' => 'admin@admin.com',
             'image' => 'def.png',
             'password' => bcrypt(12345678),
