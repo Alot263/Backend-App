@@ -25,7 +25,7 @@
                         <div class="cash-icon mr-3">
                             <img src="{{asset('public/assets/admin/img/cash.png')}}" alt="img">
                         </div>
-                        <h2 class="cash--title text-white">{{\App\CentralLogics\Helpers::format_currency($wallet->collected_cash)}}</h2>
+
                     </div>
                 </div>
                 <div class="card-footer pt-0 bg-transparent border-0">

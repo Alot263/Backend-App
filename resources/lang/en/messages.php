@@ -2333,6 +2333,8 @@
   'Gross Revenue' => 'Gross Revenue',
   'revenue' => 'Revenue',
   'most rated stores' => 'Most rated stores',
+  'collected_cash_by_delivery_company' => 'Collected Cash By Delivery Company',
+  'collect_cash_from_delivery_company' => 'Collect Cash From Delivery Company',
   'top selling products' => 'Top selling products',
   'top rated products' => 'Top rated products',
   'Failed Orders' => 'Failed Orders',

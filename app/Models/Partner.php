@@ -15,6 +15,8 @@ class Partner extends Authenticatable
         'updated_at' => 'datetime'
     ];
 
+    public $wallet;
+
     protected $hidden = [
         'password',
         'auth_token',

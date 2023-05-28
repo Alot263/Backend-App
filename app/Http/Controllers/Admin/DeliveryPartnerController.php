@@ -214,11 +214,11 @@ class DeliveryPartnerController extends Controller
 
     public function view(DeliveryCompany $delivery_company, $tab=null, $sub_tab='cash')
     {
-        $wallet = $delivery_company->partner()->wallet;
+        $wallet = $delivery_company->partner->wallet;
         if(!$wallet)
         {
             $wallet= new DeliveryCompanyWallet();
-            $wallet->partner_id = $delivery_company->partner()->id;
+            $wallet->partner_id = $delivery_company->partner_id;
             $wallet->total_earning= 0.0;
             $wallet->total_withdrawn=0.0;
             $wallet->pending_withdraw=0.0;
