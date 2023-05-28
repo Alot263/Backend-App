@@ -234,10 +234,7 @@ class DeliveryPartnerController extends Controller
         {
             return view('admin-views.delivery-partner.view.order', compact('delivery_company'));
         }
-        else if($tab == 'item')
-        {
-            return view('admin-views.delivery-partner.view.product', compact('delivery_company'));
-        }
+
         else if($tab == 'discount')
         {
             return view('admin-views.delivery-partner.view.discount', compact('delivery_company'));

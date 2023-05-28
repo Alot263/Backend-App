@@ -52,9 +52,6 @@
                     <a class="nav-link {{request('tab')=='order'?'active':''}}" href="{{route('admin.delivery-company.view', ['delivery_company'=>$delivery_company->id, 'tab'=> 'order'])}}"  aria-disabled="true">{{translate('messages.orders')}}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{request('tab')=='item'?'active':''}}" href="{{route('admin.delivery-company.view', ['delivery_company'=>$delivery_company->id, 'tab'=> 'item'])}}"  aria-disabled="true">{{translate('messages.items')}}</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {{request('tab')=='reviews'?'active':''}}" href="{{route('admin.delivery-company.view', ['delivery_company'=>$delivery_company->id, 'tab'=> 'reviews'])}}"  aria-disabled="true">{{translate('messages.reviews')}}</a>
                 </li>
                 <li class="nav-item">

@@ -25,22 +25,11 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="form-group mb-0">
-                                <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="item_section">
-                                <span class="pr-2">{{translate('messages.manage_item_setup')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('By disabling this field, the the delivery company can`t manage items, which means the delivery company web panel app won`t get the access for managing items')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.show_hide_food_menu')}}"></span></span>
-                                    <input type="checkbox" class="toggle-switch-input" onclick="location.href='{{route('admin.delivery-company.toggle-settings',[$delivery_company->id,$delivery_company->item_section?0:1, 'item_section'])}}'" name="item_section" id="item_section" {{$delivery_company->item_section?'checked':''}}>
-                                    <span class="toggle-switch-label text">
-                                        <span class="toggle-switch-indicator"></span>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
 
                         <div class="col-sm-6 col-lg-4">
                             <div class="form-group mb-0">
                                 <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="reviews_section">
-                                <span class="pr-2">{{translate('messages.Show_Reviews_In_Store_Panel')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If this field is active, the delivery company panel & store app can see the customer`s review')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.show_hide_food_menu')}}"></span> </span>
+                                <span class="pr-2">{{translate('messages.Show_Reviews_In_Delivery_Company_Panel')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If this field is active, the delivery company panel & store app can see the customer`s review')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{translate('messages.show_hide_food_menu')}}"></span> </span>
                                     <input type="checkbox" class="toggle-switch-input" onclick="location.href='{{route('admin.delivery-company.toggle-settings',[$delivery_company->id,$delivery_company->reviews_section?0:1, 'reviews_section'])}}'" name="reviews_section" id="reviews_section" {{$delivery_company->reviews_section?'checked':''}}>
                                     <span class="toggle-switch-label text">
                                         <span class="toggle-switch-indicator"></span>
@@ -48,31 +37,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="form-group mb-0">
-                                <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="pos_system">
-                                <span class="pr-2 text-capitalize">{{translate('messages.include_POS_in_store_panel')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If this option is turned on, the store panel will get the
-                                    Point of Sale (POS) option')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{__('messages.pos_system_hint')}}"></span></span>
-                                    <input type="checkbox" class="toggle-switch-input" onclick="location.href='{{route('admin.delivery-company.toggle-settings',[$delivery_company->id,$delivery_company->pos_system?0:1, 'pos_system'])}}'" id="pos_system" {{$delivery_company->pos_system?'checked':''}}>
-                                    <span class="toggle-switch-label">
-                                        <span class="toggle-switch-indicator"></span>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
 
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="form-group mb-0">
-                                <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="schedule_order">
-                                <span class="pr-2">{{translate('messages.scheduled')}} {{translate('messages.order_option')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If this status is turned on, the customer is able to place a scheduled
-                                    order for this store')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{__('messages.scheduled_order_hint')}}"></span></span>
-                                    <input type="checkbox" class="toggle-switch-input" onclick="location.href='{{route('admin.delivery-company.toggle-settings',[$delivery_company->id,$delivery_company->schedule_order?0:1, 'schedule_order'])}}'" id="schedule_order" {{$delivery_company->schedule_order?'checked':''}}>
-                                    <span class="toggle-switch-label">
-                                        <span class="toggle-switch-indicator"></span>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
                         <div class="col-sm-6 col-lg-4">
                             <div class="form-group mb-0">
                                 <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="self_delivery_system">
@@ -97,17 +62,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-lg-4">
-                            <div class="form-group mb-0">
-                                <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control" for="take_away">
-                                <span class="pr-2 text-capitalize">{{translate('messages.take_away')}}<span class="input-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{__('messages.take_away_hint')}}"><img src="{{asset('/public/assets/admin/img/info-circle.svg')}}" alt="{{__('messages.take_away_hint')}}"></span></span>
-                                    <input type="checkbox" class="toggle-switch-input" onclick="location.href='{{route('admin.delivery-company.toggle-settings',[$delivery_company->id,$delivery_company->take_away?0:1, 'take_away'])}}'" id="take_away" {{$delivery_company->take_away?'checked':''}}>
-                                    <span class="toggle-switch-label">
-                                        <span class="toggle-switch-indicator"></span>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
+
                         @if ($delivery_company->module->module_type == 'pharmacy')
                         @php($prescription_order_status = \App\Models\BusinessSetting::where('key', 'prescription_order_status')->first())
                         @php($prescription_order_status = $prescription_order_status ? $prescription_order_status->value : 0)

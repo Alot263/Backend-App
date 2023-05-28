@@ -1535,6 +1535,7 @@
   'discounts' => 'Discounts',
   'manage_item_setup' => 'Manage item setup',
   'Show_Reviews_In_Store_Panel' => 'Show Reviews In Store Panel',
+  'Show_Reviews_In_Delivery_Company_Panel' => 'Show Reviews In Delivery Company Panel',
   'order_option' => 'Order option',
   'self_delivery' => 'Self delivery',
   'scheduled_order_hint' => ' If this status is turned on  the customer is able to place a scheduled order for this restaurant.',
