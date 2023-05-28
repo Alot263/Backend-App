@@ -60,7 +60,7 @@ class ItemController extends Controller
         if ($request['price'] <= $dis || $validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
-        
+
         $tag_ids = [];
         if ($request->tags != null) {
             $tags = explode(",", $request->tags);
@@ -303,7 +303,7 @@ class ItemController extends Controller
         if ($request['price'] <= $dis || $validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
-        
+
         $tag_ids = [];
         if ($request->tags != null) {
             $tags = explode(",", $request->tags);
@@ -701,7 +701,7 @@ class ItemController extends Controller
             $query->withOutGlobalScope(StoreScope::class);
         }, 'customer'])->whereHas('item', function ($q) use ($request) {
             return $q->where('module_id', Config::get('module.current_module_id'))->withOutGlobalScope(StoreScope::class);
-        })->latest()->paginate(config('default_pagination'));   
+        })->latest()->paginate(config('default_pagination'));
         return view('admin-views.product.reviews-list', compact('reviews'));
     }
 
@@ -888,6 +888,16 @@ class ItemController extends Controller
         }
     }
 
+    public function delivery_company_item_export($type, $store_id)
+    {
+        $item = Item::withoutGlobalScope(StoreScope::class)->with('category')->where('delivery_company_id', $store_id)->get();
+        if ($type == 'excel') {
+            return (new FastExcel(Helpers::export_store_item($item)))->download('Items.xlsx');
+        } elseif ($type == 'csv') {
+            return (new FastExcel(Helpers::export_store_item($item)))->download('Items.csv');
+        }
+    }
+
     public function export(Request $request, $types)
     {
         $store_id = $request->query('store_id', 'all');
@@ -928,6 +938,22 @@ class ItemController extends Controller
         return response()->json([
             'count' => count($foods),
             'view' => view('admin-views.vendor.view.partials._product', compact('foods'))->render()
+        ]);
+    }
+
+    public function search_delivery_company(Request $request, $delivery_company_id)
+    {
+        $key = explode(' ', $request['search']);
+        $foods = Item::withoutGlobalScope(StoreScope::class)
+            ->where('store_id', $delivery_company_id)
+            ->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->where('name', 'like', "%{$value}%");
+                }
+            })->limit(50)->get();
+        return response()->json([
+            'count' => count($foods),
+            'view' => view('admin-views.delivery-partner.view.partials._product', compact('foods'))->render()
         ]);
     }
 }

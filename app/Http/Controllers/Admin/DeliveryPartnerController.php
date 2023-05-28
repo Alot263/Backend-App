@@ -228,11 +228,11 @@ class DeliveryPartnerController extends Controller
         }
         if($tab == 'settings')
         {
-            return view('admin-views.deliver-partner.view.settings', compact('delivery_company'));
+            return view('admin-views.delivery-partner.view.settings', compact('delivery_company'));
         }
         else if($tab == 'order')
         {
-            return view('admin-views.delivery-prtner.view.order', compact('delivery_company'));
+            return view('admin-views.delivery-partner.view.order', compact('delivery_company'));
         }
         else if($tab == 'item')
         {

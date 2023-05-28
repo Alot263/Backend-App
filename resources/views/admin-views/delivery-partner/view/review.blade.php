@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',$store->name."'s ".translate('messages.reviews'))
+@section('title',$delivery_company->name."'s ".translate('messages.reviews'))
 
 @push('css_or_js')
     <!-- Custom styles for this page -->
@@ -10,14 +10,14 @@
 
 @section('content')
 <div class="content container-fluid">
-    @include('admin-views.vendor.view.partials._header',['store'=>$store])
+    @include('admin-views.delivery-partner.view.partials._header',['delivery_company'=>$delivery_company])
     <!-- Page Heading -->
     <div class="tab-content">
         <div class="tab-pane fade show active" id="product">
-            <div class="resturant-review-top" id="store_details">
+            <div class="resturant-review-top" id="delivery_company_details">
                 <div class="resturant-review-left mb-3">
-                    @php($reviews = $store->reviews()->with('item',function($query){
-                        $query->withoutGlobalScope(\App\Scopes\StoreScope::class);
+                    @php($reviews = $delivery_company->reviews()->with('item',function($query){
+                        $query->withoutGlobalScope(\App\Scopes\DeliveryCompanyScope::class);
                     })->get())
                     {{-- {{ dd($reviews) }} --}}
                     @php($user_rating = null)
@@ -135,7 +135,7 @@
                 </div>
                 <div class="resturant-review-right">
                     <ul class="list-unstyled list-unstyled-py-2 mb-0">
-                    @php($ratings = $store->rating)
+                    @php($ratings = $delivery_company->rating)
                     @php($five = $ratings[0])
                     @php($four = $ratings[1])
                     @php($three = $ratings[2])
@@ -234,7 +234,7 @@
                             </thead>
 
                             <tbody id="set-rows">
-                            @php($reviews = $store->reviews()->with('item',function($query){
+                            @php($reviews = $delivery_company->reviews()->with('item',function($query){
                                 $query->withoutGlobalScope(\App\Scopes\StoreScope::class);
                             })->latest()->paginate(25))
 

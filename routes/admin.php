@@ -143,10 +143,12 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('search', 'ItemController@search')->name('search');
             Route::get('export/{type}', 'ItemController@export')->name('export');
             Route::post('store/{store_id}/search', 'ItemController@search_store')->name('store-search');
+            Route::post('delivery-company/{delivery_company_id}/search', 'ItemController@search_delivery_company')->name('delivery-company-search');
             Route::get('reviews', 'ItemController@review_list')->name('reviews');
             Route::post('reviews/search', 'ItemController@review_search')->name('reviews.search');
             Route::get('remove-image', 'ItemController@remove_image')->name('remove-image');
             Route::get('view/{id}', 'ItemController@view')->name('view');
+            Route::get('delivery-company-item-export/{type}/{delivery_company_id}', 'ItemController@delivery_company_item_export')->name('delivery-company-item-export');
             Route::get('store-item-export/{type}/{store_id}', 'ItemController@store_item_export')->name('store-item-export');
             //ajax request
             Route::get('get-categories', 'ItemController@get_categories')->name('get-categories');
@@ -403,7 +405,9 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('filter', 'OrderController@filter')->name('filter');
             Route::get('search', 'OrderController@search')->name('search');
             Route::post('store/search', 'OrderController@store_order_search')->name('store-search');
+            Route::post('delivery-company/search', 'OrderController@delivery_company_order_search')->name('delivery-company-search');
             Route::get('store/export/{type}/{store_id}', 'OrderController@store_order_export')->name('store-export');
+            Route::get('delivery-company/export/{type}/{delivery_company_id}', 'OrderController@delivery_company_order_export')->name('delivery-company-export');
             //order update
             Route::post('add-to-cart', 'OrderController@add_to_cart')->name('add-to-cart');
             Route::post('remove-from-cart', 'OrderController@remove_from_cart')->name('remove-from-cart');

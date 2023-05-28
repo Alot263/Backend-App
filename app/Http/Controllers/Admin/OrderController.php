@@ -924,11 +924,11 @@ class OrderController extends Controller
                     if ($c['item_campaign_id'] != null) {
                         $product = ItemCampaign::find($c['item_campaign_id']);
                         if ($product) {
-    
+
                             $price = $c['price'];
-    
+
                             $product = Helpers::product_data_formatting($product);
-    
+
                             $c->item_details = json_encode($product);
                             $c->updated_at = now();
                             if (isset($c->id)) {
@@ -952,7 +952,7 @@ class OrderController extends Controller
                             } else {
                                 $c->save();
                             }
-    
+
                             $total_addon_price += $c['total_add_on_price'];
                             $product_price += $price * $c['quantity'];
                             $store_discount_amount += $c['discount_on_item'] * $c['quantity'];
@@ -966,9 +966,9 @@ class OrderController extends Controller
                         $product = Item::find($c['item_id']);
                         if ($product) {
                             $price = $c['price'];
-    
+
                             $product = Helpers::product_data_formatting($product);
-    
+
                             $c->item_details = json_encode($product);
                             $c->updated_at = now();
                             if (isset($c->id)) {
@@ -992,7 +992,7 @@ class OrderController extends Controller
                             } else {
                                 $c->save();
                             }
-    
+
                             $total_addon_price += $c['total_add_on_price'];
                             $product_price += $price * $c['quantity'];
                             $store_discount_amount += $c['discount_on_item'] * $c['quantity'];
@@ -1201,6 +1201,18 @@ class OrderController extends Controller
     public function store_order_export($type, $store_id)
     {
         $orders = Order::where('store_id', $store_id)->Notpos()->get();
+
+        if ($type == 'excel') {
+            return (new FastExcel(OrderLogic::format_export_data($orders, $type)))->download('Orders.xlsx');
+        } else if ($type == 'csv') {
+            return (new FastExcel(OrderLogic::format_export_data($orders, $type)))->download('Orders.csv');
+        }
+        return (new FastExcel(OrderLogic::format_export_data($orders, $type)))->download('Orders.xlsx');
+    }
+
+    public function delivery_company_order_export($type, $delivery_company_id)
+    {
+        $orders = Order::where('delivery_company_id', $delivery_company_id)->Notpos()->get();
 
         if ($type == 'excel') {
             return (new FastExcel(OrderLogic::format_export_data($orders, $type)))->download('Orders.xlsx');

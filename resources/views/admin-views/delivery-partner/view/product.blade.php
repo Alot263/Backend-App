@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',$store->name."'s ".translate('messages.items'))
+@section('title',$delivery_company->name."'s ".translate('messages.items'))
 
 @push('css_or_js')
     <!-- Custom styles for this page -->
@@ -10,9 +10,9 @@
 
 @section('content')
 <div class="content container-fluid">
-    @include('admin-views.vendor.view.partials._header',['store'=>$store])
+    @include('admin-views.delivery-partner.view.partials._header',['$delivery_company'=>$delivery_company])
     <!-- Page Heading -->
-    @php($foods = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where('store_id', $store->id)->latest()->paginate(25))
+    @php($foods = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where('delivery_company_id', $delivery_company->id)->latest()->paginate(25))
     <div class="tab-content">
         <div class="tab-pane fade show active" id="product">
 
@@ -21,7 +21,7 @@
                     <div class="order-info-icon icon-sm">
                         <img src="{{asset('/public/assets/admin/img/all.png')}}" alt="public">
                     </div>
-                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['store_id'=>$store->id])->count())
+                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['delivery_company_id'=>$delivery_company->id])->count())
                     @php($item = ($item == null) ? 0 : $item)
                     <h6 class="card-subtitle">
                         {{translate('All Items')}}
@@ -33,7 +33,7 @@
                     <div class="order-info-icon icon-sm">
                 <img src="{{asset('/public/assets/admin/img/active.png')}}" alt="public">
                     </div>
-                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['store_id'=>$store->id, 'status'=>1])->count())
+                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['delivery_company_id'=>$delivery_company->id, 'status'=>1])->count())
                     @php($item = ($item == null) ? 0 : $item)
                     <h6 class="card-subtitle">
                         {{translate('Active Items')}}
@@ -45,7 +45,7 @@
                     <div class="order-info-icon icon-sm">
                 <img src="{{asset('/public/assets/admin/img/inactive.png')}}" alt="public">
                     </div>
-                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['store_id'=>$store->id, 'status'=>0])->count())
+                    @php($item = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where(['delivery_company_id'=>$delivery_company->id, 'status'=>0])->count())
                     @php($item = ($item == null) ? 0 : $item)
                     <h6 class="card-subtitle">
                         {{translate('Inactive Items')}}
@@ -63,7 +63,7 @@
                         </h3>
 
                     <form id="search-form" class="search-form">
-                    <input type="hidden" name="store_id" value="{{$store->id}}">
+                    <input type="hidden" name="delivery_company_id" value="{{$delivery_company->id}}">
                         <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch" name="search" type="search" class="form-control h--40px" placeholder="{{ translate('Search by name...') }}" aria-label="{{translate('messages.search_here')}}">
@@ -100,13 +100,13 @@
                             <div class="dropdown-divider"></div> --}}
                             <span class="dropdown-header">{{ translate('messages.download') }}
                                 {{ translate('messages.options') }}</span>
-                            <a id="export-excel" class="dropdown-item" href="{{route('admin.item.store-item-export', ['type'=>'excel', 'store_id'=>$store->id])}}">
+                            <a id="export-excel" class="dropdown-item" href="{{route('admin.item.delivery-company-item-export', ['type'=>'excel', 'delivery_company_id'=>$delivery_company->id])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
                                     alt="Image Description">
                                 {{ translate('messages.excel') }}
                             </a>
-                            <a id="export-csv" class="dropdown-item" href="{{route('admin.item.store-item-export', ['type'=>'csv', 'store_id'=>$store->id])}}">
+                            <a id="export-csv" class="dropdown-item" href="{{route('admin.item.delivery-company-item-export', ['type'=>'csv', 'delivery_company_id'=>$delivery_company->id])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
                                     alt="Image Description">
@@ -144,7 +144,7 @@
                         </thead>
 
                         <tbody id="setrows">
-                        @php($foods = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where('store_id', $store->id)->latest()->paginate(25))
+                        @php($foods = \App\Models\Item::withoutGlobalScope(\App\Scopes\StoreScope::class)->where('delivery_company_id', $delivery_company->id)->latest()->paginate(25))
                         @foreach($foods as $key=>$food)
 
                         <tr>
@@ -268,7 +268,7 @@
                     }
                 });
                 $.post({
-                    url: '{{route('admin.item.store-search', $store->id)}}',
+                    url: '{{route('admin.item.delivery-company-search', $delivery_company->id)}}',
                     data: formData,
                     cache: false,
                     contentType: false,
@@ -295,7 +295,7 @@
         //         }
         //     });
         //     $.post({
-        //         url: '{{route('admin.item.store-search', $store->id)}}',
+        //         url: '{{route('admin.item.delivery-company-search', $delivery_company->id)}}',
         //         data: formData,
         //         cache: false,
         //         contentType: false,

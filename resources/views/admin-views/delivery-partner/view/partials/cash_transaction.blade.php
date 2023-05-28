@@ -13,7 +13,7 @@
                 </tr>
             </thead>
             <tbody>
-            @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'store')->where('from_id', $store->vendor->id)->paginate(25))
+            @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'delivery_company')->where('from_id', $delivery_company->partner_id)->paginate(25))
             @foreach($account_transaction as $k=>$at)
                 <tr>
                     <td scope="row">{{$k+$account_transaction->firstItem()}}</td>
