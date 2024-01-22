@@ -26,6 +26,8 @@
         "mercadopago/dx-php": "2.4.3",
         "mpdf/mpdf": "^8.0",
         "nwidart/laravel-modules": "9.0",
+        "payfast/payfast-php-sdk": "^1.1",
+        "paynow/php-sdk": "^1.0",
         "paypal/paypal-checkout-sdk": "^1.0",
         "rap2hpoutre/fast-excel": "^5.2",
         "razorpay/razorpay": "^2.8",
