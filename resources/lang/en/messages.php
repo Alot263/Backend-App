@@ -14,6 +14,7 @@
   'excel' => 'Excel',
   'csv' => 'Csv',
   'sl' => 'Sl',
+  'payfast' => 'Payfast',
   'action' => 'Action',
   'edit' => 'Edit',
   'Want to delete this attribute ?' => 'Want to delete this attribute ?',

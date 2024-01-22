@@ -13,6 +13,7 @@
   'options' => 'অপশনস',
   'excel' => 'এক্সেল',
   'csv' => 'সিএসভি',
+  'payfast' => 'Payfast',
   'sl' => 'Sl',
   'action' => 'অ্যাকশন',
   'edit' => 'এডিট',

@@ -816,7 +816,37 @@ class BusinessSettingsController extends Controller
                     'updated_at' => now(),
                 ]);
             }
-        } elseif ($name == 'stripe') {
+        }
+        elseif ($name == 'payfast') {
+	        $payment = BusinessSetting::where('key', 'payfast')->first();
+	        if (isset($payment) == false) {
+		        DB::table('business_settings')->insert([
+			        'key'                      => 'payfast',
+			        'value'                    => json_encode([
+				        'status'               => 1,
+				        'mode'                 => '',
+				        'payfast_merchant_id'  => '',
+				        'payfast_merchant_key' => '',
+				        'payfast_passphrase'   => '',
+			        ]),
+			        'created_at' => now(),
+			        'updated_at' => now(),
+		        ]);
+	        } else {
+		        DB::table('business_settings')->where(['key' => 'payfast'])->update([
+			        'key'        => 'payfast',
+			        'value'      => json_encode([
+				        'status'               => $request['status'],
+				        'mode'                 => $request['mode'],
+				        'payfast_merchant_id'  => $request['payfast_merchant_id'],
+				        'payfast_merchant_key' => $request['payfast_merchant_key'],
+				        'payfast_passphrase'   => $request['payfast_passphrase'],
+			        ]),
+			        'updated_at' => now(),
+		        ]);
+	        }
+        }
+        elseif ($name == 'stripe') {
             $payment = BusinessSetting::where('key', 'stripe')->first();
             if (isset($payment) == false) {
                 DB::table('business_settings')->insert([

@@ -259,12 +259,107 @@
                     </div>
                 </div>
             @endforeach
+
+                <!-- End Col -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body p-30px">
+                            @php($config=\App\CentralLogics\Helpers::get_business_settings('paypal'))
+                            <form
+                                    action="{{env('APP_MODE')!='demo'?route('admin.business-settings.third-party.payment-method-update',['paypal']):'javascript:'}}"
+                                    method="post">
+                                @csrf
+                                <h5 class="d-flex flex-wrap justify-content-between">
+                                    <strong>{{translate('messages.paypal')}}</strong>
+                                    <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
+                                        <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
+                                        <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
+                                        <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
+                                        <span class="toggle-switch-label text">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                                    </label>
+                                </h5>
+                                <div class="payment--gateway-img">
+                                    <img src="{{asset('/public/assets/admin/img/payment/paypal.png')}}" alt="public">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label for="mode">{{ translate('messages.select_payment_mode') }}</label>
+                                    <select name="mode" class="form-control" id="sel1">
+                                        <option value="test" {{isset($config['mode'])?($config['mode'] == 'test'?'selected':''):''}}>Test</option>
+                                        <option value="live" {{isset($config['mode'])?($config['mode'] == 'live'?'selected':''):''}}>Live</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <input class="form-control" type="text" placeholder="Paypal Client Id" name="paypal_client_id"
+                                           value="{{env('APP_MODE')!='demo'?($config?$config['paypal_client_id']:''):''}}">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <input class="form-control" type="text" placeholder="Paypal Secret" name="paypal_secret"
+                                           value="{{env('APP_MODE')!='demo'?$config['paypal_secret']??'':''}}">
+                                </div>
+                                <div class="text-right">
+                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
+                                            onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body p-30px">
+                            @php($config=\App\CentralLogics\Helpers::get_business_settings('payfast'))
+                            <form
+                                    action="{{env('APP_MODE')!='demo'?route('admin.business-settings.third-party.payment-method-update',['payfast']):'javascript:'}}"
+                                    method="post">
+                                @csrf
+                                <h5 class="d-flex flex-wrap justify-content-between">
+                                    <strong>{{translate('messages.payfast')}}</strong>
+                                    <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
+                                        <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
+                                        <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
+                                        <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
+                                        <span class="toggle-switch-label text">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                                    </label>
+                                </h5>
+                                <div class="payment--gateway-img">
+                                    <img src="{{asset('/public/assets/admin/img/payment/payfast.png')}}" alt="public">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label for="mode">{{ translate('messages.select_payment_mode') }}</label>
+                                    <select name="mode" class="form-control" id="sel1">
+                                        <option value="test" {{isset($config['mode'])?($config['mode'] == 'test'?'selected':''):''}}>Test</option>
+                                        <option value="live" {{isset($config['mode'])?($config['mode'] == 'live'?'selected':''):''}}>Live</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <input class="form-control" type="text" placeholder="Merchant ID" name="payfast_merchant_id"
+                                           value="{{env('APP_MODE')!='demo'?($config?$config['payfast_merchant_id']:''):''}}">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <input class="form-control" type="text" placeholder="Merchant Key" name="payfast_merchant_key"
+                                           value="{{env('APP_MODE')!='demo'?($config?$config['payfast_merchant_key']:''):''}}">
+                                </div>
+                                <div class="form-group mb-4">
+                                    <input class="form-control" type="text" placeholder="Passphrase" name="payfast_passphrase"
+                                           value="{{env('APP_MODE')!='demo'?$config['payfast_passphrase']??'':''}}">
+                                </div>
+
+                                <div class="text-right">
+                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
+                                            onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
         </div>
         <!-- End Tab Content -->
     </div>
-
-
-
 
 
 @endsection

@@ -225,6 +225,42 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body p-20">
+                        <h5 class="text-center">Payfast</h5>
+                        @php($config=\App\CentralLogics\Helpers::get_business_settings('payfast'))
+                        <form action="{{route('admin.business-settings.payment-method-update',['payfast'])}}"
+                              method="post">
+                            @csrf
+                            @if(isset($config))
+                                <div class="form-group mb-2">
+                                    <label class="control-label">Payfast</label>
+                                </div>
+                                <div class="form-group mb-2 mt-2">
+                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
+                                    <label class="d-block">Active</label>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
+                                    <label class="d-block">Inactive</label>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="d-block">Paypal client id</label>
+                                    <input type="text" class="form-control" name="paypal_client_id">
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label class="d-block">Paypal secret </label>
+                                    <input type="text" class="form-control" name="paypal_secret">
+                                </div>
+                                <button type="button" onclick="call_admin()" class="btn btn-primary mb-2">Save</button>
+                            @else
+                                <button type="submit" class="btn btn-primary mb-2">Configure</button>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+            </div>
             <div class="col-md-6 pt-4">
                 <div class="card">
                     <div class="card-body p-20">

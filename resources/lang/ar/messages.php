@@ -10,6 +10,7 @@
   'access_denied' => 'تم الرفض !',
   'access_token' => 'رمز وصول',
   'add' => 'يضيف',
+  'payfast' => 'Payfast',
   'add_new_item' => 'أضف أداة جديدة',
   'add_delivery_man' => 'أضف رجل التوصيل',
   'add_customer' => 'تسجيل عميل جديد',
