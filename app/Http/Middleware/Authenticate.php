@@ -17,17 +17,18 @@ class Authenticate extends Middleware
         if($request->is('api/*')) {
             return route('authentication-failed');
         }
-        else if ($request->is('admin/*'))
+        else if ($request->is('admin/*') || $request->is('vendor/*'))
         {
-            return route('admin.auth.login');
+            return route('home');
+            // return route('admin.auth.login');
         }
-        else if ($request->is('vendor/*'))
-        {
-            return route('vendor.auth.login');
-        }
+        // else if ($request->is('vendor/*'))
+        // {
+        //     return route('vendor.auth.login');
+        // }
         else
         {
-            return route('/');
+            return route('home');
         }
     }
 }

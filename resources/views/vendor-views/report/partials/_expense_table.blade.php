@@ -9,12 +9,5 @@
         {{$exp['description']}}
     </div></td>
     <td>{{date('Y-m-d '.config('timeformat'),strtotime($exp->created_at))}}</td>
-    {{-- <td>
-        <div class="btn--container justify-content-center">
-            <a href="{{route('admin.expense.show',[$exp['id']])}}"
-            class="btn action-btn btn--warning btn-outline-warning"><i class="tio-visible"></i>
-            </a>
-        </div>
-    </td> --}}
 </tr>
 @endforeach

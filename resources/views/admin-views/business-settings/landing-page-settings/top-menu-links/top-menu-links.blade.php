@@ -28,11 +28,6 @@
             href="{{ route('admin.business-settings.landing-page-settings', 'promotion-banner') }}"
             aria-disabled="true">{{ translate('messages.promotion Banner') }}</a>
     </li>
-    {{-- <li class="nav-item">
-        <a class="nav-link {{ Request::is('admin/business-settings/landing-page-settings/module-section') ? 'active' : '' }}"
-            href="{{ route('admin.business-settings.landing-page-settings', 'module-section') }}"
-            aria-disabled="true">{{ translate('messages.module Section') }}</a>
-    </li> --}}
     <li class="nav-item">
         <a class="nav-link {{ Request::is('admin/business-settings/landing-page-settings/testimonial') ? 'active' : '' }}"
             href="{{ route('admin.business-settings.landing-page-settings', 'testimonial') }}"

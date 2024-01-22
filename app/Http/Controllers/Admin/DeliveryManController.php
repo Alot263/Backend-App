@@ -2,19 +2,29 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\DeliveryMan;
-use App\Models\DMReview;
+use App\Exports\DisbursementHistoryExport;
+use App\Models\DisbursementDetails;
 use App\Models\Zone;
 use App\Models\Message;
-use App\Models\Conversation;
+use App\Models\DMReview;
 use App\Models\UserInfo;
-use Brian2694\Toastr\Facades\Toastr;
+use App\Models\DeliveryMan;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\CentralLogics\Helpers;
+use App\Exports\DeliveryManEarningExport;
+use App\Exports\DeliveryManListExport;
+use App\Exports\DeliveryManReviewExport;
+use App\Exports\SingleDeliveryManReviewExport;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\OrderTransaction;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\Password;
 
 class DeliveryManController extends Controller
 {
@@ -25,10 +35,24 @@ class DeliveryManController extends Controller
 
     public function list(Request $request)
     {
+        $key = explode(' ', $request['search']);
         $zone_id = $request->query('zone_id', 'all');
-        $delivery_men = DeliveryMan::when(is_numeric($zone_id), function($query) use($zone_id){
+        $delivery_men = DeliveryMan::
+        when(isset($key), function($query) use($key){
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('f_name', 'like', "%{$value}%")
+                        ->orWhere('l_name', 'like', "%{$value}%")
+                        ->orWhere('email', 'like', "%{$value}%")
+                        ->orWhere('phone', 'like', "%{$value}%")
+                        ->orWhere('identity_number', 'like', "%{$value}%");
+                }
+            });
+        })
+        ->when(is_numeric($zone_id), function($query) use($zone_id){
             return $query->where('zone_id', $zone_id);
-        })->with('zone')->where('type','zone_wise')
+        })
+        ->with('zone')->where('type','zone_wise')
         ->where('application_status', 'approved')
         ->latest()->paginate(config('default_pagination'));
         $zone = is_numeric($zone_id)?Zone::findOrFail($zone_id):null;
@@ -122,15 +146,39 @@ class DeliveryManController extends Controller
         ]);
     }
 
-    public function reviews_list(){
-        $reviews=DMReview::with(['delivery_man','customer'])->whereHas('delivery_man',function($query){
-            $query->where('type','zone_wise');
+    public function reviews_list(Request $request){
+        $key = explode(' ', $request['search']);
+        $reviews=DMReview::with(['delivery_man','customer'])->whereHas('delivery_man',function($query) use ($key){
+            foreach ($key as $value) {
+                $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%");
+            }
         })->latest()->paginate(config('default_pagination'));
         return view('admin-views.delivery-man.reviews-list',compact('reviews'));
     }
 
+    public function reviews_export(Request $request){
+        $key = explode(' ', $request['search']);
+        $reviews=DMReview::with(['delivery_man','customer'])->whereHas('delivery_man',function($query) use ($key){
+            foreach ($key as $value) {
+                $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%");
+            }
+        })->get();
+
+        $data = [
+            'reviews'=>$reviews,
+            'search'=>$request->search??null,
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new DeliveryManReviewExport($data), 'DeliveryManReviews.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new DeliveryManReviewExport($data), 'DeliveryManReviews.csv');
+        }
+    }
+
     public function preview(Request $request, $id, $tab='info')
     {
+        $key = explode(' ', $request['search']);
         $dm = DeliveryMan::with(['reviews'])->where('type','zone_wise')->where(['id' => $id])->first();
         if($tab == 'info')
         {
@@ -152,6 +200,86 @@ class DeliveryManController extends Controller
             }
 
             return view('admin-views.delivery-man.view.conversations', compact('conversations','dm'));
+        } else if ($tab == 'disbursement') {
+            $disbursements=DisbursementDetails::where('delivery_man_id', $dm->id)
+                ->when(isset($key), function ($q) use ($key){
+                    $q->where(function ($q) use ($key) {
+                        foreach ($key as $value) {
+                            $q->orWhere('disbursement_id', 'like', "%{$value}%")
+                                ->orWhere('status', 'like', "%{$value}%");
+                        }
+                    });
+                })
+                ->latest()->paginate(config('default_pagination'));
+            return view('admin-views.delivery-man.view.disbursement', compact('dm','disbursements'));
+
+        }
+    }
+
+    public function review_export(Request $request){
+        $dm = DeliveryMan::with(['reviews'])->where('type','zone_wise')->where(['id' => $request->id])->first();
+        $reviews=DMReview::where(['delivery_man_id'=>$request->id])->latest()->get();
+
+        $data = [
+            'dm'=>$dm,
+            'reviews'=>$reviews,
+            'search'=>$request->search??null,
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new SingleDeliveryManReviewExport($data), 'DeliveryManReviews.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new SingleDeliveryManReviewExport($data), 'DeliveryManReviews.csv');
+        }
+    }
+
+    public function disbursement_export(Request $request,$id,$type)
+    {
+        $key = explode(' ', $request['search']);
+
+        $dm= DeliveryMan::find($id);
+        $disbursements=DisbursementDetails::where('delivery_man_id', $dm->id)
+            ->when(isset($key), function ($q) use ($key){
+                $q->where(function ($q) use ($key) {
+                    foreach ($key as $value) {
+                        $q->orWhere('disbursement_id', 'like', "%{$value}%")
+                            ->orWhere('status', 'like', "%{$value}%");
+                    }
+                });
+            })
+            ->latest()->get();
+        $data = [
+            'disbursements'=>$disbursements,
+            'search'=>$request->search??null,
+            'delivery_man'=>$dm->f_name.' '.$dm->l_name,
+            'type'=>'dm',
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new DisbursementHistoryExport($data), 'Disbursementlist.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new DisbursementHistoryExport($data), 'Disbursementlist.csv');
+        }
+    }
+
+    public function earning_export(Request $request){
+        $date = $request->date;
+        $dm = DeliveryMan::with(['reviews'])->where('type','zone_wise')->where(['id' => $request->id])->first();
+        $earnings=OrderTransaction::where('delivery_man_id', $request->id)
+        ->when($date, function($query)use($date){
+            return $query->whereDate('created_at', $date);
+        })->get();
+
+        $data = [
+            'dm'=>$dm,
+            'earnings'=>$earnings,
+            'date'=>$request->date??null,
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new DeliveryManEarningExport($data), 'DeliveryManEarnings.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new DeliveryManEarningExport($data), 'DeliveryManEarnings.csv');
         }
     }
 
@@ -166,7 +294,7 @@ class DeliveryManController extends Controller
             'zone_id' => 'required',
             'earning' => 'required',
             'vehicle_id' => 'required',
-            'password'=>'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'zone_id.required' => translate('messages.select_a_zone'),
@@ -245,6 +373,11 @@ class DeliveryManController extends Controller
                     ]);
                 }
 
+                $mail_status = Helpers::get_mail_status('suspend_mail_status_dm');
+                if (config('mail.status') && $mail_status == '1') {
+                    Mail::to($delivery_man['email'])->send(new \App\Mail\DmSuspendMail($delivery_man['f_name']));
+                }
+
             }
 
         }
@@ -284,7 +417,23 @@ class DeliveryManController extends Controller
         $delivery_man->application_status = $request->status;
         if($request->status == 'approved') $delivery_man->status = 1;
         $delivery_man->save();
+        try{
+            if($request->status=='approved'){
 
+                $mail_status = Helpers::get_mail_status('approve_mail_status_dm');
+                if(config('mail.status') && $mail_status == '1'){
+                    Mail::to($delivery_man->email)->send(new \App\Mail\DmSelfRegistration('approved',$delivery_man->f_name.' '.$delivery_man->l_name));
+                }
+            }else{
+
+                $mail_status = Helpers::get_mail_status('deny_mail_status_dm');
+                if(config('mail.status') && $mail_status == '1'){
+                    Mail::to($delivery_man->email)->send(new \App\Mail\DmSelfRegistration('denied', $delivery_man->f_name.' '.$delivery_man->l_name));
+                }
+            }
+        }catch(\Exception $ex){
+            info($ex->getMessage());
+        }
         Toastr::success(translate('messages.application_status_updated_successfully'));
         return back();
     }
@@ -299,6 +448,7 @@ class DeliveryManController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$id,
             'vehicle_id' => 'required',
             'earning' => 'required',
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'vehicle_id.required' => translate('messages.select_a_vehicle'),
@@ -475,16 +625,34 @@ class DeliveryManController extends Controller
     }
 
     public function export(Request $request){
+        $key = explode(' ', $request['search']);
         $zone_id = $request->query('zone_id', 'all');
-        $delivery_men = DeliveryMan::when(is_numeric($zone_id), function($query) use($zone_id){
+        $delivery_men = DeliveryMan::when(isset($key), function($query) use($key){
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('f_name', 'like', "%{$value}%")
+                        ->orWhere('l_name', 'like', "%{$value}%")
+                        ->orWhere('email', 'like', "%{$value}%")
+                        ->orWhere('phone', 'like', "%{$value}%")
+                        ->orWhere('identity_number', 'like', "%{$value}%");
+                }
+            });
+        })->when(is_numeric($zone_id), function($query) use($zone_id){
             return $query->where('zone_id', $zone_id);
         })->with('zone')->where('type','zone_wise')
         ->where('application_status', 'approved')
         ->get();
-        if($request->type == 'excel'){
-            return (new FastExcel(Helpers::export_delivery_men($delivery_men)))->download('DeliveryMans.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel(Helpers::export_delivery_men($delivery_men)))->download('DeliveryMans.csv');
+
+        $data = [
+            'delivery_men'=>$delivery_men,
+            'search'=>$request->search??null,
+            'zone'=>is_numeric($zone_id)?Helpers::get_zones_name($zone_id):null,
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new DeliveryManListExport($data), 'DeliveryMans.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new DeliveryManListExport($data), 'DeliveryMans.csv');
         }
     }
 }

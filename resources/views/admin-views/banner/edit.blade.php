@@ -11,7 +11,7 @@
                     <img src="{{asset('public/assets/admin/img/edit.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{translate('messages.update')}} {{translate('messages.banner')}}
+                    {{translate('messages.update_banner')}}
                 </span>
             </h1>
         </div>
@@ -20,27 +20,67 @@
             <div class="col-sm-12 col-lg-12 mb-3 mb-lg-2">
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{route('admin.banner.update', [$banner->id])}}" method="post" id="banner_form">
+                        <form action="{{route('admin.banner.update', [$banner->id])}}" method="post"
+                            id="banner_form"
+                            >
                             @csrf
                             <div class="row g-3">
                                 <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.title')}}</label>
-                                        <input type="text" name="title" class="form-control" placeholder="{{translate('messages.new_banner')}}" value="{{$banner->title}}" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="input-label">{{translate('messages.module')}}</label>
-                                        <select name="module_id" class="form-control js-select2-custom"  title="{{translate('messages.select')}} {{translate('messages.module')}}" id="module_select" disabled>
-                                            @foreach(\App\Models\Module::notParcel()->get() as $module)
-                                                <option value="{{$module->id}}" {{$module->id==$banner->module_id?'selected':''}}>{{$module->module_name}}</option>
+                                    @if($language)
+                                        <ul class="nav nav-tabs mb-4">
+                                            <li class="nav-item">
+                                                <a class="nav-link lang_link active"
+                                                href="#"
+                                                id="default-link">{{translate('messages.default')}}</a>
+                                            </li>
+                                            @foreach ($language as $lang)
+                                                <li class="nav-item">
+                                                    <a class="nav-link lang_link"
+                                                        href="#"
+                                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                                                </li>
                                             @endforeach
-                                        </select>
+                                        </ul>
+                                        <div class="lang_form" id="default-form">
+                                            <div class="form-group">
+                                                <label class="input-label" for="default_title">{{translate('messages.title')}} ({{translate('messages.default')}})</label>
+                                                <input type="text" name="title[]" id="default_title" class="form-control" placeholder="{{translate('messages.new_banner')}}" value="{{$banner?->getRawOriginal('title')}}">
+                                            </div>
+                                            <input type="hidden" name="lang[]" value="default">
+                                        </div>
+                                        @foreach($language as $lang)
+                                            <?php
+                                                if(count($banner['translations'])){
+                                                    $translate = [];
+                                                    foreach($banner['translations'] as $t)
+                                                    {
+                                                        if($t->locale == $lang && $t->key=="title"){
+                                                            $translate[$lang]['title'] = $t->value;
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+                                            <div class="d-none lang_form" id="{{$lang}}-form">
+                                                <div class="form-group">
+                                                    <label class="input-label" for="{{$lang}}_title">{{translate('messages.title')}} ({{strtoupper($lang)}})</label>
+                                                    <input type="text" name="title[]" id="{{$lang}}_title" class="form-control" placeholder="{{translate('messages.new_banner')}}" value="{{$translate[$lang]['title']??''}}">
+                                                </div>
+                                                <input type="hidden" name="lang[]" value="{{$lang}}">
+                                            </div>
+                                        @endforeach
+                                    @else
+                                    <div id="default-form">
+                                        <div class="form-group">
+                                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.title')}} ({{ translate('messages.default') }})</label>
+                                            <input type="text" name="title[]" class="form-control" placeholder="{{translate('messages.new_banner')}}" value="{{$banner['title']}}" maxlength="100">
+                                        </div>
+                                        <input type="hidden" name="lang[]" value="default">
                                     </div>
+                                    @endif
                                     <div class="form-group">
                                         <label class="input-label" for="title">{{translate('messages.zone')}}</label>
                                         <select name="zone_id" id="zone" class="form-control js-select2-custom">
                                             <option  disabled selected>---{{translate('messages.select')}}---</option>
-                                            @php($zones=\App\Models\Zone::all())
                                             @foreach($zones as $zone)
                                                 @if(isset(auth('admin')->user()->zone_id))
                                                     @if(auth('admin')->user()->zone_id == $zone->id)
@@ -53,10 +93,10 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.banner')}} {{translate('messages.type')}}</label>
-                                        <select name="banner_type" id="banner_type" class="form-control" onchange="banner_type_change(this.value)">
-                                            <option value="store_wise" {{$banner->type == 'store_wise'? 'selected':'' }}>{{translate('messages.store')}} {{translate('messages.wise')}}</option>
-                                            <option value="item_wise" {{$banner->type == 'item_wise'? 'selected':'' }}>{{translate('messages.item')}} {{translate('messages.wise')}}</option>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.banner_type')}}</label>
+                                        <select name="banner_type" id="banner_type" class="form-control">
+                                            <option value="store_wise" {{$banner->type == 'store_wise'? 'selected':'' }}>{{translate('messages.store_wise')}}</option>
+                                            <option value="item_wise" {{$banner->type == 'item_wise'? 'selected':'' }}>{{translate('messages.item_wise')}}</option>
                                             <option value="default" {{$banner->type == 'default'? 'selected':'' }}>{{translate('messages.default')}}</option>
                                         </select>
                                     </div>
@@ -73,7 +113,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group mb-0" id="item_wise">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.select')}} {{translate('messages.item')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.select_item')}}</label>
                                         <select name="item_id" id="choice_item" class="form-control js-select2-custom" placeholder="{{translate('messages.select_item')}}">
 
                                         </select>
@@ -86,16 +126,17 @@
                                 <div class="col-lg-6">
                                     <div class="h-100 d-flex flex-column">
                                         <label class="mt-auto mb-0 d-block text-center">
-                                            {{translate('messages.campaign')}} {{translate('messages.image')}}
+                                            {{translate('messages.banner_image')}}
                                             <small class="text-danger">* ( {{translate('messages.ratio')}} 900x300 )</small>
                                         </label>
-                                        <center class="py-3 my-auto">
-                                            <img class="img--vertical" id="viewer" onerror="this.src='{{asset('public/assets/admin/img/900x400/img1.jpg')}}'" src="{{asset('storage/app/public/banner')}}/{{$banner['image']}}" alt="campaign image"/>
-                                        </center>
+                                        <div class="text-center py-3 my-auto">
+                                            <img class="img--vertical onerror-image" id="viewer" data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($banner['image'], asset('storage/app/public/banner/').'/'.$banner['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'banner/') }}"
+                                            alt="banner image"/>
+                                        </div>
                                         <div class="custom-file">
                                             <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                                 accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                            <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                            <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                                         </div>
                                     </div>
                                 </div>
@@ -117,32 +158,10 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/banner-edit.js"></script>
     <script>
-        function getRequest(route, id) {
-            $.get({
-                url: route,
-                dataType: 'json',
-                success: function (data) {
-                    $('#' + id).empty().append(data.options);
-                },
-            });
-        }
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
+        "use strict";
 
-                reader.onload = function (e) {
-                    $('#viewer').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        $("#customFileEg1").change(function () {
-            readURL(this);
-        });
-    </script>
-    <script>
         var zone_id = {{$banner->zone_id}};
 
         var module_id = {{$banner->module_id}};
@@ -165,15 +184,6 @@
             });
         }
         $(document).on('ready', function () {
-
-
-            $('#module_select').on('change', function(){
-                if($(this).val())
-                {
-                    module_id = $(this).val();
-                    get_items();
-                }
-            });
             banner_type_change('{{$banner->type}}');
 
             $('#zone').on('change', function(){
@@ -222,31 +232,7 @@
             });
         });
 
-        function banner_type_change(order_type) {
-            if(order_type=='item_wise')
-            {
-                $('#store_wise').hide();
-                $('#item_wise').show();
-                $('#default').hide();
-            }
-            else if(order_type=='store_wise')
-            {
-                $('#store_wise').show();
-                $('#item_wise').hide();
-                $('#default').hide();
-            }
-            else if(order_type=='default')
-            {
-                $('#default').show();
-                $('#store_wise').hide();
-                $('#item_wise').hide();
-            }
-            else{
-                $('#item_wise').hide();
-                $('#store_wise').hide();
-                $('#default').hide();
-            }
-        }
+
         @if($banner->type == 'item_wise')
         getRequest('{{url('/')}}/admin/item/get-items?module_id={{$banner->module_id}}&zone_id={{$banner->zone_id}}&data[]={{$banner->data}}','choice_item');
         @endif
@@ -285,16 +271,4 @@
             });
         });
     </script>
-            <script>
-                $('#reset_btn').click(function(){
-                    // $('#module_select').val("{{$banner->module_id}}");
-                    // $('#zone').val("{{$banner->zone_id}}").trigger('change');
-                    // $('#viewer').attr('src','{{asset('storage/app/public/banner')}}/{{$banner['image']}}');
-                    // $('#banner_type').val("{{$banner->type}}").trigger('change');
-                    // $('#store_id').val("{{$banner->zone_id}}").trigger('change');
-                    // $('#item_id').val("{{$banner->zone_id}}").trigger('change');
-                    location.reload(true);
-                })
-
-            </script>
 @endpush

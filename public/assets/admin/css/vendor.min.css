@@ -2133,7 +2133,9 @@ a.fc-event:hover {
 .fc-v-event.fc-event-selected .fc-event-resizer {
     inset-inline-start: 50%;
     margin-inline-start: -4px;
-    margin-inline-start: calc(var(--fc-event-resizer-dot-total-width, 8px) / -2);
+    margin-inline-start: calc(
+        var(--fc-event-resizer-dot-total-width, 8px) / -2
+    );
 }
 .fc-v-event.fc-event-selected .fc-event-resizer-start {
     top: -4px;

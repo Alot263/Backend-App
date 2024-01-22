@@ -10,7 +10,7 @@
                     <img src="{{asset('public/assets/admin/img/category.png')}}" class="w--20" alt="">
                 </span>
                 <span>
-                    {{translate('messages.export')}} {{translate('messages.categories')}}
+                    {{translate('messages.export_categories')}}
                 </span>
             </h1>
         </div>
@@ -43,33 +43,33 @@
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.type')}}<span
                                         class="input-label-secondary"></span></label>
-                                <select name="type" id="type" data-placeholder="{{translate('messages.select')}} {{translate('messages.type')}}" class="form-control" required title="Select Type">
-                                    <option value="all">{{translate('messages.all')}} {{translate('messages.data')}}</option>
-                                    <option value="date_wise">{{translate('messages.date')}} {{translate('messages.wise')}}</option>
-                                    <option value="id_wise">{{translate('messages.id')}} {{translate('messages.wise')}}</option>
+                                <select name="type" id="type" data-placeholder="{{translate('messages.select_type')}}" class="form-control" required title="Select Type">
+                                    <option value="all">{{translate('messages.all_data')}}</option>
+                                    <option value="date_wise">{{translate('messages.date_wise')}}</option>
+                                    <option value="id_wise">{{translate('messages.id_wise')}}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group id_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.start')}} {{translate('messages.id')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.start_id')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="number" name="start_id" class="form-control">
                             </div>
                             <div class="form-group date_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.from')}} {{translate('messages.date')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.from_date')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="date" name="from_date" class="form-control">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group id_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.end')}} {{translate('messages.id')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.end_id')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="number" name="end_id" class="form-control">
                             </div>
                             <div class="form-group date_wise">
-                                <label class="input-label text-capitalize" for="exampleFormControlSelect1">{{translate('messages.to')}} {{translate('messages.date')}}<span
+                                <label class="input-label text-capitalize" for="exampleFormControlSelect1">{{translate('messages.to_date')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="date" name="to_date" class="form-control">
                             </div>
@@ -88,16 +88,5 @@
 @endsection
 
 @push('script_2')
-<script>
-    $(document).on('ready', function (){
-        $('.id_wise').hide();
-        $('.date_wise').hide();
-        $('#type').on('change', function()
-        {
-            $('.id_wise').hide();
-            $('.date_wise').hide();
-            $('.'+$(this).val()).show();
-        })
-    });
-</script>
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/category-import-export.js"></script>
 @endpush

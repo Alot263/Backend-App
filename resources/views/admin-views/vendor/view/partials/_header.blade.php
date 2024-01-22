@@ -13,16 +13,18 @@
                 @if(Request::is("admin/store/view/{$store->id}"))
                     @if($store->vendor->status)
                     <a href="{{route('admin.store.edit',[$store->id])}}" class="btn btn--primary float-right">
-                        <i class="tio-edit"></i> {{translate('messages.edit')}} {{translate('messages.store')}}
+                        <i class="tio-edit"></i> {{translate('messages.edit_store')}}
                     </a>
                     @else
                         @if(!isset($store->vendor->status))
-                        <a class="btn btn--danger text-capitalize font-weight-bold float-right"
-                        onclick="request_alert('{{route('admin.store.application',[$store['id'],0])}}','{{translate('messages.you_want_to_deny_this_application')}}')"
+                        <a class="btn btn--danger text-capitalize font-weight-bold float-right request_alert"
+                    data-url="{{route('admin.store.application',[$store['id'],0])}}"
+                    data-message="{{translate('messages.you_want_to_deny_this_application')}}"
                             href="javascript:"><i class="tio-clear-circle-outlined font-weight-bold pr-1"></i> {{translate('messages.deny')}}</a>
                         @endif
-                        <a class="btn btn--primary text-capitalize font-weight-bold float-right mr-2"
-                        onclick="request_alert('{{route('admin.store.application',[$store['id'],1])}}','{{translate('messages.you_want_to_approve_this_application')}}')"
+                        <a class="btn btn--primary text-capitalize font-weight-bold float-right mr-2 request_alert"
+                        data-url="{{route('admin.store.application',[$store['id'],1])}}"
+                        data-message="{{translate('messages.you_want_to_approve_this_application')}}"
                             href="javascript:"><i class="tio-checkmark-circle-outlined font-weight-bold pr-1"></i>{{translate('messages.approve')}}</a>
                     @endif
                 @endif
@@ -68,6 +70,12 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{request('tab')=='conversations'?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'conversations'])}}"  aria-disabled="true">{{translate('Conversations')}}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{request('tab')=='meta-data'?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'meta-data'])}}"  aria-disabled="true">{{translate('meta_data')}}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link  {{request('tab')=='disbursements' ?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'disbursements'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
                 </li>
             </ul>
             <!-- End Nav -->

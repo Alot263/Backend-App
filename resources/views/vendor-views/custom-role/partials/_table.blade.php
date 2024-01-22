@@ -16,10 +16,10 @@
         <td>
             <div class="btn--container justify-content-center">
                 <a class="btn action-btn btn--primary btn-outline-primary"
-                    href="{{route('vendor.custom-role.edit',[$r['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.role')}}"><i class="tio-edit"></i>
+                    href="{{route('vendor.custom-role.edit',[$r['id']])}}" title="{{translate('messages.edit_role')}}"><i class="tio-edit"></i>
                 </a>
                 <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                    onclick="form_alert('role-{{$r['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete')}} {{translate('messages.role')}}"><i class="tio-delete-outlined"></i>
+                    onclick="form_alert('role-{{$r['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete_role')}}"><i class="tio-delete-outlined"></i>
                 </a>
             </div>
             <form action="{{route('vendor.custom-role.delete',[$r['id']])}}"

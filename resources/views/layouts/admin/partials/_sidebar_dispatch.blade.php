@@ -5,8 +5,12 @@
                 <!-- Logo -->
                 @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
                 <a class="navbar-brand" href="{{ route('admin.dispatch.dashboard') }}" aria-label="Front">
-                    <img class="navbar-brand-logo initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
-                    <img class="navbar-brand-logo-mini initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
+                       <img class="navbar-brand-logo initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
+                    alt="Logo">
+                    <img class="navbar-brand-logo-mini initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
+                    alt="Logo">
                 </a>
                 <!-- End Logo -->
 
@@ -50,8 +54,7 @@
                 <!-- End Dashboards -->
                 <!-- Business Section-->
                 <li class="nav-item">
-                    <small class="nav-subtitle" title="{{ translate('messages.dispatch') }} {{ translate('messages.section') }}">{{ translate('messages.dispatch') }}
-                        {{ translate('messages.management') }}</small>
+                    <small class="nav-subtitle" title="{{ translate('messages.dispatch_section') }}">{{ translate('messages.dispatch_management') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
 
@@ -59,7 +62,7 @@
                 @if (\App\CentralLogics\Helpers::module_permission_check('order'))
                     <!-- Order dispachment -->
                     @php($modules = \App\Models\Module::Active()->get())
-                    @foreach ($modules as $module)   
+                    @foreach ($modules as $module)
                     @if ($module->module_type != 'parcel')
                     @php($unassigned = \App\Models\Order::whereHas('module', function($query) use($module){
                                         $query->where('module_id', $module->id);
@@ -72,7 +75,7 @@
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
                                 {{ $module->module_name }}
                                 <span class="badge badge-soft-info badge-pill ml-1">
-                                    {{ $unassigned + $unassigned }}
+                                    {{ $unassigned + $ongoing }}
 
                                 </span>
                             </span>
@@ -95,7 +98,7 @@
                                     <span class="text-truncate sidebar--badge-container">
                                         {{ translate('messages.ongoingOrders') }}
                                         <span class="badge badge-soft-light badge-pill ml-1">
-                                            {{ $unassigned }}
+                                            {{ $ongoing }}
                                         </span>
                                     </span>
                                 </a>
@@ -154,7 +157,7 @@
 
                 </li>
 
-                <li class="__sidebar-hs-unfold px-2">
+                <li class="__sidebar-hs-unfold px-2" id="tourb-9">
                     <div class="hs-unfold w-100">
                         <a class="js-hs-unfold-invoker navbar-dropdown-account-wrapper" href="javascript:;"
                             data-hs-unfold-options='{
@@ -163,10 +166,12 @@
                                 }'>
                             <div class="cmn--media right-dropdown-icon d-flex align-items-center">
                                 <div class="avatar avatar-sm avatar-circle">
-                                    <img class="avatar-img"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                        alt="Image Description">
+                                   <img class="avatar-img onerror-image"
+                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                    alt="Image Description">
                                     <span class="avatar-status avatar-sm-status avatar-status-success"></span>
                                 </div>
                                 <div class="media-body pl-3">
@@ -184,10 +189,12 @@
                             <div class="dropdown-item-text">
                                 <div class="media align-items-center">
                                     <div class="avatar avatar-sm avatar-circle mr-2">
-                                        <img class="avatar-img"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                                alt="Image Description">
+                                        <img class="avatar-img onerror-image"
+                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                    alt="Image Description">
                                     </div>
                                     <div class="media-body">
                                         <span class="card-title h5">{{auth('admin')->user()->f_name}}</span>
@@ -204,21 +211,7 @@
 
                             <div class="dropdown-divider"></div>
 
-                            <a class="dropdown-item" href="javascript:" onclick="Swal.fire({
-                                title: '{{translate("logout_warning_message")}}',
-                                showDenyButton: true,
-                                showCancelButton: true,
-                                confirmButtonColor: '#FC6A57',
-                                cancelButtonColor: '#363636',
-                                confirmButtonText: `Yes`,
-                                denyButtonText: `Don't Logout`,
-                                }).then((result) => {
-                                if (result.value) {
-                                location.href='{{route('admin.auth.logout')}}';
-                                } else{
-                                Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
-                                }
-                                })">
+                           <a class="dropdown-item log-out" href="javascript:">
                                 <span class="text-truncate pr-2" title="Sign out">{{translate('messages.sign_out')}}</span>
                             </a>
                         </div>

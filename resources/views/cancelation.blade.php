@@ -9,10 +9,9 @@
             <div class="section-header">
                 <h2 class="title">{{translate('messages.Cancelation Policy')}}</span></h2>
             </div>
-            @php($config=\App\CentralLogics\Helpers::get_business_settings('cancelation'))
             <div class="privacy-wrapper">
                 <div class="item">
-                    {!! $config['value'] !!}
+                    {!! $data !!}
                 </div>
             </div>
         </div>

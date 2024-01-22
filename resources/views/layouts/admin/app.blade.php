@@ -1,15 +1,6 @@
 <!DOCTYPE html>
-<?php
-    $site_direction = session()->get('site_direction');
-    // if (env('APP_MODE') == 'demo') {
-    //     $site_direction = session()->get('site_direction');
-    // }else{
-    //     $site_direction = \App\Models\BusinessSetting::where('key', 'site_direction')->first();
-    //     $site_direction = $site_direction->value ?? 'ltr';
-    // }
 
-?>
-<html dir="{{ $site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $site_direction === 'rtl'?'active':'' }}">
+<html dir="{{ session()->get('site_direction') }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{session()->get('site_direction') === 'rtl'?'active':'' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -21,29 +12,30 @@
     <link rel="shortcut icon" href="">
     <link rel="icon" type="image/x-icon" href="{{asset('storage/app/public/business/'.$logo??'')}}">
     <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+    <link href="{{asset('public/assets/admin/css/fonts.css')}}" rel="stylesheet">
     <!-- CSS Implementing Plugins -->
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/vendor.min.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/vendor/icon-set/style.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/custom.css')}}">
     <!-- CSS Front Template -->
+    <link rel="stylesheet" href="{{asset('public/assets/admin/css/owl.min.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/bootstrap.min.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/theme.minc619.css?v=1.0')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/bootstrap-tour-standalone.min.css')}}">
+    <link rel="stylesheet" href="{{asset('public/assets/admin/css/emogi-area.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/style.css')}}">
     @stack('css_or_js')
 
-    <script
-        src="{{asset('public/assets/admin')}}/vendor/hs-navbar-vertical-aside/hs-navbar-vertical-aside-mini-cache.js"></script>
-    <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/toastr.css">
+    <script src="{{asset('public/assets/admin/vendor/hs-navbar-vertical-aside/hs-navbar-vertical-aside-mini-cache.js')}}"></script>
+    <link rel="stylesheet" href="{{asset('public/assets/admin/css/toastr.css')}}">
 </head>
 
 <body class="footer-offset">
     @if (env('APP_MODE')=='demo')
-    <div class="direction-toggle">
-        <i class="tio-settings"></i>
-        <span></span>
-    </div>  
+        <div class="direction-toggle">
+            <i class="tio-settings"></i>
+            <span></span>
+        </div>
     @endif
 
 <div class="container">
@@ -51,21 +43,26 @@
         <div class="col-md-12">
             <div id="loading" class="initial-hidden">
                 <div class="loader--inner">
-                    <img width="200" src="{{asset('public/assets/admin/img/loader.gif')}}">
+                    <img width="200" src="{{asset('public/assets/admin/img/loader.gif')}}" alt="image">
                 </div>
             </div>
         </div>
     </div>
 </div>
-@if (!isset($module_type))   
+@if (!isset($module_type))
 @php($module_type = Config::get('module.current_module_type'))
 @endif
+
 <!-- Builder -->
 @include('layouts.admin.partials._front-settings')
 <!-- End Builder -->
 
 <!-- JS Preview mode only -->
 @include('layouts.admin.partials._header')
+
+@if(Request::is('admin/payment/configuration*') || Request::is('admin/sms/configuration*'))
+@php($module_type = 'settings')
+@endif
 
 @include("layouts.admin.partials._sidebar_{$module_type}")
 
@@ -86,13 +83,13 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12">
-                            <center>
+                            <div class="text-center">
                                 <h2>
                                     <i class="tio-shopping-cart-outlined"></i> {{translate('messages.You have new order, Check Please.')}}
                                 </h2>
                                 <hr>
-                                <button onclick="check_order()" class="btn btn-primary">{{translate('messages.Ok, let me check')}}</button>
-                            </center>
+                                <button class="btn btn-primary check-order">{{translate('messages.Ok, let me check')}}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -100,29 +97,101 @@
         </div>
     </div>
 
-</main>
-{{--<nav class="floating-menu">
-    <ul class="main-menu">
-        @foreach (\App\Models\Module::notParcel()->get() as $module)
-        <li>
-            <a class="p-2 navbar-dropdown-account-wrapper" href="javascript:;" onclick="set_filter('{{url()->full()}}',{{$module->id}},'module_id')" title="{{$module->module_name}}">
-                <img class="avatar avatar-sm avatar-circle" src="{{asset('storage/app/public/module')}}/{{$module['thumbnail']}}" alt="{{$module->module_name}}" width="20">
-            </a>
-        </li>
-        @endforeach
-        <li>
-            <a class="p-2 navbar-dropdown-account-wrapper" href="javascript:;" onclick="set_filter('{{url()->full()}}','','module_id')" title="{{$module->module_name}}">
-                <img class="avatar avatar-sm avatar-circle" src="{{asset('storage/app/public/business/'.$logo??'')}}" alt="{{translate('messages.all')}} {{translate('messages.module')}}" width="20">
-            </a>
-        </li>
-    </ul>
-    <div class="menu-bg"></div>
-</nav>--}}
+
+    <div class="modal fade" id="toggle-modal">
+        <div class="modal-dialog status-warning-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true" class="tio-clear"></span>
+                    </button>
+                </div>
+                <div class="modal-body pb-5 pt-0">
+                    <div class="max-349 mx-auto mb-20">
+                        <div>
+                            <div class="text-center">
+                                <img id="toggle-image" alt="" class="mb-20">
+                                <h5 class="modal-title" id="toggle-title"></h5>
+                            </div>
+                            <div class="text-center" id="toggle-message">
+                            </div>
+                        </div>
+                        <div class="btn--container justify-content-center">
+                            <button type="button" id="toggle-ok-button" class="btn btn--primary min-w-120 confirm-Toggle" data-dismiss="modal" >{{translate('Ok')}}</button>
+                            <button id="reset_btn" type="reset" class="btn btn--cancel min-w-120" data-dismiss="modal">
+                                {{translate("Cancel")}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="toggle-status-modal">
+        <div class="modal-dialog status-warning-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true" class="tio-clear"></span>
+                    </button>
+                </div>
+                <div class="modal-body pb-5 pt-0">
+                    <div class="max-349 mx-auto mb-20">
+                        <div>
+                            <div class="text-center">
+                                <img id="toggle-status-image" alt="" class="mb-20">
+                                <h5 class="modal-title" id="toggle-status-title"></h5>
+                            </div>
+                            <div class="text-center" id="toggle-status-message">
+                            </div>
+                        </div>
+                        <div class="btn--container justify-content-center">
+                            <button type="button" id="toggle-status-ok-button" class="btn btn--primary min-w-120 confirm-Status-Toggle" data-dismiss="modal" >{{translate('Ok')}}</button>
+                            <button id="reset_btn" type="reset" class="btn btn--cancel min-w-120" data-dismiss="modal">
+                                {{translate("Cancel")}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="instruction-modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close instruction-Modal-Close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/0sus46BflpU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="email-modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close email-Modal-Close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/_BIHsClZtOE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 <!-- ========== END MAIN CONTENT ========== -->
 
 <!-- ========== END SECONDARY CONTENTS ========== -->
 <script src="{{asset('public/assets/admin')}}/js/custom.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/firebase.min.js"></script>
 <!-- JS Implementing Plugins -->
 
 @stack('script')
@@ -131,13 +200,19 @@
 <script src="{{asset('public/assets/admin')}}/js/theme.min.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/sweet_alert.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/bootstrap-tour-standalone.min.js"></script>
+<script src="{{asset('public/assets/admin/js/owl.min.js')}}"></script>
+<script src="{{asset('public/assets/admin')}}/js/font-awesome.min.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/emogi-area.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/toastr.js"></script>
+<script src="{{asset('public/assets/admin/js/app-blade/admin.js')}}"></script>
+
+
 {!! Toastr::message() !!}
 
 @if ($errors->any())
     <script>
         @foreach($errors->all() as $error)
-        toastr.error('{{$error}}', Error, {
+        toastr.error('{{translate($error)}}', Error, {
             CloseButton: true,
             ProgressBar: true
         });
@@ -145,230 +220,57 @@
     </script>
 @endif
 <!-- JS Plugins Init. -->
-<script>
-    $(document).on('ready', function () {
-        // ONLY DEV
-        // =======================================================
-        if (window.localStorage.getItem('hs-builder-popover') === null) {
-            $('#builderPopover').popover('show')
-                .on('shown.bs.popover', function () {
-                    $('.popover').last().addClass('popover-dark')
-                });
 
-            $(document).on('click', '#closeBuilderPopover', function () {
-                window.localStorage.setItem('hs-builder-popover', true);
-                $('#builderPopover').popover('dispose');
-            });
-        } else {
-            $('#builderPopover').on('show.bs.popover', function () {
-                return false
-            });
-        }
-        // END ONLY DEV
-        // =======================================================
-
-        // BUILDER TOGGLE INVOKER
-        // =======================================================
-        $('.js-navbar-vertical-aside-toggle-invoker').click(function () {
-            $('.js-navbar-vertical-aside-toggle-invoker i').tooltip('hide');
-        });
-
-        // INITIALIZATION OF NAVBAR VERTICAL NAVIGATION
-        // =======================================================
-        var sidebar = $('.js-navbar-vertical-aside').hsSideNav();
-
-
-        // INITIALIZATION OF TOOLTIP IN NAVBAR VERTICAL MENU
-        // =======================================================
-        $('.js-nav-tooltip-link').tooltip({boundary: 'window'})
-
-        $(".js-nav-tooltip-link").on("show.bs.tooltip", function (e) {
-            if (!$("body").hasClass("navbar-vertical-aside-mini-mode")) {
-                return false;
-            }
-        });
-
-
-        // INITIALIZATION OF UNFOLD
-        // =======================================================
-        $('.js-hs-unfold-invoker').each(function () {
-            var unfold = new HSUnfold($(this)).init();
-        });
-
-
-        // INITIALIZATION OF FORM SEARCH
-        // =======================================================
-        $('.js-form-search').each(function () {
-            new HSFormSearch($(this)).init()
-        });
-
-
-        // INITIALIZATION OF SELECT2
-        // =======================================================
-        $('.js-select2-custom').each(function () {
-            var select2 = $.HSCore.components.HSSelect2.init($(this));
-        });
-
-
-        // INITIALIZATION OF DATERANGEPICKER
-        // =======================================================
-        $('.js-daterangepicker').daterangepicker();
-
-        $('.js-daterangepicker-times').daterangepicker({
-            timePicker: true,
-            startDate: moment().startOf('hour'),
-            endDate: moment().startOf('hour').add(32, 'hour'),
-            locale: {
-                format: 'M/DD hh:mm A'
-            }
-        });
-
-        var start = moment();
-        var end = moment();
-
-        function cb(start, end) {
-            $('#js-daterangepicker-predefined .js-daterangepicker-predefined-preview').html(start.format('MMM D') + ' - ' + end.format('MMM D, YYYY'));
-        }
-
-        $('#js-daterangepicker-predefined').daterangepicker({
-            startDate: start,
-            endDate: end,
-            ranges: {
-                'Today': [moment(), moment()],
-                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            }
-        }, cb);
-
-        cb(start, end);
-
-
-        // INITIALIZATION OF CLIPBOARD
-        // =======================================================
-        $('.js-clipboard').each(function () {
-            var clipboard = $.HSCore.components.HSClipboard.init(this);
-        });
-    });
-</script>
 
 @stack('script_2')
-
 <script>
-    @php($modules = \App\Models\Module::Active()->get())
-    var tour = new Tour({
-        backdrop: true,
-        delay: true,
-        redirect: true,
-        name:'tour',
-        steps: [
-            {
-                element: "#tourb-0",
-                title: "Module",
-                placement: 'right',
-                content: "From here you can switch to multiple modules."
-            },
-            {
-                element: "#tourb-1",
-                title: "Module Selection",
-                content: "You can select a module from here.",
-                onNext: function(){
-                    document.location.href = "{{ route('admin.dashboard') }}?module_id={{count($modules)>0?$modules[0]->id:1}}";
-                } 
-            },
-            {
-                element: "#navbar-vertical-content",
-                title: "Module Sidebar",
-                content: "This is the module wise sidebar."
-            },
-            {
-                element: "#tourb-3",
-                title: "Settings",
-                content: "From here you can go to settings option."
-            },
-            {
-                element: "#tourb-4",
-                title: "Settings Menu",
-                content: "From here you can select any settings option.",   
-                onNext: function(){
-                    document.location.href = "{{ route('admin.business-settings.business-setup') }}";
-                } 
-            },
-            {
-                element: "#navbar-vertical-content",
-                title: "Settings Sidebar",
-                content: "This is the settings sidebar. Different from module",
-            },
-            {
-                element: "#tourb-6",
-                title: "User Section",
-                content: "You can manage all the users by selecting this option.",
-            },
-            {
-                element: "#tourb-7",
-                title: "Transaction and Report",
-                content: "You can manage all the Transaction and Report by selecting this option."
-            },
-            {
-                element: "#tourb-8",
-                title: "Dispatch Management",
-                content: "You can manage all dispatch orders by selecting this option."
-            },
-            {
-                element: "#tourb-9",
-                title: "Profile and Logout",
-                content: "You can visit your profile or logut from this panel.",
-                placement:'top'
-            }
-        ],
-        onEnd: function() {
-            $('body').css('overflow','')
-        },
-        onShow: function() {
-            $('body').css('overflow','hidden')
-        }
-    });
-
-    // Initialize the tour
-    tour.init();
-
-
-    
-    @if(isset($modules) && ($modules->count()>0))
-        // Start the tour
-        tour.start();
-        // $('body').css('overflow','hidden')
-    @endif
-
-    function restartTour() {
-        @if(isset($modules) && ($modules->count()>0))
-            // Start the tour
-            tour.restart();
-            $('body').css('overflow','hidden')
-        @endif
-    }
-
-
-    
+    let baseUrl = '{{ url('/') }}';
 </script>
+
+<script src="{{asset('public/assets/admin/js/view-pages/common.js')}}"></script>
 <audio id="myAudio">
     <source src="{{asset('public/assets/admin/sound/notification.mp3')}}" type="audio/mpeg">
 </audio>
-
 <script>
-    var audio = document.getElementById("myAudio");
 
-    function playAudio() {
-        audio.play();
-    }
+"use strict";
+    @php($modules = \App\Models\Module::Active()->get())
 
-    function pauseAudio() {
-        audio.pause();
-    }
-</script>
-<script>
+    @if(isset($modules) && ($modules->count()<1))
+    $('#instruction-modal').show();
+    @endif
+
+
+
+    $('.restart-Tour').on('click',function (){
+        @if(isset($modules) && ($modules->count()>0))
+            tour.restart();
+            $('body').css('overflow','hidden')
+        @endif
+    });
+
+
+    $('.log-out').on('click',function (){
+
+        Swal.fire({
+            title: '{{ translate('Do you want to logout?') }}',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonColor: '#FC6A57',
+            cancelButtonColor: '#363636',
+            confirmButtonText: `{{ translate('yes')}}`,
+            cancelButtonText: `{{ translate('Do_not_Logout')}}`,
+            }).then((result) => {
+            if (result.value) {
+            location.href='{{route('logout')}}';
+            } else{
+            Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
+            }
+        })
+
+    });
+
+
     function route_alert(route, message, title="{{translate('messages.are_you_sure')}}") {
         Swal.fire({
             title: title,
@@ -387,7 +289,9 @@
         })
     }
 
-    function form_alert(id, message) {
+    $('.form-alert').on('click',function (){
+        let id = $(this).data('id')
+        let message = $(this).data('message')
         Swal.fire({
             title: '{{ translate('messages.Are you sure?') }}',
             text: message,
@@ -403,72 +307,66 @@
                 $('#'+id).submit()
             }
         })
-    }
-    function set_zone_filter(url, id) {
-        var nurl = new URL(url);
-        nurl.searchParams.set('zone_id', id);
+    })
 
-        location.href = nurl;
+    $('.canceled-status').on('click',function (){
+        let route = $(this).data('url');
+        let message = $(this).data('message');
+        let processing = $(this).data('processing')??false;
+        cancelled_status(route, message, processing);
+    })
+
+    function cancelled_status(route, message, processing = false) {
+        Swal.fire({
+            //text: message,
+            title: '<?php echo e(translate('messages.Are you sure ?')); ?>',
+            type: 'warning',
+            showCancelButton: true,
+            cancelButtonColor: 'default',
+            confirmButtonColor: '#FC6A57',
+            cancelButtonText: '<?php echo e(translate('messages.Cancel')); ?>',
+            confirmButtonText: '<?php echo e(translate('messages.submit')); ?>',
+            inputPlaceholder: "<?php echo e(translate('Enter_a_reason')); ?>",
+            input: 'text',
+            html: message + '<br/>'+'<label><?php echo e(translate('Enter_a_reason')); ?></label>',
+            inputValue: processing,
+            preConfirm: (note) => {
+                location.href = route + '&note=' + note;
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        })
     }
 
-    function set_store_filter(url, id) {
-        var nurl = new URL(url);
-        nurl.searchParams.set('store_id', id);
-        location.href = nurl;
-    }
-    function set_category_filter(url, id) {
-        var nurl = new URL(url);
-        nurl.searchParams.set('category_id', id);
-        location.href = nurl;
-    }
-
-    function set_time_filter(url, id) {
-        var nurl = new URL(url);
-        nurl.searchParams.set('filter', id);
-        location.href = nurl;
-    }
-
-    function set_customer_filter(url, id) {
-        var nurl = new URL(url);
-        nurl.searchParams.set('customer_id', id);
-        location.href = nurl;
+    function set_mail_filter(url, id, filter_by) {
+        Swal.fire({
+            title: '{{ translate('messages.Are you sure?') }}',
+            text: 'Please save changes before switching template',
+            type: 'warning',
+            showCancelButton: true,
+            cancelButtonColor: 'default',
+            confirmButtonColor: '#FC6A57',
+            cancelButtonText: '{{ translate('messages.no') }}',
+            confirmButtonText: '{{ translate('messages.Yes') }}',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.value) {
+                let nurl = new URL(url);
+                nurl.searchParams.set(filter_by, id);
+                location.href = nurl;
+            }
+        })
     }
 
-
-    function set_filter(url, id, filter_by) {
-        var nurl = new URL(url);
-        nurl.searchParams.set(filter_by, id);
-        location.href = nurl;
-        tour.next();
-    }
-    function next_tour() {
-        tour.next();
-    }
 
     function copy_text(copyText) {
-        /* Copy the text inside the text field */
         navigator.clipboard.writeText(copyText);
-
         toastr.success('{{translate('messages.text_copied')}}', {
             CloseButton: true,
             ProgressBar: true
         });
     }
-</script>
-<script>
-    $(document).ready(function(){
-        $('button[type=submit]').on("click", function(){
-            setTimeout(function () {
-                $('button[type=submit]').prop('disabled', true);
-                }, 0);
-            setTimeout(function () {
-                $('button[type=submit]').prop('disabled', false);
-                }, 1000);
-        });
-    });
 
     $(document).on('ready', function(){
-        // $('body').css('overflow','')
         $(".direction-toggle").on("click", function () {
             if($('html').hasClass('active')){
                 $('html').removeClass('active')
@@ -478,14 +376,15 @@
                 $('html').addClass('active')
             }
         });
-        if ($('html').attr('dir') == "rtl") {
+
+        if ($('html').attr('dir') === "rtl") {
             $(".direction-toggle").find('span').text('Toggle LTR')
         } else {
             $(".direction-toggle").find('span').text('Toggle RTL')
         }
 
         function setDirection(status) {
-            if (status == 1) {
+            if (status === 1) {
                 $("html").attr('dir', 'ltr');
                 $(".direction-toggle").find('span').text('Toggle RTL')
             } else {
@@ -506,10 +405,8 @@
             }
         });
 
-</script>
-<script>
     @php($fcm_credentials = \App\CentralLogics\Helpers::get_business_settings('fcm_credentials'))
-    var firebaseConfig = {
+    let firebaseConfig = {
         apiKey: "{{isset($fcm_credentials['apiKey']) ? $fcm_credentials['apiKey'] : ''}}",
         authDomain: "{{isset($fcm_credentials['authDomain']) ? $fcm_credentials['authDomain'] : ''}}",
         projectId: "{{isset($fcm_credentials['projectId']) ? $fcm_credentials['projectId'] : ''}}",
@@ -553,24 +450,13 @@
         })
     }
 
-    function getUrlParameter(sParam) {
-        var sPageURL = window.location.search.substring(1);
-        var sURLVariables = sPageURL.split('&');
-        for (var i = 0; i < sURLVariables.length; i++) {
-            var sParameterName = sURLVariables[i].split('=');
-            if (sParameterName[0] == sParam) {
-                return sParameterName[1];
-            }
-        }
-    }
-
     function conversationList() {
         $.ajax({
                 url: "{{ route('admin.message.list') }}",
                 success: function(data) {
                     $('#conversation-list').empty();
                     $("#conversation-list").append(data.html);
-                    var user_id = getUrlParameter('user');
+                    let user_id = getUrlParameter('user');
                 $('.customer-list').removeClass('conv-active');
                 $('#customer-' + user_id).addClass('conv-active');
                 }
@@ -578,9 +464,9 @@
     }
 
     function conversationView() {
-        var conversation_id = getUrlParameter('conversation');
-        var user_id = getUrlParameter('user');
-        var url= '{{url('/')}}/admin/message/view/'+conversation_id+'/' + user_id;
+        let conversation_id = getUrlParameter('conversation');
+        let user_id = getUrlParameter('user');
+        let url= '{{url('/')}}/admin/message/view/'+conversation_id+'/' + user_id;
         $.ajax({
             url: url,
             success: function(data) {
@@ -592,9 +478,9 @@
 
 
     function vendorConversationView() {
-        var conversation_id = getUrlParameter('conversation');
-        var user_id = getUrlParameter('user');
-        var url= '{{url('/')}}/admin/store/message/'+conversation_id+'/' + user_id;
+        let conversation_id = getUrlParameter('conversation');
+        let user_id = getUrlParameter('user');
+        let url= '{{url('/')}}/admin/store/message/'+conversation_id+'/' + user_id;
         $.ajax({
             url: url,
             success: function(data) {
@@ -604,9 +490,9 @@
     }
 
     function dmConversationView() {
-        var conversation_id = getUrlParameter('conversation');
-        var user_id = getUrlParameter('user');
-        var url= '{{url('/')}}/admin/delivery-man/message/'+conversation_id+'/' + user_id;
+        let conversation_id = getUrlParameter('conversation');
+        let user_id = getUrlParameter('user');
+        let url= '{{url('/')}}/admin/users/delivery-man/message/'+conversation_id+'/' + user_id;
         $.ajax({
             url: url,
             success: function(data) {
@@ -615,24 +501,36 @@
         })
     }
 
-    var new_order_type='store_order';
-    var new_module_id=null;
+    let new_order_type='store_order';
+    let new_module_id=null;
+    let admin_zone_id=null;
+    let admin_role_id=null;
 
+    @php($order_notification_type = \App\Models\BusinessSetting::where('key', 'order_notification_type')->first())
+    @php($order_notification_type = $order_notification_type ? $order_notification_type->value : 'firebase')
     messaging.onMessage(function(payload) {
-        console.log(payload.data);
         if(payload.data.order_id && payload.data.type == "order_request"){
                 @php($admin_order_notification = \App\Models\BusinessSetting::where('key', 'admin_order_notification')->first())
                 @php($admin_order_notification = $admin_order_notification ? $admin_order_notification->value : 0)
-                @if (\App\CentralLogics\Helpers::module_permission_check('order') && $admin_order_notification)
+                @if (\App\CentralLogics\Helpers::module_permission_check('order') && $admin_order_notification && $order_notification_type == 'firebase')
                 new_order_type = payload.data.order_type
                 new_module_id = payload.data.module_id
-                playAudio();
-                $('#popup-modal').appendTo("body").modal('show');
+                admin_zone_id = '<?php echo auth()->guard('admin')->user()->zone_id ;?>';
+                admin_role_id = '<?php echo auth()->guard('admin')->user()->role_id ;?>';
+                if(admin_role_id === '1'){
+                    playAudio();
+                    $('#popup-modal').appendTo("body").modal('show');
+                }
+                if((admin_role_id !== '1') && (admin_zone_id === payload.data.zone_id)){
+                    playAudio();
+                    $('#popup-modal').appendTo("body").modal('show');
+                }
                 @endif
+
         }else{
-            var conversation_id = getUrlParameter('conversation');
-            var user_id = getUrlParameter('user');
-            var url= '{{url('/')}}/admin/message/view/'+conversation_id+'/' + user_id;
+            let conversation_id = getUrlParameter('conversation');
+            let user_id = getUrlParameter('user');
+            let url= '{{url('/')}}/admin/message/view/'+conversation_id+'/' + user_id;
             console.log(url);
             $.ajax({
                 url: url,
@@ -644,25 +542,46 @@
                 CloseButton: true,
                 ProgressBar: true
             });
-            if($('#conversation-list').scrollTop() == 0){
+            if($('#conversation-list').scrollTop() === 0){
                 conversationList();
             }
         }
     });
 
-    function check_order() {
-            if(new_order_type == 'parcel')
-            {
-                var url= '{{url('/')}}/admin/parcel/orders/all?module_id=' + new_module_id;
-                location.href = url;
-            }
-            else
-            {
-                var url= '{{url('/')}}/admin/order/list/all?module_id=' + new_module_id;
-                location.href = url;
-            }
+    @if(\App\CentralLogics\Helpers::module_permission_check('order') && $order_notification_type == 'manual')
+        @php($admin_order_notification=\App\Models\BusinessSetting::where('key','admin_order_notification')->first())
+        @php($admin_order_notification=$admin_order_notification?$admin_order_notification->value:0)
+        @if($admin_order_notification)
+            setInterval(function () {
+                $.get({
+                    url: '{{route('admin.get-store-data')}}',
+                    dataType: 'json',
+                    success: function (response) {
+                        let data = response.data;
+                        new_order_type = data.type;
+                        new_module_id = data.module_id;
+                        if (data.new_order > 0) {
+                            playAudio();
+                            $('#popup-modal').appendTo("body").modal('show');
+                        }else{
+                            $('#popup-modal').appendTo("body").modal('hide');
+                        }
+                    },
+                });
+            }, 10000);
+        @endif
+    @endif
 
+    $(document).on('click', '.check-order', function () {
+        if(new_order_type === 'parcel')
+        {
+            location.href = '{{url('/')}}/admin/parcel/orders/all?module_id=' + new_module_id;
         }
+        else
+        {
+            location.href = '{{url('/')}}/admin/order/list/all?module_id=' + new_module_id;
+        }
+    });
 
     startFCM();
     conversationList();
@@ -671,18 +590,42 @@
         vendorConversationView();
         dmConversationView();
     }
+
+
+    $(document).on('click', '.call-demo', function () {
+        @if(env('APP_MODE') =='demo')
+            toastr.info('{{ translate('Update option is disabled for demo!') }}', {
+                CloseButton: true,
+                ProgressBar: true
+            });
+        @endif
+    });
+
+    $('.request_alert').on('click', function (event) {
+            let url = $(this).data('url');
+            let message = $(this).data('message');
+            request_alert(url, message)
+        })
+
+        function request_alert(url, message) {
+            Swal.fire({
+                title: '{{translate('messages.are_you_sure')}}',
+                text: message,
+                type: 'warning',
+                showCancelButton: true,
+                cancelButtonColor: 'default',
+                confirmButtonColor: '#FC6A57',
+                cancelButtonText: '{{translate('messages.no')}}',
+                confirmButtonText: '{{translate('messages.yes')}}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    location.href = url;
+                }
+            })
+        }
 </script>
 
-<script>
-    function call_demo(){
-        toastr.info('{{ translate('Update option is disabled for demo!') }}', {
-            CloseButton: true,
-            ProgressBar: true
-        });
-    }
-</script>
-
-<!-- IE Support -->
 <script>
     if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) document.write('<script src="{{asset('public/assets/admin')}}/vendor/babel-polyfill/polyfill.min.js"><\/script>');
 </script>

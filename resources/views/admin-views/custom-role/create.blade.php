@@ -13,7 +13,7 @@
                 <img src="{{asset('public/assets/admin/img/role.png')}}" class="w--26" alt="">
             </span>
             <span>
-                {{translate('messages.employee')}} {{translate('messages.Role')}}
+                {{translate('messages.employee_Role')}}
             </span>
         </h1>
     </div>
@@ -25,83 +25,105 @@
                 <div class="card-body">
                     <form action="{{route('admin.users.custom-role.create')}}" method="post">
                         @csrf
-                        <div class="form-group">
-                            <label class="input-label qcont" for="name">{{translate('messages.role_name')}}</label>
-                            <input type="text" name="name" class="form-control" id="name" aria-describedby="emailHelp"
-                                placeholder="{{translate('role_name_example')}}" required value="{{old('name')}}">
-                        </div>
+                        @if ($language)
+                        <ul class="nav nav-tabs mb-4">
+                            <li class="nav-item">
+                                <a class="nav-link lang_link active"
+                                href="#"
+                                id="default-link">{{translate('messages.default')}}</a>
+                            </li>
+                            @foreach ($language as $lang)
+                                <li class="nav-item">
+                                    <a class="nav-link lang_link"
+                                        href="#"
+                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                            <div class="form-group lang_form" id="default-form">
+                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.role_name')}} ({{ translate('messages.default') }})</label>
+                                <input type="text" name="name[]" class="form-control" placeholder="{{translate('role_name_example')}}" maxlength="191">
+                            </div>
+                            <input type="hidden" name="lang[]" value="default">
+                                @foreach($language as $lang)
+                                    <div class="form-group d-none lang_form" id="{{$lang}}-form">
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.role_name')}} ({{strtoupper($lang)}})</label>
+                                        <input type="text" name="name[]" class="form-control" placeholder="{{translate('role_name_example')}}" maxlength="191">
+                                    </div>
+                                    <input type="hidden" name="lang[]" value="{{$lang}}">
+                                @endforeach
+                            @else
+                                <div class="form-group">
+                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.role_name')}}</label>
+                                    <input type="text" name="name" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{old('name')}}" maxlength="191">
+                                </div>
+                                <input type="hidden" name="lang[]" value="default">
+                            @endif
 
                         <div class="d-flex flex-wrap select--all-checkes">
                             <h5 class="input-label m-0 text-capitalize">{{translate('messages.module_permission')}} : </h5>
                             <div class="check-item pb-0 w-auto">
                                 <div class="form-group form-check form--check m-0 ml-2">
-                                    <input type="checkbox" name="modules[]" value="account" class="form-check-input" id="select-all">
-                                    <label class="form-check-label ml-2" for="select-all">Select All</label>
+                                    <input type="checkbox" name="modules[]" value="collect_cash" class="form-check-input" id="select-all">
+                                    <label class="form-check-label ml-2" for="select-all">{{ translate('select_all') }}</label>
                                 </div>
                             </div>
                         </div>
                         <div class="check--item-wrapper">
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
-                                    <input type="checkbox" name="modules[]" value="account" class="form-check-input"
-                                           id="account">
-                                    <label class="form-check-label qcont text-dark" for="account">{{translate('messages.collect')}} {{translate('messages.Cash')}}</label>
+                                    <input type="checkbox" name="modules[]" value="collect_cash" class="form-check-input"
+                                           id="collect_cash">
+                                    <label class="form-check-label qcont text-dark" for="collect_cash">{{translate('messages.collect_Cash')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="addon" class="form-check-input"
                                            id="addon">
-                                    <label class="form-check-label qcont text-dark" for="addon">{{translate('messages.addons')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="addon">{{translate('messages.addon')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="attribute" class="form-check-input"
                                            id="attribute">
-                                    <label class="form-check-label qcont text-dark" for="attribute">{{translate('messages.attributes')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="attribute">{{translate('messages.attribute')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="banner" class="form-check-input"
                                            id="banner">
-                                    <label class="form-check-label qcont text-dark" for="banner">{{translate('messages.banners')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="banner">{{translate('messages.banner')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="campaign" class="form-check-input"
                                            id="campaign">
-                                    <label class="form-check-label qcont text-dark" for="campaign">{{translate('messages.campaigns')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="campaign">{{translate('messages.campaign')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="category" class="form-check-input"
                                            id="category">
-                                    <label class="form-check-label qcont text-dark" for="category">{{translate('messages.categories')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="category">{{translate('messages.category')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="coupon" class="form-check-input"
                                            id="coupon">
-                                    <label class="form-check-label qcont text-dark" for="coupon">{{translate('messages.coupons')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="coupon">{{translate('messages.coupon')}}</label>
                                 </div>
                             </div>
-                            {{-- <div class="check-item">
-                                <div class="form-group form-check form--check">
-                                    <input type="checkbox" name="modules[]" value="custom_role" class="form-check-input"
-                                           id="custom_role">
-                                    <label class="form-check-label qcont text-dark" for="custom_role">{{translate('messages.custom_role')}}</label>
-                                </div>
-                            </div> --}}
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
-                                    <input type="checkbox" name="modules[]" value="customerList" class="form-check-input"
-                                           id="customerList">
-                                    <label class="form-check-label qcont text-dark" for="customerList">{{translate('messages.customers')}}</label>
+                                    <input type="checkbox" name="modules[]" value="customer_management" class="form-check-input"
+                                           id="customer_management">
+                                    <label class="form-check-label qcont text-dark" for="customer_management">{{translate('messages.customer_management')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
@@ -115,56 +137,56 @@
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="provide_dm_earning" class="form-check-input"
                                            id="provide_dm_earning">
-                                    <label class="form-check-label qcont text-dark" for="provide_dm_earning">{{translate('messages.deliverymen_earning_provide')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="provide_dm_earning">{{translate('messages.provide_dm_earning')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="employee" class="form-check-input"
                                            id="employee">
-                                    <label class="form-check-label qcont text-dark" for="employee">{{translate('messages.Employees')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="employee">{{translate('messages.Employee')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="item" class="form-check-input"
                                            id="item">
-                                    <label class="form-check-label qcont text-dark" for="item">{{translate('messages.items')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="item">{{translate('messages.item')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="notification" class="form-check-input"
                                            id="notification">
-                                    <label class="form-check-label qcont text-dark" for="notification">{{translate('messages.notification_settings')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="notification">{{translate('messages.notification')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="order" class="form-check-input"
                                            id="order">
-                                    <label class="form-check-label qcont text-dark" for="order">{{translate('messages.orders')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="order">{{translate('messages.order')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="store" class="form-check-input"
                                            id="store">
-                                    <label class="form-check-label qcont text-dark" for="store">{{translate('messages.stores')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="store">{{translate('messages.store')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="report" class="form-check-input"
                                             id="report">
-                                    <label class="form-check-label qcont text-dark" for="report">{{translate('messages.reports')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="report">{{translate('messages.report')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="settings" class="form-check-input"
                                            id="settings">
-                                    <label class="form-check-label qcont text-dark" for="settings">{{translate('messages.business')}} {{translate('messages.settings')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="settings">{{translate('messages.settings')}}</label>
                                 </div>
                             </div>
 
@@ -172,21 +194,21 @@
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="withdraw_list" class="form-check-input"
                                             id="withdraw_list">
-                                    <label class="form-check-label qcont text-dark" for="withdraw_list">{{translate('messages.store')}} {{translate('messages.withdraws')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="withdraw_list">{{translate('messages.withdraw_list')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="zone" class="form-check-input"
                                            id="zone">
-                                    <label class="form-check-label qcont text-dark" for="zone">{{translate('messages.zone_setup')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="zone">{{translate('messages.zone')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="module" class="form-check-input"
                                            id="module_system">
-                                    <label class="form-check-label qcont text-dark" for="module_system">{{translate('messages.system_module_setup')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="module_system">{{translate('messages.module')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
@@ -200,14 +222,14 @@
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="pos" class="form-check-input"
                                            id="pos">
-                                    <label class="form-check-label qcont text-dark" for="pos">{{translate('messages.pos_system')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="pos">{{translate('messages.pos')}}</label>
                                 </div>
                             </div>
                             <div class="check-item">
                                 <div class="form-group form-check form--check">
                                     <input type="checkbox" name="modules[]" value="unit" class="form-check-input"
                                            id="unit">
-                                    <label class="form-check-label qcont text-dark" for="unit">{{translate('messages.units')}}</label>
+                                    <label class="form-check-label qcont text-dark" for="unit">{{translate('messages.unit')}}</label>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +249,7 @@
                 <div class="card-header border-0 py-2">
                     <div class="search--button-wrapper">
                         <h5 class="card-title">
-                            {{translate('messages.roles_table')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$rl->total()}}</span>
+                            {{translate('messages.roles_table')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$roles->total()}}</span>
                         </h5>
                         <form action="javascript:" id="search-form" class="search-form min--200">
                             @csrf
@@ -237,55 +259,7 @@
                                 <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                             </div>
                             <!-- End Search -->
-                        </form>                    <!-- Unfold -->
-                    {{-- <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
-                            data-hs-unfold-options='{
-                                    "target": "#usersExportDropdown",
-                                    "type": "css-animation"
-                                }'>
-                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
-                        </a>
-
-                        <div id="usersExportDropdown"
-                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.copy') }}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.print') }}
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
-                            <a id="export-excel" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.excel') }}
-                            </a>
-                            <a id="export-csv" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
-                                    alt="Image Description">
-                                .{{ translate('messages.csv') }}
-                            </a>
-                            <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.pdf') }}
-                            </a>
-                        </div>
-                    </div> --}}
-                    <!-- End Unfold -->
+                        </form>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -308,20 +282,20 @@
                             </tr>
                             </thead>
                             <tbody  id="set-rows">
-                            @foreach($rl as $k=>$r)
+                            @foreach($roles as $k=>$role)
                                 <tr>
-                                    <td scope="row">{{$k+$rl->firstItem()}}</td>
-                                    <td>{{Str::limit($r['name'],25,'...')}}</td>
+                                    <td scope="row">{{$k+$roles->firstItem()}}</td>
+                                    <td>{{Str::limit($role['name'],25,'...')}}</td>
                                     <td class="text-capitalize">
-                                        @if($r['modules']!=null)
-                                            @foreach((array)json_decode($r['modules']) as $key=>$m)
-                                               {{str_replace('_',' ',$m)}}
+                                        @if($role['modules']!=null)
+                                            @foreach((array)json_decode($role['modules']) as $key=>$module)
+                                               {{translate(str_replace('_',' ',$module))}}
                                             @endforeach
                                         @endif
                                     </td>
                                     <td>
                                         <div class="create-date">
-                                            {{date('d-M-y',strtotime($r['created_at']))}}
+                                            {{date('d-M-y',strtotime($role['created_at']))}}
                                         </div>
                                     </td>
                                     {{--<td>
@@ -330,14 +304,14 @@
                                     <td>
                                         <div class="btn--container justify-content-center">
                                             <a class="btn action-btn btn--primary btn-outline-primary"
-                                                href="{{route('admin.users.custom-role.edit',[$r['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.role')}}"><i class="tio-edit"></i>
+                                                href="{{route('admin.users.custom-role.edit',[$role['id']])}}" title="{{translate('messages.edit_role')}}"><i class="tio-edit"></i>
                                             </a>
-                                            <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                                                onclick="form_alert('role-{{$r['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete')}} {{translate('messages.role')}}"><i class="tio-delete-outlined"></i>
+                                            <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="role-{{$role['id']}}" data-message="{{translate('messages.Want_to_delete_this_role')}}"
+                                               title="{{translate('messages.delete_role')}}"><i class="tio-delete-outlined"></i>
                                             </a>
                                         </div>
-                                        <form action="{{route('admin.users.custom-role.delete',[$r['id']])}}"
-                                                method="post" id="role-{{$r['id']}}">
+                                        <form action="{{route('admin.users.custom-role.delete',[$role['id']])}}"
+                                                method="post" id="role-{{$role['id']}}">
                                             @csrf @method('delete')
                                         </form>
                                     </td>
@@ -345,13 +319,13 @@
                             @endforeach
                             </tbody>
                         </table>
-                        @if(count($rl) !== 0)
+                        @if(count($roles) !== 0)
                         <hr>
                         @endif
                         <div class="page-area">
-                            {!! $rl->links() !!}
+                            {!! $roles->links() !!}
                         </div>
-                        @if(count($rl) === 0)
+                        @if(count($roles) === 0)
                         <div class="empty--data">
                             <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
                             <h5>
@@ -368,10 +342,12 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/custom-role-index.js"></script>
     <script>
+        "use strict";
         $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -396,20 +372,7 @@
                 },
             });
         });
-        $(document).ready(function() {
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-        });
-    </script>
-
-    <script>
-        $('#select-all').on('change', function(){
-            if(this.checked === true) {
-                $('.check--item-wrapper .check-item .form-check-input').attr('checked', true)
-            } else {
-                $('.check--item-wrapper .check-item .form-check-input').attr('checked', false)
-            }
-        })
-    </script>
+</script>
 
 @endpush
 

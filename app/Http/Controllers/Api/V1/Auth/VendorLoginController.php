@@ -12,9 +12,12 @@ use Illuminate\Support\Str;
 use App\Models\Zone;
 use App\Models\Store;
 use App\CentralLogics\StoreLogic;
+use App\Models\Admin;
+use App\Models\Translation;
 use App\Models\VendorEmployee;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
+use MatanYadaev\EloquentSpatial\Objects\Point;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 
 class VendorLoginController extends Controller
 {
@@ -113,8 +116,8 @@ class VendorLoginController extends Controller
         $validator = Validator::make($request->all(), [
             'f_name' => 'required|max:100',
             'l_name' => 'nullable|max:100',
-            'name' => 'required|max:191',
-            'address' => 'required|max:1000',
+            // 'name' => 'required|max:191',
+            // 'address' => 'required|max:1000',
             'latitude' => 'required',
             'longitude' => 'required',
             'email' => 'required|unique:vendors',
@@ -122,7 +125,7 @@ class VendorLoginController extends Controller
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
             'delivery_time_type'=>'required',
-            'password' => 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'zone_id' => 'required',
             'module_id' => 'required',
             'logo' => 'required',
@@ -131,13 +134,22 @@ class VendorLoginController extends Controller
 
         if($request->zone_id)
         {
-            $point = new Point($request->latitude, $request->longitude);
-            $zone = Zone::contains('coordinates', $point)->where('id', $request->zone_id)->first();
+            $zone = Zone::query()
+            ->whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))
+            ->where('id',$request->zone_id)
+            ->first();
             if(!$zone){
                 $validator->getMessageBag()->add('latitude', translate('messages.coordinates_out_of_zone'));
                 return response()->json(['errors' => Helpers::error_processor($validator)], 403);
             }
         }
+
+        $data = json_decode($request->translations, true);
+
+        if (count($data) < 1) {
+            $validator->getMessageBag()->add('translations', translate('messages.Name and description in english is required'));
+        }
+
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
@@ -151,12 +163,12 @@ class VendorLoginController extends Controller
         $vendor->save();
 
         $store = new Store;
-        $store->name = $request->name;
+        $store->name = $data[0]['value'];
         $store->phone = $request->phone;
         $store->email = $request->email;
         $store->logo = Helpers::upload('store/', 'png', $request->file('logo'));
         $store->cover_photo = Helpers::upload('store/cover/', 'png', $request->file('cover_photo'));
-        $store->address = $request->address;
+        $store->address = $data[1]['value'];
         $store->latitude = $request->latitude;
         $store->longitude = $request->longitude;
         $store->vendor_id = $vendor->id;
@@ -171,13 +183,25 @@ class VendorLoginController extends Controller
         {
             StoreLogic::insert_schedule($store->id);
         }
+     
+        foreach ($data as $key=>$i) {
+            $data[$key]['translationable_type'] = 'App\Models\Store';
+            $data[$key]['translationable_id'] = $store->id;
+        }
+        Translation::insert($data);
 
         try{
-            if(config('mail.status')){
-                Mail::to($request['email'])->send(new \App\Mail\SelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            $admin= Admin::where('role_id', 1)->first();
+            $mail_status = Helpers::get_mail_status('registration_mail_status_store');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($request['email'])->send(new \App\Mail\VendorSelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            }
+            $mail_status = Helpers::get_mail_status('store_registration_mail_status_admin');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($admin['email'])->send(new \App\Mail\StoreRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
             }
         }catch(\Exception $ex){
-            info($ex);
+            info($ex->getMessage());
         }
 
         return response()->json(['message'=>translate('messages.application_placed_successfully')],200);

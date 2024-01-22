@@ -14,7 +14,7 @@
                 <span class="page-header-icon">
                     <img src="{{asset('public/assets/admin/img/delivery-man.png')}}" class="w--26" alt="">
                 </span>
-                <span>{{translate('messages.deliveryman')}} {{translate('messages.reviews')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span></span>
+                <span>{{translate('messages.deliveryman_reviews')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span></span>
             </h1>
         </div>
         <!-- End Page Header -->
@@ -26,15 +26,43 @@
                     <div class="card-header py-2 border-0">
                         <span class="card-header-title"></span>
                         <div class="search--button-wrapper justify-content-end">
-                            <form id="search-form" class="search-form">
-                            @csrf
+                            <form class="search-form">
+                            {{-- @csrf --}}
                                 <!-- Search -->
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch" name="search" type="search" class="form-control" placeholder="{{translate('ex_:_search_delivery_man')}}" aria-label="{{translate('messages.search_here')}}">
+                                    <input id="datatableSearch" name="search" type="search" class="form-control" placeholder="{{translate('ex_:_search_delivery_man')}}" value="{{ request()->get('search') }}" aria-label="{{translate('messages.search_here')}}">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
                             </form>
+                            <!-- Unfold -->
+                            <div class="hs-unfold mr-2">
+                                <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                                    data-hs-unfold-options='{
+                                            "target": "#usersExportDropdown",
+                                            "type": "css-animation"
+                                        }'>
+                                    <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                                </a>
+
+                                <div id="usersExportDropdown"
+                                    class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                                    <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                                    <a id="export-excel" class="dropdown-item" href="{{route('admin.users.delivery-man.reviews.export', ['type'=>'excel',request()->getQueryString()])}}">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                            src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                            alt="Image Description">
+                                        {{ translate('messages.excel') }}
+                                    </a>
+                                    <a id="export-csv" class="dropdown-item" href="{{route('admin.users.delivery-man.reviews.export', ['type'=>'csv',request()->getQueryString()])}}">
+                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                            src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                            alt="Image Description">
+                                        .{{ translate('messages.csv') }}
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- End Unfold -->
                         </div>
                     </div>
                     <!-- End Header -->
@@ -55,7 +83,6 @@
                                 <th class="border-0">{{translate('messages.customer')}}</th>
                                 <th class="border-0">{{translate('messages.review')}}</th>
                                 <th class="border-0">{{translate('messages.rating')}}</th>
-                                {{-- <th class="border-0">{{translate('messages.status')}}</th> --}}
                             </tr>
                             </thead>
 
@@ -89,16 +116,6 @@
                                                 {{$review->rating}} <i class="tio-star"></i>
                                             </label>
                                         </td>
-                                        {{-- <td>
-                                            <label class="toggle-switch toggle-switch-sm" for="reviewCheckbox{{$review->id}}">
-                                                <input type="checkbox" onclick="status_form_alert('status-{{$review['id']}}','{{$review->status?translate('messages.you_want_to_hide_this_review_for_customer'):translate('messages.you_want_to_show_this_review_for_customer')}}', event)" class="toggle-switch-input" id="reviewCheckbox{{$review->id}}" {{$review->status?'checked':''}}>
-                                                <span class="toggle-switch-label">
-                                                    <span class="toggle-switch-indicator"></span>
-                                                </span>
-                                            </label>
-                                            <form action="{{route('admin.users.delivery-man.reviews.status',[$review['id'],$review->status?0:1])}}" method="get" id="status-{{$review['id']}}">
-                                            </form>
-                                        </td> --}}
                                     </tr>
                                 @endif
                             @endforeach
@@ -130,35 +147,18 @@
 
 @push('script_2')
     <script>
+        "use strict";
+
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
         });
 
-        function status_form_alert(id, message, e) {
-            e.preventDefault();
-            Swal.fire({
-                title: '{{translate('messages.are_you_sure')}}',
-                text: message,
-                type: 'warning',
-                showCancelButton: true,
-                cancelButtonColor: 'default',
-                confirmButtonColor: '#FC6A57',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Yes',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.value) {
-                    $('#'+id).submit()
-                }
-            })
-        }
-
         $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

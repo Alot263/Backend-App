@@ -1,6 +1,6 @@
 @extends('layouts.vendor.app')
 
-@section('title','Update addon')
+@section('title',translate('Update addon'))
 
 @push('css_or_js')
 
@@ -14,7 +14,7 @@
                 <span class="page-header-icon">
                     <img src="{{asset('public/assets/admin/img/edit.png')}}" class="w--22" alt="">
                 </span>
-                <span> {{translate('messages.addon')}} {{translate('messages.update')}}</span>
+                <span> {{translate('messages.addon_update')}}</span>
             </h1>
         </div>
         <!-- End Page Header -->
@@ -24,20 +24,32 @@
                     @csrf
                     @php($language=\App\Models\BusinessSetting::where('key','language')->first())
                     @php($language = $language->value ?? null)
-                    @php($default_lang = 'en')
+                    @php($defaultLang = str_replace('_', '-', app()->getLocale()))
 
                     @if($language)
-                        @php($default_lang = json_decode($language)[0])
+                        @php($defaultLang = json_decode($language)[0])
                         <ul class="nav nav-tabs mb-4 border-0">
-                            @foreach(json_decode($language) as $lang)
+                            <li class="nav-item">
+                                <a class="nav-link lang_link active"
+                                href="#"
+                                id="default-link">{{translate('messages.default')}}</a>
+                            </li>
+                            @foreach (json_decode($language) as $lang)
                                 <li class="nav-item">
-                                    <a class="nav-link lang_link {{$lang == $default_lang? 'active':''}}" href="#" id="{{$lang}}-link">{{\App\CentralLogics\Helpers::get_language_name($lang).'('.strtoupper($lang).')'}}</a>
+                                    <a class="nav-link lang_link"
+                                        href="#"
+                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
                                 </li>
                             @endforeach
                         </ul>
                     @endif
 
                     @if ($language)
+                    <div class="form-group lang_form" id="default-form">
+                        <label class="input-label" for="name">{{translate('messages.name')}} ({{ translate('messages.Default') }})</label>
+                        <input type="text" id="name" name="name[]" class="form-control" placeholder="{{translate('messages.new_addon')}}" maxlength="191" value="{{$addon->getRawOriginal('name')}}"  >
+                    </div>
+                    <input type="hidden" name="lang[]" value="{{$lang}}">
                         @foreach(json_decode($language) as $lang)
                             <?php
                                 if(count($addon['translations'])){
@@ -50,23 +62,23 @@
                                     }
                                 }
                             ?>
-                            <div class="form-group {{$lang != $default_lang ? 'd-none':''}} lang_form" id="{{$lang}}-form">
-                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
-                                <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_addon')}}" maxlength="191" value="{{$lang==$default_lang?$addon['name']:($translate[$lang]['name']??'')}}" {{$lang == $default_lang? 'required':''}} oninvalid="document.getElementById('en-link').click()">
+                            <div class="form-group d-none lang_form" id="{{$lang}}-form">
+                                <label class="input-label" for="name{{$lang}}">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
+                                <input id="name{{$lang}}" type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_addon')}}" maxlength="191" value="{{$translate[$lang]['name']??''}}"  >
                             </div>
                             <input type="hidden" name="lang[]" value="{{$lang}}">
                         @endforeach
                     @else
                         <div class="form-group">
-                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}}</label>
-                            <input type="text" name="name" class="form-control" placeholder="{{translate('messages.new_addon')}}" value="{{ $attribute['name'] }}" required maxlength="191">
+                            <label class="input-label" for="name">{{translate('messages.name')}}</label>
+                            <input id="name" type="text" name="name" class="form-control" placeholder="{{translate('messages.new_addon')}}" value="{{ $attribute['name'] }}" required maxlength="191">
                         </div>
-                        <input type="hidden" name="lang[]" value="{{$lang}}">
+                        <input type="hidden" name="lang[]" value="default">
                     @endif
 
                         <div class="form-group">
-                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.price')}}</label>
-                            <input type="number" min="0" max="999999999999.99" step="0.01" name="price" value="{{$addon['price']}}" class="form-control" placeholder="200" required>
+                            <label class="input-label" for="price">{{translate('messages.price')}}</label>
+                            <input id="price" type="number" min="0" max="999999999999.99" step="0.01" name="price" value="{{$addon['price']}}" class="form-control" placeholder="200" required>
                         </div>
 
                         <div class="btn--container justify-content-end">
@@ -81,26 +93,4 @@
 
 @endsection
 
-@push('script_2')
-<script>
-    $(".lang_link").click(function(e){
-        e.preventDefault();
-        $(".lang_link").removeClass('active');
-        $(".lang_form").addClass('d-none');
-        $(this).addClass('active');
 
-        let form_id = this.id;
-        let lang = form_id.substring(0, form_id.length - 5);
-        console.log(lang);
-        $("#"+lang+"-form").removeClass('d-none');
-        if(lang == '{{$default_lang}}')
-        {
-            $(".from_part_2").removeClass('d-none');
-        }
-        else
-        {
-            $(".from_part_2").addClass('d-none');
-        }
-    });
-</script>
-@endpush

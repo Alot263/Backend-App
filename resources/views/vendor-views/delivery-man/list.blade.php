@@ -2,9 +2,6 @@
 
 @section('title',translate('messages.deliverymen'))
 
-@push('css_or_js')
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-@endpush
 
 @section('content')
     <div class="content container-fluid">
@@ -24,13 +21,11 @@
         <div class="card">
             <!-- Header -->
             <div class="card-header justify-content-end">
-                <form action="javascript:" id="search-form">
-                    @csrf
+                <form class="search-form" >
                     <div class="input-group input--group">
-                        <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                placeholder="{{translate('messages.ex_search_name')}}" aria-label="{{translate('messages.ex_search_name')}}" required>
+                        <input  type="search" name="search" class="form-control" value="{{request()?->search ?? ''}}"
+                                placeholder="{{translate('messages.ex_search_name')}}" aria-label="{{translate('messages.ex_search_name')}}" >
                         <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-
                     </div>
                     <!-- End Search -->
                 </form>
@@ -50,7 +45,7 @@
                     <tr>
                         <th class="border-0 text-capitalize">{{translate('messages.#')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.name')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.availability')}} {{translate('messages.status')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.availability_status')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.phone')}}</th>
                         <th class="border-0 text-capitalize text-center">{{translate('messages.active_orders')}}</th>
                         <th class="border-0 text-capitalize text-center">{{translate('messages.action')}}</th>
@@ -63,8 +58,10 @@
                             <td>{{$key+$delivery_men->firstItem()}}</td>
                             <td>
                                 <a class="media align-items-center" href="{{route('vendor.delivery-man.preview',[$dm['id']])}}">
-                                    <img class="avatar avatar-lg mr-3" onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                            src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}" alt="{{$dm['f_name']}} {{$dm['l_name']}}">
+                                    <img class="avatar avatar-lg mr-3 onerror-image"
+                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                         src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                                         alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                                     <div class="media-body">
                                         <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
                                         <span class="rating">
@@ -102,7 +99,10 @@
                                 <div class="btn--container justify-content-center">
                                     <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('vendor.delivery-man.edit',[$dm['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i>
                                     </a>
-                                    <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('delivery-man-{{$dm['id']}}','Want to remove this deliveryman ?')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
+                                    <a class="btn action-btn btn--danger btn-outline-danger form-alert"
+                                       data-id="delivery-man-{{$dm['id']}}"
+                                       data-message="{{translate('Want_to_remove_this_deliveryman_?')}}"
+                                       href="javascript:"  title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
                                     </a>
                                 </div>
                                 <form action="{{route('vendor.delivery-man.delete',[$dm['id']])}}" method="post" id="delivery-man-{{$dm['id']}}">
@@ -141,76 +141,5 @@
 @endsection
 
 @push('script_2')
-    <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .columns(1)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column2_search').on('keyup', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column3_search').on('keyup', function () {
-                datatable
-                    .columns(3)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column4_search').on('keyup', function () {
-                datatable
-                    .columns(4)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-
-    <script>
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('vendor.delivery-man.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.count);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-    </script>
+    <script src="{{asset('public/assets/admin/js/view-pages/datatable-search.js')}}"></script>
 @endpush

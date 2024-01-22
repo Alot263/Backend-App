@@ -7,7 +7,7 @@
     <section class="about-section py-5 position-relative">
         <div class=" container">
             <div class="section-header">
-                <h2 class="title">{{translate("messages.Terms")}} {{translate("messages.And")}} <span class="text--base">{{translate("messages.Conditions")}}</span></h2>
+                <h2 class="title">{{translate("messages.Terms_And")}} <span class="text--base">{{translate("messages.Conditions")}}</span></h2>
             </div>
             <div class="privacy-wrapper">
                 <div class="item">

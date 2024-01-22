@@ -1,9 +1,9 @@
 @if(count($combinations[0]) > 0)
-    <table class="table table-bordered">
-        <thead class="thead-light">
+    <table class="table table-borderless table--vertical-middle">
+        <thead class="thead-light __bg-7">
             <tr>
                 <th class="text-center border-0">
-                    <span class="control-label">{{translate('messages.Variant')}}</span>
+                    <span class="control-label m-0">{{translate('messages.Variant')}}</span>
                 </th>
                 <th class="text-center border-0">
                     <span class="control-label">{{translate('messages.Variant Price')}}</span>
@@ -31,8 +31,8 @@
             @endphp
             @if(strlen($str) > 0)
                 <tr>
-                    <td>
-                        <label for="" class="control-label">{{ $str }}</label>
+                    <td class="text-center">
+                        <label class="control-label m-0">{{ $str }}</label>
                     </td>
                     <td>
                         <input type="number" name="price_{{ $str }}" value="{{ $price }}" min="0" step="0.01"
@@ -49,12 +49,13 @@
         </tbody>
     </table>
     <script>
+        "use strict";
         update_qty();
         function update_qty()
         {
-            var total_qty = 0;
-            var qty_elements = $('input[name^="stock_"]');
-            for(var i=0; i<qty_elements.length; i++)
+            let total_qty = 0;
+            let qty_elements = $('input[name^="stock_"]');
+            for(let i=0; i<qty_elements.length; i++)
             {
                 total_qty += parseInt(qty_elements.eq(i).val());
             }
@@ -69,13 +70,17 @@
             }
         }
         $('input[name^="stock_"]').on('keyup', function () {
-            var total_qty = 0;
-            var qty_elements = $('input[name^="stock_"]');
-            for(var i=0; i<qty_elements.length; i++)
+            let total_qty = 0;
+            let qty_elements = $('input[name^="stock_"]');
+            for(let i=0; i<qty_elements.length; i++)
             {
                 total_qty += parseInt(qty_elements.eq(i).val());
             }
             $('input[name="current_stock"]').val(total_qty);
+        });
+
+        $('.update_qty').on('keyup', function () {
+            update_qty();
         });
 
     </script>

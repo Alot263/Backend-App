@@ -44,28 +44,32 @@
                     </div>
                     <div class="btn--container justify-content-end mt-4">
                         <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                        <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn--primary">{{translate('Clear')}}</button>
+                        <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" class="btn btn--primary call-demo">{{translate('Clear')}}</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
+
+
+
 @endsection
 
 @push('script_2')
 <script>
-    var store_dependent = ['stores','store_schedule', 'discounts'];
-    var order_dependent = ['order_delivery_histories','d_m_reviews', 'delivery_histories', 'track_deliverymen', 'order_details', 'reviews'];
-    var zone_dependent = ['stores','vendors', 'orders'];
+    "use strict";
+
+    let store_dependent = ['stores','store_schedule', 'discounts'];
+    let order_dependent = ['order_delivery_histories','d_m_reviews', 'delivery_histories', 'track_deliverymen', 'order_details', 'reviews'];
+    let zone_dependent = ['stores','vendors', 'orders'];
     $(document).ready(function () {
         $('.form-check-input').on('change', function(event){
             if($(this).is(':checked')){
-                if(event.target.id == 'zones' || event.target.id == 'stores' || event.target.id == 'vendors') {
+                if(event.target.id === 'zones' || event.target.id === 'stores' || event.target.id === 'vendors') {
                     checked_stores(true);
                 }
 
-                if(event.target.id == 'zones' || event.target.id == 'orders') {
+                if(event.target.id === 'zones' || event.target.id === 'orders') {
                     checked_orders(true);
                 }
             } else {
@@ -87,14 +91,7 @@
 
         });
 
-        $("#purchase_code_div").click(function () {
-            var type = $('#purchase_code').get(0).type;
-            if (type === 'password') {
-                $('#purchase_code').get(0).type = 'text';
-            } else if (type === 'text') {
-                $('#purchase_code').get(0).type = 'password';
-            }
-        });
+
     })
 
     function checked_stores(status) {
@@ -138,9 +135,6 @@
         return false;
     }
 
-</script>
-
-<script>
     $("form").on('submit',function(e) {
         e.preventDefault();
         Swal.fire({

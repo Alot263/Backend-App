@@ -11,6 +11,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" id="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Title -->
     <title>@yield('title')</title>
     <!-- Favicon -->
@@ -18,13 +20,14 @@
     <link rel="shortcut icon" href="">
     <link rel="icon" type="image/x-icon" href="{{asset('storage/app/public/business/'.$logo??'')}}">
     <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+    <link href="{{asset('public/assets/admin/css/fonts.css')}}" rel="stylesheet">
     <!-- CSS Implementing Plugins -->
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/vendor.min.css">
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/vendor/icon-set/style.css">
     <!-- CSS Front Template -->
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/theme.minc619.css?v=1.0">
+    <link rel="stylesheet" href="{{asset('public/assets/admin/css/emogi-area.css')}}">
     <link rel="stylesheet" href="{{asset('public/assets/admin/css/style.css')}}">
     @stack('css_or_js')
 
@@ -37,7 +40,7 @@
     <div class="direction-toggle">
         <i class="tio-settings"></i>
         <span></span>
-    </div>  
+    </div>
     @endif
 {{--loader--}}
 <div class="container">
@@ -71,19 +74,79 @@
 @include('layouts.vendor.partials._footer')
 <!-- End Footer -->
 
+
+    <div class="modal fade" id="toggle-modal">
+        <div class="modal-dialog status-warning-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true" class="tio-clear"></span>
+                    </button>
+                </div>
+                <div class="modal-body pb-5 pt-0">
+                    <div class="max-349 mx-auto mb-20">
+                        <div>
+                            <div class="text-center">
+                                <img id="toggle-image" alt="" class="mb-20">
+                                <h5 class="modal-title" id="toggle-title"></h5>
+                            </div>
+                            <div class="text-center" id="toggle-message">
+                            </div>
+                        </div>
+                        <div class="btn--container justify-content-center">
+                            <button type="button" id="toggle-ok-button" class="btn btn--primary min-w-120 confirm-Toggle" data-dismiss="modal">{{translate('Ok')}}</button>
+                            <button id="reset_btn" type="reset" class="btn btn--cancel min-w-120" data-dismiss="modal">
+                                {{translate("Cancel")}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="toggle-status-modal">
+        <div class="modal-dialog status-warning-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true" class="tio-clear"></span>
+                    </button>
+                </div>
+                <div class="modal-body pb-5 pt-0">
+                    <div class="max-349 mx-auto mb-20">
+                        <div>
+                            <div class="text-center">
+                                <img id="toggle-status-image" alt="" class="mb-20">
+                                <h5 class="modal-title" id="toggle-status-title"></h5>
+                            </div>
+                            <div class="text-center" id="toggle-status-message">
+                            </div>
+                        </div>
+                        <div class="btn--container justify-content-center">
+                            <button type="button" id="toggle-status-ok-button" class="btn btn--primary min-w-120 confirm-Status-Toggle" data-dismiss="modal">{{translate('Ok')}}</button>
+                            <button id="reset_btn" type="reset" class="btn btn--cancel min-w-120" data-dismiss="modal">
+                                {{translate("Cancel")}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="popup-modal">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12">
-                            <center>
+                            <div class="text-center">
                                 <h2>
                                     <i class="tio-shopping-cart-outlined"></i> {{translate('messages.You have new order, Check Please.')}}
                                 </h2>
                                 <hr>
-                                <button onclick="check_order()" class="btn btn-primary">{{translate('messages.Ok, let me check')}}</button>
-                            </center>
+                                <button  class="btn btn-primary check-order">{{translate('messages.Ok, let me check')}}</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -96,7 +159,7 @@
 
 <!-- ========== END SECONDARY CONTENTS ========== -->
 <script src="{{asset('public/assets/admin')}}/js/custom.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.3.2/firebase.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/firebase.min.js"></script>
 <!-- JS Implementing Plugins -->
 
 @stack('script')
@@ -106,21 +169,33 @@
 <script src="{{asset('public/assets/admin')}}/js/theme.min.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/sweet_alert.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/toastr.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/emogi-area.js"></script>
+
+<script src="{{asset('public/assets/admin/js/app-blade/vendor.js')}}"></script>
 {!! Toastr::message() !!}
 
 @if ($errors->any())
-    <script>
-        @foreach($errors->all() as $error)
-        toastr.error('{{$error}}', Error, {
-            CloseButton: true,
-            ProgressBar: true
-        });
-        @endforeach
-    </script>
-@endif
-<!-- Toggle Direction Init -->
 <script>
 
+"use strict";
+    @foreach ($errors->all() as $error)
+    toastr.error('{{ translate($error) }}', Error, {
+        CloseButton: true,
+        ProgressBar: true
+    });
+    @endforeach
+</script>
+@endif
+
+@stack('script_2')
+<audio id="myAudio">
+    <source src="{{asset('public/assets/admin/sound/notification.mp3')}}" type="audio/mpeg">
+</audio>
+    <script src="{{asset('public/assets/admin/js/view-pages/common.js')}}"></script>
+
+<script>
+
+"use strict";
     $(document).on('ready', function(){
         // $('body').css('overflow','')
         $(".direction-toggle").on("click", function () {
@@ -132,14 +207,14 @@
                 $('html').addClass('active')
             }
         });
-        if ($('html').attr('dir') == "rtl") {
+        if ($('html').attr('dir') === "rtl") {
             $(".direction-toggle").find('span').text('Toggle LTR')
         } else {
             $(".direction-toggle").find('span').text('Toggle RTL')
         }
 
         function setDirection(status) {
-            if (status == 1) {
+            if (status === 1) {
                 $("html").attr('dir', 'ltr');
                 $(".direction-toggle").find('span').text('Toggle RTL')
             } else {
@@ -153,141 +228,13 @@
                         status: status,
                     },
                     success: function() {
-                        alert(ok);
                     },
 
                 });
             }
         });
 
-</script>
-<!-- JS Plugins Init. -->
-<script>
-    $(document).on('ready', function () {
-        // ONLY DEV
-        // =======================================================
-        if (window.localStorage.getItem('hs-builder-popover') === null) {
-            $('#builderPopover').popover('show')
-                .on('shown.bs.popover', function () {
-                    $('.popover').last().addClass('popover-dark')
-                });
 
-            $(document).on('click', '#closeBuilderPopover', function () {
-                window.localStorage.setItem('hs-builder-popover', true);
-                $('#builderPopover').popover('dispose');
-            });
-        } else {
-            $('#builderPopover').on('show.bs.popover', function () {
-                return false
-            });
-        }
-        // END ONLY DEV
-        // =======================================================
-
-        // BUILDER TOGGLE INVOKER
-        // =======================================================
-        $('.js-navbar-vertical-aside-toggle-invoker').click(function () {
-            $('.js-navbar-vertical-aside-toggle-invoker i').tooltip('hide');
-        });
-
-        // INITIALIZATION OF NAVBAR VERTICAL NAVIGATION
-        // =======================================================
-        var sidebar = $('.js-navbar-vertical-aside').hsSideNav();
-
-
-        // INITIALIZATION OF TOOLTIP IN NAVBAR VERTICAL MENU
-        // =======================================================
-        $('.js-nav-tooltip-link').tooltip({boundary: 'window'})
-
-        $(".js-nav-tooltip-link").on("show.bs.tooltip", function (e) {
-            if (!$("body").hasClass("navbar-vertical-aside-mini-mode")) {
-                return false;
-            }
-        });
-
-
-        // INITIALIZATION OF UNFOLD
-        // =======================================================
-        $('.js-hs-unfold-invoker').each(function () {
-            var unfold = new HSUnfold($(this)).init();
-        });
-
-
-        // INITIALIZATION OF FORM SEARCH
-        // =======================================================
-        $('.js-form-search').each(function () {
-            new HSFormSearch($(this)).init()
-        });
-
-
-        // INITIALIZATION OF SELECT2
-        // =======================================================
-        $('.js-select2-custom').each(function () {
-            var select2 = $.HSCore.components.HSSelect2.init($(this));
-        });
-
-
-        // INITIALIZATION OF DATERANGEPICKER
-        // =======================================================
-        $('.js-daterangepicker').daterangepicker();
-
-        $('.js-daterangepicker-times').daterangepicker({
-            timePicker: true,
-            startDate: moment().startOf('hour'),
-            endDate: moment().startOf('hour').add(32, 'hour'),
-            locale: {
-                format: 'M/DD hh:mm A'
-            }
-        });
-
-        var start = moment();
-        var end = moment();
-
-        function cb(start, end) {
-            $('#js-daterangepicker-predefined .js-daterangepicker-predefined-preview').html(start.format('MMM D') + ' - ' + end.format('MMM D, YYYY'));
-        }
-
-        $('#js-daterangepicker-predefined').daterangepicker({
-            startDate: start,
-            endDate: end,
-            ranges: {
-                'Today': [moment(), moment()],
-                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            }
-        }, cb);
-
-        cb(start, end);
-
-
-        // INITIALIZATION OF CLIPBOARD
-        // =======================================================
-        $('.js-clipboard').each(function () {
-            var clipboard = $.HSCore.components.HSClipboard.init(this);
-        });
-    });
-</script>
-
-@stack('script_2')
-<audio id="myAudio">
-    <source src="{{asset('public/assets/admin/sound/notification.mp3')}}" type="audio/mpeg">
-</audio>
-
-<script>
-    var audio = document.getElementById("myAudio");
-
-    function playAudio() {
-        audio.play();
-    }
-
-    function pauseAudio() {
-        audio.pause();
-    }
-</script>
-<script>
     function route_alert(route, message) {
         Swal.fire({
             title: '{{ translate('messages.Are you sure?') }}',
@@ -306,7 +253,9 @@
         })
     }
 
-    function form_alert(id, message) {
+    $('.form-alert').on('click',function (){
+        let id = $(this).data('id')
+        let message = $(this).data('message')
         Swal.fire({
             title: '{{ translate('messages.Are you sure?') }}',
             text: message,
@@ -322,18 +271,17 @@
                 $('#'+id).submit()
             }
         })
-    }
+    })
+
 
     function set_filter(url, id, filter_by) {
-        var nurl = new URL(url);
+        let nurl = new URL(url);
         nurl.searchParams.set(filter_by, id);
         location.href = nurl;
     }
-</script>
 
-<script>
     @php($fcm_credentials = \App\CentralLogics\Helpers::get_business_settings('fcm_credentials'))
-    var firebaseConfig = {
+    let firebaseConfig = {
         apiKey: "{{isset($fcm_credentials['apiKey']) ? $fcm_credentials['apiKey'] : ''}}",
         authDomain: "{{isset($fcm_credentials['authDomain']) ? $fcm_credentials['authDomain'] : ''}}",
         projectId: "{{isset($fcm_credentials['projectId']) ? $fcm_credentials['projectId'] : ''}}",
@@ -354,21 +302,6 @@ messaging
     }).then(function (response) {
         @php($store_id=\App\CentralLogics\Helpers::get_store_id())
         subscribeTokenToTopic(response, "store_panel_{{$store_id}}_message");
-        // $.ajaxSetup({
-        //     headers: {
-        //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //     }
-        // });
-        // $.ajax({
-        //     url: '{{ route('vendor.store.token') }}',
-        //     type: 'POST',
-        //     data: {
-        //         token: response
-        //     },
-        //     // error: function (error) {
-        //     //     alert(error);
-        //     // },
-        // });
     }).catch(function (error) {
         console.log(error);
     });
@@ -391,23 +324,23 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
 })
 }
     function getUrlParameter(sParam) {
-            var sPageURL = window.location.search.substring(1);
-            var sURLVariables = sPageURL.split('&');
-            for (var i = 0; i < sURLVariables.length; i++) {
-                var sParameterName = sURLVariables[i].split('=');
-                if (sParameterName[0] == sParam) {
+            let sPageURL = window.location.search.substring(1);
+            let sURLletiables = sPageURL.split('&');
+            for (let i = 0; i < sURLletiables.length; i++) {
+                let sParameterName = sURLletiables[i].split('=');
+                if (sParameterName[0] === sParam) {
                     return sParameterName[1];
                 }
             }
         }
 
-        function converationList() {
+        function conversationList() {
             $.ajax({
                 url: "{{ route('vendor.message.list') }}",
                 success: function(data) {
                     $('#conversation-list').empty();
                     $("#conversation-list").append(data.html);
-                    var user_id = getUrlParameter('user');
+                    let user_id = getUrlParameter('user');
                     $('.customer-list').removeClass('conv-active');
                     $('#customer-' + user_id).addClass('conv-active');
                 }
@@ -415,9 +348,9 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
         }
 
         function conversationView() {
-            var conversation_id = getUrlParameter('conversation');
-            var user_id = getUrlParameter('user');
-            var url= '{{url('/')}}/store-panel/message/view/'+conversation_id+'/' + user_id;
+            let conversation_id = getUrlParameter('conversation');
+            let user_id = getUrlParameter('user');
+            let url= '{{url('/')}}/store-panel/message/view/'+conversation_id+'/' + user_id;
             $.ajax({
                 url: url,
                 success: function(data) {
@@ -425,19 +358,20 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
                 }
             })
         }
-        var order_type = 'all';
+        @php($order_notification_type = \App\Models\BusinessSetting::where('key', 'order_notification_type')->first())
+        @php($order_notification_type = $order_notification_type ? $order_notification_type->value : 'firebase')
+        let order_type = 'all';
         messaging.onMessage(function (payload) {
-            console.log(payload.data);
-            if(payload.data.order_id && payload.data.type == 'new_order'){
-                @if(\App\CentralLogics\Helpers::employee_module_permission_check('order'))
+            if(payload.data.order_id && payload.data.type === 'new_order'){
+                @if(\App\CentralLogics\Helpers::employee_module_permission_check('order') && $order_notification_type == 'firebase')
                     order_type = payload.data.order_type
                     playAudio();
                     $('#popup-modal').appendTo("body").modal('show');
                 @endif
-            }else if(payload.data.type == 'message'){
-            var conversation_id = getUrlParameter('conversation');
-            var user_id = getUrlParameter('user');
-            var url= '{{url('/')}}/store-panel/message/view/'+conversation_id+'/' + user_id;
+            }else if(payload.data.type === 'message'){
+            let conversation_id = getUrlParameter('conversation');
+            let user_id = getUrlParameter('user');
+            let url= '{{url('/')}}/store-panel/message/view/'+conversation_id+'/' + user_id;
             $.ajax({
                 url: url,
                 success: function(data) {
@@ -449,38 +383,70 @@ fetch('https://iid.googleapis.com/iid/v1/' + token + '/rel/topics/' + topic, {
                         ProgressBar: true
                     });
 
-            if($('#conversation-list').scrollTop() == 0){
-                converationList();
+            if($('#conversation-list').scrollTop() === 0){
+                conversationList();
             }
         }
         });
-        function check_order() {
+
+        @if(\App\CentralLogics\Helpers::employee_module_permission_check('order') && $order_notification_type == 'manual')
+        setInterval(function () {
+            $.get({
+                url: '{{route('vendor.get-store-data')}}',
+                dataType: 'json',
+                success: function (response) {
+                    let data = response.data;
+                    if (data.new_pending_order > 0) {
+                        order_type = 'pending';
+                        playAudio();
+                        $('#popup-modal').appendTo("body").modal('show');
+                    }
+                    else if(data.new_confirmed_order > 0)
+                    {
+                        order_type = 'confirmed';
+                        playAudio();
+                        $('#popup-modal').appendTo("body").modal('show');
+                    }
+                },
+            });
+        }, 10000);
+        @endif
+
+        $('.check-order').on('click',function (){
             if(order_type){
                 location.href = '{{url('/')}}/store-panel/order/list/'+order_type;
             }
-            location.href = '{{url('/')}}/store-panel/order/list/all';
-        }
-
+        });
         startFCM();
-        converationList();
+        conversationList();
         if(getUrlParameter('conversation')){
             conversationView();
         }
+
+
+        $('.log-out').on('click',function (){
+
+            Swal.fire({
+            title: '{{ translate('Do you want to logout?') }}',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonColor: '#FC6A57',
+            cancelButtonColor: '#363636',
+            confirmButtonText: `{{ translate('yes')}}`,
+            cancelButtonText: `{{ translate('Do_not_Logout')}}`,
+            }).then((result) => {
+            if (result.value) {
+            location.href='{{route('logout')}}';
+            } else{
+            Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
+            }
+        })
+
+});
+
+
 </script>
 
-<script>
-    function call_demo(){
-        toastr.info('{{ translate('Update option is disabled for demo!') }}', {
-            CloseButton: true,
-            ProgressBar: true
-        });
-    }
-    function set_time_filter(url, id) {
-            var nurl = new URL(url);
-            nurl.searchParams.set('filter', id);
-            location.href = nurl;
-        }
-</script>
 
 <!-- IE Support -->
 <script>

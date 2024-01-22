@@ -11,8 +11,13 @@
 <div class="col-sm-6 col-lg-3">
     <!-- Card -->
     <a class="resturant-card dashboard--card card--bg-2" href="{{route('vendor.order.list',['cooking'])}}">
+        @php($store_data=\App\CentralLogics\Helpers::get_store_data())
        <h4 class="title">{{$data['cooking']}}</h4>
+        @if($store_data->module->module_type == 'food')
        <span class="subtitle">{{translate('messages.cooking')}}</span>
+        @else
+       <span class="subtitle">{{translate('messages.processing')}}</span>
+        @endif
        <img src="{{asset('public/assets/admin/img/dashboard/2.png')}}" alt="img" class="resturant-icon">
     </a>
     <!-- End Card -->

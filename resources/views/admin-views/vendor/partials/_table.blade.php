@@ -30,7 +30,7 @@
         </div>
     </td>
     <td>
-        {{$store->zone?$store->zone->name:translate('messages.zone').' '.translate('messages.deleted')}}
+        {{$store->zone?$store->zone->name:translate('messages.zone_deleted')}}
         {{--<span class="d-block font-size-sm">{{$banner['image']}}</span>--}}
     </td>
     <td>
@@ -62,10 +62,10 @@
     <td>
         <div class="btn--container justify-content-center">
             <a class="btn action-btn btn--primary btn-outline-primary"
-            href="{{route('admin.store.edit',[$store['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.store')}}"><i class="tio-edit"></i>
+            href="{{route('admin.store.edit',[$store['id']])}}" title="{{translate('messages.edit_store')}}"><i class="tio-edit"></i>
             </a>
             <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-            onclick="form_alert('vendor-{{$store['id']}}','{{translate('You want to remove this store')}}')" title="{{translate('messages.delete')}} {{translate('messages.store')}}"><i class="tio-delete-outlined"></i>
+            onclick="form_alert('vendor-{{$store['id']}}','{{translate('You want to remove this store')}}')" title="{{translate('messages.delete_store')}}"><i class="tio-delete-outlined"></i>
             </a>
             <form action="{{route('admin.store.delete',[$store['id']])}}" method="post" id="vendor-{{$store['id']}}">
                 @csrf @method('delete')

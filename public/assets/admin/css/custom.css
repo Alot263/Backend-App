@@ -143,3 +143,31 @@
 ol.breadcrumb {
     padding: 1px;
 }
+
+
+/* view inline css */
+#dm-conversation-list {
+    overflow-y: scroll;
+    height: 600px
+}
+
+#conversation-list {
+    overflow-y: scroll;
+    height: 600px
+}
+
+.select2-container--open {
+    z-index: 99999999999999;
+}
+#offline_payment_cancelation_note {
+    z-index: 99999999999999;
+}
+
+.w-100-p{
+    width:100%;
+}
+
+div.scroll-down {
+    max-height: 300px;
+    overflow-y: scroll;
+}

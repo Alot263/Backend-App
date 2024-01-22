@@ -1,5 +1,5 @@
 @extends('layouts.vendor.app')
-@section('title','Create Role')
+@section('title',translate('messages.Create_Role'))
 @push('css_or_js')
 
 @endpush
@@ -18,7 +18,9 @@
         </h1>
     </div>
     <!-- Page Heading -->
-
+    @php($language=\App\Models\BusinessSetting::where('key','language')->first())
+    @php($language = $language->value ?? null)
+    @php($defaultLang = str_replace('_', '-', app()->getLocale()))
     <!-- Content Row -->
     <div class="card">
         <div class="card-header">
@@ -32,11 +34,40 @@
         <div class="card-body">
             <form action="{{route('vendor.custom-role.create')}}" method="post">
                 @csrf
-                <div class="form-group">
-                    <label class="input-label qcont text-capitalize" for="name">{{translate('messages.role_name')}}</label>
-                    <input type="text" name="name" class="form-control" id="name" aria-describedby="emailHelp"
-                            placeholder="{{translate('role_name_example')}}" required>
-                </div>
+                @if ($language)
+                        <ul class="nav nav-tabs mb-4">
+                            <li class="nav-item">
+                                <a class="nav-link lang_link active"
+                                href="#"
+                                id="default-link">{{translate('messages.default')}}</a>
+                            </li>
+                            @foreach (json_decode($language) as $lang)
+                                <li class="nav-item">
+                                    <a class="nav-link lang_link"
+                                        href="#"
+                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                            <div class="form-group lang_form" id="default-form">
+                                <label class="input-label" for="name">{{translate('messages.role_name')}} ({{ translate('messages.default') }})</label>
+                                <input type="text" id="name" name="name[]" class="form-control" placeholder="{{translate('role_name_example')}}" maxlength="191"  >
+                            </div>
+                            <input type="hidden" name="lang[]" value="default">
+                                @foreach(json_decode($language) as $lang)
+                                    <div class="form-group d-none lang_form" id="{{$lang}}-form">
+                                        <label class="input-label" for="name{{$lang}}">{{translate('messages.role_name')}} ({{strtoupper($lang)}})</label>
+                                        <input type="text" id="name{{$lang}}" name="name[]" class="form-control" placeholder="{{translate('role_name_example')}}" maxlength="191"  >
+                                    </div>
+                                    <input type="hidden" name="lang[]" value="{{$lang}}">
+                                @endforeach
+                            @else
+                                <div class="form-group">
+                                    <label class="input-label" for="name">{{translate('messages.role_name')}}</label>
+                                    <input type="text" id="name" name="name" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{old('name')}}" required maxlength="191">
+                                </div>
+                                <input type="hidden" name="lang[]" value="default">
+                            @endif
 
                 <h5 class="text-capitalize">{{translate('messages.module_permission')}} : </h5>
                 <hr>
@@ -45,20 +76,20 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="item" class="form-check-input"
                                     id="item">
-                            <label class="form-check-label input-label qcont" for="item">{{translate('messages.items')}}</label>
+                            <label class="form-check-label input-label " for="item">{{translate('messages.items')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="order" class="form-check-input"
                                     id="order">
-                            <label class="form-check-label input-label qcont" for="order">{{translate('messages.orders')}}</label>
+                            <label class="form-check-label input-label " for="order">{{translate('messages.orders')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="store_setup" class="form-check-input" id="store_setup">
-                            <label class="form-check-label input-label qcont" for="store_setup">{{translate('messages.store')}} {{translate('messages.setup')}}</label>
+                            <label class="form-check-label input-label " for="store_setup">{{translate('messages.store_setup')}}</label>
                         </div>
                     </div>
                     @if (config('module.'.\App\CentralLogics\Helpers::get_store_data()->module->module_type)['add_on'])
@@ -66,71 +97,65 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="addon" class="form-check-input"
                                     id="addon">
-                            <label class="form-check-label input-label qcont" for="addon">{{translate('messages.addons')}}</label>
+                            <label class="form-check-label input-label " for="addon">{{translate('messages.addons')}}</label>
                         </div>
-                    </div>                                
+                    </div>
                     @endif
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="wallet" class="form-check-input"
                                     id="wallet">
-                            <label class="form-check-label input-label qcont" for="wallet">{{translate('messages.my_wallet')}}</label>
+                            <label class="form-check-label input-label " for="wallet">{{translate('messages.my_wallet')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="bank_info" class="form-check-input"
                                     id="bank_info">
-                            <label class="form-check-label input-label qcont" for="bank_info">{{translate('messages.bank_info')}}</label>
+                            <label class="form-check-label input-label " for="bank_info">{{translate('messages.bank_info')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="employee" class="form-check-input"
                                     id="employee">
-                            <label class="form-check-label input-label qcont" for="employee">{{translate('messages.Employees')}}</label>
+                            <label class="form-check-label input-label " for="employee">{{translate('messages.Employees')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="my_shop" class="form-check-input"
                                     id="my_shop">
-                            <label class="form-check-label input-label qcont" for="my_shop">{{translate('messages.my_shop')}}</label>
+                            <label class="form-check-label input-label " for="my_shop">{{translate('messages.my_shop')}}</label>
                         </div>
                     </div>
-                    {{-- <div class="check-item">
-                        <div class="form-group form-check form--check">
-                            <input type="checkbox" name="modules[]" value="custom_role" class="form-check-input"
-                                    id="custom_role">
-                            <label class="form-check-label input-label qcont" for="custom_role">{{translate('messages.custom_role')}}</label>
-                        </div>
-                    </div> --}}
+
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="campaign" class="form-check-input"
                                     id="campaign">
-                            <label class="form-check-label input-label qcont" for="campaign">{{translate('messages.campaigns')}}</label>
+                            <label class="form-check-label input-label " for="campaign">{{translate('messages.campaigns')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="reviews" class="form-check-input"
                                     id="reviews">
-                            <label class="form-check-label input-label qcont" for="reviews">{{translate('messages.reviews')}}</label>
+                            <label class="form-check-label input-label " for="reviews">{{translate('messages.reviews')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="pos" class="form-check-input"
                                     id="pos">
-                            <label class="form-check-label input-label qcont text-uppercase" for="pos">{{translate('messages.pos')}}</label>
+                            <label class="form-check-label input-label  text-uppercase" for="pos">{{translate('messages.pos')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="chat" class="form-check-input"
                                     id="chat">
-                            <label class="form-check-label input-label qcont" for="chat">{{translate('messages.chat')}}</label>
+                            <label class="form-check-label input-label " for="chat">{{translate('messages.chat')}}</label>
                         </div>
                     </div>
                 </div>
@@ -153,11 +178,10 @@
                         {{translate('messages.roles_table')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$rl->total()}}</span>
                     </span>
                 </h5>
-                <form action="javascript:" id="search-form" class="search-form min--250">
-                    @csrf
+                <form  class="search-form min--250">
                     <!-- Search -->
                     <div class="input-group input--group">
-                        <input id="datatableSearch_" type="search" name="search" class="form-control" placeholder="{{translate('messages.search_role')}}" aria-label="{{translate('messages.search')}}">
+                        <input  value="{{request()?->search ?? ''}}" type="search" name="search" class="form-control" placeholder="{{translate('messages.search_role')}}" aria-label="{{translate('messages.search')}}">
                         <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                     </div>
                     <!-- End Search -->
@@ -179,33 +203,30 @@
                             <th class="border-0 w-50px">{{translate('messages.role_name')}}</th>
                             <th class="border-0 w-100px">{{translate('messages.modules')}}</th>
                             <th class="border-0 w-50px">{{translate('messages.created_at')}}</th>
-                            {{--<th class="border-0 w-50px">{{translate('messages.status')}}</th>--}}
                             <th class="border-0 w-50px text-center">{{translate('messages.action')}}</th>
                         </tr>
                     </thead>
                     <tbody  id="set-rows">
                     @foreach($rl as $k=>$r)
                         <tr>
-                            <td scope="row">{{$k+$rl->firstItem()}}</td>
+                            <td >{{$k+$rl->firstItem()}}</td>
                             <td>{{Str::limit($r['name'],20,'...')}}</td>
                             <td class="text-capitalize">
                                 @if($r['modules']!=null)
                                     @foreach((array)json_decode($r['modules']) as $key=>$m)
-                                        {{str_replace('_',' ',$m)}},
+                                        {{translate(str_replace('_',' ',$m))}},
                                     @endforeach
                                 @endif
                             </td>
                             <td>{{date('d-M-y',strtotime($r['created_at']))}}</td>
-                            {{--<td>
-                                {{$r->status?'Active':'Inactive'}}
-                            </td>--}}
                             <td>
                                 <div class="btn--container justify-content-center">
                                     <a class="btn action-btn btn--primary btn-outline-primary"
-                                        href="{{route('vendor.custom-role.edit',[$r['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.role')}}"><i class="tio-edit"></i>
+                                        href="{{route('vendor.custom-role.edit',[$r['id']])}}" title="{{translate('messages.edit_role')}}"><i class="tio-edit"></i>
                                     </a>
-                                    <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                                        onclick="form_alert('role-{{$r['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete')}} {{translate('messages.role')}}"><i class="tio-delete-outlined"></i>
+                                    <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:"
+                                       data-id="role-{{$r['id']}}" data-message="{{translate('messages.Want_to_delete_this_role')}}"
+                                         title="{{translate('messages.delete_role')}}"><i class="tio-delete-outlined"></i>
                                     </a>
                                 </div>
                                 <form action="{{route('vendor.custom-role.delete',[$r['id']])}}"
@@ -241,36 +262,4 @@
 </div>
 @endsection
 
-@push('script_2')
-    <script>
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('vendor.custom-role.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-        $(document).ready(function() {
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-        });
-    </script>
-@endpush
+

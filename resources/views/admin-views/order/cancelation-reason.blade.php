@@ -106,7 +106,7 @@
                                             <label class="toggle-switch toggle-switch-sm"
                                                 for="stocksCheckbox{{ $reason->id }}">
                                                 <input type="checkbox"
-                                                    onclick="location.href='{{ route('admin.business-settings.order-cancel-reasons.status', [$reason['id'], $reason->status ? 0 : 1]) }}'"class="toggle-switch-input"
+                                                    data-url="{{ route('admin.business-settings.order-cancel-reasons.status', [$reason['id'], $reason->status ? 0 : 1]) }}" class="toggle-switch-input redirect-url"
                                                     id="stocksCheckbox{{ $reason->id }}"
                                                     {{ $reason->status ? 'checked' : '' }}>
                                                 <span class="toggle-switch-label">
@@ -119,16 +119,15 @@
                                             <div class="btn--container justify-content-center">
 
                                                 <button
-                                                    class="btn action-btn btn--primary btn-outline-primary identifyingClass"
-                                                    data-id={{ $reason['id'] }} title="{{ translate('messages.edit') }}"
-                                                    onClick="javascript:showMyModal('{{ $reason['id'] }}', `{{ $reason->reason }}`, '{{ $reason->user_type }}')">
+                                                    class="btn action-btn btn--primary btn-outline-primary identifyingClass show-modal"
+                                                    data-id="{{ $reason['id'] }}" title="{{ translate('messages.edit') }}" data-data="{{ $reason->reason }}" data-type="{{ $reason->user_type }}">
                                                     <i class="tio-edit"></i>
                                                 </button>
 
 
-                                                <a class="btn btn-sm btn--danger btn-outline-danger action-btn"
+                                                <a class="btn btn-sm btn--danger btn-outline-danger action-btn form-alert"
                                                     href="javascript:"
-                                                    onclick="form_alert('order-cancellation-reason-{{ $reason['id'] }}','{{ translate('messages.want_to_delete_this_order_cancellation_reason') }}')"
+                                                    data-id="order-cancellation-reason-{{ $reason['id'] }}" data-message="{{ translate('messages.want_to_delete_this_order_cancellation_reason') }}"
                                                     title="{{ translate('messages.delete') }}">
                                                     <i class="tio-delete-outlined"></i>
                                                 </a>
@@ -159,39 +158,45 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{ translate('messages.order_cancellation_reason') }}
-                        {{ translate('messages.Update') }}</label></h5>
+                    <h5 class="modal-title" id="exampleModalLabel">{{ translate('messages.order_cancellation_reason_Update') }}</label></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form action="{{ route('admin.business-settings.order-cancel-reasons.update') }}" method="post">
-                        @csrf
-                        @method('put')
-                        <input type="hidden" name="reason_id" id="hiddenValue" />
-                        <input class="form-control" name='reason' id="hiddenValuetext" required type="text">
-                        <label for="hiddenValuetype"></label>
-                        <select name="user_type" id="hiddenValuetype" class="form-control h--45px"
-                            required>
-                            <option value="">{{ translate('messages.select_user_type') }}</option>
-                            <option value="admin">{{ translate('messages.admin') }}</option>
-                            <option value="store">{{ translate('messages.store') }}</option>
-                            <option value="customer">{{ translate('messages.customer') }}</option>
-                            <option value="deliveryman">{{ translate('messages.deliveryman') }}</option>
-                        </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ translate('Close') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ translate('Save_changes') }}</button>
-                    </form>
-                </div>
+                <form action="{{ route('admin.business-settings.order-cancel-reasons.update') }}" method="post">
+                    @csrf
+                    @method('put')
+                    <div class="modal-body">
+                            <input type="hidden" name="reason_id" id="hiddenValue" />
+                            <input class="form-control" name='reason' id="hiddenValuetext" required type="text">
+                            <label for="hiddenValuetype"></label>
+                            <select name="user_type" id="hiddenValuetype" class="form-control h--45px"
+                                required>
+                                <option value="">{{ translate('messages.select_user_type') }}</option>
+                                <option value="admin">{{ translate('messages.admin') }}</option>
+                                <option value="store">{{ translate('messages.store') }}</option>
+                                <option value="customer">{{ translate('messages.customer') }}</option>
+                                <option value="deliveryman">{{ translate('messages.deliveryman') }}</option>
+                            </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ translate('Close') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ translate('Save_changes') }}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 @endsection
 @push('script_2')
     <script>
+        "use strict";
+        $('.show-modal').on('click', function (){
+            let id = $(this).data('id');
+            let data = $(this).data('data');
+            let type = $(this).data('type');
+            showMyModal(id, data, type);
+        })
         function showMyModal(id, data, type) {
             $(".modal-body #hiddenValue").val(id);
             $(".modal-body #hiddenValuetext").val(data);

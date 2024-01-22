@@ -203,7 +203,7 @@ class ConversationController extends Controller
             }
 
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
         $vendor = UserInfo::where('vendor_id',$vendor->id)->first();
         $convs = Message::where(['conversation_id' => $conversation->id])->get();

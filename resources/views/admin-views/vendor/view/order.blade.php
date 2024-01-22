@@ -18,35 +18,35 @@
                 <div class="col-md-12">
                     <div class="resturant-card-navbar">
 
-                        <div class="order-info-item"  onclick="location.href='{{route('admin.order.list',['all'])}}?vendor[]={{$store->id}}'">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['all'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/all.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.all')}}<span class="amount text--primary">{{\App\Models\Order::where('store_id', $store->id)->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item" onclick="location.href='{{route('admin.order.list',['scheduled'])}}?vendor[]={{$store->id}}'">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['scheduled'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/schedule.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.scheduled')}}<span class="amount text--warning">{{\App\Models\Order::Scheduled()->where('store_id', $store->id)->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item" onclick="location.href='{{route('admin.order.list',['pending'])}}?vendor[]={{$store->id}}'">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['pending'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/pending.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.pending')}}<span class="amount text--info">{{\App\Models\Order::where(['order_status'=>'pending','store_id'=>$store->id])->StoreOrder()->OrderScheduledIn(30)->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item" onclick="location.href='{{route('admin.order.list',['delivered'])}}?vendor[]={{$store->id}}'">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['delivered'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/delivered.png')}}" alt="public">
                             </div>
                             <h6 class="card-subtitle">{{translate('messages.delivered')}}<span class="amount text--success">{{\App\Models\Order::where(['order_status'=>'delivered', 'store_id'=>$store->id])->StoreOrder()->count()}}</span></h6>
                         </div>
                         <span class="order-info-seperator"></span>
-                        <div class="order-info-item" onclick="location.href='{{route('admin.order.list',['canceled'])}}?vendor[]={{$store->id}}'">
+                        <div class="order-info-item redirect-url" data-url="{{route('admin.order.list',['canceled'])}}?vendor[]={{$store->id}}">
                             <div class="order-info-icon">
                                 <img src="{{asset('public/assets/admin/img/navbar/cancel.png')}}" alt="public">
                             </div>
@@ -62,12 +62,12 @@
                         <div class="search--button-wrapper">
                             <h5 class="card-title">
                             </h5>
-                            <form action="javascript:" id="search-form" class="search-form">
+                            <form class="search-form">
                                 <!-- Search -->
-                                @csrf
+
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                            placeholder="{{translate('ex_:_order_id')}}" aria-label="Search" required>
+                                    <input id="datatableSearch_" type="search" value="{{ request()->search ?? null }}" name="search" class="form-control"
+                                            placeholder="{{translate('ex_:_order_id')}}" aria-label="Search">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
@@ -84,40 +84,21 @@
 
                                 <div id="usersExportDropdown"
                                     class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                                    {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                                    <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.copy') }}
-                                    </a>
-                                    <a id="export-print" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.print') }}
-                                    </a>
-                                    <div class="dropdown-divider"></div> --}}
-                                    <span class="dropdown-header">{{ translate('messages.download') }}
-                                        {{ translate('messages.options') }}</span>
-                                    <a id="export-excel" class="dropdown-item" href="{{route('admin.order.store-export', ['type'=>'excel', 'store_id'=>$store->id])}}">
+
+                                    <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                                    <a id="export-excel" class="dropdown-item" href="{{route('admin.order.store-export', ['type'=>'excel', 'store_id'=>$store->id , request()->getQueryString()])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
                                             src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
                                             alt="Image Description">
                                         {{ translate('messages.excel') }}
                                     </a>
-                                    <a id="export-csv" class="dropdown-item" href="{{route('admin.order.store-export', ['type'=>'csv', 'store_id'=>$store->id])}}">
+                                    <a id="export-csv" class="dropdown-item" href="{{route('admin.order.store-export', ['type'=>'csv', 'store_id'=>$store->id , request()->getQueryString() ])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
                                             src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
                                             alt="Image Description">
                                         .{{ translate('messages.csv') }}
                                     </a>
-                                    {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.pdf') }}
-                                    </a> --}}
+
                                 </div>
                             </div>
                             <!-- End Unfold -->
@@ -152,15 +133,14 @@
                                         <th class="table-column-pl-0 border-0">{{translate('messages.order')}}</th>
                                         <th class="border-0">{{translate('messages.date')}}</th>
                                         <th class="border-0">{{translate('messages.customer')}}</th>
-                                        <th class="border-0">{{translate('messages.payment')}} {{translate('messages.status')}}</th>
+                                        <th class="border-0">{{translate('messages.payment_status')}}</th>
                                         <th class="border-0">{{translate('messages.total')}}</th>
-                                        <th class="border-0 text-center">{{translate('messages.order')}} {{translate('messages.status')}}</th>
+                                        <th class="border-0 text-center">{{translate('messages.order_status')}}</th>
                                         <th class="border-0 text-center">{{translate('messages.actions')}}</th>
                                     </tr>
                                     </thead>
 
                                     <tbody id="set-rows">
-                                    @php($orders=\App\Models\Order::where('store_id', $store->id)->latest()->Notpos()->paginate(10))
                                     @foreach($orders as $key=>$order)
 
                                         <tr class="status-{{$order['order_status']}} class-all">
@@ -179,7 +159,12 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                @if($order->customer)
+                                                @if($order->is_guest)
+                                                @php($customer_details = json_decode($order['delivery_address'],true))
+                                                <strong>{{$customer_details['contact_person_name']}}</strong>
+                                                <div>{{$customer_details['contact_person_number']}}</div>
+
+                                                @elseif($order->customer)
                                                 <div>
                                                     <a class="text-body text-capitalize"
                                                     href="{{route('admin.customer.view',[$order['user_id']])}}">
@@ -192,7 +177,7 @@
                                                     </a>
                                                 </div>
                                                 @else
-                                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                                 @endif
                                             </td>
                                             <td>
@@ -275,16 +260,14 @@
 @push('script_2')
     <!-- Page level plugins -->
     <script>
+        "use strict";
         // Call the dataTables jQuery plugin
         $(document).ready(function () {
             $('#dataTable').DataTable();
-        });
-    </script>
-    <script>
-        $(document).on('ready', function () {
+
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -318,11 +301,11 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
 
             $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

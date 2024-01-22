@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\api\v1\auth;
 
-use App\CentralLogics\CustomerLogic;
-use Carbon\CarbonInterval;
-use App\CentralLogics\Helpers;
-use App\Http\Controllers\Controller;
 use App\Models\User;
-use GuzzleHttp\Client;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\CentralLogics\SMS_module;
-use App\Models\BusinessSetting;
-use Illuminate\Support\Carbon;
-use App\Models\WalletTransaction;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 use Firebase\JWT\JWT;
+use GuzzleHttp\Client;
+use Carbon\CarbonInterval;
+use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
+use Illuminate\Support\Carbon;
+use App\Models\BusinessSetting;
+use App\CentralLogics\SMS_module;
+use App\Models\WalletTransaction;
+use Illuminate\Support\Facades\DB;
+use App\CentralLogics\CustomerLogic;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Modules\Gateways\Traits\SmsGateway;
+use Illuminate\Support\Facades\Validator;
 
 class SocialAuthController extends Controller
 {
@@ -108,7 +109,7 @@ class SocialAuthController extends Controller
                         //         Mail::to($referar_user->email)->send(new \App\Mail\AddFundToWallet($refer_wallet_transaction));
                         //     }
                         // } catch (\Exception $ex) {
-                        //     info($ex);
+                        //     info($ex->getMessage());
                         // }
                     }
                 }
@@ -157,7 +158,18 @@ class SocialAuthController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                         ]);
-                    $response = SMS_module::send($request['phone'],$otp);
+                    //for payment and sms gateway addon
+                    $published_status = 0;
+                    $payment_published_status = config('get_payment_publish_status');
+                    if (isset($payment_published_status[0]['is_published'])) {
+                        $published_status = $payment_published_status[0]['is_published'];
+                    }
+
+                    if($published_status == 1){
+                        $response = SmsGateway::send($request['phone'],$otp);
+                    }else{
+                        $response = SMS_module::send($request['phone'],$otp);
+                    }
                     if($response != 'success')
                     {
 
@@ -245,7 +257,7 @@ class SocialAuthController extends Controller
                         //         Mail::to($referar_user->email)->send(new \App\Mail\AddFundToWallet($refer_wallet_transaction));
                         //     }
                         // } catch (\Exception $ex) {
-                        //     info($ex);
+                        //     info($ex->getMessage());
                         // }
                     }
                 }
@@ -262,7 +274,7 @@ class SocialAuthController extends Controller
                 'password' => $user->social_id
             ];
             $customer_verification = BusinessSetting::where('key','customer_verification')->first()->value;
-            if (auth()->attempt($data)) {
+            if (auth()->loginUsingId($user->id)) {
                 $token = auth()->user()->createToken('RestaurantCustomerAuth')->accessToken;
                 if(!auth()->user()->status)
                 {
@@ -294,7 +306,18 @@ class SocialAuthController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                         ]);
-                    $response = SMS_module::send($request['phone'],$otp);
+                    //for payment and sms gateway addon
+                    $published_status = 0;
+                    $payment_published_status = config('get_payment_publish_status');
+                    if (isset($payment_published_status[0]['is_published'])) {
+                        $published_status = $payment_published_status[0]['is_published'];
+                    }
+
+                    if($published_status == 1){
+                        $response = SmsGateway::send($request['phone'],$otp);
+                    }else{
+                        $response = SMS_module::send($request['phone'],$otp);
+                    }
                     if($response != 'success')
                     {
 
@@ -450,7 +473,18 @@ class SocialAuthController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                     ]);
-                $response = SMS_module::send($user->phone,$otp);
+                //for payment and sms gateway addon
+                $published_status = 0;
+                $payment_published_status = config('get_payment_publish_status');
+                if (isset($payment_published_status[0]['is_published'])) {
+                    $published_status = $payment_published_status[0]['is_published'];
+                }
+
+                if($published_status == 1){
+                    $response = SmsGateway::send($user->phone,$otp);
+                }else{
+                    $response = SMS_module::send($user->phone,$otp);
+                }
                 if($response != 'success')
                 {
 

@@ -12,7 +12,7 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title"><i class="tio-notice"></i> {{translate('messages.item')}} {{translate('messages.campaign')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$campaigns->total()}}</span></h1>
+                    <h1 class="page-header-title"><i class="tio-notice"></i> {{translate('messages.item_campaign')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$campaigns->total()}}</span></h1>
                 </div>
             </div>
         </div>
@@ -49,8 +49,6 @@
                                 <th >{{translate('messages.date')}}</th>
                                 <th >{{translate('messages.time')}}</th>
                                 <th >{{translate('messages.price')}}</th>
-                                {{-- <th>{{translate('messages.status')}}</th>
-                                <th class="text-center">{{translate('messages.action')}}</th> --}}
                             </tr>
 
                             </thead>
@@ -70,28 +68,7 @@
                                         <span class="bg-gradient-light text-dark">{{$campaign->start_time?$campaign->start_time->format(config('timeformat')). ' - ' .$campaign->end_time->format(config('timeformat')): 'N/A'}}</span>
                                     </td>
                                     <td>{{\App\CentralLogics\Helpers::format_currency($campaign->price)}}</td>
-                                    {{-- <td>
-                                        <label class="toggle-switch toggle-switch-sm" for="campaignCheckbox{{$campaign->id}}">
-                                            <input type="checkbox" onclick="location.href='{{route('admin.campaign.status',['item',$campaign['id'],$campaign->status?0:1])}}'"class="toggle-switch-input" id="campaignCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
-                                            <span class="toggle-switch-label">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <div class="btn--container justify-content-center">
-                                            <a class="btn btn-sm btn--primary btn-outline-primary action-btn"
-                                                href="{{route('admin.campaign.edit',['item',$campaign['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.campaign')}}"><i class="tio-edit"></i>
-                                            </a>
-                                            <a class="btn btn-sm btn--danger btn-outline-danger action-btn" href="javascript:"
-                                                onclick="form_alert('campaign-{{$campaign['id']}}','Want to delete this item ?')" title="{{translate('messages.delete')}} {{translate('messages.campaign')}}"><i class="tio-delete-outlined"></i>
-                                            </a>
-                                        </div>
-                                        <form action="{{route('admin.campaign.delete-item',[$campaign['id']])}}"
-                                                      method="post" id="campaign-{{$campaign['id']}}">
-                                            @csrf @method('delete')
-                                        </form>
-                                    </td> --}}
+
                                 </tr>
                             @endforeach
                             </tbody>
@@ -115,50 +92,11 @@
 
 @push('script_2')
     <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column2_search').on('keyup', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column3_search').on('change', function () {
-                datatable
-                    .columns(3)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column4_search').on('keyup', function () {
-                datatable
-                    .columns(4)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-    <script>
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
+        "use strict";
+        $('#search-form').on('submit', function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

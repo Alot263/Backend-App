@@ -55,37 +55,67 @@ class ParcelCategoryController extends Controller
             'description'=>'required|array',
             'description.0'=>'required',
             'parcel_per_km_shipping_charge'=>'required_with:parcel_minimum_shipping_charge',
-            'parcel_minimum_shipping_charge'=>'required_with:parcel_per_km_shipping_charge'
+            'parcel_minimum_shipping_charge'=>'required_with:parcel_per_km_shipping_charge',
+            'name.0' => 'required',
+            'description.0' => 'required',               
+        ],[
+            'name.0.required'=>translate('default_name_is_required'),
+            'description.0.required'=>translate('default_description_is_required'), 
         ]);
 
         $parcel_category = new ParcelCategory;
         $parcel_category->module_id = Config::get('module.current_module_id');
-        $parcel_category->name = $request->name[array_search('en', $request->lang)];
-        $parcel_category->description =  $request->description[array_search('en', $request->lang)];
+        $parcel_category->name = $request->name[array_search('default', $request->lang)];
+        $parcel_category->description =  $request->description[array_search('default', $request->lang)];
         $parcel_category->image = Helpers::upload('parcel_category/', 'png', $request->file('image'));
         $parcel_category->parcel_per_km_shipping_charge = $request->parcel_per_km_shipping_charge;
         $parcel_category->parcel_minimum_shipping_charge = $request->parcel_minimum_shipping_charge;
         $parcel_category->save();
-
         $data = [];
+        $default_lang = str_replace('_', '-', app()->getLocale());
         foreach ($request->lang as $index => $key) {
-            if ($request->name[$index] && $key != 'en') {
-                array_push($data, array(
-                    'translationable_type' => 'App\Models\ParcelCategory',
-                    'translationable_id' => $parcel_category->id,
-                    'locale' => $key,
-                    'key' => 'name',
-                    'value' => $request->name[$index],
-                ));
+            if($default_lang == $key && !($request->name[$index])){
+                if ($key != 'default') {
+                    array_push($data, array(
+                        'translationable_type' => 'App\Models\ParcelCategory',
+                        'translationable_id' => $parcel_category->id,
+                        'locale' => $key,
+                        'key' => 'name',
+                        'value' => $parcel_category->name,
+                    ));
+                }
+            }else{
+                if ($request->name[$index] && $key != 'default') {
+                    array_push($data, array(
+                        'translationable_type' => 'App\Models\ParcelCategory',
+                        'translationable_id' => $parcel_category->id,
+                        'locale' => $key,
+                        'key' => 'name',
+                        'value' => $request->name[$index],
+                    ));
+                }
             }
-            if ($request->description[$index] && $key != 'en') {
-                array_push($data, array(
-                    'translationable_type' => 'App\Models\ParcelCategory',
-                    'translationable_id' => $parcel_category->id,
-                    'locale' => $key,
-                    'key' => 'description',
-                    'value' => $request->description[$index],
-                ));
+
+            if($default_lang == $key && !($request->description[$index])){
+                if (isset($parcel_category->description) && $key != 'default') {
+                    array_push($data, array(
+                        'translationable_type' => 'App\Models\ParcelCategory',
+                        'translationable_id' => $parcel_category->id,
+                        'locale' => $key,
+                        'key' => 'description',
+                        'value' => $parcel_category->description,
+                    ));
+                }
+            }else{
+                if ($request->description[$index] && $key != 'default') {
+                    array_push($data, array(
+                        'translationable_type' => 'App\Models\ParcelCategory',
+                        'translationable_id' => $parcel_category->id,
+                        'locale' => $key,
+                        'key' => 'description',
+                        'value' => $request->description[$index],
+                    ));
+                }
             }
         }
         Translation::insert($data);
@@ -132,38 +162,81 @@ class ParcelCategoryController extends Controller
             'name.*'=>'max:191',
             'description'=>'required|array',
             'parcel_per_km_shipping_charge'=>'required_with:parcel_minimum_shipping_charge',
-            'parcel_minimum_shipping_charge'=>'required_with:parcel_per_km_shipping_charge'
+            'parcel_minimum_shipping_charge'=>'required_with:parcel_per_km_shipping_charge',
+            'name.0' => 'required',
+            'description.0' => 'required',               
+        ],[
+            'name.0.required'=>translate('default_name_is_required'),
+            'description.0.required'=>translate('default_description_is_required'), 
         ]);
 
         $parcel_category = ParcelCategory::findOrFail($id);
         // $parcel_category->module_id = $request->module_id;
-        $parcel_category->name = $request->name[array_search('en', $request->lang)];
-        $parcel_category->description =  $request->description[array_search('en', $request->lang)];
+        $parcel_category->name = $request->name[array_search('default', $request->lang)];
+        $parcel_category->description =  $request->description[array_search('default', $request->lang)];
         $parcel_category->image = Helpers::update('parcel_category/', $parcel_category->image, 'png', $request->file('image'));
         $parcel_category->parcel_per_km_shipping_charge = $request->parcel_per_km_shipping_charge;
         $parcel_category->parcel_minimum_shipping_charge = $request->parcel_minimum_shipping_charge;
         $parcel_category->save();
 
+        $default_lang = str_replace('_', '-', app()->getLocale());
+
         foreach ($request->lang as $index => $key) {
-            if ($request->name[$index] && $key != 'en') {
-                Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Models\ParcelCategory',
-                        'translationable_id' => $parcel_category->id,
-                        'locale' => $key,
-                        'key' => 'name'],
-                    ['value' => $request->name[$index]]
-                );
+            if($default_lang == $key && !($request->name[$index])){
+                if ($key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type' => 'App\Models\ParcelCategory',
+                            'translationable_id' => $parcel_category->id,
+                            'locale' => $key,
+                            'key' => 'name'
+                        ],
+                        ['value' => $parcel_category->name]
+                    );
+                }
+            }else{
+
+                if ($request->name[$index] && $key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type' => 'App\Models\ParcelCategory',
+                            'translationable_id' => $parcel_category->id,
+                            'locale' => $key,
+                            'key' => 'name'
+                        ],
+                        ['value' => $request->name[$index]]
+                    );
+                }
             }
-            if ($request->description[$index] && $key != 'en') {
-                Translation::updateOrInsert(
-                    ['translationable_type' => 'App\Models\ParcelCategory',
-                        'translationable_id' => $parcel_category->id,
-                        'locale' => $key,
-                        'key' => 'description'],
-                    ['value' => $request->description[$index]]
-                );
+            if($default_lang == $key && !($request->description[$index])){
+                if (isset($parcel_category->description) && $key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type' => 'App\Models\ParcelCategory',
+                            'translationable_id' => $parcel_category->id,
+                            'locale' => $key,
+                            'key' => 'description'
+                        ],
+                        ['value' => $parcel_category->description]
+                    );
+                }
+
+            }else{
+
+                if ($request->description[$index] && $key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type' => 'App\Models\ParcelCategory',
+                            'translationable_id' => $parcel_category->id,
+                            'locale' => $key,
+                            'key' => 'description'
+                        ],
+                        ['value' => $request->description[$index]]
+                    );
+                }
             }
         }
+
         Toastr::success(translate('messages.parcel_category_updated_successfully'));
         return back();
     }

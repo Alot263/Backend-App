@@ -18,7 +18,7 @@
                             <img src="{{asset('public/assets/admin/img/order.png')}}" class="w--26" alt="">
                         </span>
                         <span>
-                            @if ($parcel_order) {{translate('messages.parcel')}} {{translate('messages.orders')}}
+                            @if ($parcel_order) {{translate('messages.parcel_orders')}}
                             @elseif(Request::is('admin/refund/*') ) {{translate('messages.Refund')}}  {{translate(str_replace('_',' ',$status))}}
                             @else {{translate(str_replace('_',' ',$status))}} {{translate('messages.orders')}}
                             @endif
@@ -36,12 +36,14 @@
             <!-- Header -->
             <div class="card-header py-1 border-0">
                 <div class="search--button-wrapper justify-content-end">
-                    <form action="javascript:" id="search-form" class="search-form min--260">
+                    <form class="search-form min--260">
                         <!-- Search -->
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control h--40px"
-                                    placeholder="{{ translate('messages.Ex:') }} 10010" aria-label="{{translate('messages.search')}}" required>
-                            <input type="hidden" name="parcel_order" value="{{$parcel_order}}">
+                                    placeholder="{{ translate('messages.Ex:') }} 10010" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search')}}" required>
+                                    @if($parcel_order)
+                                    <input type="hidden" name="parcel_order" value="{{$parcel_order}}">
+                                    @endif
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
 
                         </div>
@@ -54,9 +56,6 @@
                                 <span id="datatableCounter">0</span>
                                 {{translate('messages.selected')}}
                                 </span>
-                            {{--<a class="btn btn-sm btn-outline-danger" href="javascript:;">
-                                <i class="tio-delete-outlined"></i> Delete
-                            </a>--}}
                         </div>
                     </div>
                     <!-- End Datatable Info -->
@@ -87,7 +86,7 @@
                                 {{translate('messages.print')}}
                             </a>
                             <div class="dropdown-divider"></div>
-                            <span class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
+                            <span class="dropdown-header">{{translate('messages.download_options')}}</span>
                             <a id="export-excel" class="dropdown-item" href="javascript:;">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                         src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
@@ -100,19 +99,12 @@
                                         alt="Image Description">
                                 .{{translate('messages.csv')}}
                             </a>
-                            <!-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/components/pdf.svg"
-                                        alt="Image Description">
-                                {{translate('messages.pdf')}}
-                            </a> -->
                         </div>
                     </div>
                     <!-- End Unfold -->
                     @if(Request::is('admin/refund/*'))
                     <div class="select-item">
-                        <select name="slist" class="form-control js-select2-custom"
-                        onchange="window.location.href=this.options[this.selectedIndex].value;" >
+                        <select name="slist" class="form-control js-select2-custom refund-filter" >
                             <option {{($status=='requested')?'selected':''}} value="{{ route('admin.refund.refund_attr', ['requested']) }}">{{translate('messages.Refund Requests')}}</option>
                             <option {{($status=='refunded')?'selected':''}} value="{{ route('admin.refund.refund_attr', ['refunded']) }}">{{translate('messages.Refund')}}</option>
                             <option {{($status=='rejected')?'selected':''}} value="{{ route('admin.refund.refund_attr', ['rejected']) }}">{{translate('Rejected')}}</option>
@@ -121,8 +113,7 @@
                     @endif
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:;"
-                            onclick="$('#datatableFilterSidebar,.hs-unfold-overlay').show(500)">
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px filter-button-show" href="javascript:;">
                             <i class="tio-filter-list mr-1"></i> {{ translate('messages.filter') }} <span class="badge badge-success badge-pill ml-1" id="filter_count"></span>
                         </a>
                     </div>
@@ -198,21 +189,6 @@
                                         <!-- End Checkbox Switch -->
                                     </div>
 
-                                    {{-- <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2 text-capitalize">{{translate('messages.payment')}} {{translate('messages.status')}}</span>
-
-                                        <!-- Checkbox Switch -->
-                                        <label class="toggle-switch toggle-switch-sm"
-                                                for="toggleColumn_payment_status">
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                    id="toggleColumn_payment_status" checked>
-                                            <span class="toggle-switch-label">
-                                            <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                        <!-- End Checkbox Switch -->
-                                    </div> --}}
-
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="mr-2">{{translate('messages.total')}}</span>
 
@@ -227,7 +203,7 @@
                                         <!-- End Checkbox Switch -->
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{translate('messages.order')}} {{translate('messages.status')}}</span>
+                                        <span class="mr-2">{{translate('messages.order_status')}}</span>
 
                                         <!-- Checkbox Switch -->
                                         <label class="toggle-switch toggle-switch-sm" for="toggleColumn_order_status">
@@ -295,8 +271,8 @@
                         @else
                             <th class="border-0">{{translate('messages.store')}}</th>
                         @endif
-                        <th class="border-0">{{translate('messages.total')}} {{translate('messages.amount')}}</th>
-                        <th class="text-center border-0">{{translate('messages.order')}} {{translate('messages.status')}}</th>
+                        <th class="border-0">{{translate('messages.total_amount')}}</th>
+                        <th class="text-center border-0">{{translate('messages.order_status')}}</th>
                         <th class="text-center border-0">{{translate('messages.actions')}}</th>
                     </tr>
                     </thead>
@@ -322,13 +298,17 @@
                                 </div>
                             </td>
                             <td>
-                                @if($order->customer)
-                                    <a class="text-body text-capitalize" href="{{route('admin.customer.view',[$order['user_id']])}}">
-                                        <strong>{{$order->customer['f_name'].' '.$order->customer['l_name']}}</strong>
-                                        <div>{{$order->customer['phone']}}</div>
-                                    </a>
+                                @if($order->is_guest)
+                                @php($customer_details = json_decode($order['delivery_address'],true))
+                                <strong>{{$customer_details['contact_person_name']}}</strong>
+                                <div>{{$customer_details['contact_person_number']}}</div>
+                                @elseif($order->customer)
+                                <a class="text-body text-capitalize" href="{{route('admin.customer.view',[$order['user_id']])}}">
+                                    <strong>{{$order->customer['f_name'].' '.$order->customer['l_name']}}</strong>
+                                    <div>{{$order->customer['phone']}}</div>
+                                </a>
                                 @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                 @endif
                             </td>
                             @if ($parcel_order)
@@ -351,6 +331,10 @@
                                     @if($order->payment_status=='paid')
                                     <strong class="text-success">
                                         {{translate('messages.paid')}}
+                                    </strong>
+                                    @elseif($order->payment_status=='partially_paid')
+                                    <strong class="text-success">
+                                        {{translate('messages.partially_paid')}}
                                     </strong>
                                     @else
                                     <strong class="text-danger">
@@ -382,7 +366,7 @@
                                     </span>
                                 @elseif($order['order_status']=='failed')
                                     <span class="badge badge-soft-danger">
-                                      {{translate('messages.payment')}}  {{translate('messages.failed')}}
+                                      {{translate('messages.payment_failed')}}
                                     </span>
                                 @elseif($order['order_status']=='handover')
                                     <span class="badge badge-soft-danger">
@@ -395,6 +379,10 @@
                                 @elseif($order['order_status']=='accepted')
                                     <span class="badge badge-soft-danger">
                                       {{translate('messages.accepted')}}
+                                    </span>
+                                @elseif($order['order_status']=='refund_requested')
+                                    <span class="badge badge-soft-danger">
+                                      {{translate('messages.refund_requested')}}
                                     </span>
                                 @else
                                     <span class="badge badge-soft-danger">
@@ -450,11 +438,10 @@
         <div id="datatableFilterSidebar" class="hs-unfold-content_ sidebar sidebar-bordered sidebar-box-shadow initial-hidden">
             <div class="card card-lg sidebar-card sidebar-footer-fixed">
                 <div class="card-header">
-                    <h4 class="card-header-title">{{translate('messages.order')}} {{translate('messages.filter')}}</h4>
+                    <h4 class="card-header-title">{{translate('messages.order_filter')}}</h4>
 
                     <!-- Toggle Button -->
-                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-xs btn-ghost-dark ml-2" href="javascript:;"
-                    onclick="$('#datatableFilterSidebar,.hs-unfold-overlay').hide(500)">
+                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-xs btn-ghost-dark ml-2 filter-button-hide" href="javascript:;">
                         <i class="tio-clear tio-lg"></i>
                     </a>
                     <!-- End Toggle Button -->
@@ -500,7 +487,7 @@
 
                     <hr class="my-4">
                     @if($status == 'all')
-                    <small class="text-cap mb-3">{{translate('messages.order')}} {{translate('messages.status')}}</small>
+                    <small class="text-cap mb-3">{{translate('messages.order_status')}}</small>
 
                     <!-- Custom Checkbox -->
                     <div class="custom-control custom-radio mb-2">
@@ -523,10 +510,7 @@
                         <input type="checkbox" id="orderStatus5" name="orderStatus[]" class="custom-control-input" value="delivered" {{isset($orderstatus)?(in_array('delivered', $orderstatus)?'checked':''):''}}>
                         <label class="custom-control-label" for="orderStatus5">{{translate('messages.delivered')}}</label>
                     </div>
-                    {{-- <div class="custom-control custom-radio mb-2">
-                        <input type="checkbox" id="orderStatus6" name="orderStatus[]" class="custom-control-input" value="returned" {{isset($orderstatus)?(in_array('returned', $orderstatus)?'checked':''):''}}>
-                        <label class="custom-control-label" for="orderStatus6">{{translate('messages.returned')}}</label>
-                    </div> --}}
+
                     <div class="custom-control custom-radio mb-2">
                         <input type="checkbox" id="orderStatus7" name="orderStatus[]" class="custom-control-input" value="failed" {{isset($orderstatus)?(in_array('failed', $orderstatus)?'checked':''):''}}>
                         <label class="custom-control-label" for="orderStatus7">{{translate('messages.failed')}}</label>
@@ -555,7 +539,7 @@
                     @endif
                     @if (!$parcel_order)
                         <hr class="my-4">
-                        <small class="text-cap mb-3">{{translate('messages.order')}} {{translate('messages.type')}}</small>
+                        <small class="text-cap mb-3">{{translate('messages.order_type')}}</small>
                         <div class="custom-control custom-radio mb-2">
                             <input type="radio" id="take_away" name="order_type" class="custom-control-input" value="take_away" {{isset($order_type)?($order_type=='take_away'?'checked':''):''}}>
                             <label class="custom-control-label text-uppercase" for="take_away">{{translate('messages.take_away')}}</label>
@@ -568,7 +552,7 @@
 
                     <hr class="my-4">
 
-                    <small class="text-cap mb-3">{{translate('messages.date')}} {{translate('messages.between')}}</small>
+                    <small class="text-cap mb-3">{{translate('messages.date_between')}}</small>
 
                     <div class="row">
                         <div class="col-12">
@@ -603,30 +587,13 @@
 @endsection
 
 @push('script_2')
-    <!-- <script src="{{asset('public/assets/admin')}}/js/bootstrap-select.min.js"></script> -->
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/order-list.js"></script>
     <script>
+        "use strict";
         $(document).on('ready', function () {
             @if($filter_count>0)
             $('#filter_count').html({{$filter_count}});
             @endif
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-
-            var zone_id = [];
-            $('#zone_ids').on('change', function(){
-                if($(this).val())
-                {
-                    zone_id = $(this).val();
-                }
-                else
-                {
-                    zone_id = [];
-                }
-            });
-
 
             $('#vendor_ids').select2({
                 ajax: {
@@ -644,7 +611,7 @@
                         };
                     },
                     __port: function (params, success, failure) {
-                        var $request = $.ajax(params);
+                        let $request = $.ajax(params);
 
                         $request.then(success);
                         $request.fail(failure);
@@ -656,7 +623,7 @@
 
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#datatable'), {
+            let datatable = $.HSCore.components.HSDatatables.init($('#datatable'), {
                 dom: 'Bfrtip',
                 buttons: [
                     {
@@ -704,7 +671,6 @@
                         '</div>'
                 }
             });
-
             $('#export-copy').click(function () {
                 datatable.button('.buttons-copy').trigger()
             });
@@ -717,22 +683,18 @@
                 datatable.button('.buttons-csv').trigger()
             });
 
-            // $('#export-pdf').click(function () {
-            //     datatable.button('.buttons-pdf').trigger()
-            // });
-
             $('#export-print').click(function () {
                 datatable.button('.buttons-print').trigger()
             });
 
             $('#datatableSearch').on('mouseup', function (e) {
-                var $input = $(this),
+                let $input = $(this),
                     oldValue = $input.val();
 
                 if (oldValue == "") return;
 
                 setTimeout(function () {
-                    var newValue = $input.val();
+                    let newValue = $input.val();
 
                     if (newValue == "") {
                         // Gotcha
@@ -762,35 +724,17 @@
                 datatable.columns(6).visible(e.target.checked)
             })
 
-            // $('#toggleColumn_order_type').change(function (e) {
-            //     datatable.columns(7).visible(e.target.checked)
-            // })
-
             $('#toggleColumn_actions').change(function (e) {
                 datatable.columns(7).visible(e.target.checked)
             })
-            // INITIALIZATION OF TAGIFY
-            // =======================================================
-            $('.js-tagify').each(function () {
-                var tagify = $.HSCore.components.HSTagify.init($(this));
-            });
-
-            $("#date_from").on("change", function () {
-                $('#date_to').attr('min',$(this).val());
-            });
-
-            $("#date_to").on("change", function () {
-                $('#date_from').attr('max',$(this).val());
-            });
         });
+
 
         $('#reset').on('click', function(){
             // e.preventDefault();
             location.href = '{{url('/')}}/admin/order/filter/reset';
         });
-    </script>
 
-    <script>
         $('#search-form').on('submit', function (e) {
             $.ajaxSetup({
                 headers: {

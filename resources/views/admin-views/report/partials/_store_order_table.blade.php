@@ -18,13 +18,18 @@
         </div>
     </td>
     <td>
-        @if($order->customer)
-            <a class="text-body text-capitalize" href="{{route('admin.transactions.customer.view',[$order['user_id']])}}">
-                <strong>{{$order->customer['f_name'].' '.$order->customer['l_name']}}</strong>
-                <div>{{$order->customer['phone']}}</div>
-            </a>
+        @if($order->is_guest)
+        @php($customer_details = json_decode($order['delivery_address'],true))
+        <strong>{{$customer_details['contact_person_name']}}</strong>
+        <div>{{$customer_details['contact_person_number']}}</div>
+        
+        @elseif($order->customer)
+        <a class="text-body text-capitalize" href="{{route('admin.transactions.customer.view',[$order['user_id']])}}">
+            <strong>{{$order->customer['f_name'].' '.$order->customer['l_name']}}</strong>
+            <div>{{$order->customer['phone']}}</div>
+        </a>
         @else
-            <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+            <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
         @endif
     </td>
     <td>

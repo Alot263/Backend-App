@@ -35,8 +35,8 @@
                                             class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control"
                                             for="customer_wallet">
                                             <span class="pr-2">{{ translate('messages.customer_wallet') }} :</span>
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                onclick="section_visibility('customer_wallet')" name="customer_wallet"
+                                            <input type="checkbox" class="toggle-switch-input section_visibility"
+                                                data-id="customer_wallet" name="customer_wallet"
                                                 id="customer_wallet" value="1" data-section="wallet-section"
                                                 {{ isset($data['wallet_status']) && $data['wallet_status'] == 1 ? 'checked' : '' }}>
                                             <span class="toggle-switch-label text">
@@ -52,8 +52,8 @@
                                             class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control"
                                             for="customer_loyalty_point">
                                             <span class="pr-2">{{ translate('messages.customer_loyalty_point') }} :</span>
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                onclick="section_visibility('customer_loyalty_point')" name="customer_loyalty_point"
+                                            <input type="checkbox" class="toggle-switch-input section_visibility"
+                                                data-id="customer_loyalty_point" name="customer_loyalty_point"
                                                 id="customer_loyalty_point" data-section="loyalty-point-section" value="1"
                                                 {{ isset($data['loyalty_point_status']) && $data['loyalty_point_status'] == 1 ? 'checked' : '' }}>
                                             <span class="toggle-switch-label text">
@@ -68,8 +68,8 @@
                                             class="toggle-switch toggle-switch-sm d-flex justify-content-between border border-secondary rounded px-4 form-control">
                                             <span
                                                 class="pr-2">{{ translate('messages.customer_referrer_earning') }} :</span>
-                                            <input type="checkbox" class="toggle-switch-input"
-                                                onclick="section_visibility('ref_earning_status')"
+                                            <input type="checkbox" class="toggle-switch-input section_visibility"
+                                                data-id="ref_earning_status"
                                                 name="ref_earning_status" id="ref_earning_status"
                                                 data-section="referrer-earning" value="1"
                                                 {{ isset($data['ref_earning_status']) && $data['ref_earning_status'] == 1 ? 'checked' : '' }}>
@@ -128,7 +128,7 @@
                                     <i class="tio-settings-outlined"></i>
                                 </span>
                                 <span>
-                                    {{ translate('messages.customer_loyalty_point') }} {{ translate('messages.settings') }}
+                                    {{ translate('messages.customer_loyalty_point_settings') }}
                                 </span>
                             </h5>
                         </div>
@@ -175,7 +175,7 @@
                                     <i class="tio-settings-outlined"></i>
                                 </span>
                                 <span>
-                                    {{ translate('customer_referrer') }} {{ translate('settings') }}
+                                    {{ translate('customer_referrer_settings') }}
                                 </span>
                             </h5>
                         </div>
@@ -205,21 +205,23 @@
     </div>
 @endsection
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/customer-wallet-settings.js"></script>
     <script>
+        "use strict";
         $(document).on('ready', function() {
             @if (isset($data['wallet_status']) && $data['wallet_status'] != 1)
-                $('.wallet-section').hide();
+            $('.wallet-section').hide();
             @endif
             @if (isset($data['loyalty_point_status']) && $data['loyalty_point_status'] != 1)
-                $('.loyalty-point-section').hide();
+            $('.loyalty-point-section').hide();
             @endif
             @if (isset($data['ref_earning_status']) && $data['ref_earning_status'] != 1)
-                $('.referrer-earning').hide();
+            $('.referrer-earning').hide();
             @endif
 
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
             $('#column1_search').on('keyup', function() {
                 datatable
                     .columns(1)
@@ -235,23 +237,10 @@
                     .draw();
             });
         });
-    </script>
-
-    <script>
-        function section_visibility(id) {
-            console.log($('#' + id).data('section'));
-            if ($('#' + id).is(':checked')) {
-                console.log('checked');
-                $('.' + $('#' + id).data('section')).show();
-            } else {
-                console.log('unchecked');
-                $('.' + $('#' + id).data('section')).hide();
-            }
-        }
         $('#add_fund').on('submit', function(e) {
 
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
 
             Swal.fire({
                 title: '{{ translate('messages.are_you_sure') }}',
@@ -280,7 +269,7 @@
                         processData: false,
                         success: function(data) {
                             if (data.errors) {
-                                for (var i = 0; i < data.errors.length; i++) {
+                                for (let i = 0; i < data.errors.length; i++) {
                                     toastr.error(data.errors[i].message, {
                                         CloseButton: true,
                                         ProgressBar: true
@@ -298,10 +287,5 @@
                 }
             })
         })
-    </script>
-        <script>
-            $('#reset_btn').click(function(){
-                location.reload(true);
-            })
         </script>
 @endpush

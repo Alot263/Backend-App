@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/star.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{translate('messages.customers')}} {{translate('messages.reviews')}}
+                    {{translate('messages.customers_reviews')}}
                 </span>
             </h1>
         </div>
@@ -49,8 +49,9 @@
                             <td>
                                 @if ($review->item)
                                 <a class="media align-items-center" href="{{route('vendor.item.view',[$review->item['id']])}}">
-                                    <img class="avatar avatar-lg mr-3" src="{{asset('storage/app/public/product')}}/{{$review->item['image']}}"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'" alt="{{$review->item->name}} image">
+                                    <img class="avatar avatar-lg mr-3 onerror-image"  data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($review->item['image'], asset('storage/app/public/product/').'/'.$review->item['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'product/') }}"
+                                       alt="{{$review->item->name}} image">
                                     <div class="media-body">
                                         <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],10)}}</h5>
                                     </div>
@@ -64,9 +65,9 @@
                                 @if($review->customer)
                                 <div class="d-flex align-items-center">
                                     <div class="avatar avatar-circle">
-                                        <img class="avatar-img" width="75" height="75"
-                                            onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                            src="{{asset('storage/app/public/profile/'.$review->customer->image)}}"
+                                        <img class="avatar-img onerror-image" width="75" height="75"
+                                            data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                            src="{{\App\CentralLogics\Helpers::onerror_image_helper($review->customer->image, asset('storage/app/public/profile/').'/'.$review->customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
                                             alt="Image Description">
                                     </div>
                                     <div class="ml-3">
@@ -129,10 +130,11 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
         });
     </script>

@@ -30,7 +30,7 @@ trait ActivationClass
                 } else {
                     return base64_decode('aHR0cHM6Ly82YW10ZWNoLmNvbS9zb2Z0d2FyZS1hY3RpdmF0aW9u');
                 }
-            } catch (\Exception $exception) {info($exception);}
+            } catch (\Exception $exception) {info($exception->getMessage());}
         }
 
         Session::put(base64_decode('cHVyY2hhc2Vfa2V5'), $request[base64_decode('cHVyY2hhc2Vfa2V5')]);//pk
@@ -54,7 +54,7 @@ trait ActivationClass
                 $response = Http::post(base64_decode('aHR0cHM6Ly9jaGVjay42YW10ZWNoLmNvbS9hcGkvdjEvYWN0aXZhdGlvbi1jaGVjaw=='), $post)->json();
                 $status = $response['active'] ?? base64_encode(1);
                 return (int)base64_decode($status);
-            } catch (\Exception $exception) {info($exception);}
+            } catch (\Exception $exception) {info($exception->getMessage());}
         }
         return true;
     }

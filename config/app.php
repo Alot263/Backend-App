@@ -1,5 +1,7 @@
 <?php
 
+use App\Providers\InterfaceServiceProvider;
+
 return [
 
     /*
@@ -39,7 +41,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', true),
+    'debug' => (bool)env('APP_DEBUG', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -174,10 +176,12 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Grimzy\LaravelMysqlSpatial\SpatialServiceProvider::class,
+        // Grimzy\LaravelMysqlSpatial\SpatialServiceProvider::class,
         App\Providers\ConfigServiceProvider::class,
         Laravelpkg\Laravelchk\LaravelchkServiceProvider::class,
-        FruitCake\Cors\CorsServiceProvider::class,
+        // FruitCake\Cors\CorsServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
+        InterfaceServiceProvider::class
     ],
 
     /*
@@ -230,6 +234,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
 
     ],
 

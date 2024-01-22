@@ -16,20 +16,12 @@
         <div class="tab-pane fade show active" id="product">
             <div class="resturant-review-top" id="store_details">
                 <div class="resturant-review-left mb-3">
-                    @php($reviews = $store->reviews()->with('item',function($query){
-                        $query->withoutGlobalScope(\App\Scopes\StoreScope::class);
-                    })->get())
-                    {{-- {{ dd($reviews) }} --}}
                     @php($user_rating = null)
                     @php($total_rating = 0)
                     @php($total_reviews = 0)
-                    @foreach ($reviews as $key=>$value)
-                        @php($user_rating += $value->rating)
-                        @php($total_rating +=1)
-                        @php($total_reviews +=1)
-                    @endforeach
-                    @php($user_rating = isset($user_rating) ? ($user_rating)/count($reviews) : 0)
-                    {{-- {{$review[0]->rating}} --}}
+                    @php($store_reviews = \App\CentralLogics\StoreLogic::calculate_store_rating($store['rating']))
+                    @php($user_rating = $store_reviews['rating'])
+                    @php($reviews = $store_reviews['total'])
                     <h1 class="title">{{ number_format($user_rating, 1)}}<span class="out-of">/5</span></h1>
                     @if ($user_rating == 5)
                     <div class="rating">
@@ -130,7 +122,7 @@
                     @endif
                     <div class="info">
                         {{-- <span class="mr-3">{{$total_rating}} {{translate('messages.ratings')}}</span> --}}
-                        <span>{{$total_reviews}} {{translate('messages.reviews')}}</span>
+                        <span>{{$reviews}} {{translate('messages.reviews')}}</span>
                     </div>
                 </div>
                 <div class="resturant-review-right">
@@ -175,8 +167,8 @@
                             <span class="progress-name mr-3">{{translate('messages.average')}}</span>
                             <div class="progress flex-grow-1">
                                 <div class="progress-bar" role="progressbar"
-                                        style="width: {{($five/$total_rating)*100}}%;"
-                                        aria-valuenow="{{($five/$total_rating)*100}}"
+                                        style="width: {{($three/$total_rating)*100}}%;"
+                                        aria-valuenow="{{($three/$total_rating)*100}}"
                                         aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                             <span class="ml-3">{{$three}}</span>
@@ -213,6 +205,55 @@
                 </div>
             </div>
             <div class="card">
+
+                    <!-- Header -->
+            <div class="card-header py-2">
+                <div class="search--button-wrapper">
+                    <h5 class="card-title">{{translate('messages.Review_list')}}</h5>
+                    {{-- <form  class="search-form">
+                                    <!-- Search -->
+                        @csrf
+                        <div class="input-group input--group">
+                            <input id="datatableSearch_" type="search" value="{{ request()?->search ?? null }}" name="search" class="form-control"
+                                    placeholder="{{translate('ex_:_Search_Store_Name')}}" aria-label="{{translate('messages.search')}}" >
+                            <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
+
+                        </div>
+                        <!-- End Search -->
+                    </form> --}}
+                    <!-- Unfold -->
+                    <div class="hs-unfold mr-2">
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                            data-hs-unfold-options='{
+                                    "target": "#usersExportDropdown",
+                                    "type": "css-animation"
+                                }'>
+                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                        </a>
+
+                        <div id="usersExportDropdown"
+                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                            <a id="export-excel" class="dropdown-item" href="{{route('admin.store.store_wise_reviwe_export', ['type'=>'excel', 'id' => $store->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.excel') }}
+                            </a>
+                            <a id="export-csv" class="dropdown-item" href="{{route('admin.store.store_wise_reviwe_export', ['type'=>'csv','id' => $store->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                    alt="Image Description">
+                                .{{ translate('messages.csv') }}
+                            </a>
+
+                        </div>
+                    </div>
+                    <!-- End Unfold -->
+                </div>
+            </div>
+            <!-- End Header -->
                 <div class="card-body p-0">
                     <div class="table-responsive datatable-custom">
                         <table id="columnSearchDatatable"
@@ -244,8 +285,14 @@
                                     <td>
                                     @if ($review->item)
                                         <a class="media align-items-center" href="{{route('admin.item.view',[$review->item['id']])}}">
-                                            <img class="avatar avatar-lg mr-3" src="{{asset('storage/app/public/product')}}/{{$review->item['image']}}"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'" alt="{{$review->item->name}} image">
+                                            <img class="avatar avatar-lg mr-3 onerror-image"
+                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                                $review->item['image'] ?? '',
+                                                asset('storage/app/public/product').'/'.$review->item['image'] ?? '',
+                                                asset('public/assets/admin/img/160x160/img2.jpg'),
+                                                'product/'
+                                            ) }}"
+                                            data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$review->item->name}} image">
                                             <div class="media-body">
                                                 <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],10)}}</h5>
                                             </div>
@@ -260,9 +307,14 @@
                                         <a class="d-flex align-items-center"
                                         href="{{route('admin.customer.view',[$review['user_id']])}}">
                                             <div class="avatar avatar-circle">
-                                                <img class="avatar-img" width="75" height="75"
-                                                    onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                    src="{{asset('storage/app/public/profile/'.$review->customer->image)}}"
+                                                <img class="avatar-img onerror-image" width="75" height="75"
+                                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                                        $review->customer->image ?? '',
+                                                        asset('storage/app/public/profile').'/'.$review->customer->image ?? '',
+                                                        asset('public/assets/admin/img/160x160/img1.jpg'),
+                                                        'profile/'
+                                                    ) }}"
                                                     alt="Image Description">
                                             </div>
                                             <div class="ml-3">
@@ -324,16 +376,13 @@
 @push('script_2')
     <!-- Page level plugins -->
     <script>
+        "use strict";
         // Call the dataTables jQuery plugin
         $(document).ready(function () {
             $('#dataTable').DataTable();
-        });
-    </script>
-    <script>
-        $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -367,12 +416,12 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
 
         $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

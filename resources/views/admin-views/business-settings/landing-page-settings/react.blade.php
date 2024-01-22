@@ -281,8 +281,7 @@
                                                     class="custom-file-input"
                                                     accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
                                                 <label class="custom-file-label"
-                                                    for="customFileEg1">{{ translate('messages.choose') }}
-                                                    {{ translate('messages.file') }}</label>
+                                                    for="customFileEg1">{{ translate('messages.choose_file') }}</label>
                                             </div>
                                     </div>
                                 </div>
@@ -356,8 +355,7 @@
                                                     class="custom-file-input"
                                                     accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
                                                 <label class="custom-file-label"
-                                                    for="customFileEg1">{{ translate('messages.choose') }}
-                                                    {{ translate('messages.file') }}</label>
+                                                    for="customFileEg1">{{ translate('messages.choose_file') }}</label>
                                             </div>
                                     </div>
                                 </div>
@@ -432,8 +430,7 @@
                                                     class="custom-file-input"
                                                     accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" >
                                                 <label class="custom-file-label"
-                                                    for="customFileEg2">{{ translate('messages.choose') }}
-                                                    {{ translate('messages.file') }}</label>
+                                                    for="customFileEg2">{{ translate('messages.choose_file') }}</label>
                                             </div>
                                     </div>
                                 </div>
@@ -508,8 +505,7 @@
                                                         class="custom-file-input"
                                                         accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
                                                     <label class="custom-file-label"
-                                                        for="customFile_Eg1_{{ $i }}">{{ translate('messages.choose') }}
-                                                        {{ translate('messages.file') }}</label>
+                                                        for="customFile_Eg1_{{ $i }}">{{ translate('messages.choose_file') }}</label>
                                                 </div>
                                         </div>
                                     </div>

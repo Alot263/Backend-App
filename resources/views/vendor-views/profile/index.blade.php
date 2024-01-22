@@ -85,9 +85,9 @@
                             class="avatar avatar-xxl avatar-circle avatar-border-lg avatar-uploader profile-cover-avatar"
                             for="avatarUploader">
                             <img id="viewer"
-                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                 class="avatar-img"
-                                 src="{{asset('storage/app/public/vendor')}}/{{auth('vendor')->check()?auth('vendor')->user()->image:auth('vendor_employee')->user()->image}}"
+                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                 class="avatar-img onerror-image"
+                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('vendor')->check() ? auth('vendor')->user()->image : auth('vendor_employee')->user()->image, asset('storage/app/public/vendor/').'/'.(auth('vendor')->check() ? auth('vendor')->user()->image : auth('vendor_employee')->user()->image), asset('public/assets/admin/img/160x160/img1.jpg'), 'vendor/') }}"
                                  alt="Image">
 
                             <input type="file" name="image" class="js-file-attach avatar-uploader-input"
@@ -157,7 +157,7 @@
                             </div>
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="@if(env('APP_MODE')!='demo') form_alert('vendor-settings-form','{{translate('messages.you_want_to_update_user_info')}}') @else call_demo() @endif" class="btn btn--primary">{{translate('messages.save_changes')}}</button>
+                                <button type="button" data-id="vendor-settings-form" data-message="{{ translate('you_want_to_update_user_info') }}" class="btn btn-primary {{env('APP_MODE')!='demo'?'form-alert':'call-demo'}}">{{ translate('messages.Save_changes') }}</button>
                             </div>
 
                             <!-- End Form -->
@@ -185,12 +185,14 @@
 
                         <!-- Form Group -->
                             <div class="row form-group">
-                                <label for="newPassword" class="col-sm-3 col-form-label input-label">{{translate('messages.new_password')}}</label>
+                                <label for="newPassword" class="col-sm-3 col-form-label input-label">{{translate('messages.new_password')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+        data-original-title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"><img src="{{ asset('/public/assets/admin/img/info-circle.svg') }}" alt="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"></span></label>
 
                                 <div class="col-sm-9">
                                     <input type="password" class="js-pwstrength form-control" name="password"
-                                           id="newPassword" placeholder="{{translate('messages.enter_new_password')}}"
-                                           aria-label="{{translate('messages.enter_new_password')}}"
+                                           id="newPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                           placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                           aria-label="8+ characters required"
                                            data-hs-pwstrength-options='{
                                            "ui": {
                                              "container": "#changePasswordForm",
@@ -215,15 +217,16 @@
                                 <div class="col-sm-9">
                                     <div class="mb-3">
                                         <input type="password" class="form-control" name="confirm_password"
-                                               id="confirmNewPasswordLabel" placeholder="{{translate('messages.confirm_new_password')}}"
-                                               aria-label="{{translate('messages.confirm_new_password')}}" required>
+                                               id="confirmNewPasswordLabel" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                               placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                               aria-label="8+ characters required" required>
                                     </div>
                                 </div>
                             </div>
                             <!-- End Form Group -->
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="@if(env('APP_MODE')!='demo') form_alert('changePasswordForm', '{{translate('messages.want_to_update_password')}}') @else call_demo() @endif" class="btn btn--primary">{{translate('messages.save_changes')}}</button>
+                                <button type="button" data-id="changePasswordForm" data-message="{{translate('messages.want_to_update_password')}}" class="btn btn-primary {{env('APP_MODE')!='demo'?'form-alert':'call-demo'}}">{{translate('messages.Save_changes')}}</button>
                             </div>
                         </form>
                         <!-- End Form -->
@@ -242,39 +245,5 @@
 @endsection
 
 @push('script_2')
-    <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-
-                reader.onload = function (e) {
-                    $('#viewer').attr('src', e.target.result);
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        $("#customFileEg1").change(function () {
-            readURL(this);
-        });
-    </script>
-
-    <script>
-        $("#generalSection").click(function() {
-            $("#passwordSection").removeClass("active");
-            $("#generalSection").addClass("active");
-            $('html, body').animate({
-                scrollTop: $("#generalDiv").offset().top
-            }, 2000);
-        });
-
-        $("#passwordSection").click(function() {
-            $("#generalSection").removeClass("active");
-            $("#passwordSection").addClass("active");
-            $('html, body').animate({
-                scrollTop: $("#passwordDiv").offset().top
-            }, 2000);
-        });
-    </script>
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/vendor/profile-index.js"></script>
 @endpush

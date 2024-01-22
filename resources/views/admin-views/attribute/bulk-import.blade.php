@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title','Attribute Bulk Import')
+@section('title',translate('Attribute Bulk Import'))
 
 @push('css_or_js')
 
@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="content container-fluid">
-        <h1 class="text-capitalize">{{translate('messages.attributes')}} {{translate('messages.bulk_import')}}</h1>
+        <h1 class="text-capitalize">{{translate('messages.attributes_bulk_import')}}</h1>
         <!-- Content Row -->
         <div class="row">
             <div class="col-12">

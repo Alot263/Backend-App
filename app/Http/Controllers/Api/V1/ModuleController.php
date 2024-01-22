@@ -15,11 +15,11 @@ class ModuleController extends Controller
     {
         if ($request->hasHeader('zoneId')) {
             $zone_id=$request->header('zoneId');
-            $modules = Module::with('zones')->whereHas('zones',function($query) use ($zone_id){
+            $modules = Module::with('zones')->withCount('items')->whereHas('zones',function($query) use ($zone_id){
                 $query->whereIn('zone_id',json_decode($zone_id, true));
             })->active()->get();
         }else{
-            $modules = Module::when($request->zone_id, function($query)use($request){
+            $modules = Module::withCount('items')->when($request->zone_id, function($query)use($request){
                 $query->whereHas('zones',function($query) use ($request){
                     $query->where('zone_id',$request->zone_id);
                 })->notParcel();
@@ -27,21 +27,21 @@ class ModuleController extends Controller
         }
 
         $modules = array_map(function($item){
-            if(count($item['translations'])>0)
-            {
-                foreach($item['translations'] as $translation){
-                    if($translation['key']=='module_name')
-                    {
-                        $item['module_name'] = $translation['value'];
-                    }
+            // if(count($item['translations'])>0)
+            // {
+            //     foreach($item['translations'] as $translation){
+            //         if($translation['key']=='module_name')
+            //         {
+            //             $item['module_name'] = $translation['value'];
+            //         }
 
-                    if($translation['key']=='description')
-                    {
-                        $item['description'] = $translation['value'];
-                    }
-                }
+            //         if($translation['key']=='description')
+            //         {
+            //             $item['description'] = $translation['value'];
+            //         }
+            //     }
 
-            }
+            // }
             return $item;
         },$modules->toArray());
         return response()->json($modules);

@@ -1,10 +1,22 @@
 <?php
 
-use App\CentralLogics\Helpers;
-use App\Library\ClientSecret;
-use App\Models\NotificationMessage;
+use App\Models\ItemTag;
+
+use App\Models\Translation;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
+use App\Http\Controllers\PaytmController;
+use App\Http\Controllers\LiqPayController;
+use App\Http\Controllers\PaymobController;
+use App\Http\Controllers\PaytabsController;
+use App\Http\Controllers\PaystackController;
+use App\Http\Controllers\RazorPayController;
+use App\Http\Controllers\SenangPayController;
+use App\Http\Controllers\MercadoPagoController;
+use App\Http\Controllers\BkashPaymentController;
+use App\Http\Controllers\FlutterwaveV3Controller;
+use App\Http\Controllers\PaypalPaymentController;
+use App\Http\Controllers\StripePaymentController;
+use App\Http\Controllers\SslCommerzPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +29,16 @@ use Illuminate\Http\Request;
 |
 */
 
+
+
+Route::get('/', 'UpdateController@update_software_index')->name('index');
+Route::post('update-system', 'UpdateController@update_software')->name('update-system');
+
+Route::fallback(function () {
+    return redirect('/');
+});
+
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('lang/{locale}', 'HomeController@lang')->name('lang');
 Route::get('terms-and-conditions', 'HomeController@terms_and_conditions')->name('terms-and-conditions');
@@ -25,9 +47,20 @@ Route::get('contact-us', 'HomeController@contact_us')->name('contact-us');
 Route::post('send-message', 'HomeController@send_message')->name('send-message');
 Route::get('privacy-policy', 'HomeController@privacy_policy')->name('privacy-policy');
 Route::get('cancelation', 'HomeController@cancelation')->name('cancelation');
-Route::get('refund', 'HomeController@refund')->name('refund');
+Route::get('refund', 'HomeController@refund_policy')->name('refund');
 Route::get('shipping-policy', 'HomeController@shipping_policy')->name('shipping-policy');
 Route::post('newsletter/subscribe', 'NewsletterController@newsLetterSubscribe')->name('newsletter.subscribe');
+
+Route::get('login/{tab}', 'LoginController@login')->name('login');
+Route::post('login_submit', 'LoginController@submit')->name('login_post')->middleware('actch');
+Route::get('logout', 'LoginController@logout')->name('logout');
+Route::get('/reload-captcha', 'LoginController@reloadCaptcha')->name('reload-captcha');
+Route::get('/reset-password', 'LoginController@reset_password_request')->name('reset-password');
+Route::post('/vendor-reset-password', 'LoginController@vendor_reset_password_request')->name('vendor-reset-password');
+Route::get('/password-reset', 'LoginController@reset_password')->name('change-password');
+Route::post('verify-otp', 'LoginController@verify_token')->name('verify-otp');
+Route::post('reset-password-submit', 'LoginController@reset_password_submit')->name('reset-password-submit');
+Route::get('otp-resent', 'LoginController@otp_resent')->name('otp_resent');
 
 Route::get('authentication-failed', function () {
     $errors = [];
@@ -42,111 +75,121 @@ Route::group(['prefix' => 'payment-mobile'], function () {
     Route::get('set-payment-method/{name}', 'PaymentController@set_payment_method')->name('set-payment-method');
 });
 
-// SSLCOMMERZ Start
-/*Route::get('/example1', 'SslCommerzPaymentController@exampleEasyCheckout');
-Route::get('/example2', 'SslCommerzPaymentController@exampleHostedCheckout');*/
-Route::post('pay-ssl', 'SslCommerzPaymentController@index')->name('pay-ssl');
-Route::post('/success', 'SslCommerzPaymentController@success');
-Route::post('/fail', 'SslCommerzPaymentController@fail');
-Route::post('/cancel', 'SslCommerzPaymentController@cancel');
-Route::post('/ipn', 'SslCommerzPaymentController@ipn');
-//SSLCOMMERZ END
-
-/*paypal*/
-/*Route::get('/paypal', function (){return view('paypal-test');})->name('paypal');*/
-Route::post('pay-paypal', 'PaypalPaymentController@payWithpaypal')->name('pay-paypal');
-Route::get('paypal-status', 'PaypalPaymentController@getPaymentStatus')->name('paypal-status');
-/*paypal*/
-
-/*Route::get('stripe', function (){
-return view('stripe-test');
-});*/
-
-Route::get('pay-stripe', 'StripePaymentController@payment_process_3d')->name('pay-stripe');
-Route::get('pay-stripe/success/{order_id}/{transaction_ref}', 'StripePaymentController@success')->name('pay-stripe.success');
-Route::get('pay-stripe/fail', 'StripePaymentController@fail')->name('pay-stripe.fail');
-
-// Get Route For Show Payment Form
-Route::get('paywithrazorpay', 'RazorPayController@payWithRazorpay')->name('paywithrazorpay');
-Route::post('payment-razor/{order_id}', 'RazorPayController@payment')->name('payment-razor');
-
-/*Route::fallback(function () {
-return redirect('/admin/auth/login');
-});*/
-
 Route::get('payment-success', 'PaymentController@success')->name('payment-success');
 Route::get('payment-fail', 'PaymentController@fail')->name('payment-fail');
+Route::get('payment-cancel', 'PaymentController@cancel')->name('payment-cancel');
 
-//senang pay
-Route::match(['get', 'post'], '/return-senang-pay', 'SenangPayController@return_senang_pay')->name('return-senang-pay');
+$is_published = 0;
+try {
+$full_data = include('Modules/Gateways/Addon/info.php');
+$is_published = $full_data['is_published'] == 1 ? 1 : 0;
+} catch (\Exception $exception) {}
 
-// paymob
-Route::post('/paymob-credit', 'PaymobController@credit')->name('paymob-credit');
-Route::get('/paymob-callback', 'PaymobController@callback')->name('paymob-callback');
+if (!$is_published) {
+    Route::group(['prefix' => 'payment'], function () {
 
-//paystack
-Route::post('/paystack-pay', 'PaystackController@redirectToGateway')->name('paystack-pay');
-Route::get('/paystack-callback', 'PaystackController@handleGatewayCallback')->name('paystack-callback');
-Route::get('/paystack', function () {
-    return view('paystack');
-});
+        //SSLCOMMERZ
+        Route::group(['prefix' => 'sslcommerz', 'as' => 'sslcommerz.'], function () {
+            Route::get('pay', [SslCommerzPaymentController::class, 'index'])->name('pay');
+            Route::post('success', [SslCommerzPaymentController::class, 'success'])
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+            Route::post('failed', [SslCommerzPaymentController::class, 'failed'])
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+            Route::post('canceled', [SslCommerzPaymentController::class, 'canceled'])
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+        });
 
+        //STRIPE
+        Route::group(['prefix' => 'stripe', 'as' => 'stripe.'], function () {
+            Route::get('pay', [StripePaymentController::class, 'index'])->name('pay');
+            Route::get('token', [StripePaymentController::class, 'payment_process_3d'])->name('token');
+            Route::get('success', [StripePaymentController::class, 'success'])->name('success');
+        });
 
-// The route that the button calls to initialize payment
-Route::post('/flutterwave-pay', 'FlutterwaveController@initialize')->name('flutterwave_pay');
-// The callback url after a payment
-Route::get('/rave/callback/{order_id}', 'FlutterwaveController@callback')->name('flutterwave_callback');
+        //RAZOR-PAY
+        Route::group(['prefix' => 'razor-pay', 'as' => 'razor-pay.'], function () {
+            Route::get('pay', [RazorPayController::class, 'index']);
+            Route::post('payment', [RazorPayController::class, 'payment'])->name('payment')
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+        });
 
+        //PAYPAL
+        Route::group(['prefix' => 'paypal', 'as' => 'paypal.'], function () {
+            Route::get('pay', [PaypalPaymentController::class, 'payment']);
+            Route::any('success', [PaypalPaymentController::class, 'success'])->name('success')
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);;
+            Route::any('cancel', [PaypalPaymentController::class, 'cancel'])->name('cancel')
+                ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);;
+        });
 
-// The callback url after a payment
-Route::get('mercadopago/home', 'MercadoPagoController@index')->name('mercadopago.index');
-Route::post('mercadopago/make-payment', 'MercadoPagoController@make_payment')->name('mercadopago.make_payment');
-Route::get('mercadopago/get-user', 'MercadoPagoController@get_test_user')->name('mercadopago.get-user');
+        //SENANG-PAY
+        Route::group(['prefix' => 'senang-pay', 'as' => 'senang-pay.'], function () {
+            Route::get('pay', [SenangPayController::class, 'index']);
+            Route::any('callback', [SenangPayController::class, 'return_senang_pay']);
+        });
 
-//paytabs
-Route::any('/paytabs-payment', 'PaytabsController@payment')->name('paytabs-payment');
-Route::any('/paytabs-response', 'PaytabsController@callback_response')->name('paytabs-response');
+        //PAYTM
+        Route::group(['prefix' => 'paytm', 'as' => 'paytm.'], function () {
+            Route::get('pay', [PaytmController::class, 'payment']);
+            Route::any('response', [PaytmController::class, 'callback'])->name('response')
+            ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+        });
 
-//bkash
-Route::group(['prefix' => 'bkash'], function () {
-    // Payment Routes for bKash
-    Route::post('get-token', 'BkashPaymentController@getToken')->name('bkash-get-token');
-    // Route::post('create-payment', 'BkashPaymentController@createPayment')->name('bkash-create-payment');
-    // Route::post('execute-payment', 'BkashPaymentController@executePayment')->name('bkash-execute-payment');
-    // Route::get('query-payment', 'BkashPaymentController@queryPayment')->name('bkash-query-payment');
-    Route::get('make-payment', 'BkashPaymentController@make_tokenize_payment')->name('bkash-make-payment');
-    Route::any('callback', 'BkashPaymentController@callback')->name('bkash-callback');
+        //FLUTTERWAVE
+        Route::group(['prefix' => 'flutterwave-v3', 'as' => 'flutterwave-v3.'], function () {
+            Route::get('pay', [FlutterwaveV3Controller::class, 'initialize'])->name('pay');
+            Route::get('callback', [FlutterwaveV3Controller::class, 'callback'])->name('callback');
+        });
 
-    // Refund Routes for bKash
-    // Route::get('refund', 'BkashRefundController@index')->name('bkash-refund');
-    // Route::post('refund', 'BkashRefundController@refund')->name('bkash-refund');
-});
+        //PAYSTACK
+        Route::group(['prefix' => 'paystack', 'as' => 'paystack.'], function () {
+            Route::get('pay', [PaystackController::class, 'index'])->name('pay');
+            Route::post('payment', [PaystackController::class, 'redirectToGateway'])->name('payment');
+            Route::get('callback', [PaystackController::class, 'handleGatewayCallback'])->name('callback');
+        });
 
-// The callback url after a payment PAYTM
-Route::get('paytm-payment', 'PaytmController@payment')->name('paytm-payment');
-Route::any('paytm-response', 'PaytmController@callback')->name('paytm-response');
+        //BKASH
 
-// The callback url after a payment LIQPAY
-Route::get('liqpay-payment', 'LiqPayController@payment')->name('liqpay-payment');
-Route::any('liqpay-callback/{order_id}', 'LiqPayController@callback')->name('liqpay-callback');
+        Route::group(['prefix' => 'bkash', 'as' => 'bkash.'], function () {
+            // Payment Routes for bKash
+            Route::get('make-payment', [BkashPaymentController::class, 'make_tokenize_payment'])->name('make-payment');
+            Route::any('callback', [BkashPaymentController::class, 'callback'])->name('callback');
+
+            // Refund Routes for bKash
+            // Route::get('refund', 'BkashRefundController@index')->name('bkash-refund');
+            // Route::post('refund', 'BkashRefundController@refund')->name('bkash-refund');
+        });
+
+        //Liqpay
+        Route::group(['prefix' => 'liqpay', 'as' => 'liqpay.'], function () {
+            Route::get('payment', [LiqPayController::class, 'payment'])->name('payment');
+            Route::any('callback', [LiqPayController::class, 'callback'])->name('callback');
+        });
+
+        //MERCADOPAGO
+        Route::group(['prefix' => 'mercadopago', 'as' => 'mercadopago.'], function () {
+            Route::get('pay', [MercadoPagoController::class, 'index'])->name('index');
+            Route::post('make-payment', [MercadoPagoController::class, 'make_payment'])->name('make_payment');
+        });
+
+        //PAYMOB
+        Route::group(['prefix' => 'paymob', 'as' => 'paymob.'], function () {
+            Route::any('pay', [PaymobController::class, 'credit'])->name('pay');
+            Route::any('callback', [PaymobController::class, 'callback'])->name('callback');
+        });
+
+        //PAYTABS
+        Route::group(['prefix' => 'paytabs', 'as' => 'paytabs.'], function () {
+            Route::any('pay', [PaytabsController::class, 'payment'])->name('pay');
+            Route::any('callback', [PaytabsController::class, 'callback'])->name('callback');
+            Route::any('response', [PaytabsController::class, 'response'])->name('response');
+        });
+    });
+}
 
 
 Route::get('/test', function () {
-    // $apple_login=\App\Models\BusinessSetting::where(['key'=>'apple_login'])->first();
-    // if($apple_login){
-    //     $apple_login = json_decode($apple_login->value)[0];
-    // }
-    // $keyContent = file_get_contents('storage/app/public/apple-login/'.$apple_login->service_file);
-    // $keyContent = file_get_contents('AppleServiceId.p8');
-    // dd($keyContent);
-//     $clientId = 'com.sixamtech.6amMart';
-// $teamId   = '7WSYLQ8Y87';
-// $keyId    = 'U7KA7F82UM';
-// $certPath = url('/'). '/app/Library/AuthKey_U7KA7F82UM.p8';
 
-// $clientSecret = new ClientSecret($clientId, $teamId, $keyId, $certPath);
-
-// dd($clientSecret->generate());
     dd('Hello tester');
 });
 

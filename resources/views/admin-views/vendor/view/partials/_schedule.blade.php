@@ -29,7 +29,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -65,7 +65,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -100,7 +100,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -136,7 +136,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -172,7 +172,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -208,7 +208,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach
@@ -244,7 +244,7 @@ foreach ($store->schedules as $schedule)
                         {{date(config('timeformat'), strtotime($day['end_time']))}}
                     </span>
                 </span>
-                <span class="dismiss--date" onclick="delete_schedule('{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}')">
+                <span class="dismiss--date delete-schedule" data-url="{{route('admin.store.remove-schedule',['store_schedule'=>$day['id']])}}">
                     <i class="tio-clear-circle-outlined"></i>
                 </span>
                 @endforeach

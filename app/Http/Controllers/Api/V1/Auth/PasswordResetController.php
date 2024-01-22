@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
-use App\CentralLogics\Helpers;
-use Carbon\CarbonInterval;
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
 use Illuminate\Support\Carbon;
 use App\Models\BusinessSetting;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use App\CentralLogics\SMS_module;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Modules\Gateways\Traits\SmsGateway;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class PasswordResetController extends Controller
 {
@@ -53,9 +56,24 @@ class PasswordResetController extends Controller
                 'token' => $token,
                 'created_at' => now(),
             ]);
-            // Mail::to($customer['email'])->send(new \App\Mail\PasswordResetMail($token));
+
+            $mail_status = Helpers::get_mail_status('forget_password_mail_status_user');
+            if (config('mail.status') && $mail_status == '1') {
+                Mail::to($customer['email'])->send(new \App\Mail\UserPasswordResetMail($token,$customer['f_name']));
+            }
             // return response()->json(['message' => 'Email sent successfully.'], 200);
-            $response = SMS_module::send($request['phone'],$token);
+            //for payment and sms gateway addon
+            $published_status = 0;
+            $payment_published_status = config('get_payment_publish_status');
+            if (isset($payment_published_status[0]['is_published'])) {
+                $published_status = $payment_published_status[0]['is_published'];
+            }
+
+            if($published_status == 1){
+                $response = SmsGateway::send($request['phone'],$token);
+            }else{
+                $response = SMS_module::send($request['phone'],$token);
+            }
             if($response == 'success')
             {
                 return response()->json(['message' => translate('messages.otp_sent_successfull')], 200);
@@ -65,7 +83,10 @@ class PasswordResetController extends Controller
                 return response()->json([
                     'errors' => [
                         ['code' => 'otp', 'message' => translate('messages.failed_to_send_sms')]
-                ]], 405);
+                ]], 200);
+
+                // Need To Update the logic for Sms and Email
+
             }
         }
         return response()->json(['errors' => [
@@ -173,7 +194,7 @@ class PasswordResetController extends Controller
         $validator = Validator::make($request->all(), [
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|exists:users,phone',
             'reset_token'=> 'required',
-            'password'=> 'required|min:6',
+            'password' => ['required', Password::min(8)],
             'confirm_password'=> 'required|same:password',
         ]);
 

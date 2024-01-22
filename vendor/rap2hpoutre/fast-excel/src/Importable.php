@@ -2,11 +2,10 @@
 
 namespace Rap2hpoutre\FastExcel;
 
-use Box\Spout\Common\Type;
-use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
-use Box\Spout\Reader\SheetInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use OpenSpout\Reader\SheetInterface;
+use OpenSpout\Writer\Common\AbstractOptions;
 
 /**
  * Trait Importable.
@@ -23,19 +22,19 @@ trait Importable
     private $sheet_number = 1;
 
     /**
-     * @param \Box\Spout\Reader\ReaderInterface|\Box\Spout\Writer\WriterInterface $reader_or_writer
+     * @param AbstractOptions $options
      *
      * @return mixed
      */
-    abstract protected function setOptions(&$reader_or_writer);
+    abstract protected function setOptions(&$options);
 
     /**
      * @param string        $path
      * @param callable|null $callback
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
      *
      * @return Collection
      */
@@ -58,9 +57,9 @@ trait Importable
      * @param string        $path
      * @param callable|null $callback
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
      *
      * @return Collection
      */
@@ -84,22 +83,28 @@ trait Importable
     /**
      * @param $path
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Common\Exception\IOException
      *
-     * @return \Box\Spout\Reader\ReaderInterface
+     * @return \OpenSpout\Reader\ReaderInterface
      */
     private function reader($path)
     {
-        if (Str::endsWith($path, Type::CSV)) {
-            $reader = ReaderEntityFactory::createCSVReader();
-        } elseif (Str::endsWith($path, Type::ODS)) {
-            $reader = ReaderEntityFactory::createODSReader();
+        if (Str::endsWith($path, 'csv')) {
+            $options = new \OpenSpout\Reader\CSV\Options();
+            $this->setOptions($options);
+            $reader = new \OpenSpout\Reader\CSV\Reader($options);
+        } elseif (Str::endsWith($path, 'ods')) {
+            $options = new \OpenSpout\Reader\ODS\Options();
+            $this->setOptions($options);
+            $reader = new \OpenSpout\Reader\ODS\Reader($options);
         } else {
-            $reader = ReaderEntityFactory::createXLSXReader();
+            $options = new \OpenSpout\Reader\XLSX\Options();
+            $this->setOptions($options);
+            $reader = new \OpenSpout\Reader\XLSX\Reader($options);
         }
-        $this->setOptions($reader);
-        /* @var \Box\Spout\Reader\ReaderInterface $reader */
+
+        /* @var \OpenSpout\Reader\ReaderInterface $reader */
         $reader->open($path);
 
         return $reader;
@@ -116,10 +121,14 @@ trait Importable
 
         foreach ($array as $row => $columns) {
             foreach ($columns as $column => $value) {
-                data_set($collection, implode('.', [
-                    $column,
-                    $row,
-                ]), $value);
+                data_set(
+                    $collection,
+                    implode('.', [
+                        $column,
+                        $row,
+                    ]),
+                    $value
+                );
             }
         }
 
@@ -179,6 +188,8 @@ trait Importable
     {
         foreach ($values as &$value) {
             if ($value instanceof \DateTime) {
+                $value = $value->format('Y-m-d H:i:s');
+            } elseif ($value instanceof \DateTimeImmutable) {
                 $value = $value->format('Y-m-d H:i:s');
             } elseif ($value) {
                 $value = (string) $value;

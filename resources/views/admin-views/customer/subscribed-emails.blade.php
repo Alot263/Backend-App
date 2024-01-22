@@ -29,8 +29,8 @@
                                 aria-label="Search" required>
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                             @if (request()->get('search'))
-                                <button type="reset" class="btn btn-info mx-1"
-                                    onclick="location.href = '{{ route('admin.users.customer.subscribed') }}'">{{ translate('messages.reset') }}</button>
+                                <button type="reset" class="btn btn-info mx-1 redirect-url"
+                                data-url="{{ route('admin.users.customer.subscribed') }}" > {{ translate('messages.reset') }}</button>
                             @endif
                         </div>
                     </form>
@@ -46,8 +46,7 @@
 
                                             <div id="usersExportDropdown"
                                                 class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                                                <span class="dropdown-header">{{ translate('messages.download') }}
-                                                    {{ translate('messages.options') }}</span>
+                                                <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                                                 <a id="export-excel" class="dropdown-item" href="{{route('admin.users.customer.subscriber-export', ['type'=>'excel'])}}">
                                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
                                                         src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -122,28 +121,15 @@
                 @endif
             </div>
             <!-- End Table -->
-            <!-- Footer -->
-            {{-- <div class="card-footer">
-                <!-- Pagination -->
-                <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
-                    <div class="col-sm-auto">
-                        <div class="d-flex justify-content-center justify-content-sm-end">
-                            <!-- Pagination -->
-                            $customer->links() !!}
-                        </div>
-                    </div>
-                </div>
-                <!-- End Pagination -->
-            </div> --}}
-            <!-- End Footer -->
         </div>
         <!-- End Card -->
     </div>
 @endsection
 @push('script_2')
     <script type="text/javascript">
+        "use strict";
         $('#search-form').on('submit', function() {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

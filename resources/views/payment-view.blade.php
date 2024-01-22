@@ -35,6 +35,13 @@
     {{--stripe--}}
 </head>
 <!-- Body-->
+{{--loader--}}
+<div id="loading" class="initial-hidden">
+    <div class="loading-inner">
+        <img width="200" src="{{asset('public/assets/front-end/img/loader.gif')}}">
+    </div>
+</div>
+{{--loader--}}
 <body class="toolbar-enabled">
 <!-- Page Content-->
 <div class="container pb-5 mb-2 mb-md-4">
@@ -79,8 +86,8 @@
                                         <!--amount need to be in paisa-->
                                         <script src="https://checkout.razorpay.com/v1/checkout.js"
                                                 data-key="{{ Config::get('razor.razor_key') }}"
-                                                data-amount="{{$order->order_amount*100}}"
-                                                data-buttontext="Pay {{$order->order_amount}} {{\App\CentralLogics\Helpers::currency_code()}}"
+                                                data-amount="{{($order->order_amount - $order->partially_paid_amount)*100}}"
+                                                data-buttontext="Pay {{$order->order_amount - $order->partially_paid_amount}} {{\App\CentralLogics\Helpers::currency_code()}}"
                                                 data-name="{{\App\Models\BusinessSetting::where(['key'=>'business_name'])->first()->value}}"
                                                 data-description="{{$order['id']}}"
                                                 data-image="{{asset('storage/app/public/business/'.\App\Models\BusinessSetting::where(['key'=>'logo'])->first()->value)}}"
@@ -105,13 +112,13 @@
                         <div class="col-md-6 mb-4 cursor-pointer">
                             <div class="card">
                                 <div class="card-body pb-0 pt-1 h--70px">
-                                    <form class="needs-validation" method="POST" id="payment-form"
-                                          action="{{route('pay-paypal',request()->getQueryString())}}">
-                                        {{ csrf_field() }}
+                                    <form class="needs-validation" method="GET"
+                                          action="{{route('paypal.pay')}}">
                                         <button class="btn btn-block click-if-alone" type="submit">
                                             <img width="100"
                                                  src="{{asset('public/assets/admin/img/paypal.png')}}"/>
                                         </button>
+                                        <input type="hidden" name="order_id" value="{{$order->id}}">
                                     </form>
                                 </div>
                             </div>
@@ -155,44 +162,20 @@
                             </div>
                         </div>
                     @endif
-
-
+                    
                     @php($config=\App\CentralLogics\Helpers::get_business_settings('paystack'))
                     @if($config['status'])
                         <div class="col-md-6 mb-4 cursor-pointer">
                             <div class="card">
                                 <div class="card-body py-0 h--70px">
-                                    @php($config=\App\CentralLogics\Helpers::get_business_settings('paystack'))
-                                    @php($order=\App\Models\Order::find(session('order_id')))
-                                    <form method="POST" action="{{ route('paystack-pay') }}" accept-charset="UTF-8"
-                                          class="form-horizontal"
-                                          role="form">
-                                        @csrf
-                                        <div class="row">
-                                            <div class="col-md-8 col-md-offset-2">
-                                                <input type="hidden" name="email"
-                                                       value="{{$order->customer->email!=null?$order->customer->email:'required@email.com'}}"> {{-- required --}}
-                                                <input type="hidden" name="orderID" value="{{$order['id']}}">
-                                                <input type="hidden" name="amount"
-                                                       value="{{$order['order_amount']*100}}"> {{-- required in kobo --}}
-                                                <input type="hidden" name="quantity" value="1">
-                                                <input type="hidden" name="currency"
-                                                       value="{{$currency}}">
-                                                <input type="hidden" name="metadata"
-                                                       value="{{ json_encode($array = ['key_name' => 'value',]) }}"> {{-- For other necessary things you want to add to your payload. it is optional though --}}
-                                                <input type="hidden" name="reference"
-                                                       value="{{ Paystack::genTranxRef() }}"> {{-- required --}}
-                                                <p>
-                                                    <button class="paystack-payment-button initial-hidden" type="submit" value="Pay Now!"></button>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <button class="btn btn-block click-if-alone" type="button"
-                                            onclick="$('.paystack-payment-button').click()">
-                                        <img width="100"
-                                             src="{{asset('public/assets/admin/img/paystack.png')}}"/>
-                                    </button>
+                                    <form id="paymentForm">
+                                        <input type="hidden" id="publicKey" value="{{ $config['publicKey'] }}">
+                                        <input type="hidden" value="{{ $order->customer->email }}" id="email-address" required />
+                                        <input type="hidden" value="{{ round($order->order_amount - $order->partially_paid_amount )}}" id="amount" required />
+                                        <button class="btn btn-block click-if-alone" type="submit" onclick="payWithPaystack()">
+                                          <img width="100" src="{{asset('public/assets/admin/img/paystack.png')}}"/>
+                                        </button>
+                                      </form>
                                 </div>
                             </div>
                         </div>
@@ -210,7 +193,7 @@
                                     @php($data->merchantId = $config['merchant_id'])
                                     @php($data->detail = 'payment')
                                     @php($data->order_id = $order->id)
-                                    @php($data->amount = $order->order_amount)
+                                    @php($data->amount = $order->order_amount - $order->partially_paid_amount)
                                     @php($data->name = $user->f_name.' '.$user->l_name)
                                     @php($data->email = $user->email)
                                     @php($data->phone = $user->phone)
@@ -276,7 +259,7 @@
                             <div class="card">
                                 <div class="card-body h--100px">
                                     <form class="needs-validation" method="POST" id="payment-form-paymob"
-                                        action="{{route('paymob-credit')}}">
+                                    action="{{route('paymob-credit',request()->getQueryString())}}">
                                         {{ csrf_field() }}
                                         <button class="btn btn-block click-if-alone" type="submit">
                                             <img width="150"
@@ -362,11 +345,61 @@
 
 
 
+
 <script>
     setTimeout(function () {
         $('.stripe-button-el').hide();
         $('.razorpay-payment-button').hide();
     }, 10)
+</script>
+
+<script src="https://js.paystack.co/v2/inline.js"></script>
+
+<script>
+    const paymentForm = document.getElementById('paymentForm');
+    paymentForm.addEventListener("submit", payWithPaystack, false);
+    function payWithPaystack(e) {
+        e.preventDefault();
+        showLoader();
+        const channels = ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'];
+        const paystack = new PaystackPop();
+        paystack.newTransaction({
+            key: document.getElementById("publicKey").value, // Replace with your public key
+            email: document.getElementById("email-address").value,
+            amount: document.getElementById("amount").value * 100,
+            ref: '{{$order->id}}',
+            channels: channels,
+            currency: "{{$currency}}",
+
+            onSuccess: (transaction) => {
+                window.location.href = "{{ route('paystack-callback') }}?reference=" + transaction.reference;
+            },
+            onCancel: () => {
+                window.location.href = "{{ route('paystack-callback') }}?reference=" + {{$order->id}};
+            }
+        });
+    }
+    
+    function showLoader() {
+        const loader = document.createElement("div");
+        loader.style.position = "fixed";
+        loader.style.top = "0";
+        loader.style.left = "0";
+        loader.style.width = "100%";
+        loader.style.height = "100%";
+        loader.style.background = "rgba(0, 0, 0, 0.5)";
+        loader.style.display = "flex";
+        loader.style.justifyContent = "center";
+        loader.style.alignItems = "center";
+
+        const spinner = document.createElement("div");
+        spinner.className = "spinner-border text-light";
+        spinner.setAttribute("role", "status");
+
+        loader.appendChild(spinner);
+
+        document.body.appendChild(loader);
+    }
 </script>
 
 {{-- @if(env('APP_MODE')=='live')
@@ -456,7 +489,7 @@
 
     function createPayment(request) {
         // because of createRequest function finds amount from this request
-        request['amount'] = "{{round($order->order_amount,2)}}"; // max two decimal points allowed
+        request['amount'] = "{{round($order->order_amount - $order->partially_paid_amount,2)}}"; // max two decimal points allowed
         $.ajax({
             url: '{{ route('bkash-create-payment') }}',
             data: JSON.stringify(request),

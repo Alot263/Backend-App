@@ -12,7 +12,7 @@
             <?php
                 $subtotal = 0;
                 $addon_price = 0;
-                $tax = $store? $store->tax: 0;
+                $tax = isset($store)? $store->tax: 0;
                 $discount = 0;
                 $discount_type = 'amount';
                 $discount_on_product = 0;
@@ -34,23 +34,30 @@
                 @foreach(session()->get('cart') as $key => $cartItem)
                 @if(is_array($cartItem))
                     <?php
-                    $variation_price += isset($cartItem['variation_price'])?$cartItem['variation_price']:0;
+                    $variation_price += $cartItem['variation_price'] ?? 0;
                     $product_subtotal = ($cartItem['price'])*$cartItem['quantity'];
                     $discount_on_product += ($cartItem['discount']*$cartItem['quantity']);
                     $subtotal += $product_subtotal;
                     $addon_price += $cartItem['addon_price'];
                     ?>
                 <tr>
-                    <td class="media align-items-center cursor-pointer" onclick="quickViewCartItem({{$cartItem['id']}}, {{$key}})">
-                        <img class="avatar avatar-sm mr-1" src="{{asset('storage/app/public/product')}}/{{$cartItem['image']}}"
-                                onerror="this.src='{{asset('public/assets/admin/img/100x100/2.png')}}'" alt="{{$cartItem['name']}} image">
+                    <td class="media align-items-center cursor-pointer quick-View-Cart-Item" data-product-id="{{$cartItem['id']}}" data-item-key="{{$key}}">
+                        <img class="avatar avatar-sm mr-1 onerror-image"
+                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                            $cartItem['image'] ?? '',
+                            asset('storage/app/public/product').'/'.$cartItem['image'] ?? '',
+                            asset('public/assets/admin/img/100x100/2.png'),
+                            'product/'
+                        ) }}"
+
+                                data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}" alt="{{$cartItem['name']}} image">
                         <div class="media-body">
                             <h5 class="text-hover-primary mb-0">{{Str::limit($cartItem['name'], 10)}}</h5>
                             <small>{{Str::limit($cartItem['variant'], 20)}}</small>
                         </div>
                     </td>
                     <td class="text-center middle-align">
-                        <input type="number"  data-key="{{$key}}" class="amount--input form-control text-center" value="{{$cartItem['quantity']}}" min="1" onkeyup="updateQuantity(event)">
+                        <input type="number"  data-key="{{$key}}" class="amount--input form-control text-center update-Quantity" value="{{$cartItem['quantity']}}" min="1" max="{{$cartItem['maximum_cart_quantity']?? '9999999999'}}">
                     </td>
                     <td class="text-center px-0 py-1">
                         <div class="btn">
@@ -58,7 +65,7 @@
                         </div> <!-- price-wrap .// -->
                     </td>
                     <td class="align-items-center text-center">
-                        <a href="javascript:removeFromCart({{$key}})" class="btn btn-sm btn-outline-danger"> <i class="tio-delete-outlined"></i></a>
+                        <a href="javascript:" data-product-id="{{$key}}" class="btn btn-sm btn-outline-danger remove-From-Cart"> <i class="tio-delete-outlined"></i></a>
                     </td>
                 </tr>
                 @endif
@@ -100,14 +107,13 @@
             <dd class="col-sm-6 text-right">- {{\App\CentralLogics\Helpers::format_currency(round($discount_on_product,2))}}</dd>
             <dt class="col-6">{{ translate('messages.delivery_fee') }} :</dt>
             <dd class="col-6 text-right" id="delivery_price">
-                {{ \App\CentralLogics\Helpers::format_currency($delivery_fee, 2) }}</dd>
+                {{ \App\CentralLogics\Helpers::format_currency($delivery_fee) }}</dd>
                 @if ($tax_included !=  1)
 
             <dt  class="col-sm-6">{{ translate('messages.tax') }}  : </dt>
             <dd class="col-sm-6 text-right">
-                {{-- <button class="btn btn-sm" type="button" data-toggle="modal" data-target="#add-tax"><i class="tio-edit"></i></button> --}}
                 {{\App\CentralLogics\Helpers::format_currency(round($total_tax_amount,2))}}</dd>
-@endif
+      @endif
             <dt  class="col-6 pr-0">
                 <hr class="mt-0">
             </dt>
@@ -120,7 +126,7 @@
             </dd>
 
         </dl>
-        <form action="{{route('admin.pos.order')}}?store_id={{request('store_id')}}" id='order_place' method="post" onkeydown="return event.key != 'Enter';">
+        <form action="{{route('admin.pos.order')}}?store_id={{request('store_id')}}" id='order_place' method="post" >
             @csrf
             <input type="hidden" name="user_id" id="customer_id">
             <div class="pos--payment-options mt-3 mb-3">
@@ -146,81 +152,18 @@
                     @endif
                 </ul>
             </div>
-        {{--<div class="mt-4 d-flex justify-content-between pos--payable-amount">
-        <label class="m-0 text-capitalize">{{translate('messages.payment_method')}}</label>
-            <div>
-                <span data-toggle="modal" data-target="#insertPayableAmount" class="text-body"><i class="tio-edit"></i></span>
-                <span>$1000.00</span>
-            </div>
-        </div>--}}
+
         <div class="row button--bottom-fixed g-1 bg-white">
             <div class="col-sm-6">
-                <button type="submit" class="btn  btn--primary btn-sm btn-block">{{ translate('messages.place_order') }} </button>
+                <button type="submit" class="btn  btn--primary btn-sm place-order-submit btn-block">{{ translate('messages.place_order') }} </button>
             </div>
             <div class="col-sm-6">
-                <a href="#" class="btn btn--reset btn-sm btn-block" onclick="emptyCart()">{{  translate('Clear Cart') }}</a>
+                <a href="#" class="btn btn--reset btn-sm btn-block empty-Cart" >{{  translate('Clear Cart') }}</a>
             </div>
         </div>
         </form>
     </div>
 
-    <div class="modal fade" id="add-discount" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{translate('messages.update_discount')}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{route('admin.pos.discount')}}" method="post" class="row">
-                        @csrf
-                        <div class="form-group col-sm-6">
-                            <label for="">{{translate('messages.discount')}}</label>
-                            <input type="number" class="form-control" name="discount" min="0" id="discount_input" value="{{$discount}}" max="{{$discount_type=='percent'?100:1000000000}}">
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label for="">{{translate('messages.type')}}</label>
-                            <select name="type" class="form-control" id="discount_input_type" onchange="document.getElementById('discount_input').max=(this.value=='percent'?100:1000000000);">
-                                <option value="amount" {{$discount_type=='amount'?'selected':''}}>{{translate('messages.amount')}}({{\App\CentralLogics\Helpers::currency_symbol()}})</option>
-                                <option value="percent" {{$discount_type=='percent'?'selected':''}}>{{translate('messages.percent')}}(%)</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-12 text-right mb-0">
-                            <button class="btn btn-sm btn--primary" type="submit">{{translate('messages.submit')}}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="add-tax" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{translate('messages.update_tax')}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{route('admin.pos.tax')}}" method="POST" class="row" id="order_submit_form">
-                        @csrf
-                        <div class="form-group col-12">
-                            <label for="">{{translate('messages.tax')}}(%)</label>
-                            <input type="number" class="form-control" name="tax" min="0">
-                        </div>
-
-                        <div class="form-group col-sm-12 mb-0 text-right">
-                            <button class="btn btn-sm btn--primary" type="submit">{{translate('messages.submit')}}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="modal fade" id="deliveryAddrModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -231,6 +174,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
+                @if ($store)
                 <div class="modal-body">
 
                     <?php
@@ -246,48 +190,48 @@
                         <div class="row g-2" id="delivery_address">
                             <div class="col-md-6">
                                 <label class="input-label"
-                                    for="">{{ translate('messages.contact_person_name') }}<span
+                                    for="contact_person_name">{{ translate('messages.contact_person_name') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" name="contact_person_name"
+                                <input  id="contact_person_name" type="text" class="form-control" name="contact_person_name"
                                     value="{{ $old ? $old['contact_person_name'] : '' }}" placeholder="{{ translate('messages.Ex :') }} Jhone">
                             </div>
                             <div class="col-md-6">
                                 <label class="input-label"
-                                    for="">{{ translate('Contact Number') }}<span
+                                    for="contact_person_number">{{ translate('Contact Number') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="tel" class="form-control" name="contact_person_number"
+                                <input id="contact_person_number" type="tel" class="form-control" name="contact_person_number"
                                     value="{{ $old ? $old['contact_person_number'] : '' }}"  placeholder="{{ translate('messages.Ex :') }} +3264124565">
                             </div>
                             <div class="col-md-4">
-                                <label class="input-label" for="">{{ translate('messages.Road') }}<span
+                                <label class="input-label" for="road">{{ translate('messages.Road') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" name="road" value="{{ $old ? $old['road'] : '' }}"  placeholder="{{ translate('messages.Ex :') }} 4th">
+                                <input id="road" type="text" class="form-control" name="road" value="{{ $old ? $old['road'] : '' }}"  placeholder="{{ translate('messages.Ex :') }} 4th">
                             </div>
                             <div class="col-md-4">
-                                <label class="input-label" for="">{{ translate('messages.House') }}<span
+                                <label  class="input-label" for="house">{{ translate('messages.House') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" name="house" value="{{ $old ? $old['house'] : '' }}" placeholder="{{ translate('messages.Ex :') }} 45/C">
+                                <input id="house" type="text" class="form-control" name="house" value="{{ $old ? $old['house'] : '' }}" placeholder="{{ translate('messages.Ex :') }} 45/C">
                             </div>
                             <div class="col-md-4">
-                                <label class="input-label" for="">{{ translate('messages.Floor') }}<span
+                                <label class="input-label" for="floor">{{ translate('messages.Floor') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" name="floor" value="{{ $old ? $old['floor'] : '' }}"  placeholder="{{ translate('messages.Ex :') }} 1A">
+                                <input id="floor" type="text" class="form-control" name="floor" value="{{ $old ? $old['floor'] : '' }}"  placeholder="{{ translate('messages.Ex :') }} 1A">
                             </div>
                             <div class="col-md-6">
-                                <label class="input-label" for="">{{ translate('messages.longitude') }}<span
+                                <label class="input-label" for="longitude">{{ translate('messages.longitude') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" id="longitude" name="longitude"
+                                <input  type="text" class="form-control" id="longitude" name="longitude"
                                     value="{{ $old ? $old['longitude'] : '' }}" readonly >
                             </div>
                             <div class="col-md-6">
-                                <label class="input-label" for="">{{ translate('messages.latitude') }}<span
+                                <label class="input-label" for="latitude">{{ translate('messages.latitude') }}<span
                                                 class="input-label-secondary text-danger">*</span></label>
-                                <input type="text" class="form-control" id="latitude" name="latitude"
+                                <input  type="text" class="form-control" id="latitude" name="latitude"
                                     value="{{ $old ? $old['latitude'] : '' }}" readonly>
                             </div>
                             <div class="col-md-12">
-                                <label class="input-label" for="">{{ translate('messages.address') }}</label>
-                                <textarea name="address" class="form-control" cols="30" rows="3" placeholder="{{ translate('messages.Ex :') }} address">{{ $old ? $old['address'] : '' }}</textarea>
+                                <label class="input-label" for="address">{{ translate('messages.address') }}</label>
+                                <textarea id="address" name="address" class="form-control" cols="30" rows="3" placeholder="{{ translate('messages.Ex :') }} address">{{ $old ? $old['address'] : '' }}</textarea>
                             </div>
                             <div class="col-12">
                                 <div class="d-flex justify-content-between">
@@ -309,56 +253,37 @@
                         </div>
                         <div class="col-md-12">
                             <div class="btn--container justify-content-end">
-                                <button class="btn btn-sm btn--primary w-100" type="button" onclick="deliveryAdressStore()">
-                                    {{  translate('Update') }} {{ translate('messages.Delivery address') }}
+                                <button class="btn btn-sm btn--primary w-100 delivery-Address-Store" type="button">
+                                    {{  translate('Update_Delivery address') }}
                                 </button>
                             </div>
                         </div>
                     </form>
                 </div>
+                @else
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="text-center">
+                                <h2>
+                                    {{translate('messages.please_select_a_store_first')}}
+                                </h2>
+                                <button data-dismiss="modal" class="btn btn-primary">{{translate('messages.Ok')}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @endif
             </div>
         </div>
     </div>
 
-    <!-- Duplicate of Delivery Information Modal -->
-    {{-- <div class="modal fade" id="insertPayableAmount" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">{{translate('messages.payment')}}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        @csrf
-                        <input type="hidden" name="user_id" id="customer_id">
-                        <div class="form-group">
-                            <label class="input-label" for="">{{translate('messages.amount')}}({{\App\CentralLogics\Helpers::currency_symbol()}})</label>
-                            <input type="number" class="form-control" name="amount" min="0" step="0.01" value="{{round($total+$total_tax_amount, 2)}}">
-                        </div>
-                        <div class="text-right">
-                            <button class="btn btn-sm btn--primary" type="submit">{{translate('messages.submit')}}</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div> --}}
+
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 
 
-    <script>
-    var form = document.getElementById('order_place');
-    form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        var customer_id = document.getElementById('customer');
-        if(customer_id.value)
-        {
-            console.log(customer_id.value);
-            document.getElementById('customer_id').value = customer_id.value;
-        }
-        form.submit();
-    })
-    </script>
+
+
+
 

@@ -65,7 +65,6 @@ class ConversationController extends Controller
     public function store(Request $request, $user_id)
     {
 
-
         if ($request->has('images')) {
             $image_name=[];
             foreach($request->images as $key=>$img)
@@ -154,7 +153,7 @@ class ConversationController extends Controller
             }
 
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
 
         $convs = Message::where(['conversation_id' => $conversation->id])->get();

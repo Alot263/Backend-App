@@ -54,7 +54,7 @@
                     <div class="custom-file">
                         <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                 accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                        <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                        <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                     </div>
 
                     <center id="image-viewer-section" class="initial-hidden pt-2">
@@ -64,11 +64,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="input-label" >{{translate('messages.Reviewer Brand')}} {{translate('messages.Image')}} ({{translate('messages.optional')}})<small class="text-danger"> ( {{translate('messages.size')}}: 140 X 140 px )</small></label>
+                    <label class="input-label" >{{translate('messages.Reviewer Brand_Image')}} ({{translate('messages.optional')}})<small class="text-danger"> ( {{translate('messages.size')}}: 140 X 140 px )</small></label>
                     <div class="custom-file">
                         <input type="file" name="brand_image" id="customFileEg2" class="custom-file-input"
                                 accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                        <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                        <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose_file')}}</label>
                     </div>
 
                     <center id="image-viewer-section2" class="initial-hidden pt-2">

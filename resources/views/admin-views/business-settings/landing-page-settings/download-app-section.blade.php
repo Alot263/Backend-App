@@ -55,7 +55,7 @@
                                     <div class="custom-file">
                                         <input type="file" name="image" id="customFileEg" class="custom-file-input"
                                                 accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                        <label class="custom-file-label" for="customFileEg">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                        <label class="custom-file-label" for="customFileEg">{{translate('messages.choose_file')}}</label>
                                     </div>
 
                                     <center id="image-viewer-section" class="pt-4">
@@ -85,9 +85,9 @@
                            @php($button = \App\Models\BusinessSetting::where(['key' => 'app_download_button'])->first())
                            @php($button = isset($button->value) ? json_decode($button->value, true) : [])
                            @csrf
-       
+
                            <div
-       
+
                            class="row gy-3">
                                <div class="col-lg-6">
                                    <div class="form-group">
@@ -110,7 +110,7 @@
                                    <button type="submit" class="btn btn--primary">{{ translate('messages.submit') }}</button>
                                </div>
                            </div>
-       
+
                        </form>
                    </div>
                        <div class="col-12">
@@ -186,7 +186,7 @@
                                         </div>
                                     </div>
                                 </div>
-        
+
                                 <div class="btn--container justify-content-end">
                                     <button type="reset" id="reset-button" class="btn btn--reset">{{translate('messages.reset')}}</button>
                                     <button type="submit" class="btn btn--primary">{{translate('messages.submit')}}</button>

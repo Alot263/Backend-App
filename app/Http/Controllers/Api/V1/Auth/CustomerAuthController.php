@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Models\Cart;
 use App\Models\User;
+use App\Models\Guest;
 use Carbon\CarbonInterval;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Carbon;
 use App\Mail\EmailVerification;
+use App\Mail\LoginVerification;
 use App\Models\BusinessSetting;
 use App\CentralLogics\SMS_module;
 use App\Models\WalletTransaction;
@@ -16,7 +19,9 @@ use Illuminate\Support\Facades\DB;
 use App\CentralLogics\CustomerLogic;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
+use Modules\Gateways\Traits\SmsGateway;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class CustomerAuthController extends Controller
 {
@@ -72,28 +77,13 @@ class CustomerAuthController extends Controller
                     'otp' => 'inactive'
                 ], 200);
             } else {
-                 // $otp_hit = BusinessSetting::where('key', 'max_otp_hit')->first();
-                // $max_otp_hit =isset($otp_hit) ? $otp_hit->value : 5 ;
                 $max_otp_hit = 5;
-
-                // $otp_hit_time = BusinessSetting::where('key', 'max_otp_hit_time')->first();
-                // $max_otp_hit_time =isset($otp_hit_time) ? $otp_hit_time->value : 30 ;
-
                 $max_otp_hit_time = 60; // seconds
                 $temp_block_time = 600; // seconds
 
                 $verification_data= DB::table('phone_verifications')->where('phone', $request['phone'])->first();
 
                 if(isset($verification_data)){
-
-
-                    // if($verification_data->is_blocked == 1){
-                    //     $errors = [];
-                    //     array_push($errors, ['code' => 'otp', 'message' => translate('messages.your_account_is_blocked')]);
-                    //     return response()->json(['errors' => $errors ], 403);
-                    // }
-
-
 
                     if(isset($verification_data->temp_block_time ) && Carbon::parse($verification_data->temp_block_time)->DiffInSeconds() <= $temp_block_time){
                         $time= $temp_block_time - Carbon::parse($verification_data->temp_block_time)->DiffInSeconds();
@@ -118,14 +108,6 @@ class CustomerAuthController extends Controller
                             ]);
                         }
 
-                    // if($verification_data->is_temp_blocked == 1 && Carbon::parse($verification_data->updated_at)->DiffInSeconds() < $max_otp_hit_time){
-                    //         $errors = [];
-                    //     array_push($errors, ['code' => 'otp', 'message' => translate('messages.please_try_again_after_').$time.' '.translate('messages.seconds') ]);
-                    //     return response()->json([
-                    //         'errors' => $errors
-                    //     ], 405);
-                    //     }
-
                     if($verification_data->otp_hit_count >= $max_otp_hit &&  Carbon::parse($verification_data->updated_at)->DiffInSeconds() < $max_otp_hit_time &&  $verification_data->is_temp_blocked == 0){
 
                         DB::table('phone_verifications')->updateOrInsert(['phone' => $request['phone']],
@@ -142,21 +124,6 @@ class CustomerAuthController extends Controller
                         ], 405);
                     }
 
-
-                    // if($verification_data->otp_hit_count >= $max_otp_hit &&  Carbon::parse($verification_data->updated_at)->DiffInSeconds() < $max_otp_hit_time){
-
-                    //     DB::table('phone_verifications')->updateOrInsert(['phone' => $request['phone']],
-                    //         [
-                    //         // 'is_temp_blocked' => 1,
-                    //         'created_at' => now(),
-                    //         'updated_at' => now(),
-                    //         ]);
-                    //         // $errors = [];
-                    //         array_push($errors, ['code' => 'otp_warning', 'message' =>translate('messages.Too_many_attemps') ]);
-                    //         return response()->json([
-                    //             'errors' => $errors
-                    //         ], 405);
-                    // }
                 }
 
 
@@ -196,8 +163,10 @@ class CustomerAuthController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            if (config('mail.status')) {
-                Mail::to($request['email'])->send(new EmailVerification($token));
+            $mail_status = Helpers::get_mail_status('registration_otp_mail_status_user');
+            if (config('mail.status') && $mail_status == '1') {
+                $user = User::where('email', $request['email'])->first();
+                Mail::to($request['email'])->send(new EmailVerification($token,$user->f_name));
             }
             return response()->json([
                 'message' => 'Email is ready to register',
@@ -245,7 +214,7 @@ class CustomerAuthController extends Controller
             'l_name' => 'required',
             'email' => 'required|unique:users',
             'phone' => 'required|unique:users',
-            'password' => 'required|min:6',
+            'password' => ['required', Password::min(8)],
         ], [
             'f_name.required' => 'The first name field is required.',
             'l_name.required' => 'The last name field is required.',
@@ -272,19 +241,6 @@ class CustomerAuthController extends Controller
                 return response()->json(['errors'=>Helpers::error_formater('phone',translate('Referrer code already used'))], 203);
             }
 
-            // $ref_code_exchange_amt = BusinessSetting::where('key','ref_earning_exchange_rate')->first()->value;
-
-            // $refer_wallet_transaction = CustomerLogic::create_wallet_transaction($referar_user->id, $ref_code_exchange_amt, 'referrer',$request->phone);
-            //dd($refer_wallet_transaction);
-            // try{
-            //     if(config('mail.status')) {
-            //         Mail::to($referar_user->email)->send(new \App\Mail\AddFundToWallet($refer_wallet_transaction));
-            //     }
-            // }catch(\Exception $ex)
-            // {
-            //     info($ex->getMessage());
-            // }
-
             $ref_by= $referar_user->id;
         }
 
@@ -305,9 +261,6 @@ class CustomerAuthController extends Controller
 
         if($customer_verification && env('APP_MODE') !='demo')
         {
-
-            // $interval_time = BusinessSetting::where('key', 'otp_interval_time')->first();
-            // $otp_interval_time= isset($interval_time) ? $interval_time->value : 20;
             $otp_interval_time= 60; //seconds
             $verification_data= DB::table('phone_verifications')->where('phone', $request['phone'])->first();
 
@@ -328,8 +281,22 @@ class CustomerAuthController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
                 ]);
-            // Mail::to($request['email'])->send(new EmailVerification($otp));
-            $response = SMS_module::send($request['phone'],$otp);
+                $mail_status = Helpers::get_mail_status('registration_otp_mail_status_user');
+                if (config('mail.status') && $mail_status == '1') {
+                    Mail::to($request['email'])->send(new EmailVerification($otp,$request->f_name));
+                }
+            //for payment and sms gateway addon
+            $published_status = 0;
+            $payment_published_status = config('get_payment_publish_status');
+            if (isset($payment_published_status[0]['is_published'])) {
+                $published_status = $payment_published_status[0]['is_published'];
+            }
+
+            if($published_status == 1){
+                $response = SmsGateway::send($request['phone'],$otp);
+            }else{
+                $response = SMS_module::send($request['phone'],$otp);
+            }
             if($response != 'success')
             {
                 $errors = [];
@@ -339,12 +306,31 @@ class CustomerAuthController extends Controller
                 ], 405);
             }
         }
-        try {
-            if (config('mail.status')) {
+        try
+        {
+            $mail_status = Helpers::get_mail_status('registration_mail_status_user');
+            if (config('mail.status') && $request->email && $mail_status == '1') {
                 Mail::to($request->email)->send(new \App\Mail\CustomerRegistration($request->f_name . ' ' . $request->l_name));
             }
-        } catch (\Exception $ex) {
-            info($ex);
+        }
+        catch(\Exception $ex)
+        {
+            info($ex->getMessage());
+        }
+        if($request->guest_id  && isset($user->id)){
+
+            $userStoreIds = Cart::where('user_id', $request->guest_id)
+                ->join('items', 'carts.item_id', '=', 'items.id')
+                ->pluck('items.store_id')
+                ->toArray();
+
+            Cart::where('user_id', $user->id)
+                ->whereHas('item', function ($query) use ($userStoreIds) {
+                    $query->whereNotIn('store_id', $userStoreIds);
+                })
+                ->delete();
+
+            Cart::where('user_id', $request->guest_id)->update(['user_id' => $user->id,'is_guest' => 0]);
         }
         return response()->json(['token' => $token, 'is_phone_verified' => 0, 'phone_verify_end_url' => "api/v1/auth/verify-phone"], 200);
     }
@@ -374,11 +360,9 @@ class CustomerAuthController extends Controller
                     'errors' => $errors
                 ], 403);
             }
+            $user = auth()->user();
             if($customer_verification && !auth()->user()->is_phone_verified && env('APP_MODE') != 'demo')
             {
-
-                // $interval_time = BusinessSetting::where('key', 'otp_interval_time')->first();
-                // $otp_interval_time= isset($interval_time) ? $interval_time->value : 60;
                 $otp_interval_time= 60; //seconds
 
                 $verification_data= DB::table('phone_verifications')->where('phone', $request['phone'])->first();
@@ -401,8 +385,23 @@ class CustomerAuthController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                     ]);
-                $response = SMS_module::send($request['phone'],$otp);
-                // $response = 'qq';
+                $mail_status = Helpers::get_mail_status('login_otp_mail_status_user');
+                if (config('mail.status') && $mail_status == '1') {
+                    Mail::to($user['email'])->send(new LoginVerification($otp,$user->f_name));
+                }
+                //for payment and sms gateway addon
+                $published_status = 0;
+                $payment_published_status = config('get_payment_publish_status');
+                if (isset($payment_published_status[0]['is_published'])) {
+                    $published_status = $payment_published_status[0]['is_published'];
+                }
+
+                if($published_status == 1){
+                    $response = SmsGateway::send($request['phone'],$otp);
+                }else{
+                    $response = SMS_module::send($request['phone'],$otp);
+                }
+
                 if($response != 'success')
                 {
                     $errors = [];
@@ -411,11 +410,26 @@ class CustomerAuthController extends Controller
                         'errors' => $errors
                     ], 405);
                 }
+
             }
-            $user = auth()->user();
             if($user->ref_code == null && isset($user->id)){
                 $ref_code = Helpers::generate_referer_code($user);
                 DB::table('users')->where('phone', $user->phone)->update(['ref_code' => $ref_code]);
+            }
+            if($request->guest_id  && isset($user->id)){
+
+                $userStoreIds = Cart::where('user_id', $request->guest_id)
+                    ->join('items', 'carts.item_id', '=', 'items.id')
+                    ->pluck('items.store_id')
+                    ->toArray();
+
+                Cart::where('user_id', $user->id)
+                    ->whereHas('item', function ($query) use ($userStoreIds) {
+                        $query->whereNotIn('store_id', $userStoreIds);
+                    })
+                    ->delete();
+
+                Cart::where('user_id', $request->guest_id)->update(['user_id' => $user->id,'is_guest' => 0]);
             }
             return response()->json(['token' => $token, 'is_phone_verified' => auth()->user()->is_phone_verified], 200);
         } else {
@@ -425,5 +439,23 @@ class CustomerAuthController extends Controller
                 'errors' => $errors
             ], 401);
         }
+    }
+
+    public function guest_request(Request $request)
+    {
+        $guest = new Guest();
+        $guest->ip_address = $request->ip();
+        $guest->fcm_token = $request->fcm_token;
+
+        if ($guest->save()) {
+            return response()->json([
+                'message' => translate('messages.guest_varified'),
+                'guest_id' => $guest->id,
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => translate('messages.failed')
+        ], 404);
     }
 }

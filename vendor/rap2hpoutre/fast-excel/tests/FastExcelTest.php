@@ -2,8 +2,9 @@
 
 namespace Rap2hpoutre\FastExcel\Tests;
 
-use Box\Spout\Common\Entity\Style\Color;
-use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
+use OpenSpout\Common\Entity\Style\Color;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Reader\XLSX\Options;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Rap2hpoutre\FastExcel\SheetCollection;
 
@@ -13,9 +14,9 @@ use Rap2hpoutre\FastExcel\SheetCollection;
 class FastExcelTest extends TestCase
 {
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
      */
     public function testImportXlsx()
     {
@@ -24,9 +25,9 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
      */
     public function testImportCsv()
     {
@@ -40,11 +41,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     private function export($file)
     {
@@ -56,11 +57,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
      */
     public function testExportXlsx()
     {
@@ -68,11 +69,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
      */
     public function testExportCsv()
     {
@@ -80,9 +81,9 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
      */
     public function testExcelImportWithCallback()
     {
@@ -106,11 +107,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     public function testExcelExportWithCallback()
     {
@@ -127,11 +128,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     public function testExportMultiSheetXLSX()
     {
@@ -143,11 +144,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     public function testImportMultiSheetXLSX()
     {
@@ -169,11 +170,11 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     public function testImportMultiSheetWithSheetNamesXLSX()
     {
@@ -195,19 +196,22 @@ class FastExcelTest extends TestCase
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
      */
     public function testExportWithHeaderStyle()
     {
         $original_collection = $this->collection();
-        $style = (new StyleBuilder())
-           ->setFontBold()
-           ->setBackgroundColor(Color::YELLOW)
-           ->build();
+
+        $style = new Style();
+        $style->setFontBold();
+        $style->setFontSize(15);
+        $style->setFontColor(Color::BLUE);
+        $style->setShouldWrapText();
+        $style->setBackgroundColor(Color::YELLOW);
         $file = __DIR__.'/test-header-style.xlsx';
         (new FastExcel(clone $original_collection))
             ->headerStyle($style)
@@ -215,5 +219,34 @@ class FastExcelTest extends TestCase
         $this->assertEquals($original_collection, (new FastExcel())->import($file));
 
         unlink($file);
+    }
+
+    /**
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Reader\Exception\ReaderNotOpenedException
+     */
+    public function testImportXlsxWithCustomDateOption()
+    {
+        // Default options, dates will end parsed
+        $collection = (new FastExcel())->import(__DIR__.'/test-dates.xlsx');
+
+        $this->assertEquals(collect([
+            ['col1' => new \DateTimeImmutable('2022-01-02 00:00:00.000000')],
+            ['col1' => new \DateTimeImmutable('2022-01-03 00:00:00.000000')],
+        ]), $collection);
+
+        $collection = (new FastExcel())
+            ->configureOptionsUsing(function ($options) {
+                if ($options instanceof Options) {
+                    $options->SHOULD_FORMAT_DATES = true;
+                }
+            })
+            ->import(__DIR__.'/test-dates.xlsx');
+
+        $this->assertEquals(collect([
+            ['col1' => '1/2/2022'],
+            ['col1' => '1/3/2022'],
+        ]), $collection);
     }
 }

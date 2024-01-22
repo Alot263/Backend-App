@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\AccountTransaction;
-use App\Models\Store;
-use App\Models\DeliveryMan;
-use App\Models\AdminWallet;
 use App\Models\Admin;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Store;
+use App\Models\AdminWallet;
+use App\Models\DeliveryMan;
+use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
+use App\Exports\CollectCashTransactionExport;
+use App\Models\AccountTransaction;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
+use Illuminate\Support\Facades\Validator;
 
 class AccountTransactionController extends Controller
 {
@@ -22,9 +25,18 @@ class AccountTransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $account_transaction = AccountTransaction::latest()->paginate(config('default_pagination'));
+        $key = isset($request['search']) ? explode(' ', $request['search']) : [];
+        $account_transaction = AccountTransaction::
+        when(isset($key), function ($query) use ($key) {
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('ref', 'like', "%{$value}%");
+                }
+            });
+        })->where('type', 'collected' )
+            ->latest()->paginate(config('default_pagination'));
         return view('admin-views.account.index', compact('account_transaction'));
     }
 
@@ -96,6 +108,12 @@ class AccountTransactionController extends Controller
             $account_transaction->save();
             $data->wallet->decrement('collected_cash', $request['amount']);
             AdminWallet::where('admin_id', Admin::where('role_id', 1)->first()->id)->increment('manual_received', $request['amount']);
+            if($request['type']=='deliveryman' && $request['deliveryman_id']){
+                $mail_status = Helpers::get_mail_status('cash_collect_mail_status_dm');
+                if (config('mail.status') && $mail_status == '1') {
+                    Mail::to($data['email'])->send(new \App\Mail\CollectCashMail($account_transaction,$data['f_name']));
+                }
+            }
             DB::commit();
         }
         catch(\Exception $e)
@@ -156,11 +174,27 @@ class AccountTransactionController extends Controller
     }
 
     public function export_account_transaction(Request $request){
-        $account_transaction = AccountTransaction::latest()->get();
-        if($request->type == 'excel'){
-            return (new FastExcel(Helpers::export_account_transaction($account_transaction)))->download('Account_transactions.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel(Helpers::export_account_transaction($account_transaction)))->download('Account_transactions.csv');
+        $key = isset($request['search']) ? explode(' ', $request['search']) : [];
+        $account_transaction = AccountTransaction::
+        when(isset($key), function ($query) use ($key) {
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('ref', 'like', "%{$value}%");
+                }
+            });
+        }) ->where('type', 'collected')
+            ->latest()->get();
+
+        $data = [
+            'account_transactions'=>$account_transaction,
+            'search'=>$request->search??null,
+
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new CollectCashTransactionExport($data), 'CollectCashTransactions.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new CollectCashTransactionExport($data), 'CollectCashTransactions.csv');
         }
     }
 
@@ -170,7 +204,9 @@ class AccountTransactionController extends Controller
             foreach ($key as $value) {
                 $q->orWhere('ref', 'like', "%{$value}%");
             }
-        })->get();
+        })
+            ->where('type', 'collected' )
+            ->get();
 
         return response()->json([
             'view'=>view('admin-views.account.partials._table', compact('account_transaction'))->render(),

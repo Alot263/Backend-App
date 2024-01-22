@@ -57,7 +57,7 @@ class DashboardController extends Controller
 
     public function store_data()
     {
-        $new_pending_order = DB::table('orders')->where(['checked' => 0])->where('store_id', Helpers::get_store_id())->where('order_status','pending');;
+        $new_pending_order = DB::table('orders')->where(['checked' => 0])->where('store_id', Helpers::get_store_id())->where('order_status','pending');
         if(config('order_confirmation_model') != 'store' && !Helpers::get_store_data()->self_delivery_system)
         {
             $new_pending_order = $new_pending_order->where('order_type', 'take_away');
@@ -97,37 +97,37 @@ class DashboardController extends Controller
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->where(['store_id' => Helpers::get_store_id()])->whereIn('order_status',['confirmed', 'accepted'])->whereNotNull('confirmed')->StoreOrder()->OrderScheduledIn(30)->count();
+        })->where(['store_id' => Helpers::get_store_id()])->whereIn('order_status',['confirmed', 'accepted'])->whereNotNull('confirmed')->StoreOrder()->NotDigitalOrder()->OrderScheduledIn(30)->count();
 
         $cooking = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->where(['order_status' => 'processing', 'store_id' => Helpers::get_store_id()])->StoreOrder()->count();
+        })->where(['order_status' => 'processing', 'store_id' => Helpers::get_store_id()])->StoreOrder()->NotDigitalOrder()->count();
 
         $ready_for_delivery = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->where(['order_status' => 'handover', 'store_id' => Helpers::get_store_id()])->StoreOrder()->count();
+        })->where(['order_status' => 'handover', 'store_id' => Helpers::get_store_id()])->StoreOrder()->NotDigitalOrder()->count();
 
         $item_on_the_way = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->ItemOnTheWay()->where(['store_id' => Helpers::get_store_id()])->StoreOrder()->count();
+        })->ItemOnTheWay()->where(['store_id' => Helpers::get_store_id()])->StoreOrder()->NotDigitalOrder()->count();
 
         $delivered = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->where(['order_status' => 'delivered', 'store_id' => Helpers::get_store_id()])->StoreOrder()->count();
+        })->where(['order_status' => 'delivered', 'store_id' => Helpers::get_store_id()])->StoreOrder()->NotDigitalOrder()->count();
 
         $refunded = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
         })->when($this_month, function ($query) {
             return $query->whereMonth('created_at', Carbon::now());
-        })->where(['order_status' => 'refunded', 'store_id' => Helpers::get_store_id()])->StoreOrder()->count();
+        })->where(['order_status' => 'refunded', 'store_id' => Helpers::get_store_id()])->StoreOrder()->NotDigitalOrder()->count();
 
         $scheduled = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
@@ -145,7 +145,7 @@ class DashboardController extends Controller
                 });
             }
 
-        })->StoreOrder()->count();
+        })->StoreOrder()->NotDigitalOrder()->count();
 
         $all = Order::when($today, function ($query) {
             return $query->whereDate('created_at', Carbon::today());
@@ -158,7 +158,7 @@ class DashboardController extends Controller
                 return $query->where('order_status','pending')->where('order_type', 'take_away');
             });
         })
-        ->StoreOrder()->count();
+        ->StoreOrder()->NotDigitalOrder()->count();
 
         $data = [
             'confirmed' => $confirmed,

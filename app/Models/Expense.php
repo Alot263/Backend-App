@@ -30,6 +30,10 @@ class Expense extends Model
     {
         return $this->belongsTo(DeliveryMan::class,'delivery_man_id');
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
+    }
 
     public function getCreatedAtAttribute($value)
     {

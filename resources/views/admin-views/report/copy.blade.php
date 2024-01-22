@@ -72,13 +72,13 @@
                         </select>
                     </div>
                     <div class="col-sm-6 col-md-3">
-                        <!-- <label class="input-label">{{translate('start')}} {{translate('date')}}</label> -->
+                        <!-- <label class="input-label">{{translate('start_date')}}</label> -->
                         <label class="input-date">
                             <input type="text" name="from" id="from_date" class="js-flatpickr form-control flatpickr-custom flatpickr-input" placeholder="{{ translate('Start Date') }}" required>
                         </label>
                     </div>
                     <div class="col-sm-6 col-md-3">
-                            <!-- <label class="input-label">{{translate('end')}} {{translate('date')}}</label> -->
+                            <!-- <label class="input-label">{{translate('end_date')}}</label> -->
                             <label class="input-date">
                             <input type="text" name="to" id="to_date" class="js-flatpickr form-control flatpickr-custom flatpickr-input" placeholder="{{ translate('End Date') }}" required>
                     </label>
@@ -267,8 +267,7 @@
                                 {{ translate('messages.print') }}
                             </a>
                             <div class="dropdown-divider"></div> --}}
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item" href="{{route('admin.report.item-wise-export', ['type'=>'excel',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -311,5 +310,5 @@
         });
     });
 </script>
-    
+
 @endpush

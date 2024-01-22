@@ -31,11 +31,10 @@
                     @csrf
                     <div class="row g-3">
                         <div class="col-sm-6 col-md-3">
-                            <select name="module_id" class="form-control js-select2-custom"
-                                onchange="set_filter('{{ url()->full() }}',this.value,'module_id')"
-                                title="{{ translate('messages.select') }} {{ translate('messages.modules') }}">
+                            <select name="module_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="module_id"
+                                title="{{ translate('messages.select_modules') }}">
                                 <option value="" {{ !request('module_id') ? 'selected' : '' }}>
-                                    {{ translate('messages.all') }} {{ translate('messages.modules') }}</option>
+                                    {{ translate('messages.all_modules') }}</option>
                                 @foreach (\App\Models\Module::notParcel()->get() as $module)
                                     <option value="{{ $module->id }}"
                                         {{ request('module_id') == $module->id ? 'selected' : '' }}>
@@ -45,9 +44,8 @@
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_zone_filter('{{ url()->full() }}',this.value)" id="zone">
-                                <option value="all">{{ translate('messages.All Zones') }}</option>
+                            <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id">
+                                <option value="all">{{ translate('messages.All_Zones') }}</option>
                                 @foreach (\App\Models\Zone::orderBy('name')->get() as $z)
                                     <option value="{{ $z['id'] }}"
                                         {{ isset($zone) && $zone->id == $z['id'] ? 'selected' : '' }}>
@@ -57,30 +55,29 @@
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select name="store_id" onchange="set_store_filter('{{ url()->full() }}',this.value)"
-                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.store') }}"
-                                class="js-data-example-ajax form-control">
+                            <select name="store_id"
+                                data-placeholder="{{ translate('messages.select_store') }}"
+                                class="js-data-example-ajax form-control set-filter" data-url="{{ url()->full() }}" data-filter="store_id">
                                 @if (isset($store))
                                     <option value="{{ $store->id }}" selected>{{ $store->name }}</option>
                                 @else
-                                    <option value="all" selected>{{ translate('messages.all') }} {{ translate('messages.stores') }}</option>
+                                    <option value="all" selected>{{ translate('messages.all_stores') }}</option>
                                 @endif
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select name="customer_id" onchange="set_customer_filter('{{ url()->full() }}',this.value)"
-                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.customer') }}"
-                                class="js-data-example-ajax-2 form-control">
+                            <select name="customer_id"
+                                data-placeholder="{{ translate('messages.select_customer') }}"
+                                class="js-data-example-ajax-2 form-control set-filter" data-url="{{ url()->full() }}" data-filter="customer_id">
                                 @if (isset($customer))
                                     <option value="{{ $customer->id }}" selected>{{ $customer->f_name . ' ' .$customer->l_name }}</option>
                                 @else
-                                    <option value="all" selected>{{ translate('messages.all') }} {{ translate('messages.customers') }}</option>
+                                    <option value="all" selected>{{ translate('messages.all_customers') }}</option>
                                 @endif
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select class="form-control" name="filter"
-                                onchange="set_time_filter('{{ url()->full() }}',this.value)">
+                            <select class="form-control set-filter" data-url="{{ url()->full() }}" data-filter="filter" name="filter">
                                 <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
                                     {{ translate('messages.All Time') }}</option>
                                 <option value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
@@ -133,13 +130,13 @@
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
                     <h3 class="card-title">
-                        {{ translate('messages.expense') }} {{ translate('messages.lists') }} <span
+                        {{ translate('messages.expense_lists') }} <span
                             class="badge badge-soft-secondary" id="countItems">{{ $expense->total() }}</span>
                     </h3>
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <form class="search-form">
                         <!-- Search -->
                         <div class="input--group input-group input-group-merge input-group-flush">
-                            <input name="search" type="search" class="form-control" placeholder="{{ translate('Search by Order ID') }}">
+                            <input name="search" type="search" value="{{ request()?->search ?? null}}" class="form-control" placeholder="{{ translate('Search by Order ID') }}">
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                         </div>
                         <!-- End Search -->
@@ -203,7 +200,7 @@
                                 <td scope="row">{{$key+$expense->firstItem()}}</td>
                                 <td>
                                     @if ($exp->order)
-                                        
+
                                     <div>
                                         <a
                                             href="{{ route('admin.order.details', ['id' => $exp->order->id,'module_id'=>$exp->order->module_id]) }}">{{ $exp['order_id'] }}</a>
@@ -213,12 +210,14 @@
                                 <td>
                                     {{date('Y-m-d '.config('timeformat'),strtotime($exp->created_at))}}
                                 </td>
-                                <td><label class="text-uppercase">{{translate("messages.{$exp['type']}")}}</label></td>
+                                <td><label>{{ucwords(translate("messages.{$exp['type']}"))}}</label></td>
                                 <td class="text-center">
                                     @if (isset($exp->order->customer))
                                     {{ $exp->order->customer->f_name.' '.$exp->order->customer->l_name }}
+                                    @elseif ($exp['type'] == 'add_fund_bonus')
+                                    {{ $exp->user->f_name.' '.$exp->user->l_name }}
                                     @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
 
                                     @endif
                                 </td>
@@ -264,193 +263,10 @@
     <script src="{{ asset('public/assets/admin') }}/vendor/chartjs-chart-matrix/dist/chartjs-chart-matrix.min.js">
     </script>
     <script src="{{ asset('public/assets/admin') }}/js/hs.chartjs-matrix.js"></script>
-
+    <script src="{{ asset('public/assets/admin') }}/js/view-pages/admin-reports.js"></script>
     <script>
+        "use strict";
         $(document).on('ready', function() {
-
-            // INITIALIZATION OF FLATPICKR
-            // =======================================================
-            $('.js-flatpickr').each(function() {
-                $.HSCore.components.HSFlatpickr.init($(this));
-            });
-
-
-            // INITIALIZATION OF NAV SCROLLER
-            // =======================================================
-            $('.js-nav-scroller').each(function() {
-                new HsNavScroller($(this)).init()
-            });
-
-
-            // INITIALIZATION OF DATERANGEPICKER
-            // =======================================================
-            $('.js-daterangepicker').daterangepicker();
-
-            $('.js-daterangepicker-times').daterangepicker({
-                timePicker: true,
-                startDate: moment().startOf('hour'),
-                endDate: moment().startOf('hour').add(32, 'hour'),
-                locale: {
-                    format: 'M/DD hh:mm A'
-                }
-            });
-
-            var start = moment();
-            var end = moment();
-
-            function cb(start, end) {
-                $('#js-daterangepicker-predefined .js-daterangepicker-predefined-preview').html(start.format(
-                    'MMM D') + ' - ' + end.format('MMM D, YYYY'));
-            }
-
-            $('#js-daterangepicker-predefined').daterangepicker({
-                startDate: start,
-                endDate: end,
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
-                        'month').endOf('month')]
-                }
-            }, cb);
-
-            cb(start, end);
-
-
-            // INITIALIZATION OF CHARTJS
-            // =======================================================
-            $('.js-chart').each(function() {
-                $.HSCore.components.HSChartJS.init($(this));
-            });
-
-            var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
-
-            // Call when tab is clicked
-            $('[data-toggle="chart"]').click(function(e) {
-                let keyDataset = $(e.currentTarget).attr('data-datasets')
-
-                // Update datasets for chart
-                updatingChart.data.datasets.forEach(function(dataset, key) {
-                    dataset.data = updatingChartDatasets[keyDataset][key];
-                });
-                updatingChart.update();
-            })
-
-
-            // INITIALIZATION OF MATRIX CHARTJS WITH CHARTJS MATRIX PLUGIN
-            // =======================================================
-            function generateHoursData() {
-                var data = [];
-                var dt = moment().subtract(365, 'days').startOf('day');
-                var end = moment().startOf('day');
-                while (dt <= end) {
-                    data.push({
-                        x: dt.format('YYYY-MM-DD'),
-                        y: dt.format('e'),
-                        d: dt.format('YYYY-MM-DD'),
-                        v: Math.random() * 24
-                    });
-                    dt = dt.add(1, 'day');
-                }
-                return data;
-            }
-
-            $.HSCore.components.HSChartMatrixJS.init($('.js-chart-matrix'), {
-                data: {
-                    datasets: [{
-                        label: 'Commits',
-                        data: generateHoursData(),
-                        width: function(ctx) {
-                            var a = ctx.chart.chartArea;
-                            return (a.right - a.left) / 70;
-                        },
-                        height: function(ctx) {
-                            var a = ctx.chart.chartArea;
-                            return (a.bottom - a.top) / 10;
-                        }
-                    }]
-                },
-                options: {
-                    tooltips: {
-                        callbacks: {
-                            title: function() {
-                                return '';
-                            },
-                            label: function(item, data) {
-                                var v = data.datasets[item.datasetIndex].data[item.index];
-
-                                if (v.v.toFixed() > 0) {
-                                    return '<span class="font-weight-bold">' + v.v.toFixed() +
-                                        ' hours</span> on ' + v.d;
-                                } else {
-                                    return '<span class="font-weight-bold">No time</span> on ' + v.d;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        xAxes: [{
-                            position: 'bottom',
-                            type: 'time',
-                            offset: true,
-                            time: {
-                                unit: 'week',
-                                round: 'week',
-                                displayFormats: {
-                                    week: 'MMM'
-                                }
-                            },
-                            ticks: {
-                                "labelOffset": 20,
-                                "maxRotation": 0,
-                                "minRotation": 0,
-                                "fontSize": 12,
-                                "fontColor": "rgba(22, 52, 90, 0.5)",
-                                "maxTicksLimit": 12,
-                            },
-                            gridLines: {
-                                display: false
-                            }
-                        }],
-                        yAxes: [{
-                            type: 'time',
-                            offset: true,
-                            time: {
-                                unit: 'day',
-                                parser: 'e',
-                                displayFormats: {
-                                    day: 'ddd'
-                                }
-                            },
-                            ticks: {
-                                "fontSize": 12,
-                                "fontColor": "rgba(22, 52, 90, 0.5)",
-                                "maxTicksLimit": 2,
-                            },
-                            gridLines: {
-                                display: false
-                            }
-                        }]
-                    }
-                }
-            });
-
-
-            // INITIALIZATION OF CLIPBOARD
-            // =======================================================
-            $('.js-clipboard').each(function() {
-                var clipboard = $.HSCore.components.HSClipboard.init(this);
-            });
-
-
-            // INITIALIZATION OF CIRCLES
-            // =======================================================
-            $('.js-circle').each(function() {
-                var circle = $.HSCore.components.HSCircles.init($(this));
-            });
             $('.js-data-example-ajax').select2({
                 ajax: {
                     url: '{{ url('/') }}/admin/store/get-stores',
@@ -473,7 +289,7 @@
                         };
                     },
                     __port: function(params, success, failure) {
-                        var $request = $.ajax(params);
+                        let $request = $.ajax(params);
 
                         $request.then(success);
                         $request.fail(failure);
@@ -508,7 +324,7 @@
                         };
                     },
                     __port: function(params, success, failure) {
-                        var $request = $.ajax(params);
+                        let $request = $.ajax(params);
 
                         $request.then(success);
                         $request.fail(failure);
@@ -518,31 +334,10 @@
                 }
             });
         });
-    </script>
 
-    <script>
-        $('#from_date,#to_date').change(function() {
-            let fr = $('#from_date').val();
-            let to = $('#to_date').val();
-            if (fr != '' && to != '') {
-                if (fr > to) {
-                    $('#from_date').val('');
-                    $('#to_date').val('');
-                    toastr.error('Invalid date range!', Error, {
-                        CloseButton: true,
-                        ProgressBar: true
-                    });
-                }
-            }
-
-        })
-
-    </script>
-
-    <script>
         $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

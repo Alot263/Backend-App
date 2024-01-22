@@ -24,7 +24,7 @@
                 <div>{{$order->customer['phone']}}</div>
             </a>
         @else
-            <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+            <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
         @endif
     </td>
     @if ($parcel_order)
@@ -47,6 +47,10 @@
             @if($order->payment_status=='paid')
             <strong class="text-success">
                 {{translate('messages.paid')}}
+            </strong>
+            @elseif($order->payment_status=='partially_paid')
+            <strong class="text-success">
+                {{translate('messages.partially_paid')}}
             </strong>
             @else
             <strong class="text-danger">
@@ -78,7 +82,7 @@
             </span>
         @elseif($order['order_status']=='failed')
             <span class="badge badge-soft-danger">
-              {{translate('messages.payment')}}  {{translate('messages.failed')}}
+              {{translate('messages.payment_failed')}}
             </span>
         @else
             <span class="badge badge-soft-danger">

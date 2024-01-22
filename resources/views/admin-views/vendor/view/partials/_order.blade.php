@@ -16,7 +16,12 @@
         </div>
     </td>
     <td>
-        @if($order->customer)
+        @if($order->is_guest)
+        @php($customer_details = json_decode($order['delivery_address'],true))
+        <strong>{{$customer_details['contact_person_name']}}</strong>
+        <div>{{$customer_details['contact_person_number']}}</div>
+        
+        @elseif($order->customer)
         <div>
             <a class="text-body text-capitalize"
             href="{{route('admin.customer.view',[$order['user_id']])}}">
@@ -29,7 +34,7 @@
             </a>
         </div>
         @else
-            <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+            <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
         @endif
     </td>
     <td>

@@ -11,1416 +11,270 @@
         <!-- Page Header -->
 
         <div class="page-header">
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
-                <h1 class="page-header-title">
-                    <span class="page-header-icon">
-                        <img src="{{asset('/public/assets/admin/img/payment.png')}}" class="w--22" alt="">
-                    </span>
-                    <span>
-                        {{translate('messages.payment')}} {{translate('messages.gateway')}} {{translate('messages.setup')}}
-                    </span>
-                </h1>
+            <h1 class="page-header-title">
+                <span class="page-header-icon">
+                    <img src="{{asset('/public/assets/admin/img/payment.png')}}" class="w--22" alt="">
+                </span>
+                <span>
+                    {{translate('messages.payment_gateway_setup')}}
+                </span>
+            </h1>
+            @include('admin-views.business-settings.partials.third-party-links')
+            <div class="d-flex flex-wrap justify-content-end align-items-center flex-grow-1">
+                <div class="blinkings trx_top active">
+                    <i class="tio-info-outined"></i>
+                    <div class="business-notes">
+                        <h6><img src="{{asset('/public/assets/admin/img/notes.png')}}" alt=""> {{translate('Note')}}</h6>
+                        <div>
+                            {{translate('Without configuring this section functionality will not work properly. Thus the whole system will not work as it planned')}}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- End Page Header -->
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header border-0 pb-0 pt-4">
-                        <h5 class="card-title">
-                            <span>{{translate('payment_method')}}</span>
-                        </h5>
-                    </div>
-                    <div class="card-body pt-3">
+        <div class="card border-0">
+            <div class="card-header card-header-shadow">
+                <h5 class="card-title align-items-center">
+                    <img src="{{asset('/public/assets/admin/img/payment-method.png')}}" class="mr-1" alt="">
+                    {{translate('Payment Method')}}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
                         @php($config=\App\CentralLogics\Helpers::get_business_settings('cash_on_delivery'))
-                        <form action="{{route('admin.business-settings.payment-method-update',['cash_on_delivery'])}}"
-                              method="post">
+                        <form action="{{route('admin.business-settings.third-party.payment-method-update',['cash_on_delivery'])}}"
+                            method="post" id="cash_on_delivery_status_form">
                             @csrf
-
-                            <h5 class="text-capitalize mb-3">{{translate('messages.cash_on_delivery')}}</h5>
-                            <div class="d-flex flex-wrap p-0">
-                                <label class="form-check form--check mr-2 mr-md-4">
-                                    <input class="form-check-input" type="radio" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                    <span class="form-check-label">{{translate('messages.active')}}</span>
-                                </label>
-                                <label class="form-check form--check">
-                                    <input class="form-check-input" type="radio" name="status" value="0" {{$config?($config['status']==0?'checked':''):''}}>
-                                    <span class="form-check-label">{{translate('messages.inactive')}}</span>
-                                </label>
-                            </div>
-                            <div class="text-right mt-4 pt-2 mr-2">
-                                <button type="submit" class="btn btn--primary">{{translate('messages.save')}}</button>
-                            </div>
+                            <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                <span class="pr-1 d-flex align-items-center switch--label">
+                                    <span class="line--limit-1">
+                                        {{translate('Cash On Delivery')}}
+                                    </span>
+                                    <span class="form-label-secondary text-danger d-flex" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If_enabled_Customers_will_be_able_to_select_COD_as_a_payment_method_during_checkout')}}"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="Veg/non-veg toggle"> * </span>
+                                </span>
+                                <input type="hidden" name="toggle_type" value="cash_on_delivery">
+                                <input
+                                    type="checkbox" id="cash_on_delivery_status"
+                                    data-id="cash_on_delivery_status"
+                                    data-type="status"
+                                    data-image-on="{{ asset('/public/assets/admin/img/modal/digital-payment-on.png') }}"
+                                    data-image-off="{{ asset('/public/assets/admin/img/modal/digital-payment-off.png') }}"
+                                    data-title-on="{{ translate('By Turning ON Cash On Delivery Option') }}"
+                                    data-title-off="{{ translate('By Turning OFF Cash On Delivery Option') }}"
+                                    data-text-on="<p>{{ translate('Customers will not be able to select COD as a payment method during checkout. Please review your settings and enable COD if you wish to offer this payment option to customers.') }}</p>"
+                                    data-text-off="<p>{{ translate('Customers will be able to select COD as a payment method during checkout.') }}</p>"
+                                    class="status toggle-switch-input dynamic-checkbox"
+                                       name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
+                                <span class="toggle-switch-label text">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                            </label>
                         </form>
                     </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header border-0 pb-0 pt-4">
-                        <h5 class="card-title">
-                            <span>{{translate('payment_method')}}</span>
-                        </h5>
-                    </div>
-                    <div class="card-body pt-3">
+                    <div class="col-md-4">
                         @php($digital_payment=\App\CentralLogics\Helpers::get_business_settings('digital_payment'))
-                        <form action="{{route('admin.business-settings.payment-method-update',['digital_payment'])}}"
-                              method="post">
+                        <form action="{{route('admin.business-settings.third-party.payment-method-update',['digital_payment'])}}"
+                            method="post" id="digital_payment_status_form">
                             @csrf
-                            <h5 class="text-capitalize mb-3">{{translate('messages.digital')}} {{translate('messages.payment')}}</h5>
-                            <div class="d-flex flex-wrap p-0">
-                                <label class="form-check form--check mr-2 mr-md-4">
-                                    <input class="form-check-input digital_payment" type="radio" name="status" value="1" {{$digital_payment?($digital_payment['status']==1?'checked':''):''}}>
-                                    <span class="form-check-label">{{translate('messages.active')}}</span>
-                                </label>
-                                <label class="form-check form--check">
-                                    <input class="form-check-input digital_payment" type="radio" name="status" value="0" {{$digital_payment?($digital_payment['status']==0?'checked':''):''}}>
-                                    <span class="form-check-label">{{translate('messages.inactive')}}</span>
-                                </label>
-                            </div>
-                            <div class="text-right mt-4 pt-2 mr-2">
-                                <button type="submit" class="btn btn--primary">{{translate('messages.save')}}</button>
-                            </div>
+                            <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                <span class="pr-1 d-flex align-items-center switch--label">
+                                    <span class="line--limit-1">
+                                        {{translate('digital payment')}}
+                                    </span>
+                                    <span class="form-label-secondary text-danger d-flex" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If_enabled_Customers_will_be_able_to_select_digital_payment_as_a_payment_method_during_checkout')}}"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="Veg/non-veg toggle"> * </span>
+                                </span>
+                                <input type="hidden" name="toggle_type" value="digital_payment">
+                                <input  type="checkbox" id="digital_payment_status"
+                                       data-id="digital_payment_status"
+                                       data-type="status"
+                                       data-image-on="{{ asset('/public/assets/admin/img/modal/digital-payment-on.png') }}"
+                                       data-image-off="{{ asset('/public/assets/admin/img/modal/digital-payment-off.png') }}"
+                                       data-title-on="{{ translate('By Turning ON Digital Payment Option') }}"
+                                       data-title-off="{{ translate('By Turning OFF Digital Payment Option') }}"
+                                       data-text-on="<p>{{ translate('Customers will not be able to select digital payment as a payment method during checkout. Please review your settings and enable digital payment if you wish to offer this payment option to customers.') }}</p>"
+                                       data-text-off="<p>{{ translate('Customers will be able to select digital payment as a payment method during checkout.') }}</p>"
+                                       class="status toggle-switch-input dynamic-checkbox"
+                                       name="status" value="1" {{$digital_payment?($digital_payment['status']==1?'checked':''):''}}>
+                                <span class="toggle-switch-label text">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                            </label>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        @php($Offline_Payment=\App\CentralLogics\Helpers::get_business_settings('offline_payment_status'))
+                        <form action="{{route('admin.business-settings.third-party.payment-method-update',['offline_payment_status'])}}"
+                            method="post" id="offline_payment_status_form">
+                            @csrf
+                            <label class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                <span class="pr-1 d-flex align-items-center switch--label">
+                                    <span class="line--limit-1">
+                                        {{translate('Offline_Payment')}}
+                                    </span>
+                                    <span class="form-label-secondary text-danger d-flex" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('If_enabled_Customers_will_be_able_to_select_offline_payment_as_a_payment_method_during_checkout')}}"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="Veg/non-veg toggle"> * </span>
+                                </span>
+                                <input type="hidden" name="toggle_type" value="offline_payment_status" >
+                                <input  type="checkbox" id="offline_payment_status"
+                                        data-id="offline_payment_status"
+                                        data-type="status"
+                                        data-image-on="{{ asset('/public/assets/admin/img/modal/digital-payment-on.png') }}"
+                                        data-image-off="{{ asset('/public/assets/admin/img/modal/digital-payment-off.png') }}"
+                                        data-title-on="{{ translate('By Turning ON Offline Payment Option') }}"
+                                        data-title-off="{{ translate('By Turning OFF Offline Payment Option') }}"
+                                        data-text-on="<p>{{ translate('Customers will not be able to select Offline Payment as a payment method during checkout. Please review your settings and enable Offline Payment if you wish to offer this payment option to customers.') }}</p>"
+                                        data-text-off="<p>{{ translate('Customers will be able to select Offline Payment as a payment method during checkout.') }}</p>"
+                                        class="status toggle-switch-input dynamic-checkbox"
+
+                                        name="status" value="1" {{$Offline_Payment == 1?'checked':''}}>
+                                <span class="toggle-switch-label text">
+                                    <span class="toggle-switch-indicator"></span>
+                                </span>
+                            </label>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row digital_payment_methods mt-3 g-3">
-            <!-- This Design Will Implement On All Digital Payment Method Its an Static Design Card Start -->
-            @php($config=\App\CentralLogics\Helpers::get_business_settings('ssl_commerz_payment'))
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        <form
-                        action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['ssl_commerz_payment']):'javascript:'}}"
-                        method="post">
-                        @csrf
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.sslcommerz')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" name="status" value="1" class="toggle-switch-input" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/sslcommerz.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" name="store_id" placeholder="Store ID" value="{{env('APP_MODE')!='demo'?($config?$config['store_id']:''):''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" name="store_password" placeholder="Store Password" value="{{env('APP_MODE')!='demo'?($config?$config['store_password']:''):''}}">
-                            </div>
-                            <div class="text-right">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                        </form>
+        @if($published_status == 1)
+        <br>
+        <div>
+            <div class="card">
+                <div class="card-body d-flex flex-wrap justify-content-around">
+                    <h4 class="w-50 flex-grow-1 module-warning-text">
+                        <i class="tio-info-outined"></i>
+                    {{ translate('Your_current_payment_settings_are_disabled,_because_you_have_enabled_payment_gateway_addon,_To_visit_your_currently_active_payment_gateway_settings_please_follow_the_link.') }}</h4>
+                    <div>
+                        <a href="{{!empty($payment_url) ? $payment_url : ''}}" class="btn btn-outline-primary"> <i class="tio-settings"></i> {{translate('Settings')}}</a>
                     </div>
                 </div>
             </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paypal'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paypal']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.paypal')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/paypal.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Paypal Client Id" name="paypal_client_id"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['paypal_client_id']:''):''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Paypal Secret" name="paypal_secret"
-                                           value="{{env('APP_MODE')!='demo'?$config['paypal_secret']??'':''}}">
-                            </div>
-                            <div class="text-right">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('razor_pay'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['razor_pay']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.razorpay')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/razorpay.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Razor Key" name="razor_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['razor_key']:''):''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Razor Secret" name="razor_secret"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['razor_secret']:''):''}}">
-                            </div>
-                            <div class="text-right">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('stripe'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['stripe']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.stripe')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/stripe.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Publish Key" name="published_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['published_key']:''):''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Api Key" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['api_key']:''):''}}">
-                            </div>
-                            <div class="text-right">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paystack'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paystack']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.paystack')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <span class="badge badge-soft-danger">{{translate('messages.paystack_callback_warning')}}</span>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/paystack.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Public Key" name="publicKey"
-                                           value="{{env('APP_MODE')!='demo'?$config['publicKey']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Secret Key" name="secretKey"
-                                           value="{{env('APP_MODE')!='demo'?$config['secretKey']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Payment Url" name="paymentUrl"
-                                           value="{{env('APP_MODE')!='demo'?$config['paymentUrl']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Merchant Email" name="merchantEmail"
-                                           value="{{env('APP_MODE')!='demo'?$config['merchantEmail']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="button" class="btn h--37px btn-success"onclick="copy_text('{{url('/')}}/paystack-callback')">{{translate('messages.copy_callback')}}</button>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('senang_pay'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['senang_pay']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.senang')}} {{translate('messages.pay')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/senang-pay.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Secret Key" name="secret_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['secret_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Merchant Key" name="merchant_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['merchant_id']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('flutterwave'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['flutterwave']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.flutterwave')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/flutterwave.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Public Key" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Secret Key" name="secret_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['secret_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Hash" name="hash"
-                                           value="{{env('APP_MODE')!='demo'?$config['hash']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('mercadopago'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['mercadopago']):'javascript:'}}"
-                              method="post">
-                              @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.mercadopago')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/mercador-pago.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Public Key" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Access Token" name="access_token"
-                                           value="{{env('APP_MODE')!='demo'?$config['access_token']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paymob_accept'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paymob_accept']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.paymob_accept')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/paymob.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <label class="{{Session::get('direction') === 'rtl' ? 'pr-3' : 'pl-3'}}">{{translate('messages.callback')}}</label>
-                                <span class="btn btn-secondary btn-sm m-2"
-                                    onclick="copyToClipboard('#id_paymob_accept')"><i class="tio-copy"></i> {{translate('messages.copy_callback')}}</span>
-
-                                <p class="form-control" id="id_paymob_accept">{{ url('/') }}/paymob-callback</p>
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Api Key" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Iframe Id" name="iframe_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['iframe_id']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Integration Id" name="integration_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['integration_id']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="HMAC" name="hmac"
-                                           value="{{env('APP_MODE')!='demo'?$config['hmac']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('bkash'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['bkash']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.bkash')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/bkash.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Api Key" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Api Secret" name="api_secret"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_secret']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Username" name="username"
-                                           value="{{env('APP_MODE')!='demo'?$config['username']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Password" name="password"
-                                           value="{{env('APP_MODE')!='demo'?$config['password']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paytabs'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paytabs']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.paytabs')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/paytabs.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Profile Id" name="profile_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['profile_id']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Server Key" name="server_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['server_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Base Url by Region" name="base_url"
-                                           value="{{env('APP_MODE')!='demo'?$config['base_url']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paytm'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paytm']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.paytm')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/paytm.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Paytm Merchant Key" name="paytm_merchant_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Paytm Merchant Mid" name="paytm_merchant_mid"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_mid']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Merchant Website" name="paytm_merchant_website"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_website']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- End Col -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body p-30px">
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('liqpay'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['liqpay']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                        <h5 class="d-flex flex-wrap justify-content-between">
-                            <strong>{{translate('messages.liqpay')}}</strong>
-                            <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
-                                <span class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('messages.on') }}</span>
-                                <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('messages.off') }}</span>
-                                <input type="checkbox" class="toggle-switch-input" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                <span class="toggle-switch-label text">
-                                    <span class="toggle-switch-indicator"></span>
-                                </span>
-                            </label>
-                        </h5>
-                        <div class="payment--gateway-img">
-                            <img src="{{asset('/public/assets/admin/img/payment/liqpay.png')}}" alt="public">
-                        </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Public Key" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                            </div>
-                            <div class="form-group mb-4">
-                                <input class="form-control" type="text" placeholder="Private Key" name="private_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['private_key']:''}}">
-                            </div>
-                            <div class="btn--container justify-content-end">
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn h--37px btn--primary">{{translate('messages.save')}}</button>
-                            </div>
-                            @else
-                            <button type="submit"
-                                    class="btn btn--primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                        @endif
-
-                    </form>
-                    </div>
-                </div>
-            </div>
-            <!-- This Design Will Implement On All Digital Payment Method Its an Static Design Card End -->
-
-
-            <!-- All Payment Gateway Commented Start Here  -->
-            <!-- Required payment gateway images are inside of public/admin/img/payment/ folder  -->
-
-<!-- Commented Payment Method Starts -->
-        {{--
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.sslcommerz')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('ssl_commerz_payment'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['ssl_commerz_payment']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                                <div class="form-group mb-2">
-                                    <label
-                                        class="control-label">{{translate('messages.sslcommerz')}} {{translate('messages.payment')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config?($config['status']==0?'checked':''):''}}>
-                                    <label
-                                       >{{translate('messages.inactive')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.store')}} {{translate('messages.id')}} </label><br>
-                                    <input type="text" class="form-control" name="store_id"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['store_id']:''):''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.store')}} {{translate('messages.password')}}</label><br>
-                                    <input type="text" class="form-control" name="store_password"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['store_password']:''):''}}">
-                                </div>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.razorpay')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('razor_pay'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['razor_pay']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.razorpay')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config?($config['status']==0?'checked':''):''}}>
-                                    <label
-                                       >{{translate('messages.inactive')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.razorkey')}}</label><br>
-                                    <input type="text" class="form-control" name="razor_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['razor_key']:''):''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.razorsecret')}}</label><br>
-                                    <input type="text" class="form-control" name="razor_secret"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['razor_secret']:''):''}}">
-                                </div>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.paypal')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paypal'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paypal']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.paypal')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config?($config['status']==0?'checked':''):''}}>
-                                    <label>{{translate('messages.inactive')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.paypal')}} {{translate('messages.client')}} {{translate('messages.id')}}</label><br>
-                                    <input type="text" class="form-control" name="paypal_client_id"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['paypal_client_id']:''):''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.paypalsecret')}} </label><br>
-                                    <input type="text" class="form-control" name="paypal_secret"
-                                           value="{{env('APP_MODE')!='demo'?$config['paypal_secret']??'':''}}">
-                                </div>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.stripe')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('stripe'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['stripe']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.stripe')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config?($config['status']==1?'checked':''):''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config?($config['status']==0?'checked':''):''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.published')}} {{translate('messages.key')}}</label><br>
-                                    <input type="text" class="form-control" name="published_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['published_key']:''):''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.api')}} {{translate('messages.key')}}</label><br>
-                                    <input type="text" class="form-control" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?($config?$config['api_key']:''):''}}">
-                                </div>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.paystack')}}</h5>
-                        <span class="badge badge-soft-danger">{{translate('messages.paystack_callback_warning')}}</span>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paystack'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paystack']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.paystack')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.publicKey')}}</label><br>
-                                    <input type="text" class="form-control" name="publicKey"
-                                           value="{{env('APP_MODE')!='demo'?$config['publicKey']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize">{{translate('messages.secret')}} {{translate('messages.key')}} </label><br>
-                                    <input type="text" class="form-control" name="secretKey"
-                                           value="{{env('APP_MODE')!='demo'?$config['secretKey']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize">{{translate('messages.payment')}} {{translate('messages.url')}}</label><br>
-                                    <input type="text" class="form-control" name="paymentUrl"
-                                           value="{{env('APP_MODE')!='demo'?$config['paymentUrl']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize">{{translate('messages.merchant')}} {{translate('messages.email')}}</label><br>
-                                    <input type="text" class="form-control" name="merchantEmail"
-                                           value="{{env('APP_MODE')!='demo'?$config['merchantEmail']:''}}">
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                                    <button type="button" class="btn btn-info mb-2 pull-right" onclick="copy_text('{{url('/')}}/paystack-callback')">{{translate('messages.copy_callback')}}</button>
-                                </div>
-
-
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-
-
-
-                            @endif
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.senang')}} {{translate('messages.pay')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('senang_pay'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['senang_pay']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.senang')}} {{translate('messages.pay')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.secret')}} {{translate('messages.key')}}</label><br>
-                                    <input type="text" class="form-control" name="secret_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['secret_key']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.merchant')}} {{translate('messages.id')}}</label><br>
-                                    <input type="text" class="form-control" name="merchant_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['merchant_id']:''}}">
-                                </div>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- Flutterwave -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.flutterwave')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('flutterwave'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['flutterwave']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.flutterwave')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.publicKey')}}</label><br>
-                                    <input type="text" class="form-control" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.secret')}} {{translate('messages.key')}}</label><br>
-                                    <input type="text" class="form-control" name="secret_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['secret_key']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.hash')}}</label><br>
-                                    <input type="text" class="form-control" name="hash"
-                                           value="{{env('APP_MODE')!='demo'?$config['hash']:''}}">
-                                </div>
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- MercadoPago -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.mercadopago')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('mercadopago'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['mercadopago']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.mercadopago')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.publicKey')}}</label><br>
-                                    <input type="text" class="form-control" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                       >{{translate('messages.access_token')}}</label><br>
-                                    <input type="text" class="form-control" name="access_token"
-                                           value="{{env('APP_MODE')!='demo'?$config['access_token']:''}}">
-                                </div>
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.paymob_accept')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paymob_accept'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paymob_accept']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.paymob_accept')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.callback')}}</label>
-                                    <span class="btn btn-secondary btn-sm m-2"
-                                          onclick="copyToClipboard('#id_paymob_accept')"><i class="tio-copy"></i> {{translate('messages.copy_callback')}}</span>
-                                    <br>
-                                    <p class="form-control" id="id_paymob_accept">{{ url('/') }}/paymob-callback</p>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.api_key')}}</label><br>
-                                    <input type="text" class="form-control" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_key']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.iframe_id')}}</label><br>
-                                    <input type="text" class="form-control" name="iframe_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['iframe_id']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.integration_id')}}</label><br>
-                                    <input type="text" class="form-control" name="integration_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['integration_id']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.HMAC')}}</label><br>
-                                    <input type="text" class="form-control" name="hmac"
-                                           value="{{env('APP_MODE')!='demo'?$config['hmac']:''}}">
-                                </div>
-
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.bkash')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('bkash'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['bkash']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.bkash')}}</label>
-                                </div>
-
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('api_key')}}</label><br>
-                                    <input type="text" class="form-control" name="api_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_key']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.api_secret')}}</label><br>
-                                    <input type="text" class="form-control" name="api_secret"
-                                           value="{{env('APP_MODE')!='demo'?$config['api_secret']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.username')}}</label><br>
-                                    <input type="text" class="form-control" name="username"
-                                           value="{{env('APP_MODE')!='demo'?$config['username']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.password')}}</label><br>
-                                    <input type="text" class="form-control" name="password"
-                                           value="{{env('APP_MODE')!='demo'?$config['password']:''}}">
-                                </div>
-
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.paytabs')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paytabs'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paytabs']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.paytabs')}}</label>
-                                </div>
-
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.profile_id')}}</label><br>
-                                    <input type="text" class="form-control" name="profile_id"
-                                           value="{{env('APP_MODE')!='demo'?$config['profile_id']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.server')}}</label><br>
-                                    <input type="text" class="form-control" name="server_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['server_key']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.base_url_by_region')}}</label><br>
-                                    <input type="text" class="form-control" name="base_url"
-                                           value="{{env('APP_MODE')!='demo'?$config['base_url']:''}}">
-                                </div>
-
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.paytm')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paytm'))
-                        <form
-                            action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['paytm']):'javascript:'}}"
-                            method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.paytm')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.paytm_merchant_key')}}</label><br>
-                                    <input type="text" class="form-control" name="paytm_merchant_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_key']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label>{{translate('messages.paytm_merchant_mid')}}</label><br>
-                                    <input type="text" class="form-control" name="paytm_merchant_mid"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_mid']:''}}">
-                                </div>
-
-                                <div class="form-group mb-2">
-                                    <label
-                                       >{{translate('messages.paytm_merchant_website')}}</label><br>
-                                    <input type="text" class="form-control" name="paytm_merchant_website"
-                                           value="{{env('APP_MODE')!='demo'?$config['paytm_merchant_website']:''}}">
-                                </div>
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                        onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}"
-                                        class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="text-center">{{translate('messages.liqpay')}}</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('liqpay'))
-                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.payment-method-update',['liqpay']):'javascript:'}}"
-                              method="post">
-                            @csrf
-                            @if(isset($config))
-                                <div class="form-group mb-2">
-                                    <label class="control-label">{{translate('messages.liqpay')}}</label>
-                                </div>
-                                <div class="form-group mb-2 mt-2">
-                                    <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
-                                    <label>{{translate('messages.active')}}</label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <input type="radio" name="status" value="0" {{$config['status']==0?'checked':''}}>
-                                    <label>{{translate('messages.inactive')}} </label>
-                                    <br>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                          >{{translate('messages.publicKey')}}</label><br>
-                                    <input type="text" class="form-control" name="public_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['public_key']:''}}">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label class="text-capitalize"
-                                          >{{translate('messages.privateKey')}}</label><br>
-                                    <input type="text" class="form-control" name="private_key"
-                                           value="{{env('APP_MODE')!='demo'?$config['private_key']:''}}">
-                                </div>
-
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn-primary mb-2">{{translate('messages.save')}}</button>
-                            @else
-                                <button type="submit"
-                                        class="btn btn-primary mb-2">{{translate('messages.configure')}}</button>
-                            @endif
-                        </form>
-                    </div>
-                </div>
-            </div>
---}}
-<!-- Commented Payment Method Ends -->
         </div>
+        @endif
+        @php($is_published = $published_status == 1 ? 'inactive' : '')
+        <!-- Tab Content -->
+        <div class="row digital_payment_methods  {{ $is_published }} mt-3 g-3">
+            @foreach($data_values as $payment_key => $payment)
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.third-party.payment-method-update'):'javascript:'}}" method="POST"
+                              id="{{$payment->key_name}}-form" enctype="multipart/form-data">
+                            @csrf
+                            <div class="card-header d-flex flex-wrap align-content-around">
+                                <h5>
+                                    <span class="text-uppercase">{{str_replace('_',' ',$payment->key_name)}}</span>
+                                </h5>
+                                <label class="switch--custom-label toggle-switch toggle-switch-sm d-inline-flex">
+                                    <span
+                                        class="mr-2 switch--custom-label-text text-primary on text-uppercase">{{ translate('on') }}</span>
+                                    <span class="mr-2 switch--custom-label-text off text-uppercase">{{ translate('off') }}</span>
+                                    <input type="checkbox" name="status" value="1"
+                                           class="toggle-switch-input" {{$payment['is_active']==1?'checked':''}}>
+                                    <span class="toggle-switch-label text">
+                                            <span class="toggle-switch-indicator"></span>
+                                        </span>
+                                </label>
+                            </div>
+
+                            @php($additional_data = $payment['additional_data'] != null ? json_decode($payment['additional_data']) : [])
+                            <div class="card-body">
+                                <div class="payment--gateway-img">
+                                    <img  id="{{$payment->key_name}}-image-preview" class="__height-80 onerror-image"
+                                    data-onerror-image="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
+
+                                @if ($additional_data != null)
+                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $additional_data?->gateway_image,
+                                        asset('storage/app/public/payment_modules/gateway_image').'/'.$additional_data?->gateway_image,
+                                        asset('/public/assets/admin/img/payment/placeholder.png'),
+                                        'payment_modules/gateway_image/'
+                                    ) }}"
+
+                                @else
+                                src="{{asset('/public/assets/admin/img/payment/placeholder.png')}}"
+                                @endif
+
+
+
+                                         alt="public">
+                                </div>
+
+                                <input name="gateway" value="{{$payment->key_name}}" class="d-none">
+
+                                @php($mode=$data_values->where('key_name',$payment->key_name)->first()->live_values['mode'])
+                                <div class="form-floating mb-2" >
+                                    <select class="js-select form-control theme-input-style w-100" name="mode">
+                                        <option value="live" {{$mode=='live'?'selected':''}}>{{ translate('Live') }}</option>
+                                        <option value="test" {{$mode=='test'?'selected':''}}>{{ translate('Test') }}</option>
+                                    </select>
+                                </div>
+
+                                @php($skip=['gateway','mode','status'])
+                                @foreach($data_values->where('key_name',$payment->key_name)->first()->live_values as $key=>$value)
+                                    @if(!in_array($key,$skip))
+                                        <div class="form-floating mb-2" >
+                                            <label for="{{$payment_key}}-{{$key}}"
+                                                   class="form-label">{{ucwords(str_replace('_',' ',$key))}}
+                                                *</label>
+                                            <input id="{{$payment_key}}-{{$key}}" type="text" class="form-control"
+                                                   name="{{$key}}"
+                                                   placeholder="{{ucwords(str_replace('_',' ',$key))}} *"
+                                                   value="{{env('APP_ENV')=='demo'?'':$value}}">
+                                        </div>
+                                    @endif
+                                @endforeach
+
+                                @if($payment['key_name'] == 'paystack')
+                                    <div class="form-floating mb-2" >
+                                        <label for="Callback_Url" class="form-label">{{translate('Callback Url')}}</label>
+                                        <input id="Callback_Url" type="text"
+                                               class="form-control"
+                                               placeholder="{{translate('Callback Url')}} *"
+                                               readonly
+                                               value="{{env('APP_ENV')=='demo'?'': route('paystack.callback')}}" {{$is_published}}>
+                                    </div>
+                                @endif
+
+                                <div class="form-floating mb-2" >
+                                    <label for="payment_gateway_title-{{$payment_key}}"
+                                           class="form-label">{{translate('payment_gateway_title')}}</label>
+                                    <input type="text" class="form-control"
+                                           name="gateway_title" id="payment_gateway_title-{{$payment_key}}"
+                                           placeholder="{{translate('payment_gateway_title')}}"
+                                           value="{{$additional_data != null ? $additional_data->gateway_title : ''}}">
+                                </div>
+
+                                <div class="form-floating mb-2" >
+                                    <label for="exampleFormControlInput1"
+                                           class="form-label">{{translate('logo')}}</label>
+                                    <input type="file" class="form-control" name="gateway_image" id="{{$payment->key_name}}-image" accept=".jpg, .png, .jpeg|image/*">
+                                </div>
+
+                                <div class="text-right mt-2 "  >
+                                    <button type="submit" class="btn btn-primary px-5">{{translate('save')}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <!-- End Tab Content -->
     </div>
+
+
+
+
+
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin/js/view-pages/business-settings-payment-page.js')}}"></script>
 <script>
+    "use strict";
     @if(!isset($digital_payment) || $digital_payment['status']==0)
         $('.digital_payment_methods').hide();
     @endif
-    $(document).ready(function () {
-        $('.digital_payment').on('click', function(){
-            if($(this).val()=='0')
-            {
-                $('.digital_payment_methods').addClass('blurry');
-            }
-            else
-            {
-                $('.digital_payment_methods').removeClass('blurry');
-            }
-        })
-    });
-    function copyToClipboard(element) {
-        var $temp = $("<input>");
-        $("body").append($temp);
-        $temp.val($(element).text()).select();
-        document.execCommand("copy");
-        $temp.remove();
-
-        toastr.success("{{translate('messages.text_copied')}}");
-    }
-
-
-    function checkedFunc() {
-        $('.switch--custom-label .toggle-switch-input').each( function() {
-            if(this.checked) {
-                $(this).closest('.switch--custom-label').addClass('checked')
-            }else {
-                $(this).closest('.switch--custom-label').removeClass('checked')
-            }
-        })
-    }
-    checkedFunc()
-    $('.switch--custom-label .toggle-switch-input').on('change', checkedFunc)
-
-
 </script>
 @endpush

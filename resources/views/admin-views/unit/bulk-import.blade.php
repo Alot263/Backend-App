@@ -18,7 +18,7 @@
                 <li class="breadcrumb-item">{{translate('messages.bulk_import')}} </li>
             </ol>
         </nav>
-        <h1 class="text-capitalize">{{translate('messages.attributes')}} {{translate('messages.bulk_import')}}</h1>
+        <h1 class="text-capitalize">{{translate('messages.attributes_bulk_import')}}</h1>
         <!-- Content Row -->
         <div class="row">
             <div class="col-12">

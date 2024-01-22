@@ -16,33 +16,36 @@
         <div class="tab-pane fade show active" id="vendor">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="tio-info"></i>
-                        <span>{{translate('messages.discount')}} {{translate('messages.info')}}</span>
-                    </h5>
+                    <div>
+
+                        <h5 class="card-title">
+                            <i class="tio-info"></i>
+                            <span>{{translate('messages.discount_info')}}</span>
+                        </h5>
+                        <div class="text--info mb-3">
+                            {{translate('* When this discount is available, is applied on all the items in this stores.')}}
+                        </div>
+                    </div>
                     <div class="btn--container justify-content-end">
                         @if($store->discount)
                         <button type="button" class="btn-sm btn--primary" data-toggle="modal" data-target="#updatesettingsmodal">
                             <i class="tio-open-in-new"></i> {{translate('messages.update')}}
                         </button>
-                        <button type="button" onclick="form_alert('discount-{{$store->id}}','{{ translate('Want to remove discount?') }}')" class="btn btn--danger text-white"><i class="tio-delete-outlined"></i>  {{translate('messages.delete')}}</button>
+                        <button type="button" data-id="discount-{{$store->id}}" data-message="{{ translate('Want to remove discount?') }}" class="btn btn--danger text-white form-alert"><i class="tio-delete-outlined"></i>  {{translate('messages.delete')}}</button>
                         @else
                         <button type="button" class="btn-sm btn--primary" data-toggle="modal" data-target="#updatesettingsmodal">
-                            <i class="tio-add"></i> {{translate('messages.add').' '.translate('messages.discount')}}
+                            <i class="tio-add"></i> {{translate('messages.add_discount')}}
                         </button>
                         @endif
                     </div>
                 </div>
                 <div class="card-body">
                     @if($store->discount)
-                    <div class="text--info mb-3">
-                        {{translate('* This discount is applied on all the items in your store')}}
-                    </div>
                     <div class="row gy-3">
                         <div class="col-md-4 align-self-center text-center">
 
                             <div class="discount-item text-center">
-                                <h5 class="subtitle">{{translate('messages.discount')}} {{translate('messages.amount')}}</h5>
+                                <h5 class="subtitle">{{translate('messages.discount_amount')}}</h5>
                                 <h4 class="amount">{{$store->discount?round($store->discount->discount):0}}%</h4>
                             </div>
 
@@ -52,11 +55,11 @@
                                 <h5 class="subtitle">{{translate('messages.duration')}}</h5>
                                 <ul class="list-unstyled list-unstyled-py-3 text-dark">
                                     <li class="p-0 pt-1 justify-content-center justify-content-md-start">
-                                        <span>{{translate('messages.start')}} {{translate('messages.date')}} :</span>
+                                        <span>{{translate('messages.start_date')}} :</span>
                                         <strong>{{$store->discount?date('Y-m-d',strtotime($store->discount->start_date)):''}} {{$store->discount?date(config('timeformat'), strtotime($store->discount->start_time)):''}}</strong>
                                     </li>
                                     <li class="p-0 pt-1 justify-content-center justify-content-md-start">
-                                        <span>{{translate('messages.end')}} {{translate('messages.date')}} :</span>
+                                        <span>{{translate('messages.end_date')}} :</span>
                                         <strong>{{$store->discount?date('Y-m-d', strtotime($store->discount->end_date)):''}} {{$store->discount?date(config('timeformat'), strtotime($store->discount->end_time)):''}}</strong>
                                     </li>
                                 </ul>
@@ -68,11 +71,11 @@
 
                             <ul class="list-unstyled list-unstyled-py-3 text-dark">
                                 <li class="p-0 pt-1 justify-content-center justify-content-md-start">
-                                    <span>{{translate('messages.max')}} {{translate('messages.discount')}} :</span>
+                                    <span>{{translate('messages.max_discount')}} :</span>
                                     <strong>{{\App\CentralLogics\Helpers::format_currency($store->discount?$store->discount->max_discount:0)}}</strong>
                                 </li>
                                 <li class="p-0 pt-1 justify-content-center justify-content-md-start">
-                                    <span>{{translate('messages.min')}} {{translate('messages.purchase')}} :</span>
+                                    <span>{{translate('messages.min_purchase')}} :</span>
                                     <strong>{{\App\CentralLogics\Helpers::format_currency($store->discount?$store->discount->min_purchase:0)}}</strong>
                                 </li>
                             </ul>
@@ -94,7 +97,7 @@
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
     <div class="modal-content">
       <div class="modal-header shadow py-3">
-        <h5 class="modal-title" id="exampleModalCenterTitle">{{$store->discount?translate('messages.update'):translate('messages.add')}} {{translate('messages.discount')}}</h5>
+        <h5 class="modal-title" id="exampleModalCenterTitle">{{$store->discount?translate('messages.update'):translate('messages.add_discount')}}</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -111,13 +114,13 @@
                 </div>
                 <div class="col-md-4 col-6">
                     <div class="form-group">
-                        <label class="input-label" for="title">{{translate('messages.min')}} {{translate('messages.purchase')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})</label>
+                        <label class="input-label" for="title">{{translate('messages.min_purchase')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})</label>
                         <input type="number" name="min_purchase" step="0.01" min="0" max="100000" class="form-control" placeholder="100" value="{{$store->discount?$store->discount->min_purchase:'0'}}">
                     </div>
                 </div>
                 <div class="col-md-4 col-6">
                     <div class="form-group">
-                        <label class="input-label" for="title">{{translate('messages.max')}} {{translate('messages.discount')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})</label>
+                        <label class="input-label" for="title">{{translate('messages.max_discount')}} ({{\App\CentralLogics\Helpers::currency_symbol()}})</label>
                         <input type="number" min="0" max="1000000" step="0.01" name="max_discount" class="form-control" value="{{$store->discount?$store->discount->max_discount:'0'}}">
                     </div>
                 </div>
@@ -125,25 +128,25 @@
             <div class="row gx-2">
                 <div class="col-md-6 col-6">
                     <div class="form-group">
-                        <label class="input-label" for="title">{{translate('messages.start')}} {{translate('messages.date')}}</label>
+                        <label class="input-label" for="title">{{translate('messages.start_date')}}</label>
                         <input type="date" id="date_from" class="form-control" required name="start_date" value="{{$store->discount?date('Y-m-d',strtotime($store->discount->start_date)):''}}">
                     </div>
                 </div>
                 <div class="col-md-6 col-6">
                     <div class="form-group">
-                        <label class="input-label" for="title">{{translate('messages.end')}} {{translate('messages.date')}}</label>
+                        <label class="input-label" for="title">{{translate('messages.end_date')}}</label>
                         <input type="date" id="date_to" class="form-control" required name="end_date" value="{{$store->discount?date('Y-m-d', strtotime($store->discount->end_date)):''}}">
                     </div>
 
                 </div>
                 <div class="col-md-6 col-6">
                     <div class="form-group">
-                        <label class="input-label" for="title">{{translate('messages.start')}} {{translate('messages.time')}}</label>
+                        <label class="input-label" for="title">{{translate('messages.start_time')}}</label>
                         <input type="time" id="start_time" class="form-control" required name="start_time" value="{{$store->discount?date('H:i',strtotime($store->discount->start_time)):'00:00'}}">
                     </div>
                 </div>
                 <div class="col-md-6 col-6">
-                    <label class="input-label" for="title">{{translate('messages.end')}} {{translate('messages.time')}}</label>
+                    <label class="input-label" for="title">{{translate('messages.end_time')}}</label>
                     <input type="time" id="end_time" class="form-control" required name="end_time" value="{{$store->discount?date('H:i', strtotime($store->discount->end_time)):'23:59'}}">
                 </div>
             </div>
@@ -167,11 +170,12 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
             $('#date_from').attr('min',(new Date()).toISOString().split('T')[0]);
             $('#date_to').attr('min',(new Date()).toISOString().split('T')[0]);
@@ -187,7 +191,7 @@
 
         $('#discount-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -201,7 +205,7 @@
                 processData: false,
                 success: function (data) {
                     if (data.errors) {
-                        for (var i = 0; i < data.errors.length; i++) {
+                        for (let i = 0; i < data.errors.length; i++) {
                             toastr.error(data.errors[i].message, {
                                 CloseButton: true,
                                 ProgressBar: true

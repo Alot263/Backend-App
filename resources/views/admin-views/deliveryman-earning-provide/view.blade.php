@@ -1,5 +1,5 @@
 @extends('layouts.admin.app')
-@section('title','Accoutn transaction information')
+@section('title',translate('Accoutn transaction information'))
 @push('css_or_js')
 
 @endpush
@@ -15,16 +15,16 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex row align-items-center justify-content-between mb-2">
-        <div class="col-md-6"> 
-             <h4 class=" mb-0 text-black-50">{{translate('messages.deliverymen')}} {{translate('messages.earning')}} {{translate('messages.provide')}} {{translate('messages.information')}}</h4>
+        <div class="col-md-6">
+             <h4 class=" mb-0 text-black-50">{{translate('messages.deliverymen_earning_provide_information')}}</h4>
         </div>
     </div>
     <div class="row mt-3">
-        
+
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="h3 mb-0  ">{{$account_transaction->restaurant?translate('messages.store'):translate('messages.deliveryman')}} {{translate('messages.info')}}</h3>
+                    <h3 class="h3 mb-0  ">{{$account_transaction->restaurant?translate('messages.store'):translate('messages.deliveryman_info')}}</h3>
                 </div>
                 <div class="card-body">
                     <div class="col-md-8 mt-2">
@@ -35,13 +35,13 @@
                 </div>
             </div>
         </div>
-     
+
         <div class="col-md-6">
             {{-- {{ $wr }} --}}
-           
+
             <div class="card">
                 <div class="card-header">
-                    <h3 class="h3 mb-0  ">{{translate('messages.transaction')}} {{translate('messages.information')}} </h3>
+                    <h3 class="h3 mb-0  ">{{translate('messages.transaction_information')}} </h3>
                 </div>
                 <div class="card-body">
                     <h6>{{translate('messages.amount')}} : {{\App\CentralLogics\Helpers::format_currency($account_transaction->amount)}}</h6>
@@ -50,15 +50,15 @@
                     <h6>{{translate('messages.reference')}} : {{$account_transaction->ref}}</h6>
                 </div>
             </div>
-          
-       
-       
+
+
+
         </div>
-    
-     
+
+
 
     </div>
- 
+
 </div>
 
 @endsection

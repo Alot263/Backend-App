@@ -27,7 +27,7 @@ class BannerLogic
 
         $banners = $banners->whereIn('zone_id', json_decode($zone_id, true))->whereHas('module',function($query){
             $query->active();
-        })
+        })->where('created_by','admin')
         ->get();
 
         $data = [];

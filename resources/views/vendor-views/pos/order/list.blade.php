@@ -12,7 +12,7 @@
         <div class="page-header">
             <div class="row align-items-center mb-3">
                 <div class="col-sm">
-                <h1 class="page-header-title text-capitalize">{{translate('messages.pos')}} {{translate('messages.orders')}} <span
+                <h1 class="page-header-title text-capitalize">{{translate('messages.pos_orders')}} <span
                             class="badge badge-soft-dark ml-2">{{$orders->total()}}</span></h1>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <span
-                                        class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
+                                        class="dropdown-header">{{translate('messages.download_options')}}</span>
                                     <a id="export-excel" class="dropdown-item" href="javascript:;">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
                                              src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
@@ -155,7 +155,7 @@
 
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <span
-                                                    class="mr-2 text-capitalize">{{translate('messages.payment')}} {{translate('messages.status')}}</span>
+                                                    class="mr-2 text-capitalize">{{translate('messages.payment_status')}}</span>
 
                                                 <!-- Checkbox Switch -->
                                                 <label class="toggle-switch toggle-switch-sm"
@@ -183,7 +183,7 @@
                                                 <!-- End Checkbox Switch -->
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <span class="mr-2">{{translate('messages.order')}} {{translate('messages.status')}}</span>
+                                                <span class="mr-2">{{translate('messages.order_status')}}</span>
 
                                                 <!-- Checkbox Switch -->
                                                 <label class="toggle-switch toggle-switch-sm" for="toggleColumn_order_status">
@@ -197,7 +197,7 @@
                                             </div>
 
                                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <span class="mr-2">{{__('messages.order')}} {{__('messages.type')}}</span>
+                                                <span class="mr-2">{{translate('messages.order_type')}}</span>
 
                                                 <!-- Checkbox Switch -->
                                                 <label class="toggle-switch toggle-switch-sm"
@@ -254,10 +254,10 @@
                         <th class="table-column-pl-0">{{translate('messages.order')}}</th>
                         <th>{{translate('messages.date')}}</th>
                         <th>{{translate('messages.customer')}}</th>
-                        <th>{{translate('messages.payment')}} {{translate('messages.status')}}</th>
+                        <th>{{translate('messages.payment_status')}}</th>
                         <th>{{translate('messages.total')}}</th>
-                        <th>{{translate('messages.order')}} {{translate('messages.status')}}</th>
-                        <th>{{translate('messages.order')}} {{translate('messages.type')}}</th>
+                        <th>{{translate('messages.order_status')}}</th>
+                        <th>{{translate('messages.order_type')}}</th>
                         <th>{{translate('messages.actions')}}</th>
                     </tr>
                     </thead>
@@ -395,7 +395,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">{{translate('messages.print')}} {{translate('messages.invoice')}}</h5>
+                    <h5 class="modal-title">{{translate('messages.print_invoice')}}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -405,7 +405,7 @@
                         <center>
                             <input type="button" class="btn btn-primary non-printable" onclick="printDiv('printableArea')"
                                 value="Proceed, If thermal printer is ready."/>
-                            <!-- <a href="{{url()->previous()}}" class="btn btn-danger non-printable">Back</a> -->
+                            <!-- <a href="{{url()->previous()}}" class="btn btn-danger non-printable">{{translate('messages.back')}}</a> -->
                         </center>
                         <hr class="non-printable">
                     </div>

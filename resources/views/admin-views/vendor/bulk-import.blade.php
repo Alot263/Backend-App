@@ -14,7 +14,7 @@
                     <img src="{{asset('public/assets/admin/img/resturant.png')}}" class="w--20" alt="">
                 </span>
                 <span>
-                    {{translate('messages.stores')}} {{translate('messages.bulk_import')}}
+                    {{translate('messages.stores_bulk_import')}}
                 </span>
             </h1>
         </div>
@@ -53,8 +53,7 @@
 
                     <p>{{ translate('2. You can download the example file to understand how the data must be filled.') }}</p>
 
-                    <p>{{ translate('3. Once you have downloaded and filled the format file, upload it in the form below and
-                        submit.Make sure the phone numbers and email addresses are unique.') }}</p>
+                    <p>{{ translate('3. Once you have downloaded and filled the format file, upload it in the form below and submit.Make sure the phone numbers and email addresses are unique.') }}</p>
 
                     <p>{{ translate('4. After uploading stores you need to edit them and set stores`s logo and cover.') }}</p>
 
@@ -80,17 +79,19 @@
         </div>
         <div class="card mt-3">
             <div class="card-body">
-                <form class="product-form" action="{{route('admin.store.bulk-import')}}" method="POST"
+                <form class="product-form" id="import_form" action="{{route('admin.store.bulk-import')}}" method="POST"
                       enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="button" id="btn_value">
                     <h4 class="mb-3">{{ translate('Import Stores File') }}</h4>
                     <div class="custom-file custom--file">
                         <input type="file" name="products_file" class="form-control" id="products_file">
                         <label class="custom-file-label" for="products_file">{{ translate('messages.Choose File') }}</label>
                     </div>
                     <div class="btn--container justify-content-end mt-3">
-                            <button type="reset" class="btn btn--reset">{{translate('reset')}}</button>
-                            <button type="submit" class="btn btn--primary">{{translate('submit')}}</button>
+                        <button id="reset_btn" type="reset" class="btn btn--reset">{{translate('messages.Clear')}}</button>
+                        <button type="submit" name="button" value="update" class="btn btn--warning">{{translate('messages.update')}}</button>
+                        <button type="submit" name="button" value="import" class="btn btn--primary">{{translate('messages.Import')}}</button>
                     </div>
                 </form>
             </div>
@@ -99,20 +100,37 @@
 @endsection
 
 @push('script_2')
-<!-- <script>
-    stackfoodCheck();
-    function stackfoodCheck()
-    {
-        if($('#exampleCheck1').is(':checked'))
-        {
-            $('#module').show();
-            $('input[name="module_id"]').attr("required", true);
-        }
-        else
-        {
-            $('#module').hide();
-            $('input[name="module_id"]').attr("required", false);
-        }
+    <script>
+        $('#reset_btn').click(function(){
+            $('#bulk__import').val(null);
+        })
+    </script>
+        <script>
+
+    $(document).on("click", ":submit", function(e){
+        e.preventDefault();
+            let data = $(this).val();
+            myFunction(data)
+    });
+
+
+    function myFunction(data) {
+        Swal.fire({
+        title: '{{ translate('Are you sure?') }}' ,
+        text: "{{ translate('You_want_to_') }}" +data,
+        type: 'warning',
+        showCancelButton: true,
+        cancelButtonColor: 'default',
+        confirmButtonColor: '#FC6A57',
+        cancelButtonText: '{{translate('messages.no')}}',
+        confirmButtonText: '{{translate('messages.yes')}}',
+        reverseButtons: true
+        }).then((result) => {
+            if (result.value) {
+                $('#btn_value').val(data);
+                $("#import_form").submit();
+            }
+        })
     }
-</script> -->
+        </script>
 @endpush

@@ -15,7 +15,6 @@
     @else
         @php($zone_name = translate('messages.all'))
     @endif
-    {{--<label class="badge badge-soft-primary">{{translate('messages.zone')}} : {{$zone_name}}</label>--}}
     <a href="{{ route('admin.item.list') }}" class="fz-12px font-medium text-006AE5">{{translate('view_all')}}</a>
 </div>
 <!-- End Header -->
@@ -26,7 +25,17 @@
         @foreach($top_rated_foods as $key=>$item)
             <a href="{{route('admin.item.view',[$item['id']])}}">
                 <div class="rated-media d-flex align-items-center">
-                    <img src="{{asset('storage/app/public/product')}}/{{$item['image']}}" onerror="this.src='{{asset('public/assets/admin/img/100x100/2.png')}}'" alt="{{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}">
+                    <img
+
+                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                        $item['image'] ?? '',
+                        asset('storage/app/public/product').'/'.$item['image'] ?? '',
+                        asset('public/assets/admin/img/100x100/2.png'),
+                        'product/'
+                    ) }}"
+
+                   
+                    class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}" alt="{{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}">
                     <span class="line--limit-1 w-0 flex-grow-1">
                         {{Str::limit($item->name??translate('messages.Item deleted!'),20,'...')}}
                     </span>
@@ -39,3 +48,4 @@
     </div>
 </div>
 <!-- End Body -->
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>

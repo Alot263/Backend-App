@@ -15,18 +15,18 @@
             <div class="row align-items-center py-2">
                 <div class="col-sm mb-2 mb-sm-0">
                     <div class="d-flex align-items-center">
-                        <img onerror="this.src='{{asset('/public/assets/admin/img/grocery.svg')}}'" src="{{asset('storage/app/public/module')}}/{{$mod->icon}}" width="38" alt="img">
+                        <img class="onerror-image" data-onerror-image="{{asset('/public/assets/admin/img/grocery.svg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($mod->icon, asset('storage/app/public/module/').'/'.$mod->icon, asset('public/assets/admin/img/grocery.svg'), 'module/') }}"
+                        width="38" alt="img">
                         <div class="w-0 flex-grow pl-2">
-                            <h1 class="page-header-title mb-0">{{$mod->module_name}} {{translate('messages.Dashboard')}}.</h1>
-                            <p class="page-header-text m-0">{{translate('Hello, Here You Can Manage Your')}} {{$mod->module_name}} {{translate('orders by Zone.')}}</p>
+                            <h1 class="page-header-title mb-0">{{translate($mod->module_name)}} {{translate('messages.Dashboard')}}.</h1>
+                            <p class="page-header-text m-0">{{translate('Hello, Here You Can Manage Your')}} {{translate($mod->module_name)}} {{translate('orders by Zone.')}}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-sm-auto min--280">
-                    <select name="zone_id" class="form-control js-select2-custom"
-                            onchange="fetch_data_zone_wise(this.value)">
-                        <option value="all">{{ translate('messages.All Zones') }}</option>
+                    <select name="zone_id" class="form-control js-select2-custom fetch_data_zone_wise">
+                        <option value="all">{{ translate('messages.All_Zones') }}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $zone)
                             <option
                                 value="{{$zone['id']}}" {{$params['zone_id'] == $zone['id']?'selected':''}}>
@@ -45,16 +45,16 @@
                     <div class="status-filter-wrap">
                         <div class="statistics-btn-grp">
                             <label>
-                                <input type="radio" name="statistics" value="this_year" {{$params['statistics_type'] == 'this_year'?'checked':''}} hidden onchange="order_stats_update(this.value)">
-                                <span>This Year</span>
+                                <input type="radio" name="statistics" value="this_year" {{$params['statistics_type'] == 'this_year'?'checked':''}} class="order_stats_update" hidden>
+                                <span>{{ translate('This_Year') }}</span>
                             </label>
                             <label>
-                                <input type="radio" name="statistics" value="this_month" {{$params['statistics_type'] == 'this_month'?'checked':''}} hidden onchange="order_stats_update(this.value)">
-                                <span>This Month</span>
+                                <input type="radio" name="statistics" value="this_month" {{$params['statistics_type'] == 'this_month'?'checked':''}} class="order_stats_update" hidden>
+                                <span>{{ translate('This_Month') }}</span>
                             </label>
                             <label>
-                                <input type="radio" name="statistics" value="this_week" {{$params['statistics_type'] == 'this_week'?'checked':''}} hidden onchange="order_stats_update(this.value)">
-                                <span>This Week</span>
+                                <input type="radio" name="statistics" value="this_week" {{$params['statistics_type'] == 'this_week'?'checked':''}} class="order_stats_update" hidden>
+                                <span>{{ translate('This_Week') }}</span>
                             </label>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <h6 class="card-subtitle d-flex justify-content-between m-0 align-items-center">
                                             <img src="{{asset('/public/assets/admin/img/order-status/payment-failed.svg')}}" alt="dashboard" class="oder--card-icon">
-                                            <span>{{translate('messages.payment')}} {{translate('messages.failed')}}</span>
+                                            <span>{{translate('messages.payment_failed')}}</span>
                                         </h6>
                                         <span class="card-title text-danger">
                                             {{$data['refund_requested']}}
@@ -211,19 +211,6 @@
             </div>
         </div>
         <!-- End Stats -->
-
-        {{-- <div class="row gx-2 gx-lg-3">
-            <div class="col-lg-12 mb-3 mb-lg-12">
-                <!-- Card -->
-                <div class="card h-100" id="monthly-earning-graph">
-                    <!-- Body -->
-                @include('admin-views.partials._monthly-earning-graph',['total_sell'=>$total_sell,'commission'=>$commission,'delivery_commission'=>$delivery_commission])
-                <!-- End Body -->
-                </div>
-                <!-- End Card -->
-            </div>
-        </div> --}}
-        <!-- End Row -->
 
         <div class="row g-2">
             <div class="col-lg-8 col--xl-8">
@@ -240,8 +227,7 @@
                                     {{ translate('sale') }} ({{ date("Y") }})
                                 </span>
                             </div>
-                            <select class="custom-select border-0 text-center w-auto ml-auto" name="commission_overview"
-                                    onchange="commission_overview_stats_update(this.value)">
+                            <select class="custom-select border-0 text-center w-auto ml-auto commission_overview_stats_update" name="commission_overview">
                                     <option
                                     value="this_year" {{$params['commission_overview'] == 'this_year'?'selected':''}}>
                                     {{translate('This year')}}
@@ -257,7 +243,7 @@
                             </select>
                         </div>
                         <div id="commission-overview-board">
-    
+
                             <div id="grow-sale-chart"></div>
                         </div>
                     </div>
@@ -274,11 +260,10 @@
                         <div id="stat_zone">
 
                             @include('admin-views.partials._zone-change',['data'=>$data])
-    
-    
+
+
                         </div>
-                        <select class="custom-select border-0 text-center w-auto" name="user_overview"
-                                onchange="user_overview_stats_update(this.value)">
+                        <select class="custom-select border-0 text-center w-auto user_overview_stats_update" name="user_overview">
                                 <option
                                 value="this_year" {{$params['user_overview'] == 'this_year'?'selected':''}}>
                                 {{translate('This year')}}
@@ -416,7 +401,10 @@
 
     <!-- Dognut Pie Chart -->
     <script>
-        var options = {
+        "use strict";
+        let options;
+        let chart;
+         options = {
             series: [{{ $data['customer']}}, {{$data['stores']}}, {{$data['delivery_man']}}],
             chart: {
                 width: 320,
@@ -446,21 +434,18 @@
             },
         };
 
-        var chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
+         chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
         chart.render();
 
-    </script>
-
-    <script>
-    var options = {
+        options = {
           series: [{
-          name: 'Gross Sale',
+          name: '{{ translate('Gross Sale') }}',
           data: [{{$total_sell[1]}},{{$total_sell[2]}},{{$total_sell[3]}},{{$total_sell[4]}},{{$total_sell[5]}},{{$total_sell[6]}},{{$total_sell[7]}},{{$total_sell[8]}},{{$total_sell[9]}},{{$total_sell[10]}},{{$total_sell[11]}},{{$total_sell[12]}}]
         },{
-          name: 'Admin Comission',
+          name: '{{ translate('Admin Comission') }}',
           data: [{{$commission[1]}},{{$commission[2]}},{{$commission[3]}},{{$commission[4]}},{{$commission[5]}},{{$commission[6]}},{{$commission[7]}},{{$commission[8]}},{{$commission[9]}},{{$commission[10]}},{{$commission[11]}},{{$commission[12]}}]
         },{
-          name: 'Delivery Comission',
+          name: '{{ translate('Delivery Comission') }}',
           data: [{{$delivery_commission[1]}},{{$delivery_commission[2]}},{{$delivery_commission[3]}},{{$delivery_commission[4]}},{{$delivery_commission[5]}},{{$delivery_commission[6]}},{{$delivery_commission[7]}},{{$delivery_commission[8]}},{{$delivery_commission[9]}},{{$delivery_commission[10]}},{{$delivery_commission[11]}},{{$delivery_commission[12]}}]
         }],
           chart: {
@@ -487,7 +472,7 @@
         },
         xaxis: {
         //   type: 'datetime',
-          categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+          categories: ["{{ translate('Jan') }}", "{{ translate('Feb') }}", "{{ translate('Mar') }}", "{{ translate('Apr') }}", "{{ translate('May') }}", "{{ translate('Jun') }}", "{{ translate('Jul') }}", "{{ translate('Aug') }}", "{{ translate('Sep') }}", "{{ translate('Oct') }}", "{{ translate('Nov') }}", "{{ translate('Dec') }}" ]
         },
         tooltip: {
           x: {
@@ -496,12 +481,12 @@
         },
         };
 
-        var chart = new ApexCharts(document.querySelector("#grow-sale-chart"), options);
+        chart = new ApexCharts(document.querySelector("#grow-sale-chart"), options);
         chart.render();
-    </script>
+
 
     <!-- Dognut Pie Chart -->
-    <script>
+
         // INITIALIZATION OF CHARTJS
         // =======================================================
         Chart.plugins.unregister(ChartDataLabels);
@@ -510,10 +495,12 @@
             $.HSCore.components.HSChartJS.init($(this));
         });
 
-        var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
-    </script>
+         let updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
 
-    <script>
+        $('.order_stats_update').on('change', function (){
+            let type = $(this).val();
+            order_stats_update(type);
+        })
         function order_stats_update(type) {
             $.ajaxSetup({
                 headers: {
@@ -537,6 +524,10 @@
                 }
             });
         }
+        $('.fetch_data_zone_wise').on('change', function (){
+            let zone_id = $(this).val();
+            fetch_data_zone_wise(zone_id);
+        })
 
         function fetch_data_zone_wise(zone_id) {
             $.ajaxSetup({
@@ -569,6 +560,10 @@
                 }
             });
         }
+        $('.user_overview_stats_update').on('change', function (){
+            let type = $(this).val();
+            user_overview_stats_update(type);
+        })
 
         function user_overview_stats_update(type) {
             $.ajaxSetup({
@@ -593,6 +588,10 @@
                 }
             });
         }
+        $('.commission_overview_stats_update').on('change', function (){
+            let type = $(this).val();
+            commission_overview_stats_update(type);
+        })
         function commission_overview_stats_update(type) {
             $.ajaxSetup({
                 headers: {
@@ -617,14 +616,12 @@
                 }
             });
         }
-    </script>
 
-    <script>
         function insert_param(key, value) {
             key = encodeURIComponent(key);
             value = encodeURIComponent(value);
             // kvp looks like ['key1=value1', 'key2=value2', ...]
-            var kvp = document.location.search.substr(1).split('&');
+             let kvp = document.location.search.substr(1).split('&');
             let i = 0;
 
             for (; i < kvp.length; i++) {

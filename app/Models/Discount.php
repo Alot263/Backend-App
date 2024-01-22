@@ -16,9 +16,10 @@ class Discount extends Model
         'min_purchase' => 'float',
         'max_discount' => 'float',
         'discount' => 'float',
-        'store_id'=>'integer'
+        'store_id'=>'integer',
+        'created_at'=>'datetime',
+        'updated_at'=>'datetime',
     ];
-    protected $dates = ['created_at', 'updated_at'];
 
     public function store()
     {

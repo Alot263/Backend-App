@@ -14,7 +14,7 @@
                 <span class="page-header-icon">
                     <img src="{{asset('public/assets/admin/img/delivery-man.png')}}" class="w--26" alt="">
                 </span>
-                <span>{{translate('messages.add')}} {{translate('messages.new')}} {{translate('messages.deliveryman')}}</span>
+                <span>{{translate('messages.add_new_deliveryman')}}</span>
             </h1>
         </div>
         <!-- End Page Header -->
@@ -35,14 +35,14 @@
                             <div class="row g-3">
                                 <div class="col-sm-6">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.first')}} {{translate('messages.name')}}</label>
-                                        <input type="text" name="f_name" class="form-control" placeholder="{{translate('messages.first')}} {{translate('messages.name')}}" required>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.first_name')}}</label>
+                                        <input type="text" name="f_name" class="form-control" placeholder="{{translate('messages.first_name')}}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.last')}} {{translate('messages.name')}}</label>
-                                        <input type="text" name="l_name" class="form-control" placeholder="{{translate('messages.last')}} {{translate('messages.name')}}" required>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.last_name')}}</label>
+                                        <input type="text" name="l_name" class="form-control" placeholder="{{translate('messages.last_name')}}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.deliveryman')}} {{translate('messages.type')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.deliveryman_type')}}</label>
                                         <select name="earning" class="form-control">
                                             <option value="1">{{translate('messages.freelancer')}}</option>
                                             <option value="0">{{translate('messages.salary_based')}}</option>
@@ -63,8 +63,8 @@
                                 <div class="col-sm-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.zone')}}</label>
-                                        <select name="zone_id" class="form-control" required data-placeholder="{{translate('messages.select')}} {{translate('messages.zone')}}">
-                                        <option value="" readonly="true" hidden="true">{{translate('messages.select')}} {{translate('messages.zone')}}</option>
+                                        <select name="zone_id" class="form-control" required data-placeholder="{{translate('messages.select_zone')}}">
+                                        <option value="" readonly="true" hidden="true">{{translate('messages.select_zone')}}</option>
                                         @foreach(\App\Models\Zone::all() as $zone)
                                             @if(isset(auth('admin')->user()->zone_id))
                                                 @if(auth('admin')->user()->zone_id == $zone->id)
@@ -82,8 +82,8 @@
                                         <label class="input-label"
                                             for="exampleFormControlInput1">{{ translate('messages.Vehicle') }}</label>
                                         <select name="vehicle_id" class="form-control js-select2-custom h--45px" required
-                                            data-placeholder="{{ translate('messages.select') }} {{ translate('messages.vehicle') }}">
-                                            <option value="" readonly="true" hidden="true">{{ translate('messages.select') }} {{ translate('messages.vehicle') }}</option>
+                                            data-placeholder="{{ translate('messages.select_vehicle') }}">
+                                            <option value="" readonly="true" hidden="true">{{ translate('messages.select_vehicle') }}</option>
                                             @foreach (\App\Models\DMVehicle::where('status',1)->get(['id','type']) as $v)
                                                         <option value="{{ $v->id }}" >{{ $v->type }}
                                                         </option>
@@ -95,15 +95,15 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="d-flex flex-column h-100">
-                                <label class="text-center">{{translate('messages.deliveryman')}} {{translate('messages.image')}} <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1 )</small></label>
-                                <center class="py-3 my-auto">
+                                <label class="text-center">{{translate('messages.deliveryman_image')}} <small class="text-danger">* ( {{translate('messages.ratio')}} 1:1 )</small></label>
+                                <div class="text-center py-3 my-auto">
                                     <img class="img--100" id="viewer"
                                             src="{{asset('public/assets/admin/img/admin.png')}}" alt="delivery-man image"/>
-                                </center>
+                                </div>
                                 <div class="custom-file">
                                     <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                             accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                                 </div>
                             </div>
                         </div>
@@ -111,18 +111,18 @@
                             <div class="row g-3">
                                 <div class="col-sm-6 col-lg-12">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.identity')}} {{translate('messages.type')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.identity_type')}}</label>
                                         <select name="identity_type" class="form-control">
                                             <option value="passport">{{translate('messages.passport')}}</option>
-                                            <option value="driving_license">{{translate('messages.driving')}} {{translate('messages.license')}}</option>
+                                            <option value="driving_license">{{translate('messages.driving_license')}}</option>
                                             <option value="nid">{{translate('messages.nid')}}</option>
-                                            <option value="store_id">{{translate('messages.store')}} {{translate('messages.id')}}</option>
+                                            <option value="store_id">{{translate('messages.store_id')}}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-12">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.identity')}} {{translate('messages.number')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.identity_number')}}</label>
                                         <input type="text" name="identity_number" class="form-control"
                                                 placeholder="{{ translate('messages.Ex:') }} DH-23434-LS"
                                                 required>
@@ -132,7 +132,7 @@
                         </div>
                         <div class="col-lg-8">
                             <div class="form-group">
-                                <label class="form-label" for="exampleFormControlInput1">{{translate('messages.identity')}} {{translate('messages.image')}}</label>
+                                <label class="form-label" for="exampleFormControlInput1">{{translate('messages.identity_image')}}</label>
                                 <div>
                                     <div class="row" id="coba"></div>
                                 </div>
@@ -162,10 +162,13 @@
                         </div>
                         <div class="col-md-4 col-12">
                             <div class="js-form-message form-group mb-0">
-                                <label class="input-label" for="signupSrPassword">{{translate('messages.password')}}</label>
+                                <label class="input-label" for="signupSrPassword">{{translate('messages.password')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+        data-original-title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"><img src="{{ asset('/public/assets/admin/img/info-circle.svg') }}" alt="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"></span></label>
 
                                 <div class="input-group input-group-merge">
-                                    <input type="password" class="js-toggle-password form-control" name="password" id="signupSrPassword" placeholder="{{translate('messages.password_length_placeholder',['length'=>'6+'])}}" aria-label="{{translate('messages.password_length_placeholder',['length'=>'6+'])}}" required
+                                    <input type="password" class="js-toggle-password form-control" name="password" id="signupSrPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                    placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                    aria-label="8+ characters required" required
                                     data-msg="Your password is invalid. Please try again."
                                     data-hs-toggle-password-options='{
                                     "target": [".js-toggle-password-target-1", ".js-toggle-password-target-2"],
@@ -185,7 +188,9 @@
                             <div class="js-form-message form-group mb-0">
                                 <label class="input-label" for="signupSrConfirmPassword">{{translate('messages.confirm_password')}}</label>
                                 <div class="input-group input-group-merge">
-                                <input type="password" class="js-toggle-password form-control" name="confirmPassword" id="signupSrConfirmPassword" placeholder="{{translate('messages.password_length_placeholder',['length'=>'6+'])}}" aria-label="{{translate('messages.password_length_placeholder',['length'=>'6+'])}}" required
+                                <input type="password" class="js-toggle-password form-control" name="confirmPassword" id="signupSrConfirmPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                aria-label="8+ characters required" required
                                         data-msg="Password does not match the confirm password."
                                         data-hs-toggle-password-options='{
                                         "target": [".js-toggle-password-target-1", ".js-toggle-password-target-2"],
@@ -214,37 +219,14 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin/js/intlTelInputCdn.min.js')}}"></script>
+    <script src="{{asset('public/assets/admin/js/intlTelInputCdn-jquery.min.js')}}"></script>
+    <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
 <script>
-    $(document).on('ready', function () {
-      // INITIALIZATION OF SHOW PASSWORD
-      // =======================================================
-      $('.js-toggle-password').each(function () {
-        new HSTogglePassword(this).init()
-      });
-
-
-      // INITIALIZATION OF FORM VALIDATION
-      // =======================================================
-      $('.js-validate').each(function() {
-        $.HSCore.components.HSValidation.init($(this), {
-          rules: {
-            confirmPassword: {
-              equalTo: '#signupSrPassword'
-            }
-          }
-        });
-      });
-    });
-  </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/intlTelInput.min.js" integrity="sha512-QMUqEPmhXq1f3DnAVdXvu40C8nbTgxvBGvNruP6RFacy3zWKbNTmx7rdQVVM2gkd2auCWhlPYtcW2tHwzso4SA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/intlTelInput-jquery.min.js" integrity="sha512-hkmipUFWbNGcKnR0nayU95TV/6YhJ7J9YUAkx4WLoIgrVr7w1NYz28YkdNFMtPyPeX1FrQzbfs3gl+y94uZpSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/utils.min.js" integrity="sha512-lv6g7RcY/5b9GMtFgw1qpTrznYu1U4Fm2z5PfDTG1puaaA+6F+aunX+GlMotukUFkxhDrvli/AgjAu128n2sXw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
-    <link rel="shortcut icon" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/img/flags.png" type="image/x-icon">
-    <link rel="shortcut icon" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/img/flags@2x.png" type="image/x-icon">
-   <script>
+    "use strict";
         function readURL(input) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
 
                 reader.onload = function (e) {
                     $('#viewer').attr('src', e.target.result);
@@ -258,8 +240,8 @@
             readURL(this);
         });
         @php($country=\App\Models\BusinessSetting::where('key','country')->first())
-        var phone = $("#phone").intlTelInput({
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.6/js/utils.js",
+        let phone = $("#phone").intlTelInput({
+            utilsScript: "{{asset('public/assets/admin/js/intlTelInputCdn-utils.min.js')}}",
             autoHideDialCode: true,
             autoPlaceholder: "ON",
             dropdownContainer: document.body,
@@ -269,15 +251,7 @@
             placeholderNumberType: "MOBILE",
             separateDialCode: true
         });
-        // $("#phone").on('change', function(){
-        //     $(this).val(phone.getNumber());
-        // })
 
-
-    </script>
-
-    <script src="{{asset('public/assets/admin/js/spartan-multi-image-picker.js')}}"></script>
-    <script type="text/javascript">
         $(function () {
             $("#coba").spartanMultiImagePicker({
                 fieldName: 'identity_image[]',
@@ -313,8 +287,7 @@
                 }
             });
         });
-    </script>
-        <script>
+
             $('#reset_btn').click(function(){
                 $('#viewer').attr('src','{{asset('public/assets/admin/img/400x400/img2.jpg')}}');
                 $("#coba").empty().spartanMultiImagePicker({

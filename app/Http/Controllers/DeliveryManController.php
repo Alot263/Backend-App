@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\DeliveryMan;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
+use App\Models\Admin;
 use App\Models\BusinessSetting;
 use Gregwar\Captcha\CaptchaBuilder;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 
 class DeliveryManController extends Controller
 {
@@ -71,7 +73,7 @@ class DeliveryManController extends Controller
             'zone_id' => 'required',
             'vehicle_id' => 'required',
             'earning' => 'required',
-            'password'=>'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
             'zone_id.required' => translate('messages.select_a_zone'),
@@ -113,11 +115,17 @@ class DeliveryManController extends Controller
         $dm->application_status= 'pending';
         $dm->save();
         try{
-            if(config('mail.status')){
-                Mail::to($request->email)->send(new \App\Mail\SelfRegistration('pending', $dm->f_name.' '.$dm->l_name));
+            $admin= Admin::where('role_id', 1)->first();
+            $mail_status = Helpers::get_mail_status('registration_mail_status_dm');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($request->email)->send(new \App\Mail\DmSelfRegistration('pending', $dm->f_name.' '.$dm->l_name));
+            }
+            $mail_status = Helpers::get_mail_status('dm_registration_mail_status_admin');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($admin['email'])->send(new \App\Mail\DmRegistration('pending', $dm->f_name.' '.$dm->l_name));
             }
         }catch(\Exception $ex){
-            info($ex);
+            info($ex->getMessage());
         }
         Toastr::success(translate('messages.application_placed_successfully'));
         return back();

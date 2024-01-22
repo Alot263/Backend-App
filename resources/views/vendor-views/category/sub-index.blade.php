@@ -25,18 +25,18 @@
                 <div class="card">
                     <div class="card-header py-2 border-0">
                         <div class="search--button-wrapper justify-content-end">
-                            <form action="javascript:;" id="search-form" class="search-form min--280">
+                            <form  class="search-form min--280">
                                 @csrf
                                 <!-- Search -->
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_:_search_sub_category')}}" aria-label="{{translate('messages.search_here')}}">
+                                    <input   value="{{ request()?->search ?? null }}" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_:_search_sub_category')}}" aria-label="{{translate('messages.search_here')}}">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
                             </form>
                             <!-- Unfold -->
                             <div class="hs-unfold mr-2">
-                                <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:;"
+                                <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:"
                                     data-hs-unfold-options='{
                                         "target": "#usersExportDropdown",
                                         "type": "css-animation"
@@ -46,31 +46,18 @@
 
                                 <div id="usersExportDropdown"
                                         class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                                    {{-- <span class="dropdown-header">{{translate('messages.options')}}</span>
-                                    <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                                src="{{asset('public/assets/admin')}}/svg/illustrations/copy.svg"
-                                                alt="Image Description">
-                                        {{translate('messages.copy')}}
-                                    </a>
-                                    <a id="export-print" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                                src="{{asset('public/assets/admin')}}/svg/illustrations/print.svg"
-                                                alt="Image Description">
-                                        {{translate('messages.print')}}
-                                    </a>
-                                    <div class="dropdown-divider"></div> --}}
+
                                     <span
-                                        class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
-                                    <a id="export-excel" class="dropdown-item" href="{{route('vendor.category.export-sub-categories', ['type'=>'excel'])}}">
+                                        class="dropdown-header">{{translate('messages.download_options')}}</span>
+                                    <a id="export-excel" class="dropdown-item" href="{{route('vendor.category.export-sub-categories',['type'=>'excel',request()->getQueryString()])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                                src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
+                                                src="{{asset('public/assets/admin/svg/components/excel.svg')}}"
                                                 alt="Image Description">
                                         {{translate('messages.excel')}}
                                     </a>
-                                    <a id="export-csv" class="dropdown-item" href="{{route('vendor.category.export-sub-categories', ['type'=>'csv'])}}">
+                                    <a id="export-csv" class="dropdown-item" href="{{route('vendor.category.export-sub-categories', ['type'=>'csv',request()->getQueryString()])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                                src="{{asset('public/assets/admin')}}/svg/components/placeholder-csv-format.svg"
+                                                src="{{asset('public/assets/admin/svg/components/placeholder-csv-format.svg')}}"
                                                 alt="Image Description">
                                         .{{translate('messages.csv')}}
                                     </a>
@@ -100,7 +87,7 @@
                                     <tr>
                                         <th class="border-0">{{translate('messages.#')}}</th>
                                         <th class="border-0">{{translate('messages.category_id')}}</th>
-                                        <th class="border-0">{{translate('messages.main')}} {{translate('messages.category')}}</th>
+                                        <th class="border-0">{{translate('messages.main_category')}}</th>
                                         <th class="border-0">{{translate('messages.sub_category')}}</th>
                                     </tr>
                                 </thead>
@@ -145,79 +132,4 @@
     </div>
 @endsection
 
-@push('script_2')
-    <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'), {
-                select: {
-                    style: 'multi',
-                    classMap: {
-                        checkAll: '#datatableCheckAll',
-                        counter: '#datatableCounter',
-                        counterInfo: '#datatableCounterInfo'
-                    }
-                },
-                language: {
-                    zeroRecords: '<div class="text-center p-4">' +
-                    '<img class="w-7rem mb-3" src="{{asset('public/assets/admin/svg/illustrations/sorry.svg')}}" alt="Image Description">' +
 
-                    '</div>'
-                }
-            });
-
-            $('#datatableSearch').on('mouseup', function (e) {
-                var $input = $(this),
-                    oldValue = $input.val();
-
-                if (oldValue == "") return;
-
-                setTimeout(function(){
-                    var newValue = $input.val();
-
-                    if (newValue == ""){
-                    // Gotcha
-                    datatable.search('').draw();
-                    }
-                }, 1);
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-
-<script>
-    $('#search-form').on('submit', function () {
-        var formData = new FormData(this);
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-        $.post({
-            url: '{{route('vendor.category.sub-search')}}',
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            beforeSend: function () {
-                $('#loading').show();
-            },
-            success: function (data) {
-                $('#set-rows').html(data.view);
-                $('#itemCount').html(data.count);
-                $('.page-area').hide();
-            },
-            complete: function () {
-                $('#loading').hide();
-            },
-        });
-    });
-</script>
-@endpush

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Facades\Validator;
 use App\Models\StoreSchedule;
+use App\Models\Translation;
 
 class BusinessSettingsController extends Controller
 {
@@ -14,10 +15,11 @@ class BusinessSettingsController extends Controller
     public function update_store_setup(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'address' => 'required',
+            // 'name' => 'required',
+            // 'address' => 'required',
             'contact_number' => 'required',
             'delivery' => 'required|boolean',
+            'prescription_order' => 'required|boolean',
             'take_away' => 'required|boolean',
             'schedule_order' => 'required|boolean',
             'veg' => 'required|boolean',
@@ -42,6 +44,12 @@ class BusinessSettingsController extends Controller
         //     return ($store->self_delivery_system);
         // });
 
+        $data = json_decode($request->translations, true);
+
+        if (count($data) < 1) {
+            $validator->getMessageBag()->add('translations', translate('messages.Name and address in english is required'));
+        }
+
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
@@ -64,10 +72,13 @@ class BusinessSettingsController extends Controller
         }
 
         $store->delivery = $request->delivery;
+        $store->prescription_order = $request->prescription_order;
         $store->take_away = $request->take_away;
         $store->schedule_order = $request->schedule_order;
         $store->veg = $request->veg;
         $store->non_veg = $request->non_veg;
+        $store->cutlery = $request->cutlery??0;
+        $store->free_delivery = $request->free_delivery??0;
         $store->minimum_order = $request->minimum_order;
         $store->gst = json_encode(['status'=>$request->gst_status, 'code'=>$request->gst]);
         // $store->delivery_charge = $store->self_delivery_system?$request->delivery_charge: $store->delivery_charge;
@@ -75,15 +86,29 @@ class BusinessSettingsController extends Controller
         $store->per_km_shipping_charge = $store->self_delivery_system?$request->per_km_delivery_charge??0: $store->per_km_shipping_charge;
         $store->maximum_shipping_charge = $store?$request->maximum_delivery_charge??0: $store->maximum_delivery_charge;
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
-        $store->name = $request->name;
-        $store->address = $request->address;
+        $store->name = $data[0]['value'];
+        $store->address = $data[1]['value'];
         $store->phone = $request->contact_number;
         $store->order_place_to_schedule_interval = $request->order_place_to_schedule_interval;
-
+        
         $store->logo = $request->has('logo') ? Helpers::update('store/', $store->logo, 'png', $request->file('logo')) : $store->logo;
         $store->cover_photo = $request->has('cover_photo') ? Helpers::update('store/cover/', $store->cover_photo, 'png', $request->file('cover_photo')) : $store->cover_photo;
+        $store->meta_title = $data[2]['value'];
+        $store->meta_description = $data[3]['value'];
+        $store->meta_image = $request->has('meta_image') ? Helpers::update('store/', $store->meta_image, 'png', $request->file('meta_image')) : $store->meta_image;
 
         $store->save();
+
+        foreach ($data as $key=>$i) {
+            
+            Translation::updateOrInsert(
+                ['translationable_type'  => 'App\Models\Store',
+                    'translationable_id'    => $store->id,
+                    'locale'                => $i['locale'],
+                    'key'                   => $i['key']],
+                ['value'                 => $i['value']]
+            );
+        }
 
         return response()->json(['message'=>translate('messages.store_settings_updated')], 200);
     }

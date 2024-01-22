@@ -9,22 +9,19 @@
                     <th class="border-0">{{translate('messages.balance_before_transaction')}}</th>
                     <th class="border-0">{{translate('messages.amount')}}</th>
                     <th class="border-0">{{translate('messages.reference')}}</th>
-                    <th class="border-0">{{translate('messages.action')}}</th>
+                    {{-- <th class="border-0">{{translate('messages.action')}}</th> --}}
                 </tr>
             </thead>
             <tbody>
-            @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'store')->where('from_id', $store->vendor->id)->paginate(25))
+            @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'store')->where('type', 'collected')->where('from_id', $store->vendor->id)->paginate(25))
             @foreach($account_transaction as $k=>$at)
                 <tr>
-                    <td scope="row">{{$k+$account_transaction->firstItem()}}</td>
+                    <td>{{$k+$account_transaction->firstItem()}}</td>
                     <td>{{$at->created_at->format('Y-m-d '.config('timeformat'))}}</td>
                     <td>{{\App\CentralLogics\Helpers::format_currency($at['current_balance'])}}</td>
                     <td>{{\App\CentralLogics\Helpers::format_currency($at['amount'])}}</td>
-                    <td>{{$at['ref']}}</td>
+                    <td>{{translate($at['ref'])}}</td>
                     <td>
-                        <a href="{{route('admin.account-transaction.show',[$at['id']])}}"
-                        class="btn btn--warning action-btn btn-outline-warning"><i class="tio-visible"></i>
-                        </a>
                     </td>
                 </tr>
             @endforeach

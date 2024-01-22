@@ -23,14 +23,14 @@
         <div class="card mb-3">
             <div class="card-body">
                 <div
-                    class="maintainance-mode-toggle-bar d-flex flex-wrap justify-content-between border border-primary rounded align-items-center p-2">
+                    class="maintenance-mode-toggle-bar d-flex flex-wrap justify-content-between border border-primary rounded align-items-center p-2">
                     @php($config = $refund_active_status->value ?? null)
                     <h5 class="text-capitalize m-0 text--info text--primary">
                         <i class="tio-settings-outlined"></i>
-                        {{ translate('messages.Refund Request') }} {{ translate('Mode') }}
+                        {{ translate('messages.Refund Request_Mode') }}
                     </h5>
                     <label class="toggle-switch toggle-switch-sm">
-                        <input type="checkbox" class="status toggle-switch-input" onclick="refund_mode()"
+                        <input type="checkbox" class="status toggle-switch-input refund_mode"
                             {{ isset($config) && $config ? 'checked' : '' }}>
                         <span class="toggle-switch-label text mb-0">
                             <span class="toggle-switch-indicator"></span>
@@ -119,8 +119,7 @@
                                         <td>
                                             <label class="toggle-switch toggle-switch-sm"
                                                 for="stocksCheckbox{{ $reason->id }}">
-                                                <input type="checkbox"
-                                                    onclick="location.href='{{ route('admin.refund.reason_status', [$reason['id'], $reason->status ? 0 : 1]) }}'"class="toggle-switch-input"
+                                                <input type="checkbox" data-url="{{ route('admin.refund.reason_status', [$reason['id'], $reason->status ? 0 : 1]) }}" class="toggle-switch-input redirect-url"
                                                     id="stocksCheckbox{{ $reason->id }}"
                                                     {{ $reason->status ? 'checked' : '' }}>
                                                 <span class="toggle-switch-label">
@@ -134,7 +133,7 @@
                                                 <button
                                                     class="btn action-btn btn--primary btn-outline-primary identifyingClass"
                                                     data-id={{ $reason['id'] }}
-                                                    title="{{ translate('messages.edit') }} {{ translate('messages.category') }}"
+                                                    title="{{ translate('messages.edit_category') }}"
                                                     data-toggle="modal" data-target="#exampleModal{{ $reason['id'] }}">
                                                     <i class="tio-edit"></i>
                                                 </button>
@@ -165,9 +164,10 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <a class="btn btn-sm btn--danger btn-outline-danger action-btn"
+                                                <a class="btn btn-sm btn--danger btn-outline-danger action-btn form-alert"
                                                     href="javascript:"
-                                                    onclick="form_alert('refund_reason-{{ $reason['id'] }}','{{ translate('Want to delete this refund reason ?') }}')"
+                                                    data-id="refund_reason-{{ $reason['id'] }}"
+                                                   data-message="{{ translate('Want to delete this refund reason ?') }}"
                                                     title="{{ translate('messages.delete') }}">
                                                     <i class="tio-delete-outlined"></i>
                                                 </a>
@@ -193,17 +193,17 @@
 @endsection
 @push('script_2')
     <script>
-        function refund_mode() {
-
+        "use strict";
+        $('.refund_mode').on('click', function (){
             Swal.fire({
-                title: 'Are you sure?',
+                title: '{{ translate('Are you sure?') }}' ,
                 text: 'Be careful before you turn on/off Refund Request mode',
                 type: 'warning',
                 showCancelButton: true,
                 cancelButtonColor: 'default',
                 confirmButtonColor: '#377dff',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Yes',
+                cancelButtonText: '{{translate('messages.no')}}',
+                confirmButtonText: '{{translate('messages.yes')}}',
                 reverseButtons: true
             }).then((result) => {
                 if (result.value) {
@@ -226,15 +226,6 @@
                 }
             })
 
-        };
-    </script>
-    {{-- <script type="text/javascript">
-        $(function() {
-            $(".identifyingClass").click(function() {
-                var my_id_value = $(this).data('id');
-                $(".modal-body #hiddenValue").val(my_id_value);
-                $(".modal-body #hiddenValue").val(my_id_value);
-            })
         });
-    </script> --}}
+    </script>
 @endpush

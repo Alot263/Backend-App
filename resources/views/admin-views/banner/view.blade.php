@@ -29,9 +29,9 @@
                 <div class="row align-items-md-center gx-md-5">
                     <div class="col-md-auto mb-3 mb-md-0">
                         <div class="d-flex align-items-center">
-                            <img class="avatar avatar-xxl avatar-4by3 mr-4"
-                                 src="{{asset('storage/app/public/banner')}}/{{$banner->image}}"
-                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'"
+                            <img class="avatar avatar-xxl avatar-4by3 mr-4 onerror-image"
+                            src="{{\App\CentralLogics\Helpers::onerror_image_helper($banner->image, asset('storage/app/public/banner/').'/'.$banner->image, asset('public/assets/admin/img/160x160/img2.jpg'), 'banner/') }}"
+                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"
                                  alt="Image Description">
                             <div class="d-block">
 
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="col-md">
-                        <h4>{{translate('messages.short')}} {{translate('messages.description')}} : </h4>
+                        <h4>{{translate('messages.short_description')}} : </h4>
                         <p>{{$banner->description}}</p>
                     </div>
 
@@ -90,7 +90,7 @@
                                                     @endforelse
                                                 </select>
                                             </div>
-                                            <button type="submit" class="btn btn--primary col-md-5">{{translate('messages.add')}} {{translate('messages.store')}}</button>
+                                            <button type="submit" class="btn btn--primary col-md-5">{{translate('messages.add_store')}}</button>
 
                                         </div>
                                         <!-- End Search -->
@@ -121,9 +121,10 @@
                                     <td>{{$key+1}}</td>
                                     <td>
                                         <div class="inline--1">
-                                            <img class="img--60 img--circle"
-                                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                 src="{{asset('storage/app/public/store')}}/{{$dm['logo']}}">
+                                            <img class="img--60 img--circle onerror-image"
+                                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['logo'], asset('storage/app/public/store/').'/'.$dm['logo'], asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
+>
                                         </div>
                                     </td>
                                     <td>
@@ -145,8 +146,8 @@
                                     </td>
                                     <td>
                                         <!-- Dropdown -->
-                                        <div class="inline--2"
-                                                 onclick="location.href='{{route('admin.banner.campaign',[$banner->id, $dm['id']])}}'">
+                                        <div class="inline--2 redirect-url"
+                                                 data-url="{{route('admin.banner.campaign',[$banner->id, $dm['id']])}}">
                                                 <span class="legend-indicator bg-danger"></span>{{ translate('messages.remove') }}
                                             </div>
                                         <!-- End Dropdown -->

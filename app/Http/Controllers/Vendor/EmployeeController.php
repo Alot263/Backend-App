@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Vendor;
 
-use App\CentralLogics\Helpers;
-use App\Http\Controllers\Controller;
-use App\Models\VendorEmployee;
 use App\Models\EmployeeRole;
-use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
+use App\Models\VendorEmployee;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
+use App\Exports\StoreEmployeeListExport;
+use Illuminate\Validation\Rules\Password;
 
 class EmployeeController extends Controller
 {
@@ -29,7 +32,7 @@ class EmployeeController extends Controller
             'image' => 'required',
             'email' => 'required|unique:vendor_employees',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|max:20|unique:vendor_employees',
-            'password' => 'required|min:8',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
 
         DB::table('vendor_employees')->insert([
@@ -50,9 +53,22 @@ class EmployeeController extends Controller
         return redirect()->route('vendor.employee.list');
     }
 
-    function list()
+    function list(Request $request)
     {
-        $em = VendorEmployee::where('store_id', Helpers::get_store_id())->with(['role'])->latest()->paginate(config('default_pagination'));
+        $key = explode(' ', $request['search']);
+        $em = VendorEmployee::where('store_id', Helpers::get_store_id())->with(['role'])
+        ->when(isset($key) , function($query) use($key) {
+            $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('f_name', 'like', "%{$value}%");
+                    $q->orWhere('l_name', 'like', "%{$value}%");
+                    $q->orWhere('phone', 'like', "%{$value}%");
+                    $q->orWhere('email', 'like', "%{$value}%");
+                }
+            });
+        })
+
+        ->latest()->paginate(config('default_pagination'));
         return view('vendor-views.employee.list', compact('em'));
     }
 
@@ -75,6 +91,7 @@ class EmployeeController extends Controller
             'role_id' => 'required',
             'email' => 'required|unique:vendor_employees,email,'.$id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|max:20|unique:vendor_employees,phone,'.$id,
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
         ]);
@@ -118,29 +135,55 @@ class EmployeeController extends Controller
         return back();
     }
 
-    public function search(Request $request){
-        $key = explode(' ', $request['search']);
-        $employees=VendorEmployee::where('store_id', Helpers::get_store_id())->
-        where(function ($q) use ($key) {
-            foreach ($key as $value) {
-                $q->orWhere('f_name', 'like', "%{$value}%");
-                $q->orWhere('l_name', 'like', "%{$value}%");
-                $q->orWhere('phone', 'like', "%{$value}%");
-                $q->orWhere('email', 'like', "%{$value}%");
-            }
-        })->limit(50)->get();
-        return response()->json([
-            'view'=>view('vendor-views.employee.partials._table',compact('employees'))->render(),
-            'count'=>$employees->count()
-        ]);
-    }
+    // public function search(Request $request){
+    //     $key = explode(' ', $request['search']);
+    //     $employees=VendorEmployee::where('store_id', Helpers::get_store_id())->
+    //     where(function ($q) use ($key) {
+    //         foreach ($key as $value) {
+    //             $q->orWhere('f_name', 'like', "%{$value}%");
+    //             $q->orWhere('l_name', 'like', "%{$value}%");
+    //             $q->orWhere('phone', 'like', "%{$value}%");
+    //             $q->orWhere('email', 'like', "%{$value}%");
+    //         }
+    //     })->limit(50)->get();
+    //     return response()->json([
+    //         'view'=>view('vendor-views.employee.partials._table',compact('employees'))->render(),
+    //         'count'=>$employees->count()
+    //     ]);
+    // }
 
     public function list_export(Request $request){
-        $em = VendorEmployee::where('store_id', Helpers::get_store_id())->with(['role'])->get();
-        if($request->type == 'excel'){
-            return (new FastExcel($em))->download('Employee.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel($em))->download('Employee.csv');
+
+        $key = explode(' ', $request['search']);
+        $em=VendorEmployee::where('store_id', Helpers::get_store_id())->with(['role'])
+
+        ->when(isset($key) , function($query) use($key) {
+            $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('f_name', 'like', "%{$value}%");
+                    $q->orWhere('l_name', 'like', "%{$value}%");
+                    $q->orWhere('phone', 'like', "%{$value}%");
+                    $q->orWhere('email', 'like', "%{$value}%");
+                }
+            });
+        })
+        ->latest()->get();
+        $data = [
+            'employees'=>$em,
+            'search'=>$request->search??null,
+        ];
+
+        if ($request->type == 'excel') {
+            return Excel::download(new StoreEmployeeListExport($data), 'Employees.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new StoreEmployeeListExport($data), 'Employees.csv');
         }
+
+
+        // if($request->type == 'excel'){
+        //     return (new FastExcel($em))->download('Employee.xlsx');
+        // }elseif($request->type == 'csv'){
+        //     return (new FastExcel($em))->download('Employee.csv');
+        // }
     }
 }

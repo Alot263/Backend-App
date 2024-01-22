@@ -23,9 +23,9 @@
                 <div class="card">
                     <div class="card-header flex-wrap justify-content-end p-2 px-xl-4">
                         @if($data->holder_name)
-                            <button class="btn btn--primary m-1 m-sm-2" type="button" data-toggle="modal" data-target="#update-modal"><i class="tio-edit"></i> {{__('messages.update')}}</button>
-                            <a class="btn btn--danger m-1 m-sm-2" href="javascript:void(0)" onclick="form_alert('del','Delete Bank Info ?')"><i class="tio-delete-outlined"></i> {{__('messages.delete')}}</a>
-                            <form action="javascript:" id="del" method="post">
+                            <button class="btn btn--primary m-1 m-sm-2" type="button" data-toggle="modal" data-target="#update-modal"><i class="tio-edit"></i> {{translate('messages.update')}}</button>
+                            <a class="btn btn--danger m-1 m-sm-2 form-alert" href="javascript:void(0)" data-id="del" data-message="{{ translate('Delete Bank Info ?') }}"><i class="tio-delete-outlined"></i> {{translate('messages.delete')}}</a>
+                            <form action="{{ route('vendor.profile.bank_delete') }}" id="del" method="post">
                                 @csrf @method('post')
                             </form>
                         @else
@@ -42,7 +42,7 @@
                                 <ul>
                                     <li>
                                         <h5>
-                                            {{translate('messages.bank_name')}} : 
+                                            {{translate('messages.bank_name')}} :
                                         </h5>
                                         <div class="info">
                                             {{$data->bank_name ? $data->bank_name : translate('messages.No Data found')}}
@@ -50,7 +50,7 @@
                                     </li>
                                     <li>
                                         <h5>
-                                            {{translate('messages.branch')}} : 
+                                            {{translate('messages.branch')}} :
                                         </h5>
                                         <div class="info">
                                             {{$data->branch ? $data->branch : translate('messages.No Data found')}}
@@ -58,7 +58,7 @@
                                     </li>
                                     <li>
                                         <h5>
-                                            {{translate('messages.account_no')}} : 
+                                            {{translate('messages.account_no')}} :
                                         </h5>
                                         <div class="info">
                                             {{$data->account_no ? $data->account_no : translate('messages.No Data found')}}
@@ -79,7 +79,7 @@
                 <div class="modal-header">
                     <h1 class="h3 mb-0">{{ translate('messages.edit_bank_info') }}</h1>
                     <button type="button" class="close" data-dismiss="modal">
-                        <span aria-hidden="true" class="btn btn--circle btn-soft-danger text-danger"><ti class="tio-clear"></ti></span>
+                        <span aria-hidden="true" class="btn btn--circle btn-soft-danger text-danger"><i class="tio-clear"></i></span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -95,7 +95,7 @@
                                             required maxlength="191">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="name">{{translate('messages.branch')}} {{translate('messages.name')}}<span class="text-danger">*</span></label>
+                                    <label for="name">{{translate('messages.branch_name')}}<span class="text-danger">*</span></label>
                                     <input type="text" name="branch" value="{{$data->branch}}" class="form-control"
                                             id="name"
                                             required maxlength="191">

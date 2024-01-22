@@ -14,7 +14,7 @@
                     <img src="{{ asset('public/assets/admin/img/report.png') }}" class="w--22" alt="">
                 </span>
                 <span>
-                    {{ translate('messages.transection_report') }} 
+                    {{ translate('messages.transection_report') }}
                     @if (isset($filter) && $filter != 'all_time')
                     <span class="mb-0 h6 badge badge-soft-success ml-2"
                         id="itemCount">( {{ session('from_date') }} - {{ session('to_date') }} )</span>
@@ -30,11 +30,10 @@
                     @csrf
                     <div class="row g-3">
                         <div class="col-sm-6 col-md-3">
-                            <select name="module_id" class="form-control js-select2-custom"
-                                onchange="set_filter('{{ url()->full() }}',this.value,'module_id')"
-                                title="{{ translate('messages.select') }} {{ translate('messages.modules') }}">
+                            <select name="module_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="module_id"
+                                title="{{ translate('messages.select_modules') }}">
                                 <option value="" {{ !request('module_id') ? 'selected' : '' }}>
-                                    {{ translate('messages.all') }} {{ translate('messages.modules') }}</option>
+                                    {{ translate('messages.all_modules') }}</option>
                                 @foreach (\App\Models\Module::notParcel()->get() as $module)
                                     <option value="{{ $module->id }}"
                                         {{ request('module_id') == $module->id ? 'selected' : '' }}>
@@ -44,9 +43,8 @@
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_zone_filter('{{ url()->full() }}',this.value)" id="zone">
-                                <option value="all">{{ translate('messages.All Zones') }}</option>
+                            <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id" id="zone">
+                                <option value="all">{{ translate('messages.All_Zones') }}</option>
                                 @foreach (\App\Models\Zone::orderBy('name')->get() as $z)
                                     <option value="{{ $z['id'] }}"
                                         {{ isset($zone) && $zone->id == $z['id'] ? 'selected' : '' }}>
@@ -56,20 +54,19 @@
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <select name="store_id" onchange="set_store_filter('{{ url()->full() }}',this.value)"
-                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.store') }}"
-                                class="js-data-example-ajax form-control">
+                            <select name="store_id" data-url="{{ url()->full() }}" data-filter="store_id"
+                                data-placeholder="{{ translate('messages.select_store') }}"
+                                class="js-data-example-ajax form-control set-filter">
                                 @if (isset($store))
                                     <option value="{{ $store->id }}" selected>{{ $store->name }}</option>
                                 @else
-                                    <option value="all" selected>{{ translate('messages.all') }} {{ translate('messages.stores') }}</option>
+                                    <option value="all" selected>{{ translate('messages.all_stores') }}</option>
                                 @endif
                             </select>
                         </div>
 
                         <div class="col-sm-6 col-md-3">
-                            <select class="form-control" name="filter"
-                                onchange="set_time_filter('{{ url()->full() }}',this.value)">
+                            <select class="form-control set-filter" name="filter" data-url="{{ url()->full() }}" data-filter="filter">
                                 <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
                                     {{ translate('messages.All Time') }}</option>
                                 <option value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
@@ -116,6 +113,13 @@
             $total = \App\Models\Order::when(isset($zone), function ($query) use ($zone) {
                 return $query->where('zone_id', $zone->id);
             })
+            ->when(isset($key), function ($query) use ($key) {
+                    return $query->where(function ($q) use ($key) {
+                            foreach ($key as $value) {
+                                $q->orWhere('id', 'like', "%{$value}%");
+                            }
+                        });
+                })
                 ->when(request('module_id'), function ($query) {
                     return $query->module(request('module_id'));
                 })
@@ -162,6 +166,13 @@
                                 $delivered = \App\Models\Order::when(isset($zone), function ($query) use ($zone) {
                                     return $query->where('zone_id', $zone->id);
                                 })
+                                ->when(isset($key), function ($query) use ($key) {
+                                        return $query->where(function ($q) use ($key) {
+                                                foreach ($key as $value) {
+                                                    $q->orWhere('id', 'like', "%{$value}%");
+                                                }
+                                            });
+                                    })
                                     ->when(request('module_id'), function ($query) {
                                         return $query->module(request('module_id'));
                                     })
@@ -210,64 +221,18 @@
                                 </div>
                             </a>
                         </div>
-                        {{-- <div class="col-sm-4">
-                            @php
-                                $returned = \App\Models\Order::when(isset($zone), function ($query) use ($zone) {
-                                    return $query->where('zone_id', $zone->id);
-                                })
-                                    ->when(request('module_id'), function ($query) {
-                                        return $query->module(request('module_id'));
-                                    })
-                                    ->whereIn('order_status', ['pending', 'accepted', 'confirmed', 'processing', 'handover', 'picked_up'])
-                                    ->when(isset($store), function ($query) use ($store) {
-                                        return $query->where('store_id', $store->id);
-                                    })
-                                    ->when(isset($from) && isset($to) && $from != null && $to != null && $filter == 'custom', function ($query) use ($from, $to) {
-                                        return $query->whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59']);
-                                    })
-                                    ->when(isset($filter) && $filter == 'this_year', function ($query) {
-                                        return $query->whereYear('created_at', now()->format('Y'));
-                                    })
-                                    ->when(isset($filter) && $filter == 'this_month', function ($query) {
-                                        return $query->whereMonth('created_at', now()->format('m'))->whereYear('created_at', now()->format('Y'));
-                                    })
-                                    ->when(isset($filter) && $filter == 'this_month', function ($query) {
-                                        return $query->whereMonth('created_at', now()->format('m'))->whereYear('created_at', now()->format('Y'));
-                                    })
-                                    ->when(isset($filter) && $filter == 'previous_year', function ($query) {
-                                        return $query->whereYear('created_at', date('Y') - 1);
-                                    })
-                                    ->when(isset($filter) && $filter == 'this_week', function ($query) {
-                                        return $query->whereBetween('created_at', [
-                                            now()
-                                                ->startOfWeek()
-                                                ->format('Y-m-d H:i:s'),
-                                            now()
-                                                ->endOfWeek()
-                                                ->format('Y-m-d H:i:s'),
-                                        ]);
-                                    })
-                                    ->Notpos()
-                                    ->sum('order_amount');
-                            @endphp
-                            <a class="__card-3 h-100" href="#">
-                                <img src="{{ asset('/public/assets/admin/img/report/new/trx2.png') }}" class="icon"
-                                    alt="report/new">
-                                <h3 class="title text-006AB4">{{ \App\CentralLogics\Helpers::number_format_short($returned) }}
-                                </h3>
-                                <h6 class="subtitle">{{ translate('On-Hold Transactions') }}</h6>
-                                <div class="info-icon" data-toggle="tooltip" data-placement="top"
-                                    data-original-title="This is dummy information text for report card">
-                                    <img src="{{ asset('/public/assets/admin/img/report/new/info2.png') }}"
-                                        alt="report/new">
-                                </div>
-                            </a>
-                        </div> --}}
                         <div class="col-sm-6">
                             @php
                                 $canceled = \App\Models\Order::when(isset($zone), function ($query) use ($zone) {
                                     return $query->where('zone_id', $zone->id);
                                 })
+                                ->when(isset($key), function ($query) use ($key) {
+                                        return $query->where(function ($q) use ($key) {
+                                                foreach ($key as $value) {
+                                                    $q->orWhere('id', 'like', "%{$value}%");
+                                                }
+                                            });
+                                    })
                                     ->when(request('module_id'), function ($query) {
                                         return $query->module(request('module_id'));
                                     })
@@ -319,12 +284,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- @php
-                    $admin_earned = $card_transactions->sum('admin_commission + admin_expense - delivery_fee_comission');
-                    $store_earned = $card_transactions->sum('store_amount');
-                    $deliveryman_earned = $card_transactions->sum('original_delivery_charge') + $order_transactions->sum('dm_tips');
-                    $total_sell = $card_transactions->sum('order_amount');
-                @endphp --}}
                 <div class="col-lg-4">
                     <div class="row g-2">
                         <div class="col-md-12">
@@ -341,7 +300,7 @@
                                     </div>
                                 </div>
                                 <h4 class="earning text-0661CB">
-                                    {{ \App\CentralLogics\Helpers::number_format_short($admin_earned + $admin_earned_delivery_commission) }}</h4>
+                                    {{ \App\CentralLogics\Helpers::number_format_short($admin_earned) }}</h4>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -369,8 +328,7 @@
                                         alt="">
                                     <h4 class="name">{{ translate('Deliveryman Earning') }}</h4>
                                     <div class="info-icon" data-toggle="tooltip" data-placement="right"
-                                        data-original-title="{{ translate('Deducting the admin commission on the delivery fee, the delivery fee & tips amount goes to
-                                        earning section.') }}">
+                                        data-original-title="{{ translate('Deducting the admin commission on the delivery fee, the delivery fee & tips amount goes to earning section.') }}">
                                         <img src="{{ asset('/public/assets/admin/img/report/new/info3.png') }}"
                                             alt="report/new">
                                     </div>
@@ -391,13 +349,13 @@
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
                     <h3 class="card-title">
-                        {{ translate('messages.order') }} {{ translate('messages.transactions') }} <span
+                        {{ translate('messages.order_transactions') }} <span
                             class="badge badge-soft-secondary" id="countItems">{{ $order_transactions->total() }}</span>
                     </h3>
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <form class="search-form">
                         <!-- Search -->
                         <div class="input--group input-group input-group-merge input-group-flush">
-                            <input class="form-control" placeholder="{{ translate('Search by Order ID') }}" name="search">
+                            <input class="form-control" placeholder="{{ translate('Search by Order ID') }}" value="{{ request()?->search ?? null}}" name="search">
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                         </div>
                         <!-- End Search -->
@@ -447,7 +405,7 @@
                         <thead class="thead-light">
                             <tr>
                                 <th class="border-0">{{ translate('sl') }}</th>
-                                <th class="border-0">{{ translate('messages.order') }} {{ translate('messages.id') }}</th>
+                                <th class="border-0">{{ translate('messages.order_id') }}</th>
                                 <th class="border-0">{{ translate('messages.store') }}</th>
                                 <th class="border-0">{{ translate('messages.customer_name') }}</th>
                                 <th class="border-0 min-w-120">{{ translate('messages.total_item_amount') }}</th>
@@ -455,20 +413,21 @@
                                 <th class="border-0">{{ translate('messages.coupon_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.discounted_amount') }}</th>
                                 <th class="border-0">{{ translate('messages.vat/tax') }}</th>
-                                <th class="border-0">{{ translate('messages.delivery') }} {{ translate('messages.charge') }}</th>
+                                <th class="border-0">{{ translate('messages.delivery_charge') }}</th>
                                 <th class="border-0">{{ translate('messages.order_amount') }}</th>
                                 <th class="border-0">{{ translate('messages.admin_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.store_discount') }}</th>
                                 <th class="border-0">{{ translate('messages.admin_commission') }}</th>
+                                <th class="border-0">{{ \App\CentralLogics\Helpers::get_business_data('additional_charge_name')??translate('messages.additional_charge') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('commision_on_delivery_charge') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('admin_net_income') }}</th>
                                 <th class="min-w-140 text-capitalize">{{ translate('store_net_income') }}</th>
-                                <th class="border-0 min-w-120">{{ translate('messages.amount') }} {{ translate('messages.received_by') }}</th>
+                                <th class="border-0 min-w-120">{{ translate('messages.amount_received_by') }}</th>
                                 <th class="border-top border-bottom text-capitalize">{{ translate('messages.payment_method') }}</th>
                                 <th class="border-0">{{ translate('messages.payment_status') }}</th>
                                 <th class="border-0">{{ translate('messages.action') }}</th>
                             </tr>
-                        </thead> 
+                        </thead>
                         <tbody id="set-rows">
                             @foreach ($order_transactions as $k => $ot)
                                 <tr scope="row">
@@ -496,23 +455,22 @@
                                                 <strong>{{ $ot->order->customer['f_name'] . ' ' . $ot->order->customer['l_name'] }}</strong>
                                             </a>
                                         @else
-                                            <label class="badge badge-danger">{{ translate('messages.invalid') }}
-                                                {{ translate('messages.customer') }}
-                                                {{ translate('messages.data') }}</label>
+                                            <label class="badge badge-danger">{{ translate('messages.invalid_customer_data') }}</label>
                                         @endif
                                     </td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['order_amount'] - $ot->order['dm_tips']-$ot->order['delivery_charge'] - $ot['tax'] + $ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order->details->sum('discount_on_item')) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['order_amount'] - $ot->additional_charge - $ot->order['dm_tips']-$ot->order['delivery_charge'] - $ot['tax'] + $ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']+$ot->order['flash_admin_discount_amount']+$ot->order['flash_store_discount_amount']) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order->details->sum('discount_on_item')+$ot->order['flash_admin_discount_amount']+$ot->order['flash_store_discount_amount']) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order['coupon_discount_amount']) }}</td>
-                                    <td class="white-space-nowrap">  {{ \App\CentralLogics\Helpers::number_format_short($ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']) }}</td>
+                                    <td class="white-space-nowrap">  {{ \App\CentralLogics\Helpers::number_format_short($ot->order['coupon_discount_amount'] + $ot->order['store_discount_amount']+$ot->order['flash_store_discount_amount']+$ot->order['flash_admin_discount_amount']) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->tax) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_charge) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->order_amount) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->admin_expense) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->discount_amount_by_store) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission + $ot->admin_expense) - $ot->delivery_fee_comission) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->discount_amount_by_store+$ot->order['flash_store_discount_amount']) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission + $ot->admin_expense) - $ot->delivery_fee_comission -$ot->additional_charge - $ot->order['flash_admin_discount_amount']) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->additional_charge)) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->delivery_fee_comission) }}</td>
-                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission)) }}</td>
+                                    <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency(($ot->admin_commission - $ot->order['flash_admin_discount_amount'])) }}</td>
                                     <td class="white-space-nowrap">{{ \App\CentralLogics\Helpers::format_currency($ot->store_amount - $ot->tax) }}</td>
                                     @if ($ot->received_by == 'admin')
                                         <td class="text-capitalize white-space-nowrap">{{ translate('messages.admin') }}</td>
@@ -552,7 +510,7 @@
                                           </span>
                                         @endif
                                     </td>
-                    
+
                                     <td>
                                         <div class="btn--container justify-content-center">
                                             <a class="btn btn-outline-success square-btn btn-sm mr-1 action-btn"  href="{{route('admin.report.generate-statement',[$ot['id']])}}">
@@ -594,193 +552,11 @@
     <script src="{{ asset('public/assets/admin') }}/vendor/chartjs-chart-matrix/dist/chartjs-chart-matrix.min.js">
     </script>
     <script src="{{ asset('public/assets/admin') }}/js/hs.chartjs-matrix.js"></script>
+    <script src="{{ asset('public/assets/admin') }}/js/view-pages/admin-reports.js"></script>
 
     <script>
+        "use strict";
         $(document).on('ready', function() {
-
-            // INITIALIZATION OF FLATPICKR
-            // =======================================================
-            $('.js-flatpickr').each(function() {
-                $.HSCore.components.HSFlatpickr.init($(this));
-            });
-
-
-            // INITIALIZATION OF NAV SCROLLER
-            // =======================================================
-            $('.js-nav-scroller').each(function() {
-                new HsNavScroller($(this)).init()
-            });
-
-
-            // INITIALIZATION OF DATERANGEPICKER
-            // =======================================================
-            $('.js-daterangepicker').daterangepicker();
-
-            $('.js-daterangepicker-times').daterangepicker({
-                timePicker: true,
-                startDate: moment().startOf('hour'),
-                endDate: moment().startOf('hour').add(32, 'hour'),
-                locale: {
-                    format: 'M/DD hh:mm A'
-                }
-            });
-
-            var start = moment();
-            var end = moment();
-
-            function cb(start, end) {
-                $('#js-daterangepicker-predefined .js-daterangepicker-predefined-preview').html(start.format(
-                    'MMM D') + ' - ' + end.format('MMM D, YYYY'));
-            }
-
-            $('#js-daterangepicker-predefined').daterangepicker({
-                startDate: start,
-                endDate: end,
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
-                        'month').endOf('month')]
-                }
-            }, cb);
-
-            cb(start, end);
-
-
-            // INITIALIZATION OF CHARTJS
-            // =======================================================
-            $('.js-chart').each(function() {
-                $.HSCore.components.HSChartJS.init($(this));
-            });
-
-            var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
-
-            // Call when tab is clicked
-            $('[data-toggle="chart"]').click(function(e) {
-                let keyDataset = $(e.currentTarget).attr('data-datasets')
-
-                // Update datasets for chart
-                updatingChart.data.datasets.forEach(function(dataset, key) {
-                    dataset.data = updatingChartDatasets[keyDataset][key];
-                });
-                updatingChart.update();
-            })
-
-
-            // INITIALIZATION OF MATRIX CHARTJS WITH CHARTJS MATRIX PLUGIN
-            // =======================================================
-            function generateHoursData() {
-                var data = [];
-                var dt = moment().subtract(365, 'days').startOf('day');
-                var end = moment().startOf('day');
-                while (dt <= end) {
-                    data.push({
-                        x: dt.format('YYYY-MM-DD'),
-                        y: dt.format('e'),
-                        d: dt.format('YYYY-MM-DD'),
-                        v: Math.random() * 24
-                    });
-                    dt = dt.add(1, 'day');
-                }
-                return data;
-            }
-
-            $.HSCore.components.HSChartMatrixJS.init($('.js-chart-matrix'), {
-                data: {
-                    datasets: [{
-                        label: 'Commits',
-                        data: generateHoursData(),
-                        width: function(ctx) {
-                            var a = ctx.chart.chartArea;
-                            return (a.right - a.left) / 70;
-                        },
-                        height: function(ctx) {
-                            var a = ctx.chart.chartArea;
-                            return (a.bottom - a.top) / 10;
-                        }
-                    }]
-                },
-                options: {
-                    tooltips: {
-                        callbacks: {
-                            title: function() {
-                                return '';
-                            },
-                            label: function(item, data) {
-                                var v = data.datasets[item.datasetIndex].data[item.index];
-
-                                if (v.v.toFixed() > 0) {
-                                    return '<span class="font-weight-bold">' + v.v.toFixed() +
-                                        ' hours</span> on ' + v.d;
-                                } else {
-                                    return '<span class="font-weight-bold">No time</span> on ' + v.d;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        xAxes: [{
-                            position: 'bottom',
-                            type: 'time',
-                            offset: true,
-                            time: {
-                                unit: 'week',
-                                round: 'week',
-                                displayFormats: {
-                                    week: 'MMM'
-                                }
-                            },
-                            ticks: {
-                                "labelOffset": 20,
-                                "maxRotation": 0,
-                                "minRotation": 0,
-                                "fontSize": 12,
-                                "fontColor": "rgba(22, 52, 90, 0.5)",
-                                "maxTicksLimit": 12,
-                            },
-                            gridLines: {
-                                display: false
-                            }
-                        }],
-                        yAxes: [{
-                            type: 'time',
-                            offset: true,
-                            time: {
-                                unit: 'day',
-                                parser: 'e',
-                                displayFormats: {
-                                    day: 'ddd'
-                                }
-                            },
-                            ticks: {
-                                "fontSize": 12,
-                                "fontColor": "rgba(22, 52, 90, 0.5)",
-                                "maxTicksLimit": 2,
-                            },
-                            gridLines: {
-                                display: false
-                            }
-                        }]
-                    }
-                }
-            });
-
-
-            // INITIALIZATION OF CLIPBOARD
-            // =======================================================
-            $('.js-clipboard').each(function() {
-                var clipboard = $.HSCore.components.HSClipboard.init(this);
-            });
-
-
-            // INITIALIZATION OF CIRCLES
-            // =======================================================
-            $('.js-circle').each(function() {
-                var circle = $.HSCore.components.HSCircles.init($(this));
-            });
             $('.js-data-example-ajax').select2({
                 ajax: {
                     url: '{{ url('/') }}/admin/store/get-stores',
@@ -803,7 +579,7 @@
                         };
                     },
                     __port: function(params, success, failure) {
-                        var $request = $.ajax(params);
+                        let $request = $.ajax(params);
 
                         $request.then(success);
                         $request.fail(failure);
@@ -813,28 +589,10 @@
                 }
             });
         });
-    </script>
-
-    <script>
-        $('#from_date,#to_date').change(function() {
-            let fr = $('#from_date').val();
-            let to = $('#to_date').val();
-            if (fr != '' && to != '') {
-                if (fr > to) {
-                    $('#from_date').val('');
-                    $('#to_date').val('');
-                    toastr.error('Invalid date range!', Error, {
-                        CloseButton: true,
-                        ProgressBar: true
-                    });
-                }
-            }
-
-        })
 
         $('#search-form').on('submit', function(e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

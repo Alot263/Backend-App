@@ -4,8 +4,6 @@
 @else
     @php($zone_name = translate('messages.all'))
 @endif
-{{--<label class="badge badge-soft-info">{{translate('messages.zone')}} : {{$zone_name}}</label>
---}}
 
 <div class="chartjs-custom mx-auto">
     <canvas id="business-overview" class="mt-2"></canvas>
@@ -14,8 +12,9 @@
 <script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
 
 <script>
-    var ctx = document.getElementById('business-overview');
-    var myChart = new Chart(ctx, {
+    "use strict";
+    let ctx = document.getElementById('business-overview');
+    let myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: [

@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 
 class VendorPasswordResetController extends Controller
 {
@@ -125,7 +126,7 @@ class VendorPasswordResetController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|exists:vendors,email',
             'reset_token'=> 'required',
-            'password'=> 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'confirm_password'=> 'required|same:password',
         ]);
 

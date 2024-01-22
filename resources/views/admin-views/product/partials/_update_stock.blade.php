@@ -11,7 +11,7 @@
             <div id="quantity">
                 <label class="control-label"></label>
                 <label class="input-label" for="total_stock">{{translate('messages.total_stock')}}</label>
-                <input type="number" class="form-control" name="current_stock" value="{{$product->stock}}" id="quantity" {{count(json_decode($product['variations'],true)) > 0 ? 'readonly' : ""}}>
+                <input type="number" min="0" class="form-control" name="current_stock" value="{{$product->stock}}" id="quantity" {{count(json_decode($product['variations'],true)) > 0 ? 'readonly' : ""}}>
             </div>
         </div>
     </div>

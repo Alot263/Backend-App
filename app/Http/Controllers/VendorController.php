@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
 use App\CentralLogics\StoreLogic;
+use App\Models\Admin;
+use App\Models\Translation;
 use Illuminate\Support\Facades\DB;
 use Gregwar\Captcha\CaptchaBuilder;
 use Brian2694\Toastr\Facades\Toastr;
@@ -17,7 +19,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
+use MatanYadaev\EloquentSpatial\Objects\Point;
+use Illuminate\Validation\Rules\Password;
 
 class VendorController extends Controller
 {
@@ -32,7 +35,7 @@ class VendorController extends Controller
         $custome_recaptcha = new CaptchaBuilder;
         $custome_recaptcha->build();
         Session::put('six_captcha', $custome_recaptcha->getPhrase());
-        
+
         return view('vendor-views.auth.register', compact('custome_recaptcha'));
     }
 
@@ -77,31 +80,31 @@ class VendorController extends Controller
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:vendors',
             'minimum_delivery_time' => 'required',
             'maximum_delivery_time' => 'required',
-            'password' => 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'zone_id' => 'required',
             'module_id' => 'required',
             'logo' => 'required',
             'tax' => 'required',
-            'minimum_delivery_time' => 'required',
-            'maximum_delivery_time' => 'required',
             'delivery_time_type'=>'required',
         ]);
-
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         if($request->zone_id)
         {
-            $point = new Point($request->latitude, $request->longitude);
-            $zone = Zone::contains('coordinates', $point)->where('id', $request->zone_id)->first();
+            $zone = Zone::query()
+            ->whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))
+            ->where('id',$request->zone_id)
+            ->first();
             if(!$zone){
                 $validator->getMessageBag()->add('latitude', translate('messages.coordinates_out_of_zone'));
                 return back()->withErrors($validator)
                         ->withInput();
             }
         }
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+
         $vendor = new Vendor();
         $vendor->f_name = $request->f_name;
         $vendor->l_name = $request->l_name;
@@ -112,12 +115,12 @@ class VendorController extends Controller
         $vendor->save();
 
         $store = new Store;
-        $store->name = $request->name;
+        $store->name =  $request->name[array_search('default', $request->lang)];
         $store->phone = $request->phone;
         $store->email = $request->email;
         $store->logo = Helpers::upload('store/', 'png', $request->file('logo'));
         $store->cover_photo = Helpers::upload('store/cover/', 'png', $request->file('cover_photo'));
-        $store->address = $request->address;
+        $store->address = $request->address[array_search('default', $request->lang)];
         $store->latitude = $request->latitude;
         $store->longitude = $request->longitude;
         $store->vendor_id = $vendor->id;
@@ -127,9 +130,63 @@ class VendorController extends Controller
         $store->delivery_time = $request->minimum_delivery_time .'-'. $request->maximum_delivery_time.' '.$request->delivery_time_type;
         $store->status = 0;
         $store->save();
+
+        $default_lang = str_replace('_', '-', app()->getLocale());
+            $data = [];
+            foreach ($request->lang as $index => $key) {
+                if($default_lang == $key && !($request->name[$index])){
+                    if ($key != 'default') {
+                        array_push($data, array(
+                            'translationable_type' => 'App\Models\Store',
+                            'translationable_id' => $store->id,
+                            'locale' => $key,
+                            'key' => 'name',
+                            'value' => $store->name,
+                        ));
+                    }
+                }else{
+                    if ($request->name[$index] && $key != 'default') {
+                        array_push($data, array(
+                            'translationable_type' => 'App\Models\Store',
+                            'translationable_id' => $store->id,
+                            'locale' => $key,
+                            'key' => 'name',
+                            'value' => $request->name[$index],
+                        ));
+                    }
+                }
+                if($default_lang == $key && !($request->address[$index])){
+                    if ($key != 'default') {
+                        array_push($data, array(
+                            'translationable_type' => 'App\Models\Store',
+                            'translationable_id' => $store->id,
+                            'locale' => $key,
+                            'key' => 'address',
+                            'value' => $store->address,
+                        ));
+                    }
+                }else{
+                    if ($request->address[$index] && $key != 'default') {
+                        array_push($data, array(
+                            'translationable_type' => 'App\Models\Store',
+                            'translationable_id' => $store->id,
+                            'locale' => $key,
+                            'key' => 'address',
+                            'value' => $request->address[$index],
+                        ));
+                    }
+                }
+            }
+            Translation::insert($data);
         try{
-            if(config('mail.status')){
-                Mail::to($request['email'])->send(new \App\Mail\SelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            $admin= Admin::where('role_id', 1)->first();
+            $mail_status = Helpers::get_mail_status('registration_mail_status_store');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($request['email'])->send(new \App\Mail\VendorSelfRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
+            }
+            $mail_status = Helpers::get_mail_status('store_registration_mail_status_admin');
+            if(config('mail.status') && $mail_status == '1'){
+                Mail::to($admin['email'])->send(new \App\Mail\StoreRegistration('pending', $vendor->f_name.' '.$vendor->l_name));
             }
         }catch(\Exception $ex){
             info($ex->getMessage());

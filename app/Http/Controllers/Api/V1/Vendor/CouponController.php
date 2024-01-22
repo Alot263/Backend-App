@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Translation;
 use Illuminate\Support\Facades\Validator;
 
 class CouponController extends Controller
@@ -41,7 +42,7 @@ class CouponController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'code' => 'required|unique:coupons|max:100',
-            'title' => 'required|max:191',
+            // 'title' => 'required|max:191',
             'start_date' => 'required',
             'expire_date' => 'required',
             'coupon_type' => 'required|in:free_delivery,default',
@@ -52,28 +53,39 @@ class CouponController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $store_id = $request->vendor->stores[0]->id;
+        
+        $data = json_decode($request->translations, true);
+        
+        if (count($data) < 1) {
+            $validator->getMessageBag()->add('translations', translate('messages.Title in english is required'));
+        }
 
-        $data = "";
-        DB::table('coupons')->insert([
-            'title' => $request->title,
-            'code' => $request->code,
-            'limit' => $request->coupon_type=='first_order'?1:$request->limit,
-            'coupon_type' => $request->coupon_type,
-            'start_date' => $request->start_date,
-            'expire_date' => $request->expire_date,
-            'min_purchase' => $request->min_purchase != null ? $request->min_purchase : 0,
-            'max_discount' => $request->max_discount != null ? $request->max_discount : 0,
-            'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
-            'discount_type' => $request->discount_type??'',
-            'status' => 1,
-            'created_by' => 'vendor',
-            'data' => json_encode($data),
-            'store_id' =>$store_id,
-            'customer_id' => json_encode($customer_id),
-            'module_id' => $request->vendor->stores[0]->module_id,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        $coupon_data = "";
+        $coupon = new Coupon();
+        $coupon->title = $data[0]['value'];
+        $coupon->code = $request->code;
+        $coupon->limit = $request->coupon_type=='first_order'?1:$request->limit;
+        $coupon->coupon_type = $request->coupon_type;
+        $coupon->start_date = $request->start_date;
+        $coupon->expire_date = $request->expire_date;
+        $coupon->min_purchase = $request->min_purchase != null ? $request->min_purchase : 0;
+        $coupon->max_discount = $request->max_discount != null ? $request->max_discount : 0;
+        $coupon->discount = $request->discount_type == 'amount' ? $request->discount : $request['discount'];
+        $coupon->discount_type = $request->discount_type??'';
+        $coupon->status = 1;
+        $coupon->created_by = 'vendor';
+        $coupon->data = json_encode($coupon_data);
+        $coupon->store_id =$store_id;
+        $coupon->customer_id = json_encode($customer_id);
+        $coupon->module_id = $request->vendor->stores[0]->module_id;
+        $coupon->save();
+       
+        foreach ($data as $key=>$i) {
+            $data[$key]['translationable_type'] = 'App\Models\Coupon';
+            $data[$key]['translationable_id'] = $coupon->id;
+        }
+        Translation::insert($data);
+
         return response()->json(['message' => translate('messages.coupon_added_successfully')], 200);
 
     }
@@ -92,39 +104,69 @@ class CouponController extends Controller
         return response()->json([$coupon],200);
     }
 
+    public function view_without_translate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'coupon_id'=> 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $coupon = Coupon::withoutGlobalScope('translate')->find($request->coupon_id);
+        $coupon['data'] = json_decode($coupon['data'],true);
+        $coupon['customer_id'] = json_decode($coupon['customer_id'],true);
+        return response()->json([$coupon],200);
+    }
+
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'coupon_id'=> 'required',
             'code' => 'required|max:100|unique:coupons,code,'.$request->coupon_id,
-            'title' => 'required|max:191',
+            // 'title' => 'required|max:191',
             'start_date' => 'required',
             'expire_date' => 'required',
             'discount' => 'required_if:coupon_type,default',
             'coupon_type' => 'required|in:free_delivery,default',
 
         ]);
+        $data = json_decode($request->translations, true);
+
+        if (count($data) < 1) {
+            $validator->getMessageBag()->add('translations', translate('messages.Title in english is required'));
+        }
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         $store_id = $request->vendor->stores[0]->id;
         $customer_id  = $request->customer_ids ?? ['all'];
 
-        DB::table('coupons')->where(['id' => $request->coupon_id])->where('created_by', 'vendor' )->where('store_id',$store_id)
-        ->update([
-            'title' => $request->title,
-            'code' => $request->code,
-            'limit' => $request->coupon_type=='first_order'?1:$request->limit,
-            'coupon_type' => $request->coupon_type,
-            'start_date' => $request->start_date,
-            'expire_date' => $request->expire_date,
-            'min_purchase' => $request->min_purchase != null ? $request->min_purchase : 0,
-            'max_discount' => $request->max_discount != null ? $request->max_discount : 0,
-            'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
-            'discount_type' => $request->discount_type ?? '',
-            'customer_id' => json_encode($customer_id),
-            'updated_at' => now()
-        ]);
+        $coupon = Coupon::where(['id' => $request->coupon_id])->where('created_by', 'vendor' )->where('store_id',$store_id)->first();
+
+        $coupon->title = $data[0]['value'];
+        $coupon->code = $request->code;
+        $coupon->limit = $request->coupon_type=='first_order'?1:$request->limit;
+        $coupon->coupon_type = $request->coupon_type;
+        $coupon->start_date = $request->start_date;
+        $coupon->expire_date = $request->expire_date;
+        $coupon->min_purchase = $request->min_purchase != null ? $request->min_purchase : 0;
+        $coupon->max_discount = $request->max_discount != null ? $request->max_discount : 0;
+        $coupon->discount = $request->discount_type == 'amount' ? $request->discount : $request['discount'];
+        $coupon->discount_type = $request->discount_type ?? '';
+        $coupon->customer_id = json_encode($customer_id);
+        $coupon->save();
+      
+        foreach ($data as $key=>$i) {
+            
+            Translation::updateOrInsert(
+                ['translationable_type'  => 'App\Models\Coupon',
+                    'translationable_id'    => $coupon->id,
+                    'locale'                => $i['locale'],
+                    'key'                   => 'title'],
+                ['value'                 => $i['value']]
+            );
+        }
+
         return response()->json(['message' => translate('messages.coupon_updated_successfully')], 200);
     }
 

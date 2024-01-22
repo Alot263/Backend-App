@@ -2,61 +2,30 @@
 
 @section('title',translate('messages.language'))
 
-@push('css_or_js')
 
-@endpush
 
 @section('content')
 <div class="content container-fluid">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-header-title mr-3">
+        <h1 class="page-header-title mr-3 mb-0">
             <span class="page-header-icon">
                 <img src="{{ asset('public/assets/admin/img/business.png') }}" class="w--26" alt="">
             </span>
             <span>
-                {{ translate('messages.business') }} {{ translate('messages.setup') }}
+                {{ translate('messages.business_setup') }}
             </span>
         </h1>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
-                    <!-- Nav -->
-                    <ul class="nav nav-tabs mb-5 mt-5 border-0 nav--tabs">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'business']) }}"   aria-disabled="true">{{translate('messages.business')}} {{translate('messages.settings')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'customer']) }}"  aria-disabled="true">{{translate('messages.customers')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'deliveryman']) }}"  aria-disabled="true">{{translate('messages.delivery')}} {{translate('messages.man')}}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {{ Request::is('admin/business-settings/language') ?'active':'' }}" href="{{route('admin.business-settings.language.index')}}"  aria-disabled="true">{{translate('messages.Languages')}}</a>
-                        </li>
-                    </ul>
-                    <!-- End Nav -->
-                </div>
-            </div>
-        </div>
+        @include('admin-views.business-settings.partials.nav-menu')
     </div>
     <!-- End Page Header -->
-    <div class="card mb-3">
-        <div class="card-body">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="alert alert-danger mb-3" role="alert">
-                    {{translate('changing_some_settings_will_take_time_to_show_effect_please_clear_session_or_wait_for_60_minutes_else_browse_from_incognito_mode')}}
-                </div>
 
-                <div class="card">
+                <div class="card mb-3">
                     <div class="px-3 py-4">
                         <div class="row justify-content-between align-items-center flex-grow-1">
                             <div class="col-sm-4 col-md-6 col-lg-8 mb-2 mb-sm-0">
                                 <h5 class="mb-0 d-flex">
-                                    {{translate('language_table')}}
+                                    {{translate('language_list')}}
                                 </h5>
                             </div>
                             <div class="col-sm-8 col-md-6 col-lg-4">
@@ -81,9 +50,9 @@
                                 "info": {
                                 "totalQty": "#datatableWithPaginationInfoTotalQty"
                                 },
-        
+
                                 "entries": "#datatableEntries",
-        
+
                                 "isResponsive": false,
                                 "isShowPaging": false,
                                 "paging":false
@@ -91,38 +60,34 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>{{ translate('SL')}}</th>
-                                <th>{{translate('Id')}}</th>
                                 <th>{{translate('Code')}}</th>
                                 <th class="text-center">{{translate('status')}}</th>
-                                <th class="text-center">{{translate('default')}} {{translate('status')}}</th>
+                                <th class="text-center">{{translate('default_status')}}</th>
                                 <th class="text-center">{{translate('action')}}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @php($language=App\Models\BusinessSetting::where('key','system_language')->first())
-                            @if($language=$language)
+                            @if($language)
                             @foreach(json_decode($language['value'],true) as $key =>$data)
                                 <tr>
                                     <td>{{$key+1}}</td>
-                                    <td>{{$data['id']}}</td>
                                     <td>{{$data['code']}}</td>
                                     <td>
-                                        {{-- <label class="switcher mx-auto">
-                                            <input type="checkbox"
-                                                    onclick="updateStatus('{{route('admin.business-settings.language.update-status')}}','{{$data['code']}}')"
-                                                    class="switcher_input" {{$data['status']==1?'checked':''}}>
-                                            <span class="switcher_control"></span>
-                                        </label> --}}
-                                        @if ($data['default']==true)
+
+                                        @if ($data['default'])
                                         <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$data['id']}}">
-                                            <input type="checkbox" onclick="updateLangStatus()" class="toggle-switch-input" id="stocksCheckbox{{$data['id']}}" {{$data['status']==1?'checked':''}} disabled>
+                                            <input type="checkbox"  class="toggle-switch-input update-lang-status" id="stocksCheckbox{{$data['id']}}" {{$data['status']==1?'checked':''}} disabled>
                                             <span class="toggle-switch-label mx-auto">
                                                 <span class="toggle-switch-indicator"></span>
                                             </span>
                                         </label>
                                         @else
                                         <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$data['id']}}">
-                                            <input type="checkbox" onclick="updateStatus('{{route('admin.business-settings.language.update-status')}}','{{$data['code']}}')" class="toggle-switch-input" id="stocksCheckbox{{$data['id']}}" {{$data['status']==1?'checked':''}}>
+                                            <input type="checkbox"
+                                                   data-url="{{route('admin.business-settings.language.update-status')}}"
+                                                   data-id="{{$data['code']}}"
+                                                    class="toggle-switch-input status-update" id="stocksCheckbox{{$data['id']}}" {{$data['status']==1?'checked':''}}>
                                             <span class="toggle-switch-label mx-auto">
                                                 <span class="toggle-switch-indicator"></span>
                                             </span>
@@ -130,46 +95,40 @@
                                         @endif
                                     </td>
                                     <td>
-                                        {{-- <label class="switcher mx-auto">
-                                            <input type="checkbox"
-                                                    onclick="window.location.href ='{{route('admin.business-settings.language.update-default-status', ['code'=>$data['code']])}}'"
-                                                    class="switcher_input" {{ ((array_key_exists('default', $data) && $data['default']==true) ? 'checked': ((array_key_exists('default', $data) && $data['default']==false) ? '' : 'disabled')) }}>
-                                            <span class="switcher_control"></span>
-                                        </label> --}}
                                         <label class="toggle-switch toggle-switch-sm" for="defaultCheck{{$data['id']}}">
-                                            <input type="checkbox" onclick="window.location.href ='{{route('admin.business-settings.language.update-default-status', ['code'=>$data['code']])}}'" class="toggle-switch-input" id="defaultCheck{{$data['id']}}" {{ ((array_key_exists('default', $data) && $data['default']==true) ? 'checked': ((array_key_exists('default', $data) && $data['default']==false) ? '' : 'disabled')) }}>
+                                            <input type="checkbox" class="toggle-switch-input update-default"
+                                                   data-id="defaultCheck{{$data['id']}}"
+                                                   data-url="{{route('admin.business-settings.language.update-default-status', ['code'=>$data['code']])}}"
+                                                   id="defaultCheck{{$data['id']}}" {{ ((array_key_exists('default', $data) && $data['default']) ? 'checked': ((array_key_exists('default', $data) && !$data['default']) ? '' : 'disabled')) }}>
                                             <span class="toggle-switch-label mx-auto">
                                                 <span class="toggle-switch-indicator"></span>
                                             </span>
                                         </label>
                                     </td>
                                     <td class="text-center">
-                                        <div class="dropdown">
-                                            <button class="btn btn-seconary btn-sm dropdown-toggle"
-                                                    type="button"
-                                                    id="dropdownMenuButton" data-toggle="dropdown"
-                                                    aria-haspopup="true"
-                                                    aria-expanded="false">
-                                                <i class="tio-settings"></i>
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                @if($data['code']!='en')
-                                                    <a class="dropdown-item" data-toggle="modal"
-                                                        data-target="#lang-modal-update-{{$data['code']}}">{{translate('update')}}</a>
-                                                    @if ($data['default']==true)
-                                                    {{-- <a class="dropdown-item"
-                                                    href="javascript:" onclick="default_language_delete_alert()">{{translate('Delete')}}</a> --}}
-                                                    @else
-                                                        <a class="dropdown-item delete"
-                                                            id="{{route('admin.business-settings.language.delete',[$data['code']])}}">{{translate('Delete')}}</a>
+                                        <div class="btn--container justify-content-center">
+                                            @if($data['code']!='en')
+                                                <a class="btn btn-sm btn--primary btn-outline-primary action-btn call-demo-lang" data-toggle="modal"
+                                            data-key="{{ $key }}"
+                                            data-env-mode="{{ env('APP_MODE') }}"
+                                                    data-target="{{ ( ($key == 0 ||  $key == 1 ) && env('APP_MODE') == 'demo') ? '' :'#lang-modal-update-'.$data['code'] }}">
+                                                    <i class="tio-edit"></i></a>
+                                                @if ($data['default'])
+                                                @else
+                                                    <a class="btn btn-sm btn--danger btn-outline-danger action-btn call-demo-lang {{( ($key == 0 ||  $key == 1 ) && env('APP_MODE') == 'demo') ? '' : 'delete'}}"
+                                                    data-key="{{ $key }}"
+                                                    data-env-mode="{{ env('APP_MODE') }}"
+                                                    id="{{( ($key == 0 ||  $key == 1 ) && env('APP_MODE') == 'demo')  ? 'javascript:' :route('admin.business-settings.language.delete',[$data['code']])}}"><i class="tio-delete-outlined"></i></a>
 
-                                                    @endif
                                                 @endif
-                                                @if (env('APP_MODE') != 'demo')
-                                                <a class="dropdown-item"
-                                                    href="{{route('admin.business-settings.language.translate',[$data['code']])}}">{{translate('Translate')}}</a>
-                                                @endif
-                                            </div>
+                                            @endif
+                                            <a class="btn btn-sm btn--warning btn-outline-warning action-btn call-demo-lang"
+                                                data-key="{{ $key }}"
+                                                data-env-mode="{{ env('APP_MODE') }}"
+                                                href="{{( ($key == 0 ||  $key == 1 ) && env('APP_MODE') == 'demo') ? 'javascript:' :route('admin.business-settings.language.translate',[$data['code']]) }}">
+                                                <i class="tio-globe"></i>
+
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -179,10 +138,7 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
-        </div>
-        </div>
+
 
         <div class="modal fade" id="lang-modal" tabindex="-1" role="dialog"
              aria-hidden="true">
@@ -201,10 +157,9 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label for="message-text"
+                                        <label for="country-code"
                                                class="col-form-label">{{translate('language')}}</label>
-                                               <select name="code" class="form-control js-select2-custom">
-                                                {{-- <option value="en">English</option> --}}
+                                               <select id="country-code" name="code" class="form-control js-select2-custom">
                                                 <option value="af">Afrikaans</option>
                                                 <option value="sq">Albanian - shqip</option>
                                                 <option value="am">Amharic - አማርኛ</option>
@@ -354,8 +309,8 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <label class="col-form-label">{{translate('direction')}} :</label>
-                                        <select class="form-control" name="direction">
+                                        <label for="direction" class="col-form-label">{{translate('direction')}} :</label>
+                                        <select id="direction" class="form-control" name="direction">
                                             <option value="ltr">LTR</option>
                                             <option value="rtl">RTL</option>
                                         </select>
@@ -374,7 +329,7 @@
             </div>
         </div>
         @if ($language)
-            
+
         @foreach(json_decode($language['value'],true) as $key =>$data)
             <div class="modal fade" id="lang-modal-update-{{$data['code']}}" tabindex="-1" role="dialog"
                  aria-hidden="true">
@@ -392,11 +347,10 @@
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label for="message-text"
+                                            <label for="lang_code"
                                                    class="col-form-label">{{translate('language')}}</label>
                                                    <input type="hidden" name="code" value="{{ $data['code'] }}">
                                                    <select id="lang_code" class="form-control js-select2-custom" disabled>
-                                                    {{-- <option value="en" {{ $data['code']== 'en'?'selected':'' }}>English</option> --}}
                                                     <option value="af" {{ $data['code']== 'af'?'selected':'' }}>Afrikaans</option>
                                                     <option value="sq" {{ $data['code']== 'sq'?'selected':'' }}>Albanian - shqip</option>
                                                     <option value="am" {{ $data['code']== 'am'?'selected':'' }}>Amharic - አማርኛ</option>
@@ -546,15 +500,15 @@
                                     </div>
                                     <div class="col-12">
                                         <div class="form-group">
-                                            <label class="col-form-label">{{translate('direction')}} :</label>
-                                            <select class="form-control" name="direction">
+                                            <label for="direction-update" class="col-form-label">{{translate('direction')}} :</label>
+                                            <select id="direction-update" class="form-control" name="direction">
                                                 <option
                                                     value="ltr" {{isset($data['direction'])?$data['direction']=='ltr'?'selected':'':''}}>
-                                                    LTR
+                                                   {{translate('LTR')}}
                                                 </option>
                                                 <option
                                                     value="rtl" {{isset($data['direction'])?$data['direction']=='rtl'?'selected':'':''}}>
-                                                    RTL
+                                                     {{translate('LTR')}}
                                                 </option>
                                             </select>
                                         </div>
@@ -577,53 +531,19 @@
 @endsection
 
 @push('script_2')
-    <!-- Page level custom scripts -->
-    <script>
 
-        function updateStatus(route, code) {
-            $.get({
-                url: route,
-                data: {
-                    code: code,
-                },
-                success: function (data) {
-                    toastr.success('{{translate('status_updated_successfully')}}');
-                }
-            });
-        }
-    </script>
 
     <script>
-
-            // color select select2
-            $('.country-var-select').select2({
-                templateResult: codeSelect,
-                templateSelection: codeSelect,
-                escapeMarkup: function (m) {
-                    return m;
-                }
-            });
-
-            function codeSelect(state) {
-                var code = state.title;
-                if (!code) return state.text;
-                return "<img class='image-preview' src='" + code + "'>" + state.text;
-            }
-
-    </script>
-
-    <script>
-
+        "use strict"
             $(".delete").click(function (e) {
                 e.preventDefault();
-
                 Swal.fire({
                     title: '{{translate('Are you sure to delete this')}}?',
                     text: "{{translate('You will not be able to revert this')}}!",
                     showCancelButton: true,
                     confirmButtonColor: 'primary',
                     cancelButtonColor: 'secondary',
-                    confirmButtonText: '{{translate('Yes')}}, {{translate('delete it')}}!'
+                    confirmButtonText: '{{translate('Yes_delete it')}}!'
                 }).then((result) => {
                     if (result.value) {
                         window.location.href = $(this).attr("id");
@@ -632,17 +552,43 @@
             });
 
 
+            $(".update-lang-status").click(function (e) {
+                e.preventDefault();
+                toastr.warning('{{translate('default language can not be updated! to update change the default language first!')}}');
+            });
+
+
+            $(".call-demo-lang").click(function (e) {
+                e.preventDefault();
+                let key = $(this).data('key');
+                let mode = $(this).data('env-mode');
+
+                if(  (key === 0 ||  key === 1 ) &&  mode === 'demo' ){
+                    toastr.info('{{ translate('Update option is disabled for demo!') }}', {
+                        CloseButton: true,
+                        ProgressBar: true
+                    });
+                }
+            });
+
+            $(".status-update").click(function () {
+                $.get({
+                    url: $(this).data('url'),
+                    data: {
+                        code: $(this).data('id'),
+                    },
+
+                    success: function () {
+                        toastr.success('{{translate('status_updated_successfully')}}');
+                    }
+                });
+            });
+
+            $(".update-default").click(function () {
+                window.location.href = $(this).data('url');
+            });
+
+
     </script>
-    <script>
-        function default_language_delete_alert()
-        {
-            toastr.warning('{{translate('default language can not be deleted! to delete change the default language first!')}}');
-        }
-    </script>
-    <script>
-        function updateLangStatus()
-        {
-            toastr.warning('{{translate('default language can not be updated! to update change the default language first!')}}');
-        }
-    </script>
+
 @endpush

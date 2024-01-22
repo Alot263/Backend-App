@@ -5,8 +5,12 @@
                 <!-- Logo -->
                 @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
                 <a class="navbar-brand" href="{{ route('admin.dashboard') }}" aria-label="Front">
-                    <img class="navbar-brand-logo initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
-                    <img class="navbar-brand-logo-mini initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
+                       <img class="navbar-brand-logo initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
+                    alt="Logo">
+                    <img class="navbar-brand-logo-mini initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
+                    alt="Logo">
                 </a>
                 <!-- End Logo -->
 
@@ -49,12 +53,11 @@
                     </li>
                     <!-- End Dashboards -->
 
-                    
+
                     <!-- Orders -->
                     @if (\App\CentralLogics\Helpers::module_permission_check('order'))
                     <li class="nav-item">
-                        <small class="nav-subtitle">{{ translate('messages.order') }}
-                            {{ translate('messages.management') }}</small>
+                        <small class="nav-subtitle">{{ translate('messages.order_management') }}</small>
                         <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                     </li>
 
@@ -67,7 +70,7 @@
                         </a>
                         <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/parcel/orders/*') ? 'block' : 'none' }}">
                             <li class="nav-item {{ Request::is('admin/parcel/orders/all') ? 'active' : '' }}">
-                                <a class="nav-link" href="{{ route('admin.parcel.orders', ['all']) }}" title="{{ translate('messages.all') }} {{ translate('messages.orders') }}">
+                                <a class="nav-link" href="{{ route('admin.parcel.orders', ['all']) }}" title="{{ translate('messages.all_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate sidebar--badge-container">
                                         {{ translate('messages.all') }}
@@ -89,7 +92,7 @@
                                 </a>
                             </li>
                             <li class="nav-item {{ Request::is('admin/parcel/orders/pending') ? 'active' : '' }}">
-                                <a class="nav-link " href="{{ route('admin.parcel.orders', ['pending']) }}" title="{{ translate('messages.pending') }} {{ translate('messages.orders') }}">
+                                <a class="nav-link " href="{{ route('admin.parcel.orders', ['pending']) }}" title="{{ translate('messages.pending_orders') }}">
                                     <span class="tio-circle nav-indicator-icon"></span>
                                     <span class="text-truncate sidebar--badge-container">
                                         {{ translate('messages.pending') }}
@@ -177,6 +180,18 @@
                                     </span>
                                 </a>
                             </li>
+
+                            <li class="nav-item {{ Request::is('admin/order/offline/payment/list*') ? 'active' : '' }}">
+                                <a class="nav-link " href="{{ route('admin.order.offline_verification_list', ['all']) }}" title="{{ translate('Offline_Payments') }}">
+                                    <span class="tio-circle nav-indicator-icon"></span>
+                                    <span class="text-truncate sidebar--badge-container">
+                                        {{ translate('messages.Offline_Payments') }}
+                                        <span class="badge badge-soft-danger bg-light badge-pill ml-1">
+                                            {{ \App\Models\Order::has('offline_payments')->StoreOrder()->module(Config::get('module.current_module_id'))->count() }}
+                                        </span>
+                                    </span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -219,54 +234,31 @@
 
 
 
-                    <!-- Parcel Section -->
-                    {{-- <li class="nav-item">
-                        <small class="nav-subtitle" title="{{ translate('messages.parcel') }} {{ translate('messages.section') }}">{{ translate('messages.parcel') }}
-                            {{ translate('messages.management') }}</small>
-                        <small class="tio-more-horizontal nav-subtitle-replacer"></small>
-                    </li>
 
-                    @if (\App\CentralLogics\Helpers::module_permission_check('parcel'))
-                    <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel*') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.parcel') }}">
-                            <i class="tio-bus nav-icon"></i>
-                            <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.parcel') }}</span>
-                        </a>
-                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/parcel*') ? 'block' : 'none' }}">
-                            <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/category') ? 'active' : '' }}">
-                                <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.parcel.category.index') }}" title="{{ translate('messages.parcel_category') }}">
-                                    <span class="tio-circle nav-indicator-icon"></span>
-                                    <span class="text-truncate">
-                                        {{ translate('messages.parcel_category') }}
-                                    </span>
-                                </a>
-                            </li>
-                            <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/orders*') ? 'active' : '' }}">
-                                <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.parcel.orders') }}" title="{{ translate('messages.parcel') }} {{ translate('messages.orders') }}">
-                                    <span class="tio-circle nav-indicator-icon"></span>
-                                    <span class="text-truncate">
-                                        {{ translate('messages.parcel') }} {{ translate('messages.orders') }}
-                                    </span>
-                                </a>
-                            </li>
-
-                            <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/settings') ? 'active' : '' }}">
-                                <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.parcel.settings') }}" title="{{ translate('messages.parcel') }} {{ translate('messages.settings') }}">
-                                    <span class="tio-circle nav-indicator-icon"></span>
-                                    <span class="text-truncate">
-                                        {{ translate('messages.parcel') }} {{ translate('messages.settings') }}
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    @endif --}}
                     <!--End Parcel Section -->
+
+                    <!-- Marketing section -->
+                <li class="nav-item">
+                    <small class="nav-subtitle" title="{{ translate('Promotion Management') }}">{{ translate('Promotion Management') }}</small>
+                    <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+                </li>
+
+                <!-- Banner -->
+                @if (\App\CentralLogics\Helpers::module_permission_check('banner'))
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/promotional-banner*') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.promotional-banner.add-new') }}" title="{{ translate('messages.Promotional Banners') }}">
+                        <i class="tio-image nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.Promotional Banners') }}</span>
+                    </a>
+                </li>
+                @endif
+                <!-- End Banner -->
+
+                <!-- End marketing section -->
 
                     <!-- Product Section -->
                     <li class="nav-item">
-                        <small class="nav-subtitle" title="{{ translate('messages.product') }} {{ translate('messages.section') }}">{{ translate('messages.product') }}
-                            {{ translate('messages.management') }}</small>
+                        <small class="nav-subtitle" title="{{ translate('messages.product_section') }}">{{ translate('messages.product_management') }}</small>
                         <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                     </li>
 
@@ -284,17 +276,16 @@
 
                     <!-- Product Section -->
                     <li class="nav-item">
-                        <small class="nav-subtitle" title="{{ translate('messages.delivery') }} {{ translate('messages.section') }}">{{ translate('messages.delivery') }}
-                            {{ translate('messages.management') }}</small>
+                        <small class="nav-subtitle" title="{{ translate('messages.delivery_section') }}">{{ translate('messages.delivery_management') }}</small>
                         <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                     </li>
 
                     @if (\App\CentralLogics\Helpers::module_permission_check('parcel'))
                     <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/parcel/settings') ? 'active' : '' }}">
-                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.parcel.settings') }}" title="{{ translate('messages.delivery_fee_setup') }}">
-                            <i class="tio-money nav-icon"></i>
+                        <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.parcel.settings') }}" title="{{ translate('messages.delivery_setup') }}">
+                            <i class="tio-settings nav-icon"></i>
                             <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
-                                {{ translate('messages.delivery_fee_setup') }}
+                                {{ translate('messages.delivery_setup') }}
                             </span>
                         </a>
                     </li>
@@ -302,7 +293,7 @@
                     <!--End Product Section -->
 
 
-                <li class="__sidebar-hs-unfold px-2">
+                <li class="__sidebar-hs-unfold px-2" id="tourb-9">
                     <div class="hs-unfold w-100">
                         <a class="js-hs-unfold-invoker navbar-dropdown-account-wrapper" href="javascript:;"
                             data-hs-unfold-options='{
@@ -311,10 +302,12 @@
                                 }'>
                             <div class="cmn--media right-dropdown-icon d-flex align-items-center">
                                 <div class="avatar avatar-sm avatar-circle">
-                                    <img class="avatar-img"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                        alt="Image Description">
+                                   <img class="avatar-img onerror-image"
+                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                    alt="Image Description">
                                     <span class="avatar-status avatar-sm-status avatar-status-success"></span>
                                 </div>
                                 <div class="media-body pl-3">
@@ -332,10 +325,12 @@
                             <div class="dropdown-item-text">
                                 <div class="media align-items-center">
                                     <div class="avatar avatar-sm avatar-circle mr-2">
-                                        <img class="avatar-img"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                                alt="Image Description">
+                                        <img class="avatar-img onerror-image"
+                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                    alt="Image Description">
                                     </div>
                                     <div class="media-body">
                                         <span class="card-title h5">{{auth('admin')->user()->f_name}}</span>
@@ -352,21 +347,7 @@
 
                             <div class="dropdown-divider"></div>
 
-                            <a class="dropdown-item" href="javascript:" onclick="Swal.fire({
-                                title: '{{translate("logout_warning_message")}}',
-                                showDenyButton: true,
-                                showCancelButton: true,
-                                confirmButtonColor: '#FC6A57',
-                                cancelButtonColor: '#363636',
-                                confirmButtonText: `Yes`,
-                                denyButtonText: `Don't Logout`,
-                                }).then((result) => {
-                                if (result.value) {
-                                location.href='{{route('admin.auth.logout')}}';
-                                } else{
-                                Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
-                                }
-                                })">
+                           <a class="dropdown-item log-out" href="javascript:">
                                 <span class="text-truncate pr-2" title="Sign out">{{translate('messages.sign_out')}}</span>
                             </a>
                         </div>

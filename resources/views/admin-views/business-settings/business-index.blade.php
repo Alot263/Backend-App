@@ -12,45 +12,24 @@
                     <img src="{{ asset('public/assets/admin/img/business.png') }}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{ translate('messages.business') }} {{ translate('messages.setup') }}
+                    {{ translate('messages.business_settings') }}
                 </span>
             </h1>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
-                        <!-- Nav -->
-                        <ul class="nav nav-tabs mb-5 mt-5 border-0 nav--tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'business']) }}"   aria-disabled="true">{{translate('messages.business')}} {{translate('messages.settings')}}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'customer']) }}"  aria-disabled="true">{{translate('messages.customers')}}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.business-settings.business-setup',  ['tab' => 'deliveryman']) }}"  aria-disabled="true">{{translate('messages.delivery')}} {{translate('messages.man')}}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ Request::is('admin/business-settings/language') ?'active':'' }}" href="{{route('admin.business-settings.language.index')}}"  aria-disabled="true">{{translate('messages.Languages')}}</a>
-                            </li>
-                        </ul>
-                        <!-- End Nav -->
-                    </div>
-                </div>
-            </div>
+            @include('admin-views.business-settings.partials.nav-menu')
         </div>
         <!-- End Page Header -->
+
         <div class="card mb-3">
             <div class="card-body">
                 <div
-                    class="maintainance-mode-toggle-bar d-flex flex-wrap justify-content-between border border-primary rounded align-items-center p-2">
+                    class="maintenance-mode-toggle-bar d-flex flex-wrap justify-content-between border border-info rounded align-items-center p-2">
                     @php($config = \App\CentralLogics\Helpers::get_business_settings('maintenance_mode'))
-                    <h5 class="text-capitalize m-0 text--info">
+                    <h5 class="text-capitalize m-0 text--primary">
                         <i class="tio-settings-outlined"></i>
                         {{ translate('messages.maintenance_mode') }}
                     </h5>
                     <label class="toggle-switch toggle-switch-sm">
-                        <input type="checkbox" class="status toggle-switch-input" onclick="maintenance_mode()"
+                        <input type="checkbox" class="status toggle-switch-input maintenance-mode"
                             {{ isset($config) && $config ? 'checked' : '' }}>
                         <span class="toggle-switch-label text mb-0">
                             <span class="toggle-switch-indicator"></span>
@@ -58,8 +37,7 @@
                     </label>
                 </div>
                 <div class="mt-2">
-
-                    {{ translate('messages.maintainance_txt') }}
+                    {{ translate('messages.maintenance_txt') }}
                 </div>
             </div>
         </div>
@@ -69,22 +47,19 @@
 
             <div class="row g-3">
                 <div class="col-lg-12">
+                    <h4 class="card-title mb-3 mt-1">
+                        <span class="card-header-icon mr-2"><i class="tio-user"></i></span>
+                        <span>{{ translate('Company Information') }}</span>
+                    </h4>
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">
-                                <span class="card-header-icon mr-2"><i class="tio-user"></i></span>
-                                <span>{{ translate('Company Information') }}</span>
-                            </h4>
-                        </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-sm-6 col-md-4 col-xl-3">
                                     <div class="form-group mb-0">
                                         <label class="form-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.business') }}
-                                            {{ translate('messages.name') }}</label>
-                                        <input type="text" name="store_name" value="{{ $name->value ?? '' }}"
-                                            class="form-control" placeholder="{{ translate('messages.new_business') }}"
+                                            for="store_name">{{ translate('messages.company_name') }}</label>
+                                        <input id="store_name" type="text" name="store_name" value="{{ $name->value ?? '' }}"
+                                            class="form-control" placeholder="{{ translate('messages.new_company') }}"
                                             required>
                                     </div>
                                 </div>
@@ -92,18 +67,18 @@
                                 @php($email = \App\Models\BusinessSetting::where('key', 'email_address')->first())
                                     <div class="form-group mb-0">
                                         <label class="form-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.email') }}</label>
-                                        <input type="email" value="{{ $email->value ?? '' }}" name="email"
-                                            class="form-control" placeholder="" required>
+                                            for="email">{{ translate('messages.email') }}</label>
+                                        <input id="email" type="email" value="{{ $email->value ?? '' }}" name="email"
+                                            class="form-control" placeholder="{{ translate('messages.Ex_:_ex@example.com') }}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-xl-3">
                                 @php($phone = \App\Models\BusinessSetting::where('key', 'phone')->first())
                                     <div class="form-group mb-0">
                                         <label class="form-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.phone') }}</label>
-                                        <input type="tel" value="{{ $phone->value ?? '' }}" name="phone"
-                                            class="form-control" placeholder="" required>
+                                            for="phone">{{ translate('messages.phone') }}</label>
+                                        <input type="tel"  value="{{ $phone->value ?? '' }}"  id="phone"  name="phone"
+                                            class="form-control" placeholder="{{ translate('messages.Ex: +3264124565') }}" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-md-4 col-xl-3">
@@ -363,554 +338,16 @@
                                         </select>
                                     </div>
                                 </div>
-                                {{--<div class="col-sm-6 col-md-4 col-xl-3">
-                                    <div class="form-group mb-0">
-                                        <label class="form-label"
-                                            for="exampleFormControlInput1">{{ translate('messages.language') }} </label>
-                                        <select name="language[]" id="language" data-maximum-selection-length="3"
-                                            class="form-control js-select2-custom" required multiple=true
-                                            data-toggle="tooltip" data-placement="right"
-                                            data-original-title="{{ translate('messages.add_language_warrning') }}">
-                                            <option value="en">English(default)</option>
-                                            <option value="af">Afrikaans</option>
-                                            <option value="sq">Albanian - shqip</option>
-                                            <option value="am">Amharic - አማርኛ</option>
-                                            <option value="ar">Arabic - العربية</option>
-                                            <option value="an">Aragonese - aragonés</option>
-                                            <option value="hy">Armenian - հայերեն</option>
-                                            <option value="ast">Asturian - asturianu</option>
-                                            <option value="az">Azerbaijani - azərbaycan dili</option>
-                                            <option value="eu">Basque - euskara</option>
-                                            <option value="be">Belarusian - беларуская</option>
-                                            <option value="bn">Bengali - বাংলা</option>
-                                            <option value="bs">Bosnian - bosanski</option>
-                                            <option value="br">Breton - brezhoneg</option>
-                                            <option value="bg">Bulgarian - български</option>
-                                            <option value="ca">Catalan - català</option>
-                                            <option value="ckb">Central Kurdish - کوردی (دەستنوسی عەرەبی)</option>
-                                            <option value="zh">Chinese - 中文</option>
-                                            <option value="zh-HK">Chinese (Hong Kong) - 中文（香港）</option>
-                                            <option value="zh-CN">Chinese (Simplified) - 中文（简体）</option>
-                                            <option value="zh-TW">Chinese (Traditional) - 中文（繁體）</option>
-                                            <option value="co">Corsican</option>
-                                            <option value="hr">Croatian - hrvatski</option>
-                                            <option value="cs">Czech - čeština</option>
-                                            <option value="da">Danish - dansk</option>
-                                            <option value="nl">Dutch - Nederlands</option>
-                                            <option value="en-AU">English (Australia)</option>
-                                            <option value="en-CA">English (Canada)</option>
-                                            <option value="en-IN">English (India)</option>
-                                            <option value="en-NZ">English (New Zealand)</option>
-                                            <option value="en-ZA">English (South Africa)</option>
-                                            <option value="en-GB">English (United Kingdom)</option>
-                                            <option value="en-US">English (United States)</option>
-                                            <option value="eo">Esperanto - esperanto</option>
-                                            <option value="et">Estonian - eesti</option>
-                                            <option value="fo">Faroese - føroyskt</option>
-                                            <option value="fil">Filipino</option>
-                                            <option value="fi">Finnish - suomi</option>
-                                            <option value="fr">French - français</option>
-                                            <option value="fr-CA">French (Canada) - français (Canada)</option>
-                                            <option value="fr-FR">French (France) - français (France)</option>
-                                            <option value="fr-CH">French (Switzerland) - français (Suisse)</option>
-                                            <option value="gl">Galician - galego</option>
-                                            <option value="ka">Georgian - ქართული</option>
-                                            <option value="de">German - Deutsch</option>
-                                            <option value="de-AT">German (Austria) - Deutsch (Österreich)</option>
-                                            <option value="de-DE">German (Germany) - Deutsch (Deutschland)</option>
-                                            <option value="de-LI">German (Liechtenstein) - Deutsch (Liechtenstein)
-                                            </option>
-                                            <option value="de-CH">German (Switzerland) - Deutsch (Schweiz)</option>
-                                            <option value="el">Greek - Ελληνικά</option>
-                                            <option value="gn">Guarani</option>
-                                            <option value="gu">Gujarati - ગુજરાતી</option>
-                                            <option value="ha">Hausa</option>
-                                            <option value="haw">Hawaiian - ʻŌlelo Hawaiʻi</option>
-                                            <option value="he">Hebrew - עברית</option>
-                                            <option value="hi">Hindi - हिन्दी</option>
-                                            <option value="hu">Hungarian - magyar</option>
-                                            <option value="is">Icelandic - íslenska</option>
-                                            <option value="id">Indonesian - Indonesia</option>
-                                            <option value="ia">Interlingua</option>
-                                            <option value="ga">Irish - Gaeilge</option>
-                                            <option value="it">Italian - italiano</option>
-                                            <option value="it-IT">Italian (Italy) - italiano (Italia)</option>
-                                            <option value="it-CH">Italian (Switzerland) - italiano (Svizzera)</option>
-                                            <option value="ja">Japanese - 日本語</option>
-                                            <option value="kn">Kannada - ಕನ್ನಡ</option>
-                                            <option value="kk">Kazakh - қазақ тілі</option>
-                                            <option value="km">Khmer - ខ្មែរ</option>
-                                            <option value="ko">Korean - 한국어</option>
-                                            <option value="ku">Kurdish - Kurdî</option>
-                                            <option value="ky">Kyrgyz - кыргызча</option>
-                                            <option value="lo">Lao - ລາວ</option>
-                                            <option value="la">Latin</option>
-                                            <option value="lv">Latvian - latviešu</option>
-                                            <option value="ln">Lingala - lingála</option>
-                                            <option value="lt">Lithuanian - lietuvių</option>
-                                            <option value="mk">Macedonian - македонски</option>
-                                            <option value="ms">Malay - Bahasa Melayu</option>
-                                            <option value="ml">Malayalam - മലയാളം</option>
-                                            <option value="mt">Maltese - Malti</option>
-                                            <option value="mr">Marathi - मराठी</option>
-                                            <option value="mn">Mongolian - монгол</option>
-                                            <option value="ne">Nepali - नेपाली</option>
-                                            <option value="no">Norwegian - norsk</option>
-                                            <option value="nb">Norwegian Bokmål - norsk bokmål</option>
-                                            <option value="nn">Norwegian Nynorsk - nynorsk</option>
-                                            <option value="oc">Occitan</option>
-                                            <option value="or">Oriya - ଓଡ଼ିଆ</option>
-                                            <option value="om">Oromo - Oromoo</option>
-                                            <option value="ps">Pashto - پښتو</option>
-                                            <option value="fa">Persian - فارسی</option>
-                                            <option value="pl">Polish - polski</option>
-                                            <option value="pt">Portuguese - português</option>
-                                            <option value="pt-BR">Portuguese (Brazil) - português (Brasil)</option>
-                                            <option value="pt-PT">Portuguese (Portugal) - português (Portugal)</option>
-                                            <option value="pa">Punjabi - ਪੰਜਾਬੀ</option>
-                                            <option value="qu">Quechua</option>
-                                            <option value="ro">Romanian - română</option>
-                                            <option value="mo">Romanian (Moldova) - română (Moldova)</option>
-                                            <option value="rm">Romansh - rumantsch</option>
-                                            <option value="ru">Russian - русский</option>
-                                            <option value="gd">Scottish Gaelic</option>
-                                            <option value="sr">Serbian - српски</option>
-                                            <option value="sh">Serbo-Croatian - Srpskohrvatski</option>
-                                            <option value="sn">Shona - chiShona</option>
-                                            <option value="sd">Sindhi</option>
-                                            <option value="si">Sinhala - සිංහල</option>
-                                            <option value="sk">Slovak - slovenčina</option>
-                                            <option value="sl">Slovenian - slovenščina</option>
-                                            <option value="so">Somali - Soomaali</option>
-                                            <option value="st">Southern Sotho</option>
-                                            <option value="es">Spanish - español</option>
-                                            <option value="es-AR">Spanish (Argentina) - español (Argentina)</option>
-                                            <option value="es-419">Spanish (Latin America) - español (Latinoamérica)
-                                            </option>
-                                            <option value="es-MX">Spanish (Mexico) - español (México)</option>
-                                            <option value="es-ES">Spanish (Spain) - español (España)</option>
-                                            <option value="es-US">Spanish (United States) - español (Estados Unidos)
-                                            </option>
-                                            <option value="su">Sundanese</option>
-                                            <option value="sw">Swahili - Kiswahili</option>
-                                            <option value="sv">Swedish - svenska</option>
-                                            <option value="tg">Tajik - тоҷикӣ</option>
-                                            <option value="ta">Tamil - தமிழ்</option>
-                                            <option value="tt">Tatar</option>
-                                            <option value="te">Telugu - తెలుగు</option>
-                                            <option value="th">Thai - ไทย</option>
-                                            <option value="ti">Tigrinya - ትግርኛ</option>
-                                            <option value="to">Tongan - lea fakatonga</option>
-                                            <option value="tr">Turkish - Türkçe</option>
-                                            <option value="tk">Turkmen</option>
-                                            <option value="tw">Twi</option>
-                                            <option value="uk">Ukrainian - українська</option>
-                                            <option value="ur">Urdu - اردو</option>
-                                            <option value="ug">Uyghur</option>
-                                            <option value="uz">Uzbek - o‘zbek</option>
-                                            <option value="vi">Vietnamese - Tiếng Việt</option>
-                                            <option value="wa">Walloon - wa</option>
-                                            <option value="cy">Welsh - Cymraeg</option>
-                                            <option value="fy">Western Frisian</option>
-                                            <option value="xh">Xhosa</option>
-                                            <option value="yi">Yiddish</option>
-                                            <option value="yo">Yoruba - Èdè Yorùbá</option>
-                                            <option value="zu">Zulu - isiZulu</option>
-                                        </select>
-                                    </div>
-                                </div>--}}
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($tz = \App\Models\BusinessSetting::where('key', 'timezone')->first())
-                                    @php($tz = $tz ? $tz->value : 0)
-                                    <div class="form-group mb-0">
-                                        <label
-                                            class="form-label text-capitalize">{{ translate('messages.time_zone') }}</label>
-                                        <select name="timezone" class="form-control js-select2-custom">
-                                            <option value="UTC" {{ $tz ? ($tz == '' ? 'selected' : '') : '' }}>UTC
-                                            </option>
-                                            <option value="Etc/GMT+12"
-                                                {{ $tz ? ($tz == 'Etc/GMT+12' ? 'selected' : '') : '' }}>(GMT-12:00)
-                                                International Date Line West</option>
-                                            <option value="Pacific/Midway"
-                                                {{ $tz ? ($tz == 'Pacific/Midway' ? 'selected' : '') : '' }}>
-                                                (GMT-11:00) Midway Island, Samoa</option>
-                                            <option value="Pacific/Honolulu"
-                                                {{ $tz ? ($tz == 'Pacific/Honolulu' ? 'selected' : '') : '' }}>
-                                                (GMT-10:00) Hawaii</option>
-                                            <option value="US/Alaska"
-                                                {{ $tz ? ($tz == 'US/Alaska' ? 'selected' : '') : '' }}>(GMT-09:00)
-                                                Alaska</option>
-                                            <option value="America/Los_Angeles"
-                                                {{ $tz ? ($tz == 'America/Los_Angeles' ? 'selected' : '') : '' }}>
-                                                (GMT-08:00) Pacific Time
-                                                (US & Canada)</option>
-                                            <option value="America/Tijuana"
-                                                {{ $tz ? ($tz == 'America/Tijuana' ? 'selected' : '') : '' }}>
-                                                (GMT-08:00) Tijuana, Baja California</option>
-                                            <option value="US/Arizona"
-                                                {{ $tz ? ($tz == 'US/Arizona' ? 'selected' : '') : '' }}>(GMT-07:00)
-                                                Arizona</option>
-                                            <option value="America/Chihuahua"
-                                                {{ $tz ? ($tz == 'America/Chihuahua' ? 'selected' : '') : '' }}>(GMT-07:00)
-                                                Chihuahua, La
-                                                Paz, Mazatlan</option>
-                                            <option value="US/Mountain"
-                                                {{ $tz ? ($tz == 'US/Mountain' ? 'selected' : '') : '' }}>(GMT-07:00)
-                                                Mountain Time (US & Canada)</option>
-                                            <option value="America/Managua"
-                                                {{ $tz ? ($tz == 'America/Managua' ? 'selected' : '') : '' }}>
-                                                (GMT-06:00) Central America</option>
-                                            <option value="US/Central"
-                                                {{ $tz ? ($tz == 'US/Central' ? 'selected' : '') : '' }}>(GMT-06:00)
-                                                Central Time (US & Canada)</option>
-                                            <option value="America/Mexico_City"
-                                                {{ $tz ? ($tz == 'America/Mexico_City' ? 'selected' : '') : '' }}>
-                                                (GMT-06:00) Guadalajara,
-                                                Mexico City, Monterrey</option>
-                                            <option value="Canada/Saskatchewan"
-                                                {{ $tz ? ($tz == 'Canada/Saskatchewan' ? 'selected' : '') : '' }}>
-                                                (GMT-06:00) Saskatchewan
-                                            </option>
-                                            <option value="America/Bogota"
-                                                {{ $tz ? ($tz == 'America/Bogota' ? 'selected' : '') : '' }}>
-                                                (GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
-                                            <option value="US/Eastern"
-                                                {{ $tz ? ($tz == 'US/Eastern' ? 'selected' : '') : '' }}>(GMT-05:00)
-                                                Eastern Time (US & Canada)</option>
-                                            <option value="US/East-Indiana"
-                                                {{ $tz ? ($tz == 'US/East-Indiana' ? 'selected' : '') : '' }}>
-                                                (GMT-05:00) Indiana (East)</option>
-                                            <option value="Canada/Atlantic"
-                                                {{ $tz ? ($tz == 'Canada/Atlantic' ? 'selected' : '') : '' }}>
-                                                (GMT-04:00) Atlantic Time (Canada)</option>
-                                            <option value="America/Caracas"
-                                                {{ $tz ? ($tz == 'America/Caracas' ? 'selected' : '') : '' }}>
-                                                (GMT-04:00) Caracas, La Paz</option>
-                                            <option value="America/Manaus"
-                                                {{ $tz ? ($tz == 'America/Manaus' ? 'selected' : '') : '' }}>
-                                                (GMT-04:00) Manaus</option>
-                                            <option value="America/Santiago"
-                                                {{ $tz ? ($tz == 'America/Santiago' ? 'selected' : '') : '' }}>
-                                                (GMT-04:00) Santiago</option>
-                                            <option value="Canada/Newfoundland"
-                                                {{ $tz ? ($tz == 'Canada/Newfoundland' ? 'selected' : '') : '' }}>
-                                                (GMT-03:30) Newfoundland
-                                            </option>
-                                            <option value="America/Sao_Paulo"
-                                                {{ $tz ? ($tz == 'America/Sao_Paulo' ? 'selected' : '') : '' }}>(GMT-03:00)
-                                                Brasilia</option>
-                                            <option value="America/Argentina/Buenos_Aires"
-                                                {{ $tz ? ($tz == 'America/Argentina/Buenos_Aires' ? 'selected' : '') : '' }}>
-                                                (GMT-03:00)
-                                                Buenos Aires, Georgetown</option>
-                                            <option value="America/Godthab"
-                                                {{ $tz ? ($tz == 'America/Godthab' ? 'selected' : '') : '' }}>
-                                                (GMT-03:00) Greenland</option>
-                                            <option value="America/Montevideo"
-                                                {{ $tz ? ($tz == 'America/Montevideo' ? 'selected' : '') : '' }}>
-                                                (GMT-03:00) Montevideo
-                                            </option>
-                                            <option value="America/Noronha"
-                                                {{ $tz ? ($tz == 'America/Noronha' ? 'selected' : '') : '' }}>
-                                                (GMT-02:00) Mid-Atlantic</option>
-                                            <option value="Atlantic/Cape_Verde"
-                                                {{ $tz ? ($tz == 'Atlantic/Cape_Verde' ? 'selected' : '') : '' }}>
-                                                (GMT-01:00) Cape Verde Is.
-                                            </option>
-                                            <option value="Atlantic/Azores"
-                                                {{ $tz ? ($tz == 'Atlantic/Azores' ? 'selected' : '') : '' }}>
-                                                (GMT-01:00) Azores</option>
-                                            <option value="Africa/Casablanca"
-                                                {{ $tz ? ($tz == 'Africa/Casablanca' ? 'selected' : '') : '' }}>(GMT+00:00)
-                                                Casablanca,
-                                                Monrovia, Reykjavik</option>
-                                            <option value="Etc/Greenwich"
-                                                {{ $tz ? ($tz == 'Etc/Greenwich' ? 'selected' : '') : '' }}>
-                                                (GMT+00:00) Greenwich Mean Time : Dublin, Edinburgh, Lisbon, London</option>
-                                            <option value="Europe/Amsterdam"
-                                                {{ $tz ? ($tz == 'Europe/Amsterdam' ? 'selected' : '') : '' }}>
-                                                (GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna</option>
-                                            <option value="Europe/Belgrade"
-                                                {{ $tz ? ($tz == 'Europe/Belgrade' ? 'selected' : '') : '' }}>
-                                                (GMT+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague</option>
-                                            <option value="Europe/Brussels"
-                                                {{ $tz ? ($tz == 'Europe/Brussels' ? 'selected' : '') : '' }}>
-                                                (GMT+01:00) Brussels, Copenhagen, Madrid, Paris</option>
-                                            <option value="Europe/Sarajevo"
-                                                {{ $tz ? ($tz == 'Europe/Sarajevo' ? 'selected' : '') : '' }}>
-                                                (GMT+01:00) Sarajevo, Skopje, Warsaw, Zagreb</option>
-                                            <option value="Africa/Lagos"
-                                                {{ $tz ? ($tz == 'Africa/Lagos' ? 'selected' : '') : '' }}>
-                                                (GMT+01:00) West Central Africa</option>
-                                            <option value="Asia/Amman"
-                                                {{ $tz ? ($tz == 'Asia/Amman' ? 'selected' : '') : '' }}>(GMT+02:00)
-                                                Amman</option>
-                                            <option value="Europe/Athens"
-                                                {{ $tz ? ($tz == 'Europe/Athens' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Athens, Bucharest, Istanbul</option>
-                                            <option value="Asia/Beirut"
-                                                {{ $tz ? ($tz == 'Asia/Beirut' ? 'selected' : '') : '' }}>(GMT+02:00)
-                                                Beirut</option>
-                                            <option value="Africa/Cairo"
-                                                {{ $tz ? ($tz == 'Africa/Cairo' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Cairo</option>
-                                            <option value="Africa/Harare"
-                                                {{ $tz ? ($tz == 'Africa/Harare' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Harare, Pretoria</option>
-                                            <option value="Europe/Helsinki"
-                                                {{ $tz ? ($tz == 'Europe/Helsinki' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius</option>
-                                            <option value="Asia/Jerusalem"
-                                                {{ $tz ? ($tz == 'Asia/Jerusalem' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Jerusalem</option>
-                                            <option value="Europe/Minsk"
-                                                {{ $tz ? ($tz == 'Europe/Minsk' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Minsk</option>
-                                            <option value="Africa/Windhoek"
-                                                {{ $tz ? ($tz == 'Africa/Windhoek' ? 'selected' : '') : '' }}>
-                                                (GMT+02:00) Windhoek</option>
-                                            <option value="Asia/Kuwait"
-                                                {{ $tz ? ($tz == 'Asia/Kuwait' ? 'selected' : '') : '' }}>(GMT+03:00)
-                                                Kuwait, Riyadh, Baghdad</option>
-                                            <option value="Europe/Moscow"
-                                                {{ $tz ? ($tz == 'Europe/Moscow' ? 'selected' : '') : '' }}>
-                                                (GMT+03:00) Moscow, St. Petersburg, Volgograd</option>
-                                            <option value="Africa/Nairobi"
-                                                {{ $tz ? ($tz == 'Africa/Nairobi' ? 'selected' : '') : '' }}>
-                                                (GMT+03:00) Nairobi</option>
-                                            <option value="Asia/Tbilisi"
-                                                {{ $tz ? ($tz == 'Asia/Tbilisi' ? 'selected' : '') : '' }}>
-                                                (GMT+03:00) Tbilisi</option>
-                                            <option value="Asia/Tehran"
-                                                {{ $tz ? ($tz == 'Asia/Tehran' ? 'selected' : '') : '' }}>(GMT+03:30)
-                                                Tehran</option>
-                                            <option value="Asia/Muscat"
-                                                {{ $tz ? ($tz == 'Asia/Muscat' ? 'selected' : '') : '' }}>(GMT+04:00)
-                                                Abu Dhabi, Muscat</option>
-                                            <option value="Asia/Baku"
-                                                {{ $tz ? ($tz == 'Asia/Baku' ? 'selected' : '') : '' }}>(GMT+04:00)
-                                                Baku</option>
-                                            <option value="Asia/Yerevan"
-                                                {{ $tz ? ($tz == 'Asia/Yerevan' ? 'selected' : '') : '' }}>
-                                                (GMT+04:00) Yerevan</option>
-                                            <option value="Asia/Kabul"
-                                                {{ $tz ? ($tz == 'Asia/Kabul' ? 'selected' : '') : '' }}>(GMT+04:30)
-                                                Kabul</option>
-                                            <option value="Asia/Yekaterinburg"
-                                                {{ $tz ? ($tz == 'Asia/Yekaterinburg' ? 'selected' : '') : '' }}>
-                                                (GMT+05:00) Yekaterinburg
-                                            </option>
-                                            <option value="Asia/Karachi"
-                                                {{ $tz ? ($tz == 'Asia/Karachi' ? 'selected' : '') : '' }}>
-                                                (GMT+05:00) Islamabad, Karachi, Tashkent</option>
-                                            <option value="Asia/Calcutta"
-                                                {{ $tz ? ($tz == 'Asia/Calcutta' ? 'selected' : '') : '' }}>
-                                                (GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
-                                            <!-- <option value="Asia/Calcutta"  {{ $tz ? ($tz == 'Asia/Calcutta' ? 'selected' : '') : '' }}>(GMT+05:30) Sri Jayawardenapura</option> -->
-                                            <option value="Asia/Katmandu"
-                                                {{ $tz ? ($tz == 'Asia/Katmandu' ? 'selected' : '') : '' }}>
-                                                (GMT+05:45) Kathmandu</option>
-                                            <option value="Asia/Almaty"
-                                                {{ $tz ? ($tz == 'Asia/Almaty' ? 'selected' : '') : '' }}>(GMT+06:00)
-                                                Almaty, Novosibirsk</option>
-                                            <option value="Asia/Dhaka"
-                                                {{ $tz ? ($tz == 'Asia/Dhaka' ? 'selected' : '') : '' }}>(GMT+06:00)
-                                                Astana, Dhaka</option>
-                                            <option value="Asia/Rangoon"
-                                                {{ $tz ? ($tz == 'Asia/Rangoon' ? 'selected' : '') : '' }}>
-                                                (GMT+06:30) Yangon (Rangoon)</option>
-                                            <option value="Asia/Bangkok"
-                                                {{ $tz ? ($tz == 'Asia/Bangkok' ? 'selected' : '') : '' }}>
-                                                (GMT+07:00) Bangkok, Hanoi, Jakarta</option>
-                                            <option value="Asia/Krasnoyarsk"
-                                                {{ $tz ? ($tz == 'Asia/Krasnoyarsk' ? 'selected' : '') : '' }}>
-                                                (GMT+07:00) Krasnoyarsk</option>
-                                            <option value="Asia/Hong_Kong"
-                                                {{ $tz ? ($tz == 'Asia/Hong_Kong' ? 'selected' : '') : '' }}>
-                                                (GMT+08:00) Beijing, Chongqing, Hong Kong, Urumqi</option>
-                                            <option value="Asia/Kuala_Lumpur"
-                                                {{ $tz ? ($tz == 'Asia/Kuala_Lumpur' ? 'selected' : '') : '' }}>
-                                                (GMT+08:00) Kuala Lumpur,
-                                                Singapore</option>
-                                            <option value="Asia/Irkutsk"
-                                                {{ $tz ? ($tz == 'Asia/Irkutsk' ? 'selected' : '') : '' }}>
-                                                (GMT+08:00) Irkutsk, Ulaan Bataar</option>
-                                            <option value="Australia/Perth"
-                                                {{ $tz ? ($tz == 'Australia/Perth' ? 'selected' : '') : '' }}>
-                                                (GMT+08:00) Perth</option>
-                                            <option value="Asia/Taipei"
-                                                {{ $tz ? ($tz == 'Asia/Taipei' ? 'selected' : '') : '' }}>(GMT+08:00)
-                                                Taipei</option>
-                                            <option value="Asia/Tokyo"
-                                                {{ $tz ? ($tz == 'Asia/Tokyo' ? 'selected' : '') : '' }}>(GMT+09:00)
-                                                Osaka, Sapporo, Tokyo</option>
-                                            <option value="Asia/Seoul"
-                                                {{ $tz ? ($tz == 'Asia/Seoul' ? 'selected' : '') : '' }}>(GMT+09:00)
-                                                Seoul</option>
-                                            <option value="Asia/Yakutsk"
-                                                {{ $tz ? ($tz == 'Asia/Yakutsk' ? 'selected' : '') : '' }}>
-                                                (GMT+09:00) Yakutsk</option>
-                                            <option value="Australia/Adelaide"
-                                                {{ $tz ? ($tz == 'Australia/Adelaide' ? 'selected' : '') : '' }}>
-                                                (GMT+09:30) Adelaide
-                                            </option>
-                                            <option value="Australia/Darwin"
-                                                {{ $tz ? ($tz == 'Australia/Darwin' ? 'selected' : '') : '' }}>
-                                                (GMT+09:30) Darwin</option>
-                                            <option value="Australia/Brisbane"
-                                                {{ $tz ? ($tz == 'Australia/Brisbane' ? 'selected' : '') : '' }}>
-                                                (GMT+10:00) Brisbane
-                                            </option>
-                                            <option value="Australia/Canberra"
-                                                {{ $tz ? ($tz == 'Australia/Canberra' ? 'selected' : '') : '' }}>
-                                                (GMT+10:00) Canberra,
-                                                Melbourne, Sydney</option>
-                                            <option value="Australia/Hobart"
-                                                {{ $tz ? ($tz == 'Australia/Hobart' ? 'selected' : '') : '' }}>
-                                                (GMT+10:00) Hobart</option>
-                                            <option value="Pacific/Guam"
-                                                {{ $tz ? ($tz == 'Pacific/Guam' ? 'selected' : '') : '' }}>
-                                                (GMT+10:00) Guam, Port Moresby</option>
-                                            <option value="Asia/Vladivostok"
-                                                {{ $tz ? ($tz == 'Asia/Vladivostok' ? 'selected' : '') : '' }}>
-                                                (GMT+10:00) Vladivostok</option>
-                                            <option value="Asia/Magadan"
-                                                {{ $tz ? ($tz == 'Asia/Magadan' ? 'selected' : '') : '' }}>
-                                                (GMT+11:00) Magadan, Solomon Is., New Caledonia</option>
-                                            <option value="Pacific/Auckland"
-                                                {{ $tz ? ($tz == 'Pacific/Auckland' ? 'selected' : '') : '' }}>
-                                                (GMT+12:00) Auckland, Wellington</option>
-                                            <option value="Pacific/Fiji"
-                                                {{ $tz ? ($tz == 'Pacific/Fiji' ? 'selected' : '') : '' }}>
-                                                (GMT+12:00) Fiji, Kamchatka, Marshall Is.</option>
-                                            <option value="Pacific/Tongatapu"
-                                                {{ $tz ? ($tz == 'Pacific/Tongatapu' ? 'selected' : '') : '' }}>
-                                                (GMT+13:00) Nuku'alofa
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($tf = \App\Models\BusinessSetting::where('key', 'timeformat')->first())
-                                    @php($tf = $tf ? $tf->value : '24')
-                                    <div class="form-group mb-0">
-                                        <label
-                                            class="form-label text-capitalize">{{ translate('messages.time_format') }}</label>
-                                        <select name="time_format" class="form-control">
-                                            <option value="12" {{ $tf == '12' ? 'selected' : '' }}>
-                                                {{ translate('messages.12_hour') }}
-                                            </option>
-                                            <option value="24" {{ $tf == '24' ? 'selected' : '' }}>
-                                                {{ translate('messages.24_hour') }}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($currency_code = \App\Models\BusinessSetting::where('key', 'currency')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label"
-                                            for="exampleFormControlInput1">{{ translate('Currency Symbol') }}</label>
-                                        <select name="currency" class="form-control js-select2-custom">
-                                            @foreach (\App\Models\Currency::orderBy('currency_code')->get() as $currency)
-                                                <option value="{{ $currency['currency_code'] }}"
-                                                    {{ $currency_code ? ($currency_code->value == $currency['currency_code'] ? 'selected' : '') : '' }}>
-                                                    {{ $currency['currency_code'] }} ( {{ $currency['currency_symbol'] }}
-                                                    )
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($currency_symbol_position = \App\Models\BusinessSetting::where('key', 'currency_symbol_position')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="currency_symbol_position">{{ translate('Currency Position') }}</label>
-                                        <select name="currency_symbol_position" class="form-control js-select2-custom"
-                                            id="currency_symbol_position">
-                                            <option value="left"
-                                                {{ $currency_symbol_position ? ($currency_symbol_position->value == 'left' ? 'selected' : '') : '' }}>
-                                                {{ translate('messages.left') }}
-                                                ({{ \App\CentralLogics\Helpers::currency_symbol() }}123)
-                                            </option>
-                                            <option value="right"
-                                                {{ $currency_symbol_position ? ($currency_symbol_position->value == 'right' ? 'selected' : '') : '' }}>
-                                                {{ translate('messages.right') }}
-                                                (123{{ \App\CentralLogics\Helpers::currency_symbol() }})
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($digit_after_decimal_point = \App\Models\BusinessSetting::where('key', 'digit_after_decimal_point')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="digit_after_decimal_point">{{ translate('messages.Digit after decimal point') }}</label>
-                                        <input type="number" name="digit_after_decimal_point" class="form-control"
-                                            id="digit_after_decimal_point"
-                                            value="{{ $digit_after_decimal_point ? $digit_after_decimal_point->value : 0 }}"
-                                            min="0" max="4" required>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($admin_commission = \App\Models\BusinessSetting::where('key', 'admin_commission')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="admin_commission">{{ translate('Default Commission on Order') }}</label>
-                                        <input type="number" name="admin_commission" class="form-control"
-                                            id="admin_commission"
-                                            value="{{ $admin_commission ? $admin_commission->value : 0 }}"
-                                            min="0" max="100" required>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($delivery_charge_comission = \App\Models\BusinessSetting::where('key', 'delivery_charge_comission')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"
-                                        for="admin_comission_in_delivery_charge">{{translate('Commission on Delivery Charge')}}</label>
-                                            <input type="number" name="admin_comission_in_delivery_charge" class="form-control" id="admin_comission_in_delivery_charge"
-                                            min="0" max="100" step="0.01" value="{{ $delivery_charge_comission ? $delivery_charge_comission->value: 0 }}">
-                                    </div>
-                                </div>
-                                {{-- <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($max_otp_hit = \App\Models\BusinessSetting::where('key', 'max_otp_hit')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"
-                                        for="max_otp_hit">{{translate('messages.Max_Number_of_Otp_Verification_in_a_Row')}}</label>
-                                            <input type="number" name="max_otp_hit" class="form-control" id="max_otp_hit"
-                                            min="0" max="100" step="0.01" value="{{ $max_otp_hit ? $max_otp_hit->value: 0 }}">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-md-4 col-xl-3">
-                                    @php($otp_interval_time = \App\Models\BusinessSetting::where('key', 'otp_interval_time')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"
-                                        for="otp_interval_time">{{translate('messages.otp_verification_interval_time')}} ({{ translate('messages.seconds') }})</label>
-                                            <input type="number" name="otp_interval_time" class="form-control" id="otp_interval_time"
-                                            min="0" max="100" step="0.01" value="{{ $otp_interval_time ? $otp_interval_time->value: 0 }}">
-                                    </div>
-                                </div> --}}
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title"> <span class="card-header-icon mr-2"><i class="tio-poi"></i></span>
-                                <span>{{ translate('Company Location') }}</span></h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3 mt-0">
+                            <div class="row g-3 mt-2">
                                 <div class="col-md-6">
                                     <div class="row g-3">
                                         <div class="col-sm-12">
                                             @php($address = \App\Models\BusinessSetting::where('key', 'address')->first())
                                             <div class="form-group mb-0">
                                                 <label class="form-label"
-                                                    for="exampleFormControlInput1">{{ translate('messages.address') }}</label>
-                                                <textarea type="text" id="address" name="address" class="form-control h--70px" placeholder="" rows="1" required>{{ $address->value ?? '' }}</textarea>
+                                                    for="address">{{ translate('messages.address') }}</label>
+                                                <textarea type="text" id="address" name="address" class="form-control h--90px" placeholder="{{ translate('messages.Ex: address') }}" rows="1" required>{{ $address->value ?? '' }}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
@@ -943,270 +380,435 @@
                                                     readonly>
                                             </div>
                                         </div>
-                                        <div class="col-sm-12">
-                                            @php($footer_text = \App\Models\BusinessSetting::where('key', 'footer_text')->first())
-                                            <div class="form-group mb-0">
-                                                <label class="form-label"
-                                                    for="exampleFormControlInput1">{{ translate('messages.footer') }}
-                                                    {{ translate('messages.text') }}</label>
-                                                <textarea type="text" value="" name="footer_text" class="form-control h--45"
-                                                    placeholder="{{ translate('messages.Ex_:_Footer_Text') }}" required>{{ $footer_text->value ?? '' }}</textarea>
+                                    </div>
+                                    <div class="d-flex __gap-12px mt-4">
+                                        <label class="__custom-upload-img mr-lg-5">
+                                            @php($logo = \App\Models\BusinessSetting::where('key', 'logo')->first())
+                                            @php($logo = $logo->value ?? '')
+                                            <label class="form-label">
+                                                {{ translate('logo') }} <span class="text--primary">( {{ translate('3:1') }} )</span>
+                                            </label>
+                                            <div class="text-center">
+                                                <img class="img--vertical onerror-image" id="viewer"
+                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
+                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper($logo, asset('storage/app/public/business/').'/'.$logo, asset('public/assets/admin/img/upload-img.png'),'business/') }}"
+                                                    alt="logo image" />
                                             </div>
-                                        </div>
+                                            <input type="file" name="logo" id="customFileEg1"
+                                                class="custom-file-input"
+                                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                        </label>
+
+                                        <label class="__custom-upload-img">
+                                            @php($icon = \App\Models\BusinessSetting::where('key', 'icon')->first())
+                                            @php($icon = $icon->value ?? '')
+                                            <label class="form-label">
+                                                {{ translate('Favicon') }}  <span class="text--primary">( {{ translate('1:1') }} )</span>
+                                            </label>
+
+
+                                            <div class="text-center">
+                                                <img class="img--110 onerror-image" id="iconViewer"
+                                                    data-onerror-image="{{ asset('public/assets/admin/img/upload-img.png') }}"
+                                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper($icon, asset('storage/app/public/business/').'/'.$icon, asset('public/assets/admin/img/upload-img.png') , 'business/')}}"
+                                                    alt="Fav icon" />
+                                            </div>
+                                            <input type="file" name="icon" id="favIconUpload"
+                                                class="custom-file-input"
+                                                accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <input id="pac-input" class="controls rounded" data-toggle="tooltip"
-                                        data-placement="right"
-                                        data-original-title="{{ translate('messages.search_your_location_here') }}"
-                                        type="text" placeholder="{{ translate('messages.search_here') }}" />
-                                    <div id="location_map_canvas" class="overflow-hidden rounded"></div>
+                                    <div class="mt-md-4">
+
+                                        <input id="pac-input" class="controls rounded" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.search_your_location_here') }}" type="text" placeholder="{{ translate('messages.search_here') }}" />
+                                        <div id="location_map_canvas" class="overflow-hidden rounded height-285px"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-12">
+                    <h4 class="card-title mb-3">
+                        <span class="card-header-icon mr-2"><i class="tio-settings-outlined"></i></span>
+                        <span>{{ translate('General Settings') }}</span>
+                    </h4>
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title m-0 d-flex align-items-center"> <span class="card-header-icon mr-2"><i
-                                        class="tio-neighborhood"></i></span>
-                                <span>{{ translate('business_information') }}</span></h4>
-                        </div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($schedule_order = \App\Models\BusinessSetting::where('key', 'schedule_order')->first())
-                                    @php($schedule_order = $schedule_order ? $schedule_order->value : 0)
+
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($tz = \App\Models\BusinessSetting::where('key', 'timezone')->first())
+                                    @php($tz = $tz ? $tz->value : 0)
                                     <div class="form-group mb-0">
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.scheduled') }}
-                                                    {{ translate('messages.orders') }}
+                                        <label for="timezone"
+                                            class="form-label text-capitalize">{{ translate('messages.time_zone') }}</label>
+                                        <select id="timezone" name="timezone" class="form-control js-select2-custom">
+                                            <option value="UTC" {{ $tz ? ($tz == '' ? 'selected' : '') : '' }}>UTC </option>
+                                            <option value="Etc/GMT+12"
+                                                {{ $tz ? ($tz == 'Etc/GMT+12' ? 'selected' : '') : '' }}>(GMT-12:00)International Date Line West</option>
+                                            <option value="Pacific/Midway"
+                                                {{ $tz ? ($tz == 'Pacific/Midway' ? 'selected' : '') : '' }}>
+                                                (GMT-11:00) Midway Island, Samoa</option>
+                                            <option value="Pacific/Honolulu"
+                                                {{ $tz ? ($tz == 'Pacific/Honolulu' ? 'selected' : '') : '' }}>
+                                                (GMT-10:00) Hawaii</option>
+                                            <option value="US/Alaska"
+                                                {{ $tz ? ($tz == 'US/Alaska' ? 'selected' : '') : '' }}>(GMT-09:00)Alaska</option>
+                                            <option value="America/Los_Angeles"
+                                                {{ $tz ? ($tz == 'America/Los_Angeles' ? 'selected' : '') : '' }}>
+                                                (GMT-08:00) Pacific Time
+                                                (US & Canada)</option>
+                                            <option value="America/Tijuana"
+                                                {{ $tz ? ($tz == 'America/Tijuana' ? 'selected' : '') : '' }}>
+                                                (GMT-08:00) Tijuana, Baja California</option>
+                                            <option value="US/Arizona"
+                                                {{ $tz ? ($tz == 'US/Arizona' ? 'selected' : '') : '' }}>(GMT-07:00)Arizona</option>
+                                            <option value="America/Chihuahua"
+                                                {{ $tz ? ($tz == 'America/Chihuahua' ? 'selected' : '') : '' }}>(GMT-07:00)Chihuahua, La
+                                                Paz, Mazatlan</option>
+                                            <option value="US/Mountain"
+                                                {{ $tz ? ($tz == 'US/Mountain' ? 'selected' : '') : '' }}>(GMT-07:00)Mountain Time (US & Canada)</option>
+                                            <option value="America/Managua"
+                                                {{ $tz ? ($tz == 'America/Managua' ? 'selected' : '') : '' }}>
+                                                (GMT-06:00) Central America</option>
+                                            <option value="US/Central"
+                                                {{ $tz ? ($tz == 'US/Central' ? 'selected' : '') : '' }}>(GMT-06:00)Central Time (US & Canada)</option>
+                                            <option value="America/Mexico_City"
+                                                {{ $tz ? ($tz == 'America/Mexico_City' ? 'selected' : '') : '' }}>
+                                                (GMT-06:00) Guadalajara,
+                                                Mexico City, Monterrey</option>
+                                            <option value="Canada/Saskatchewan"
+                                                {{ $tz ? ($tz == 'Canada/Saskatchewan' ? 'selected' : '') : '' }}>
+                                                (GMT-06:00) Saskatchewan </option>
+                                            <option value="America/Bogota"
+                                                {{ $tz ? ($tz == 'America/Bogota' ? 'selected' : '') : '' }}>
+                                                (GMT-05:00) Bogota, Lima, Quito, Rio Branco</option>
+                                            <option value="US/Eastern"
+                                                {{ $tz ? ($tz == 'US/Eastern' ? 'selected' : '') : '' }}>(GMT-05:00)Eastern Time (US & Canada)</option>
+                                            <option value="US/East-Indiana"
+                                                {{ $tz ? ($tz == 'US/East-Indiana' ? 'selected' : '') : '' }}>
+                                                (GMT-05:00) Indiana (East)</option>
+                                            <option value="Canada/Atlantic"
+                                                {{ $tz ? ($tz == 'Canada/Atlantic' ? 'selected' : '') : '' }}>
+                                                (GMT-04:00) Atlantic Time (Canada)</option>
+                                            <option value="America/Caracas"
+                                                {{ $tz ? ($tz == 'America/Caracas' ? 'selected' : '') : '' }}>
+                                                (GMT-04:00) Caracas, La Paz</option>
+                                            <option value="America/Manaus"
+                                                {{ $tz ? ($tz == 'America/Manaus' ? 'selected' : '') : '' }}>
+                                                (GMT-04:00) Manaus</option>
+                                            <option value="America/Santiago"
+                                                {{ $tz ? ($tz == 'America/Santiago' ? 'selected' : '') : '' }}>
+                                                (GMT-04:00) Santiago</option>
+                                            <option value="Canada/Newfoundland"
+                                                {{ $tz ? ($tz == 'Canada/Newfoundland' ? 'selected' : '') : '' }}>
+                                                (GMT-03:30) Newfoundland </option>
+                                            <option value="America/Sao_Paulo"
+                                                {{ $tz ? ($tz == 'America/Sao_Paulo' ? 'selected' : '') : '' }}>(GMT-03:00)Brasilia</option>
+                                            <option value="America/Argentina/Buenos_Aires"
+                                                {{ $tz ? ($tz == 'America/Argentina/Buenos_Aires' ? 'selected' : '') : '' }}>
+                                                (GMT-03:00)Buenos Aires, Georgetown</option>
+                                            <option value="America/Godthab"
+                                                {{ $tz ? ($tz == 'America/Godthab' ? 'selected' : '') : '' }}>
+                                                (GMT-03:00) Greenland</option>
+                                            <option value="America/Montevideo"
+                                                {{ $tz ? ($tz == 'America/Montevideo' ? 'selected' : '') : '' }}>
+                                                (GMT-03:00) Montevideo </option>
+                                            <option value="America/Noronha"
+                                                {{ $tz ? ($tz == 'America/Noronha' ? 'selected' : '') : '' }}>
+                                                (GMT-02:00) Mid-Atlantic</option>
+                                            <option value="Atlantic/Cape_Verde"
+                                                {{ $tz ? ($tz == 'Atlantic/Cape_Verde' ? 'selected' : '') : '' }}>
+                                                (GMT-01:00) Cape Verde Is. </option>
+                                            <option value="Atlantic/Azores"
+                                                {{ $tz ? ($tz == 'Atlantic/Azores' ? 'selected' : '') : '' }}>
+                                                (GMT-01:00) Azores</option>
+                                            <option value="Africa/Casablanca"
+                                                {{ $tz ? ($tz == 'Africa/Casablanca' ? 'selected' : '') : '' }}>(GMT+00:00)Casablanca,
+                                                Monrovia, Reykjavik</option>
+                                            <option value="Etc/Greenwich"
+                                                {{ $tz ? ($tz == 'Etc/Greenwich' ? 'selected' : '') : '' }}>
+                                                (GMT+00:00) Greenwich Mean Time : Dublin, Edinburgh, Lisbon, London</option>
+                                            <option value="Europe/Amsterdam"
+                                                {{ $tz ? ($tz == 'Europe/Amsterdam' ? 'selected' : '') : '' }}>
+                                                (GMT+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna</option>
+                                            <option value="Europe/Belgrade"
+                                                {{ $tz ? ($tz == 'Europe/Belgrade' ? 'selected' : '') : '' }}>
+                                                (GMT+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague</option>
+                                            <option value="Europe/Brussels"
+                                                {{ $tz ? ($tz == 'Europe/Brussels' ? 'selected' : '') : '' }}>
+                                                (GMT+01:00) Brussels, Copenhagen, Madrid, Paris</option>
+                                            <option value="Europe/Sarajevo"
+                                                {{ $tz ? ($tz == 'Europe/Sarajevo' ? 'selected' : '') : '' }}>
+                                                (GMT+01:00) Sarajevo, Skopje, Warsaw, Zagreb</option>
+                                            <option value="Africa/Lagos"
+                                                {{ $tz ? ($tz == 'Africa/Lagos' ? 'selected' : '') : '' }}>
+                                                (GMT+01:00) West Central Africa</option>
+                                            <option value="Asia/Amman"
+                                                {{ $tz ? ($tz == 'Asia/Amman' ? 'selected' : '') : '' }}>(GMT+02:00)Amman</option>
+                                            <option value="Europe/Athens"
+                                                {{ $tz ? ($tz == 'Europe/Athens' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Athens, Bucharest, Istanbul</option>
+                                            <option value="Asia/Beirut"
+                                                {{ $tz ? ($tz == 'Asia/Beirut' ? 'selected' : '') : '' }}>(GMT+02:00)Beirut</option>
+                                            <option value="Africa/Cairo"
+                                                {{ $tz ? ($tz == 'Africa/Cairo' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Cairo</option>
+                                            <option value="Africa/Harare"
+                                                {{ $tz ? ($tz == 'Africa/Harare' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Harare, Pretoria</option>
+                                            <option value="Europe/Helsinki"
+                                                {{ $tz ? ($tz == 'Europe/Helsinki' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius</option>
+                                            <option value="Asia/Jerusalem"
+                                                {{ $tz ? ($tz == 'Asia/Jerusalem' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Jerusalem</option>
+                                            <option value="Europe/Minsk"
+                                                {{ $tz ? ($tz == 'Europe/Minsk' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Minsk</option>
+                                            <option value="Africa/Windhoek"
+                                                {{ $tz ? ($tz == 'Africa/Windhoek' ? 'selected' : '') : '' }}>
+                                                (GMT+02:00) Windhoek</option>
+                                            <option value="Asia/Kuwait"
+                                                {{ $tz ? ($tz == 'Asia/Kuwait' ? 'selected' : '') : '' }}>(GMT+03:00)Kuwait, Riyadh Baghdad</option>
+                                            <option value="Europe/Moscow"
+                                                {{ $tz ? ($tz == 'Europe/Moscow' ? 'selected' : '') : '' }}>
+                                                (GMT+03:00) Moscow, St. Petersburg, Volgograd</option>
+                                            <option value="Africa/Nairobi"
+                                                {{ $tz ? ($tz == 'Africa/Nairobi' ? 'selected' : '') : '' }}>
+                                                (GMT+03:00) Nairobi</option>
+                                            <option value="Asia/Tbilisi"
+                                                {{ $tz ? ($tz == 'Asia/Tbilisi' ? 'selected' : '') : '' }}>
+                                                (GMT+03:00) Tbilisi</option>
+                                            <option value="Asia/Tehran"
+                                                {{ $tz ? ($tz == 'Asia/Tehran' ? 'selected' : '') : '' }}>(GMT+03:30)Tehran</option>
+                                            <option value="Asia/Muscat"
+                                                {{ $tz ? ($tz == 'Asia/Muscat' ? 'selected' : '') : '' }}>(GMT+04:00)Abu Dhabi,Muscat</option>
+                                            <option value="Asia/Baku"
+                                                {{ $tz ? ($tz == 'Asia/Baku' ? 'selected' : '') : '' }}>(GMT+04:00)Baku</option>
+                                            <option value="Asia/Yerevan"
+                                                {{ $tz ? ($tz == 'Asia/Yerevan' ? 'selected' : '') : '' }}>
+                                                (GMT+04:00) Yerevan</option>
+                                            <option value="Asia/Kabul"
+                                                {{ $tz ? ($tz == 'Asia/Kabul' ? 'selected' : '') : '' }}>(GMT+04:30)Kabul</option>
+                                            <option value="Asia/Yekaterinburg"
+                                                {{ $tz ? ($tz == 'Asia/Yekaterinburg' ? 'selected' : '') : '' }}>
+                                                (GMT+05:00) Yekaterinburg </option>
+                                            <option value="Asia/Karachi"
+                                                {{ $tz ? ($tz == 'Asia/Karachi' ? 'selected' : '') : '' }}>
+                                                (GMT+05:00) Islamabad, Karachi, Tashkent</option>
+                                            <option value="Asia/Calcutta"
+                                                {{ $tz ? ($tz == 'Asia/Calcutta' ? 'selected' : '') : '' }}>
+                                                (GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi</option>
+                                            <!-- <option value="Asia/Calcutta"  {{ $tz ? ($tz == 'Asia/Calcutta' ? 'selected' : '') : '' }}>(GMT+05:30) Sri Jayawardenapura</option> -->
+                                            <option value="Asia/Katmandu"
+                                                {{ $tz ? ($tz == 'Asia/Katmandu' ? 'selected' : '') : '' }}>
+                                                (GMT+05:45) Kathmandu</option>
+                                            <option value="Asia/Almaty"
+                                                {{ $tz ? ($tz == 'Asia/Almaty' ? 'selected' : '') : '' }}>(GMT+06:00)Almaty, Novosibirsk</option>
+                                            <option value="Asia/Dhaka"
+                                                {{ $tz ? ($tz == 'Asia/Dhaka' ? 'selected' : '') : '' }}>(GMT+06:00)Astana, Dhaka</option>
+                                            <option value="Asia/Rangoon"
+                                                {{ $tz ? ($tz == 'Asia/Rangoon' ? 'selected' : '') : '' }}>
+                                                (GMT+06:30) Yangon (Rangoon)</option>
+                                            <option value="Asia/Bangkok"
+                                                {{ $tz ? ($tz == 'Asia/Bangkok' ? 'selected' : '') : '' }}>
+                                                (GMT+07:00) Bangkok, Hanoi, Jakarta</option>
+                                            <option value="Asia/Krasnoyarsk"
+                                                {{ $tz ? ($tz == 'Asia/Krasnoyarsk' ? 'selected' : '') : '' }}>
+                                                (GMT+07:00) Krasnoyarsk</option>
+                                            <option value="Asia/Hong_Kong"
+                                                {{ $tz ? ($tz == 'Asia/Hong_Kong' ? 'selected' : '') : '' }}>
+                                                (GMT+08:00) Beijing, Chongqing, Hong Kong, Urumqi</option>
+                                            <option value="Asia/Kuala_Lumpur"
+                                                {{ $tz ? ($tz == 'Asia/Kuala_Lumpur' ? 'selected' : '') : '' }}>
+                                                (GMT+08:00) Kuala Lumpur,
+                                                Singapore</option>
+                                            <option value="Asia/Irkutsk"
+                                                {{ $tz ? ($tz == 'Asia/Irkutsk' ? 'selected' : '') : '' }}>
+                                                (GMT+08:00) Irkutsk, Ulaan Bataar</option>
+                                            <option value="Australia/Perth"
+                                                {{ $tz ? ($tz == 'Australia/Perth' ? 'selected' : '') : '' }}>
+                                                (GMT+08:00) Perth</option>
+                                            <option value="Asia/Taipei"
+                                                {{ $tz ? ($tz == 'Asia/Taipei' ? 'selected' : '') : '' }}>(GMT+08:00)Taipei</option>
+                                            <option value="Asia/Tokyo"
+                                                {{ $tz ? ($tz == 'Asia/Tokyo' ? 'selected' : '') : '' }}>(GMT+09:00)Osaka, Sapporo, Tokyo</option>
+                                            <option value="Asia/Seoul"
+                                                {{ $tz ? ($tz == 'Asia/Seoul' ? 'selected' : '') : '' }}>(GMT+09:00)Seoul</option>
+                                            <option value="Asia/Yakutsk"
+                                                {{ $tz ? ($tz == 'Asia/Yakutsk' ? 'selected' : '') : '' }}>
+                                                (GMT+09:00) Yakutsk</option>
+                                            <option value="Australia/Adelaide"
+                                                {{ $tz ? ($tz == 'Australia/Adelaide' ? 'selected' : '') : '' }}>
+                                                (GMT+09:30) Adelaide </option>
+                                            <option value="Australia/Darwin"
+                                                {{ $tz ? ($tz == 'Australia/Darwin' ? 'selected' : '') : '' }}>
+                                                (GMT+09:30) Darwin</option>
+                                            <option value="Australia/Brisbane"
+                                                {{ $tz ? ($tz == 'Australia/Brisbane' ? 'selected' : '') : '' }}>
+                                                (GMT+10:00) Brisbane </option>
+                                            <option value="Australia/Canberra"
+                                                {{ $tz ? ($tz == 'Australia/Canberra' ? 'selected' : '') : '' }}>
+                                                (GMT+10:00) Canberra,
+                                                Melbourne, Sydney</option>
+                                            <option value="Australia/Hobart"
+                                                {{ $tz ? ($tz == 'Australia/Hobart' ? 'selected' : '') : '' }}>
+                                                (GMT+10:00) Hobart</option>
+                                            <option value="Pacific/Guam"
+                                                {{ $tz ? ($tz == 'Pacific/Guam' ? 'selected' : '') : '' }}>
+                                                (GMT+10:00) Guam, Port Moresby</option>
+                                            <option value="Asia/Vladivostok"
+                                                {{ $tz ? ($tz == 'Asia/Vladivostok' ? 'selected' : '') : '' }}>
+                                                (GMT+10:00) Vladivostok</option>
+                                            <option value="Asia/Magadan"
+                                                {{ $tz ? ($tz == 'Asia/Magadan' ? 'selected' : '') : '' }}>
+                                                (GMT+11:00) Magadan, Solomon Is., New Caledonia</option>
+                                            <option value="Pacific/Auckland"
+                                                {{ $tz ? ($tz == 'Pacific/Auckland' ? 'selected' : '') : '' }}>
+                                                (GMT+12:00) Auckland, Wellington</option>
+                                            <option value="Pacific/Fiji"
+                                                {{ $tz ? ($tz == 'Pacific/Fiji' ? 'selected' : '') : '' }}>
+                                                (GMT+12:00) Fiji, Kamchatka, Marshall Is.</option>
+                                            <option value="Pacific/Tongatapu"
+                                                {{ $tz ? ($tz == 'Pacific/Tongatapu' ? 'selected' : '') : '' }}>
+                                                (GMT+13:00) Nuku'alofa </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($tf = \App\Models\BusinessSetting::where('key', 'timeformat')->first())
+                                    @php($tf = $tf ? $tf->value : '24')
+                                    <div class="form-group mb-0">
+                                        <label for="time_format"
+                                            class="form-label text-capitalize">{{ translate('messages.time_format') }}</label>
+                                        <select id="time_format" name="time_format" class="form-control">
+                                            <option value="12" {{ $tf == '12' ? 'selected' : '' }}>
+                                                {{ translate('messages.12_hour') }} </option>
+                                            <option value="24" {{ $tf == '24' ? 'selected' : '' }}>
+                                                {{ translate('messages.24_hour') }} </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($currency_code = \App\Models\BusinessSetting::where('key', 'currency')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label"
+                                            for="currency">{{ translate('Currency Symbol') }}</label>
+                                        <select name="currency" class="form-control js-select2-custom">
+                                            @foreach (\App\Models\Currency::orderBy('currency_code')->get() as $currency)<option value="{{ $currency['currency_code'] }}"
+                                                    {{ $currency_code ? ($currency_code->value == $currency['currency_code'] ? 'selected' : '') : '' }}>
+                                                    {{ $currency['currency_code'] }} ({{ $currency['currency_symbol'] }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($currency_symbol_position = \App\Models\BusinessSetting::where('key', 'currency_symbol_position')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label text-capitalize"
+                                            for="currency_symbol_position">{{ translate('Currency Position') }}
+                                        </label>
+                                        <div class="resturant-type-group border">
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="left" name="currency_symbol_position" {{ $currency_symbol_position ? ($currency_symbol_position->value == 'left' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    ($) {{translate('Left')}}
                                                 </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('After activating this field, customers are able to place scheduled orders.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                            </label>
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="right" name="currency_symbol_position" {{ $currency_symbol_position ? ($currency_symbol_position->value == 'right' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('Right')}} ($)
                                                 </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="schedule_order" id="schedule_order"
-                                                {{ $schedule_order == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-md-4 col-xl-3">
+                                    @php($digit_after_decimal_point = \App\Models\BusinessSetting::where('key', 'digit_after_decimal_point')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label text-capitalize"
+                                            for="digit_after_decimal_point">{{ translate('messages.Digit after decimal point') }}
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('how_many_fractional_digit_to_show_after_decimal_value') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                             </span>
                                         </label>
+                                        <input type="number" name="digit_after_decimal_point" class="form-control"
+                                            id="digit_after_decimal_point" placeholder="{{ translate('messages.ex_:_2') }}"
+                                            value="{{ $digit_after_decimal_point ? $digit_after_decimal_point->value : 0 }}"
+                                            min="0" max="4" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-xl-5">
+                                    @php($footer_text = \App\Models\BusinessSetting::where('key', 'footer_text')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label"
+                                            for="footer_text">{{ translate('Copyright Text') }}
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.make_visitors_aware_of_your_business‘s_rights_&_legal_information.') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                            </span>
+                                        </label>
+                                        <textarea type="text" id="footer_text" name="footer_text" class="form-control h--45"
+                                            placeholder="{{ translate('messages.Ex_:_Copyright_Text') }}" required>{{ $footer_text->value ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-xl-4">
+                                    @php($cookies_text = \App\Models\BusinessSetting::where('key', 'cookies_text')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label"
+                                            for="cookies_text">{{ translate('Cookies Text') }}
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.make_visitors_aware_of_your_business‘s_rights_&_legal_information.') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                            </span>
+                                        </label>
+                                        <textarea type="text"  id="cookies_text" name="cookies_text" class="form-control h--45"
+                                            placeholder="{{ translate('messages.Ex_:_Cookies_Text') }}" required>{{ $cookies_text->value ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <h4 class="card-title mb-3 d-flex align-items-center"> <span class="card-header-icon mr-2"><i
+                                class="tio-neighborhood"></i></span>
+                        <span>{{ translate('messages.Business_Rules_setup') }} </span></h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($admin_commission = \App\Models\BusinessSetting::where('key', 'admin_commission')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label text-capitalize"
+                                            for="admin_commission">
+                                            {{ translate('messages.Default_Commission_Rate_On_Order') }} (%)
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.Set_up_‘Default_Commission_Rate’_on_every_Order._Admin_can_also_set_store-wise_different_commission_rates_from_respective_store_settings.') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                            </span>
+                                        </label>
+                                        <input type="number" name="admin_commission" class="form-control"
+                                            id="admin_commission" placeholder="{{ translate('messages.Ex:_10') }}"
+                                            value="{{ $admin_commission ? $admin_commission->value : 0 }}"
+                                            min="0" max="100" required>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($admin_order_notification = \App\Models\BusinessSetting::where('key', 'admin_order_notification')->first())
-                                    @php($admin_order_notification = $admin_order_notification ? $admin_order_notification->value : 0)
+                                    @php($delivery_charge_comission = \App\Models\BusinessSetting::where('key', 'delivery_charge_comission')->first())
                                     <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.admin') }} {{ translate('messages.order') }}
-                                                    {{ translate('messages.notification') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('Turning on this, admin will get a popup notification with sound for all orders.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="admin_order_notification" id="aon1"
-                                                {{ $admin_order_notification == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
+                                        <label class="input-label text-capitalize d-flex alig-items-center"
+                                        for="admin_comission_in_delivery_charge">
+                                        {{translate('messages.Commission_Rate_On_Delivery_Charge')}} (%)
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.Set_a_default_‘Commission_Rate’_for_freelance_deliverymen_(under_admin)_on_every_deliveryman. ') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
                                             </span>
                                         </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($odc = \App\Models\BusinessSetting::where('key', 'order_delivery_verification')->first())
-                                    @php($odc = $odc ? $odc->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.order') }}
-                                                    {{ translate('messages.delivery') }}
-                                                    {{ translate('messages.verification') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('If this field is active, customers have to provide a 4-digit code to the delivery man to deliver an order successfully. Customers will get this code in order details.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.order_varification_toggle') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="odc" id="odc1" {{ $odc == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($ev = \App\Models\BusinessSetting::where('key', 'customer_verification')->first())
-                                    @php($ev = $ev ? $ev->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.customer') }}
-                                                    {{ translate('messages.verification') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.customer_varification_toggle') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="customer_verification" id="ev1"
-                                                {{ $ev == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($vnv = \App\Models\BusinessSetting::where('key', 'toggle_veg_non_veg')->first())
-                                    @php($vnv = $vnv ? $vnv->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.veg') }}/{{ translate('messages.non_veg') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('When this field is active, the stores and the customers both can see the veg/non-veg tag.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.veg_non_veg') }}"> * </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="vnv" id="vnv1" {{ $vnv == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($store_self_registration = \App\Models\BusinessSetting::where('key', 'toggle_store_registration')->first())
-                                    @php($store_self_registration = $store_self_registration ? $store_self_registration->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.store_self_registration') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('If this field is active, stores can register themself using the store app, user app, or website.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.store_self_registration') }}"> *
-                                                </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="store_self_registration" id="store_self_registration1"
-                                                {{ $store_self_registration == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($dm_self_registration = \App\Models\BusinessSetting::where('key', 'toggle_dm_registration')->first())
-                                    {{-- {{ dd($dm_self_registration) }} --}}
-                                    @php($dm_self_registration = $dm_self_registration ? $dm_self_registration->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.dm_self_registration') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('When this field is active, delivery men can register themself using the delivery man app, user app, or website.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.dm_self_registration') }}"> * </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="dm_self_registration" id="dm_self_registration1"
-                                                {{ $dm_self_registration == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-6 col-lg-4">
-                                    @php($prescription_order_status = \App\Models\BusinessSetting::where('key', 'prescription_order_status')->first())
-                                    {{-- {{ dd($prescription_order_status) }} --}}
-                                    @php($prescription_order_status = $prescription_order_status ? $prescription_order_status->value : 0)
-                                    <div class="form-group mb-0">
-
-                                        <label
-                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
-                                            <span class="pr-1 d-flex align-items-center switch--label">
-                                                <span class="line--limit-1">
-                                                    {{ translate('messages.prescription_order_status') }}
-                                                </span>
-                                                <span class="form-label-secondary text-danger d-flex"
-                                                    data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('When this field is active, store will get prescription order option.') }}"><img
-                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
-                                                        alt="{{ translate('messages.prescription_order_status') }}"> * </span>
-                                            </span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1"
-                                                name="prescription_order_status" id="prescription_order_status1"
-                                                {{ $prescription_order_status == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 col-sm-6">
-                                    @php($tax_included = \App\Models\BusinessSetting::where('key', 'tax_included')->first())
-                                    @php($tax_included = $tax_included ? $tax_included->value : 0)
-                                    <div class="form-group mb-0">
-                                        <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border rounded px-3 px-xl-4 form-control">
-                                        <span class="pr-2 d-flex align-items-center"><span class="line--limit-1">{{ translate('Include_TAX_Amount') }}</span><span class="input-label-secondary text--title" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('When this field is active, Tax amount will not be added with the total product price')}}">
-                                            <i class="tio-info-outined"></i>
-                                            </span></span>
-                                            <input type="checkbox" class="toggle-switch-input" value="1" name="tax_included"
-                                            {{ $tax_included == 1 ? 'checked' : '' }}>
-                                            <span class="toggle-switch-label text">
-                                                <span class="toggle-switch-indicator"></span>
-                                            </span>
-                                        </label>
+                                            <input type="number" name="admin_comission_in_delivery_charge" class="form-control" id="admin_comission_in_delivery_charge"  placeholder="{{ translate('messages.Ex:_10') }}"
+                                            min="0" max="100" step="0.01" value="{{ $delivery_charge_comission ? $delivery_charge_comission->value: 0 }}">
                                     </div>
                                 </div>
 
@@ -1215,12 +817,12 @@
                                     @php($order_confirmation_model = $order_confirmation_model ? $order_confirmation_model->value : 'deliveryman')
                                     <div class="form-group mb-0">
                                         <label class="input-label text-capitalize d-flex alig-items-center"><span
-                                                class="line--limit-1">{{ translate('messages.order_confirmation_model') }}</span>
-                                            <span class="input-label-secondary text--title" data-toggle="tooltip"
-                                                data-placement="right"
-                                                data-original-title="{{ translate('The chosen model will confirm the order first. For example, if you choose the delivery confirmation model then the delivery men will get the orders before the stores and confirm for delivery and after confirmation by the delivery men, the stores will get the order for processing.') }}">
-                                                <i class="tio-info-outined"></i>
-                                            </span></label>
+                                                class="line--limit-1">{{ translate('messages.Who_Will_Confirm_Order?') }}
+                                            <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.After_a_customer_order_placement,_Admin_can_define_who_will_confirm_the_order_first-_Deliveryman_or_Store?_For_example,_if_you_choose_‘Delivery_man’,_the_deliveryman_nearby_will_confirm_the_order_and_forward_it_to_the_related_store_to_process_the_order._It_works_vice-versa_if_you_choose_‘Store’.') }}">
+                                                <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                            </span>
+                                            </span>
+                                        </label>
                                         <div class="resturant-type-group border">
                                             <label class="form-check form--check mr-2 mr-md-4">
                                                 <input class="form-check-input" type="radio" value="store"
@@ -1242,46 +844,152 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-sm-6">
-                                    @php($canceled_by_store = \App\Models\BusinessSetting::where('key', 'canceled_by_store')->first())
-                                    @php($canceled_by_store = $canceled_by_store ? $canceled_by_store->value : 0)
+                                    @php($tax_included = \App\Models\BusinessSetting::where('key', 'tax_included')->first())
+                                    @php($tax_included = $tax_included ? $tax_included->value : 0)
                                     <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"><span
-                                                class="line--limit-1">{{ translate('store_can_cancel_order') }}
-                                            </span><span class="input-label-secondary text--title" data-toggle="tooltip"
-                                                data-placement="right"
-                                                data-original-title="{{ translate('Order cancellation is possible by the store if "Yes" is chosen .') }}">
-                                                <i class="tio-info-outined"></i>
-                                            </span></label>
-                                        <div class="resturant-type-group border">
-                                            <label class="form-check form--check mr-2 mr-md-4">
-                                                <input class="form-check-input" type="radio" value="1"
-                                                    name="canceled_by_store" id="canceled_by_restaurant"
-                                                    {{ $canceled_by_store == 1 ? 'checked' : '' }}>
-                                                <span class="form-check-label">
-                                                    {{ translate('yes') }}
-                                                </span>
-                                            </label>
-                                            <label class="form-check form--check mr-2 mr-md-4">
-                                                <input class="form-check-input" type="radio" value="0"
-                                                    name="canceled_by_store" id="canceled_by_restaurant2"
-                                                    {{ $canceled_by_store == 0 ? 'checked' : '' }}>
-                                                <span class="form-check-label">
-                                                    {{ translate('no') }}
-                                                </span>
-                                            </label>
-                                        </div>
+                                        <label class="toggle-switch toggle-switch-sm d-flex justify-content-between border rounded px-3 form-control">
+                                        <span class="pr-1 d-flex align-items-center"><span class="line--limit-1">{{ translate('Include_TAX_Amount') }}</span>
+                                        <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{translate('messages.If_enabled,_the_customer_will_see_the_total_product_price,_including_VAT/Tax._If_it’s_disabled,_the_VAT/Tax_will_be_added_separately_with_the_total_cost_of_the_product.')}}">
+                                            <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                        </span>
+                                        </span>
+                                            <input type="checkbox"
+
+                                                   data-id="tax_included"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/tax-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/tax-off.png') }}"
+                                                   data-title-on="{{ translate('messages.Want_to') }} <strong>{{ translate('messages.‘Include_Tax_Amount?’') }}</strong>"
+                                                   data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.Tax_Amount’?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_it,_customers_will_see_the_product_Price_including_Tax,_during_checkout.') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_it,_customers_will_see_the_product_or_service_price_without_Tax,_during_checkout.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                   value="1" name="tax_included" id="tax_included"
+                                            {{ $tax_included == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($schedule_order_slot_duration = \App\Models\BusinessSetting::where('key', 'schedule_order_slot_duration')->first())
+                                    @php($minimum_shipping_charge = \App\Models\BusinessSetting::where('key', 'minimum_shipping_charge')->first())
                                     <div class="form-group mb-0">
                                         <label class="form-label text-capitalize"
-                                            for="schedule_order_slot_duration">{{ translate('messages.Schedule order slot duration') }}
-                                            {{ translate('messages.minute') }}</label>
-                                        <input type="number" name="schedule_order_slot_duration" class="form-control"
-                                            id="schedule_order_slot_duration"
-                                            value="{{ $schedule_order_slot_duration ? $schedule_order_slot_duration->value : 0 }}"
-                                            min="0" required>
+                                            for="minimum_shipping_charge">{{ translate('messages.minimum_shipping_charge') }}</label>
+                                        <input type="number" name="minimum_shipping_charge" class="form-control"
+                                            id="minimum_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_10') }}"
+                                            value="{{ $minimum_shipping_charge ? $minimum_shipping_charge->value : 0 }}"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($per_km_shipping_charge = \App\Models\BusinessSetting::where('key', 'per_km_shipping_charge')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label text-capitalize"
+                                            for="per_km_shipping_charge">{{ translate('messages.per_km_shipping_charge') }}</label>
+                                        <input type="number" name="per_km_shipping_charge" class="form-control"
+                                            id="per_km_shipping_charge" min="0" step=".01"  placeholder="{{ translate('messages.Ex:_100') }}"
+                                            value="{{ $per_km_shipping_charge ? $per_km_shipping_charge->value : 0 }}"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($vnv = \App\Models\BusinessSetting::where('key', 'toggle_veg_non_veg')->first())
+                                    @php($vnv = $vnv ? $vnv->value : 0)
+                                    <div class="form-group mb-0">
+
+                                        <label
+                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                            <span class="pr-1 d-flex align-items-center switch--label">
+                                                <span class="line--limit-1">
+                                                    {{ translate('messages.Customer’s_Food_Preference') }}
+                                                </span>
+                                                <span class="form-label-secondary text-danger d-flex"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.If_this_feature_is_active,_customers_can_filter_food_according_to_their_preference_from_the_Customer_App_or_Website.') }}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.veg_non_veg') }}"> * </span>
+                                            </span>
+                                            <input type="checkbox"
+                                                   data-id="vnv1"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/veg-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/veg-off.png') }}"
+                                                   data-title-on="{{ translate('messages.Want_to_enable_the') }} <strong>{{ translate('messages.‘Veg/Non-Veg’_feature?') }}</strong>"
+                                                   data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.the_Veg/Non-Veg_Feature?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_customers_can_filter_food_items_by_choosing_food_from_the_Veg/Non-Veg_feature.') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_Veg/Non-Veg_feature_will_be_hidden_in_the_Customer_App_&_Website.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                value="1"
+                                                name="vnv" id="vnv1" {{ $vnv == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($admin_order_notification = \App\Models\BusinessSetting::where('key', 'admin_order_notification')->first())
+                                    @php($admin_order_notification = $admin_order_notification ? $admin_order_notification->value : 0)
+                                    <div class="form-group mb-0">
+
+                                        <label
+                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                            <span class="pr-1 d-flex align-items-center switch--label">
+                                                <span class="line--limit-1">
+                                                    {{ translate('messages.Order_Notification_for_Admin') }}
+                                                </span>
+                                                <span class="form-label-secondary text-danger d-flex"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.Admin_will_get_a_pop-up_notification_with_sounds_for_any_order_placed_by_customers.') }}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                </span>
+                                            </span>
+                                            <input type="checkbox"
+                                                   data-id="aon1"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/order-notification-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/order-notification-off.png') }}"
+                                                   data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.Order_Notification_for_Admin?') }}</strong>"
+                                                   data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.Order_Notification_for_Admin?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_the_Admin_will_receive_a_Notification_for_every_order_placed.') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_Admin_will_NOT_receive_a_Notification_for_every_order_placed.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                    value="1"
+                                                name="admin_order_notification" id="aon1"
+                                                {{ $admin_order_notification == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($order_notification_type = \App\Models\BusinessSetting::where('key', 'order_notification_type')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="input-label text-capitalize d-flex alig-items-center"><span
+                                            class="line--limit-1">{{ translate('Order_Notification_Type') }}
+                                        <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('For_Firebase,_a_single_real-time_notification_will_be_sent_upon_order_placement,_with_no_repetition._For_the_Manual_option,_notifications_will_appear_at_10-second_intervals_until_the_order_is_viewed.') }}" >
+                                            <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                        </span>
+                                        </span>
+                                        </label>
+                                        <div class="resturant-type-group border">
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="firebase" name="order_notification_type" {{ $order_notification_type ? ($order_notification_type->value == 'firebase' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('firebase')}}
+                                                </span>
+                                            </label>
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="manual" name="order_notification_type" {{ $order_notification_type ? ($order_notification_type->value == 'manual' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('manual')}}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
@@ -1294,12 +1002,22 @@
                                                 ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <small
                                                 class="text-danger"><span class="form-label-secondary"
                                                     data-toggle="tooltip" data-placement="right"
-                                                    data-original-title="{{ translate('messages.free_over_delivery_message') }}"><img
+                                                    data-original-title="{{ translate('messages.Set_a_minimum_order_value_for_automated_free_delivery._If_the_minimum_amount_is_exceeded,_the_Delivery_Fee_is_deducted_from_Admin’s_commission_and_added_to_Admin’s_expense.') }}"><img
                                                         src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
                                                         alt="{{ translate('messages.free_over_delivery_message') }}"></span>
                                                 *</small></span>
                                             <span class="toggle-switch toggle-switch-sm pr-sm-3">
-                                                <input type="checkbox" class="status toggle-switch-input"
+                                                <input type="checkbox"
+                                                       data-id="free_delivery_over_status"
+                                                       data-type="toggle"
+                                                       data-image-on="{{ asset('/public/assets/admin/img/modal/free-delivery-on.png') }}"
+                                                       data-image-off="{{ asset('/public/assets/admin/img/modal/free-delivery-off.png') }}"
+                                                       data-title-on="<strong>{{ translate('messages.Want_to_enable_Free_Delivery_on_Minimum_Orders?') }}</strong>"
+                                                       data-title-off="<strong>{{ translate('messages.Want_to_disable_Free_Delivery_on_Minimum_Order?') }}</strong>"
+                                                       data-text-on="<p>{{ translate('messages.If_you_enable_this,_customers_can_get_FREE_Delivery_by_fulfilling_the_minimum_order_requirement.') }}</p>"
+                                                       data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_FREE_Delivery_option_will_be_hidden_from_the_Customer_App_or_Website.') }}</p>"
+                                                       class="status toggle-switch-input dynamic-checkbox-toggle"
+
                                                     name="free_delivery_over_status" id="free_delivery_over_status"
                                                     value="1"
                                                     {{ isset($free_delivery_over_status->value) ? 'checked' : '' }}>
@@ -1308,181 +1026,204 @@
                                             </span>
                                         </label>
 
-                                        <input type="number" name="free_delivery_over" class="form-control"
-                                            id="free_delivery_over"
+                                        <input type="number"  name="free_delivery_over" class="form-control"
+                                            id="free_delivery_over"  placeholder="{{ translate('messages.Ex:_10') }}"
                                             value="{{ $free_delivery_over ? $free_delivery_over->value : 0 }}"
                                             min="0" step=".01" required
                                             {{ isset($free_delivery_over_status->value) ? '' : 'readonly' }}>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($minimum_shipping_charge = \App\Models\BusinessSetting::where('key', 'minimum_shipping_charge')->first())
+                                    @php($partial_payment = \App\Models\BusinessSetting::where('key', 'partial_payment_status')->first())
+                                    @php($partial_payment = $partial_payment ? $partial_payment->value : 0)
                                     <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="minimum_shipping_charge">{{ translate('messages.minimum_shipping_charge') }}</label>
-                                        <input type="number" name="minimum_shipping_charge" class="form-control"
-                                            id="minimum_shipping_charge" min="0" step=".01"
-                                            value="{{ $minimum_shipping_charge ? $minimum_shipping_charge->value : 0 }}"
-                                            required>
+                                        <label
+                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                            <span class="pr-1 d-flex align-items-center switch--label">
+                                                <span class="line--limit-1">
+                                                    {{ translate('messages.partial_payment') }}
+                                                </span>
+                                                <span class="form-label-secondary text-danger d-flex"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.If_enabled,_customers_can_make_partial_payments._For_example,_a_customer_can_pay_$20_initially_out_of_their_$50_payment_&_use_other_payment_methods_for_the_rest._Partial_payments_must_be_made_through_their_wallets.')}}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                </span>
+                                            </span>
+                                            <input type="checkbox"
+                                                   data-id="partial_payment"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/schedule-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/schedule-off.png') }}"
+                                                   data-title-on="{{ translate('messages.Want_to_enable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
+                                                   data-title-off="{{ translate('messages.Want_to_disable') }} <strong>{{ translate('messages.partial_payment_?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_customers_can_choose_partial_payment_during_checkout.') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_the_partial_payment_feature_will_be_hidden.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                   value="1"
+                                                name="partial_payment_status" id="partial_payment"
+                                                {{ $partial_payment == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 col-lg-4">
-                                    @php($per_km_shipping_charge = \App\Models\BusinessSetting::where('key', 'per_km_shipping_charge')->first())
+                                    @php($partial_payment_method = \App\Models\BusinessSetting::where('key', 'partial_payment_method')->first())
                                     <div class="form-group mb-0">
-                                        <label class="form-label text-capitalize"
-                                            for="per_km_shipping_charge">{{ translate('messages.per_km_shipping_charge') }}</label>
-                                        <input type="number" name="per_km_shipping_charge" class="form-control"
-                                            id="per_km_shipping_charge" min="0" step=".01"
-                                            value="{{ $per_km_shipping_charge ? $per_km_shipping_charge->value : 0 }}"
-                                            required>
+                                        <label class="input-label text-capitalize d-flex alig-items-center"><span
+                                            class="line--limit-1">{{ translate('Can_Pay_the_Rest_Amount_using') }}
+                                        <span class="form-label-secondary" data-toggle="tooltip" data-placement="right" data-original-title="{{ translate('messages.Set_the_method(s)_that_customers_can_pay_the_remainder_after_partial_payment.') }}" alt="">
+                                            <img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="">
+                                        </span>
+                                        </span>
+                                    </label>
+                                        <div class="resturant-type-group border">
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="cod" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'cod' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('cod')}}
+                                                </span>
+                                            </label>
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="digital_payment" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'digital_payment' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('digital_payment')}}
+                                                </span>
+                                            </label>
+                                            <label class="form-check form--check mr-2 mr-md-4">
+                                                <input class="form-check-input" type="radio" value="both" name="partial_payment_method" {{ $partial_payment_method ? ($partial_payment_method->value == 'both' ? 'checked' : '') : '' }}>
+                                                <span class="form-check-label">
+                                                    {{translate('both')}}
+                                                </span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h4 class="card-title m-0 d-flex align-items-center"> <span class="card-header-icon mr-2"><i
-                                        class="tio-poi"></i></span>
-                                <span>{{ translate('Logo & Icon') }}</span></h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-around __gap-12px">
-                                <label class="__custom-upload-img">
-                                    @php($logo = \App\Models\BusinessSetting::where('key', 'logo')->first())
-                                    @php($logo = $logo->value ?? '')
-                                    <h5 class="mb-2 text-center">
-                                        {{ translate('messages.logo') }}
-                                    </h5>
-                                    <center>
-                                        <img class="img--vertical" id="viewer"
-                                            onerror="this.src='{{ asset('public/assets/admin/img/upload-img.png') }}'"
-                                            src="{{ asset('storage/app/public/business/' . $logo) }}"
-                                            alt="logo image" />
-                                    </center>
-                                    <input type="file" name="logo" id="customFileEg1"
-                                        class="custom-file-input"
-                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                </label>
-                                <label class="__custom-upload-img">
-                                    @php($icon = \App\Models\BusinessSetting::where('key', 'icon')->first())
-                                    @php($icon = $icon->value ?? '')
-                                    <h5 class="mb-2 text-center">
-                                        {{ translate('Fav Icon') }}
-                                    </h5>
-                                    <center>
-                                        <img class="img--110" id="iconViewer"
-                                            onerror="this.src='{{ asset('public/assets/admin/img/upload-img.png') }}'"
-                                            src="{{ asset('storage/app/public/business/' . $icon) }}"
-                                            alt="Fav icon" />
-                                    </center>
-                                    <input type="file" name="icon" id="favIconUpload"
-                                        class="custom-file-input"
-                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header">
-                            <h4 class="card-title m-0 d-flex align-items-center"> <span class="card-header-icon mr-2"><i
-                                        class="tio-poi"></i></span>
-                                <span>{{ translate('Office Opening & Closing') }}</span></h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-sm-6">
-                                    @php($opening_time = \App\Models\BusinessSetting::where('key', 'opening_time')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"
-                                        for="opening_time">{{translate('Opening Time')}}</label>
-                                            <input type="time" value="{{ $opening_time ? $opening_time->value: '' }}" name="opening_time" class="form-control" id="opening_time">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    @php($closing_time = \App\Models\BusinessSetting::where('key', 'closing_time')->first())
-                                    <div class="form-group mb-0">
-                                        <label class="input-label text-capitalize d-flex alig-items-center"
-                                        for="closing_time">{{translate('Closing Time')}}</label>
-                                        <input type="time" value="{{ $closing_time ? $closing_time->value: '' }}" name="closing_time" class="form-control" id="closing_time">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    @php($opening_day = \App\Models\BusinessSetting::where('key', 'opening_day')->first())
-                                    @php($opening_day = $opening_day ? $opening_day->value : '')
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($additional_charge_status = \App\Models\BusinessSetting::where('key', 'additional_charge_status')->first())
+                                    @php($additional_charge_status = $additional_charge_status ? $additional_charge_status->value : 0)
                                     <div class="form-group mb-0">
                                         <label
-                                            class="form-label text-capitalize">{{ translate('messages.opening_day') }}</label>
-                                        <select name="opening_day" class="form-control">
-                                            <option value="saturday" {{ $opening_day == 'saturday' ? 'selected' : '' }}>
-                                                {{ translate('messages.saturday') }}
-                                            </option>
-                                            <option value="sunday" {{ $opening_day == 'sunday' ? 'selected' : '' }}>
-                                                {{ translate('messages.sunday') }}
-                                            </option>
-                                            <option value="monday" {{ $opening_day == 'monday' ? 'selected' : '' }}>
-                                                {{ translate('messages.monday') }}
-                                            </option>
-                                            <option value="tuesday" {{ $opening_day == 'tuesday' ? 'selected' : '' }}>
-                                                {{ translate('messages.tuesday') }}
-                                            </option>
-                                            <option value="wednesday" {{ $opening_day == 'wednesday' ? 'selected' : '' }}>
-                                                {{ translate('messages.wednesday') }}
-                                            </option>
-                                            <option value="thrusday" {{ $opening_day == 'thrusday' ? 'selected' : '' }}>
-                                                {{ translate('messages.thrusday') }}
-                                            </option>
-                                            <option value="friday" {{ $opening_day == 'friday' ? 'selected' : '' }}>
-                                                {{ translate('messages.friday') }}
-                                            </option>
-                                        </select>
+                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                            <span class="pr-1 d-flex align-items-center switch--label">
+                                                <span class="line--limit-1">
+                                                    {{translate('messages.additional_charge') }}
+                                                </span>
+                                                <span class="form-label-secondary text-danger d-flex"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.If_enabled,_customers_need_to_pay_an_extra_charge_while_checking_out_orders.')}}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                </span>
+                                            </span>
+                                            <input type="checkbox"
+                                                   data-id="additional_charge_status"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/dm-tips-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/dm-tips-off.png') }}"
+                                                   data-title-on="<strong>{{ translate('messages.Want_to_enable_additional_charge?') }}</strong>"
+                                                   data-title-off="<strong>{{ translate('messages.Want_to_disable_additional_charge?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_additional_charge_will_be_added_with_order_amount,_it_will_be_added_in_admin_wallet') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_additional_charge_will_not_be_added_with_order_amount.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                   value="1"
+                                                name="additional_charge_status" id="additional_charge_status"
+                                                {{ $additional_charge_status == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    @php($closing_day = \App\Models\BusinessSetting::where('key', 'closing_day')->first())
-                                    @php($closing_day = $closing_day ? $closing_day->value : '')
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($additional_charge_name = \App\Models\BusinessSetting::where('key', 'additional_charge_name')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label d-flex justify-content-between text-capitalize mb-1"
+                                            for="additional_charge_name">
+                                            <span class="line--limit-1">{{ translate('messages.additional_charge_name') }}
+                                                <small
+                                                class="text-danger"><span class="form-label-secondary"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.Set_a_name_for_the_additional_charge,_e.g._“Processing_Fee”.') }}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.free_over_delivery_message') }}"></span>
+                                                *</small></span>
+                                        </label>
+
+                                        <input type="text" name="additional_charge_name" class="form-control"
+                                            id="additional_charge_name"  placeholder="{{ translate('messages.Ex:_Processing_Fee') }}"
+                                            value="{{ $additional_charge_name ? $additional_charge_name->value : '' }}" {{ isset($additional_charge_status) ? '' : 'readonly' }} required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($additional_charge = \App\Models\BusinessSetting::where('key', 'additional_charge')->first())
+                                    <div class="form-group mb-0">
+                                        <label class="form-label d-flex justify-content-between text-capitalize mb-1"
+                                            for="additional_charge">
+                                            <span class="line--limit-1">{{ translate('messages.charge_amount') }}
+                                                ({{ \App\CentralLogics\Helpers::currency_symbol() }}) <small
+                                                class="text-danger"><span class="form-label-secondary"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.Set_the_value_(amount)_customers_need_to_pay_as_additional_charge.') }}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.free_over_delivery_message') }}"></span>
+                                                *</small></span>
+                                        </label>
+
+                                        <input type="number" name="additional_charge" class="form-control"
+                                            id="additional_charge"  placeholder="{{ translate('messages.Ex:_10') }}"
+                                            value="{{ $additional_charge ? $additional_charge->value : 0 }}"
+                                            min="0" step=".01" {{ isset($additional_charge_status) ? '' : 'readonly' }}>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 col-lg-4">
+                                    @php($guest_checkout_status = \App\Models\BusinessSetting::where('key', 'guest_checkout_status')->first())
+                                    @php($guest_checkout_status = $guest_checkout_status ? $guest_checkout_status->value : 0)
                                     <div class="form-group mb-0">
                                         <label
-                                            class="form-label text-capitalize">{{ translate('messages.closing_day') }}</label>
-                                        <select name="closing_day" class="form-control">
-                                            <option value="saturday" {{ $closing_day == 'saturday' ? 'selected' : '' }}>
-                                                {{ translate('messages.saturday') }}
-                                            </option>
-                                            <option value="sunday" {{ $closing_day == 'sunday' ? 'selected' : '' }}>
-                                                {{ translate('messages.sunday') }}
-                                            </option>
-                                            <option value="monday" {{ $closing_day == 'monday' ? 'selected' : '' }}>
-                                                {{ translate('messages.monday') }}
-                                            </option>
-                                            <option value="tuesday" {{ $closing_day == 'tuesday' ? 'selected' : '' }}>
-                                                {{ translate('messages.tuesday') }}
-                                            </option>
-                                            <option value="wednesday" {{ $closing_day == 'wednesday' ? 'selected' : '' }}>
-                                                {{ translate('messages.wednesday') }}
-                                            </option>
-                                            <option value="thrusday" {{ $closing_day == 'thrusday' ? 'selected' : '' }}>
-                                                {{ translate('messages.thrusday') }}
-                                            </option>
-                                            <option value="friday" {{ $closing_day == 'friday' ? 'selected' : '' }}>
-                                                {{ translate('messages.friday') }}
-                                            </option>
-                                        </select>
+                                            class="toggle-switch h--45px toggle-switch-sm d-flex justify-content-between border rounded px-3 py-0 form-control">
+                                            <span class="pr-1 d-flex align-items-center switch--label">
+                                                <span class="line--limit-1">
+                                                    {{translate('messages.guest_checkout') }}
+                                                </span>
+                                                <span class="form-label-secondary text-danger d-flex"
+                                                    data-toggle="tooltip" data-placement="right"
+                                                    data-original-title="{{ translate('messages.If_enabled,_customers_do_not_have_to_login_while_checking_out_orders.')}}"><img
+                                                        src="{{ asset('/public/assets/admin/img/info-circle.svg') }}"
+                                                        alt="{{ translate('messages.customer_varification_toggle') }}"> *
+                                                </span>
+                                            </span>
+                                            <input type="checkbox"
+                                                   data-id="guest_checkout_status"
+                                                   data-type="toggle"
+                                                   data-image-on="{{ asset('/public/assets/admin/img/modal/dm-tips-on.png') }}"
+                                                   data-image-off="{{ asset('/public/assets/admin/img/modal/dm-tips-off.png') }}"
+                                                   data-title-on="<strong>{{ translate('messages.Want_to_enable_guest_checkout?') }}</strong>"
+                                                   data-title-off="<strong>{{ translate('messages.Want_to_disable_guest_checkout?') }}</strong>"
+                                                   data-text-on="<p>{{ translate('messages.If_you_enable_this,_guest_checkout_will_be_visible_when_customer_is_not_logged_in.') }}</p>"
+                                                   data-text-off="<p>{{ translate('messages.If_you_disable_this,_guest_checkout_will_not_be_visible_when_customer_is_not_logged_in.') }}</p>"
+                                                   class="status toggle-switch-input dynamic-checkbox-toggle"
+                                                   value="1"
+                                                name="guest_checkout_status" id="guest_checkout_status"
+                                                {{ $guest_checkout_status == 1 ? 'checked' : '' }}>
+                                            <span class="toggle-switch-label text">
+                                                <span class="toggle-switch-indicator"></span>
+                                            </span>
+                                        </label>
                                     </div>
                                 </div>
+
+                            </div>
+                            <div class="btn--container justify-content-end mt-3">
+                                <button type="reset" class="btn btn--reset">{{ translate('messages.reset') }}</button>
+                                <button type="{{ env('APP_MODE') != 'demo' ? 'submit' : 'button' }}"
+                                    class="btn btn--primary call-demo">{{ translate('save_information') }}</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="btn--container justify-content-end mt-3">
-                <button type="reset" class="btn btn--reset">{{ translate('messages.reset') }}</button>
-                <button type="{{ env('APP_MODE') != 'demo' ? 'submit' : 'button' }}"
-                    onclick="{{ env('APP_MODE') != 'demo' ? '' : 'call_demo()' }}"
-                    class="btn btn--primary">{{ translate('save_information') }}</button>
             </div>
         </form>
     </div>
@@ -1491,51 +1232,63 @@
 
 @push('script_2')
     <script>
+        "use strict";
+        $(document).on('ready', function() {
+            @php($country = \App\Models\BusinessSetting::where('key', 'country')->first())
+
+            @if ($country)
+            $("#country option[value='{{ $country->value }}']").attr('selected', 'selected').change();
+            @endif
+        });
+
         @php($language = \App\Models\BusinessSetting::where('key', 'language')->first())
         @php($language = $language->value ?? null)
         let language = <?php echo $language; ?>;
         $('[id=language]').val(language);
 
-        function maintenance_mode() {
+
+        $(document).on('click', '.maintenance-mode', function () {
             @if (env('APP_MODE') == 'demo')
-                toastr.warning('Sorry! You can not enable maintainance mode in demo!');
+            toastr.warning('Sorry! You can not enable maintenance mode in demo!');
             @else
-                Swal.fire({
-                    title: '{{ translate('messages.Are you sure?') }}',
-                    text: '{{ translate('Be careful before you turn on/off maintenance mode') }}',
-                    type: 'warning',
-                    showCancelButton: true,
-                    cancelButtonColor: 'default',
-                    confirmButtonColor: '#00868F',
-                    cancelButtonText: '{{ translate('messages.no') }}',
-                    confirmButtonText: '{{ translate('messages.yes') }}',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.value) {
-                        $.get({
-                            url: '{{ route('admin.maintenance-mode') }}',
-                            contentType: false,
-                            processData: false,
-                            beforeSend: function() {
-                                $('#loading').show();
-                            },
-                            success: function(data) {
-                                toastr.success(data.message);
-                            },
-                            complete: function() {
-                                $('#loading').hide();
-                            },
-                        });
-                    } else {
-                        location.reload();
-                    }
-                })
+            Swal.fire({
+                title: '{{ translate('messages.Are you sure?') }}',
+                text: '{{ translate('messages.all_your_apps_and_customer_website_will_be_disabled_until_you_‘Turn_Off’ _maintenance_mode.') }}',
+                type: 'warning',
+                showCancelButton: true,
+                cancelButtonColor: 'default',
+                confirmButtonColor: '#00868F',
+                cancelButtonText: '{{ translate('messages.no') }}',
+                confirmButtonText: '{{ translate('messages.yes') }}',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    $.get({
+                        url: '{{ route('admin.maintenance-mode') }}',
+                        contentType: false,
+                        processData: false,
+                        beforeSend: function() {
+                            $('#loading').show();
+                        },
+                        success: function(data) {
+                            toastr.success(data.message);
+                        },
+                        complete: function() {
+                            $('#loading').hide();
+                        },
+                    });
+                } else {
+                    location.reload();
+                }
+            })
             @endif
-        };
+
+        });
+
 
         function readURL(input, viewer) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
                 reader.onload = function(e) {
                     $('#' + viewer).attr('src', e.target.result);
                 }
@@ -1555,8 +1308,9 @@
         src="https://maps.googleapis.com/maps/api/js?key={{ \App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value }}&libraries=places&v=3.45.8">
     </script>
     <script>
+        "use strict";
         function initAutocomplete() {
-            var myLatLng = {
+            let myLatLng = {
                 lat: {{ $default_location ? $default_location['lat'] : '-33.8688' }},
                 lng: {{ $default_location ? $default_location['lng'] : '151.2195' }}
             };
@@ -1569,17 +1323,17 @@
                 mapTypeId: "roadmap",
             });
 
-            var marker = new google.maps.Marker({
+            let marker = new google.maps.Marker({
                 position: myLatLng,
                 map: map,
             });
 
             marker.setMap(map);
-            var geocoder = geocoder = new google.maps.Geocoder();
+            let geocoder = geocoder = new google.maps.Geocoder();
             google.maps.event.addListener(map, 'click', function(mapsMouseEvent) {
                 var coordinates = JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2);
                 var coordinates = JSON.parse(coordinates);
-                var latlng = new google.maps.LatLng(coordinates['lat'], coordinates['lng']);
+                let latlng = new google.maps.LatLng(coordinates['lat'], coordinates['lng']);
                 marker.setPosition(latlng);
                 map.panTo(latlng);
 
@@ -1590,7 +1344,7 @@
                 geocoder.geocode({
                     'latLng': latlng
                 }, function(results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
+                    if (status === google.maps.GeocoderStatus.OK) {
                         if (results[1]) {
                             document.getElementById('address').innerHtml = results[1].formatted_address;
                         }
@@ -1611,7 +1365,7 @@
             searchBox.addListener("places_changed", () => {
                 const places = searchBox.getPlaces();
 
-                if (places.length == 0) {
+                if (places.length === 0) {
                     return;
                 }
                 // Clear out the old markers.
@@ -1626,7 +1380,7 @@
                         console.log("Returned place contains no geometry");
                         return;
                     }
-                    var mrkr = new google.maps.Marker({
+                    let mrkr = new google.maps.Marker({
                         map,
                         title: place.name,
                         position: place.geometry.location,
@@ -1650,26 +1404,10 @@
         };
         $(document).on('ready', function() {
             initAutocomplete();
-            @php($country = \App\Models\BusinessSetting::where('key', 'country')->first())
-
-            @if ($country)
-                $("#country option[value='{{ $country->value }}']").attr('selected', 'selected').change();
-            @endif
-
-
-
-            $("#free_delivery_over_status").on('change', function() {
-                if ($("#free_delivery_over_status").is(':checked')) {
-                    $('#free_delivery_over').removeAttr('readonly');
-                } else {
-                    $('#free_delivery_over').attr('readonly', true);
-                    $('#free_delivery_over').val(null);
-                }
-            });
         });
 
         $(document).on("keydown", "input", function(e) {
-            if (e.which == 13) e.preventDefault();
+            if (e.which === 13) e.preventDefault();
         });
     </script>
 @endpush

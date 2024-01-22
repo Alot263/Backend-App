@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\CentralLogics\CustomerLogic;
+use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
-use App\Http\Controllers\Controller;
 use App\Models\BusinessSetting;
 use App\Models\WalletTransaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\CentralLogics\CustomerLogic;
+use App\Exports\CustomerWalletTransactionExport;
+use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
 
 
 class CustomerWalletController extends Controller
@@ -39,13 +41,14 @@ class CustomerWalletController extends Controller
 
         if($wallet_transaction)
         {
+            $mail_status = Helpers::get_mail_status('add_fund_mail_status_user');
             try{
-                if(config('mail.status')) {
+                if(config('mail.status') && $mail_status == '1') {
                     Mail::to($wallet_transaction->user->email)->send(new \App\Mail\AddFundToWallet($wallet_transaction));
                 }
             }catch(\Exception $ex)
             {
-                info($ex);
+                info($ex->getMessage());
             }
             
             return response()->json([], 200);
@@ -84,6 +87,50 @@ class CustomerWalletController extends Controller
         ->paginate(config('default_pagination'));
 
         return view('admin-views.customer.wallet.report', compact('data','transactions'));
+    }
+
+    public function export(Request $request)
+    {
+        $data = WalletTransaction::selectRaw('sum(credit) as total_credit, sum(debit) as total_debit')
+        ->when(($request->from && $request->to),function($query)use($request){
+            $query->whereBetween('created_at', [$request->from.' 00:00:00', $request->to.' 23:59:59']);
+        })
+        ->when($request->transaction_type, function($query)use($request){
+            $query->where('transaction_type',$request->transaction_type);
+        })
+        ->when($request->customer_id, function($query)use($request){
+            $query->where('user_id',$request->customer_id);
+        })
+        ->get();
+        
+        $transactions = WalletTransaction::
+        when(($request->from && $request->to),function($query)use($request){
+            $query->whereBetween('created_at', [$request->from.' 00:00:00', $request->to.' 23:59:59']);
+        })
+        ->when($request->transaction_type, function($query)use($request){
+            $query->where('transaction_type',$request->transaction_type);
+        })
+        ->when($request->customer_id, function($query)use($request){
+            $query->where('user_id',$request->customer_id);
+        })
+        ->latest()
+        ->get();
+
+        $data = [
+            'transactions'=>$transactions,
+            'data'=>$data,
+            'from'=>$request->from??null,
+            'to'=>$request->to??null,
+            'transaction_type'=>$request->transaction_type??null,
+            'customer'=>$request->customer_id?Helpers::get_customer_name($request->customer_id):null,
+
+        ];
+        
+        if ($request->type == 'excel') {
+            return Excel::download(new CustomerWalletTransactionExport($data), 'CustomerWalletTransactions.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new CustomerWalletTransactionExport($data), 'CustomerWalletTransactions.csv');
+        }
     }
 
 }

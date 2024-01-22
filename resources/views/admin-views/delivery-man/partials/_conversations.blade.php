@@ -3,9 +3,9 @@
     <div class="card-header">
         <div class="chat-user-info w-100 d-flex align-items-center">
             <div class="chat-user-info-img">
-                <img class="avatar-img"
-                    src="{{asset('storage/app/public/profile/'.$user['image'])}}"
-                    onerror="this.src='{{asset('public/assets/admin')}}/img/160x160/img1.jpg'"
+                <img class="avatar-img onerror-image"
+                src="{{\App\CentralLogics\Helpers::onerror_image_helper($user['image'], asset('storage/app/public/profile/').'/'.$user['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
+                    data-onerror-image="{{asset('public/assets/admin')}}/img/160x160/img1.jpg"
                     alt="Image Description">
             </div>
             <div class="chat-user-info-content">
@@ -18,7 +18,7 @@
 
     <div class="card-body">
         <div class="scroll-down">
-            @foreach($convs as $con)
+            @foreach($conversations as $con)
                 @if($con->sender_id == $user->id)
                     <div class="pt1 pb-1">
                         <div class="conv-reply-1">
@@ -56,8 +56,9 @@
 
     </div>
 </div>
-
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script>
+    "use strict";
     $(document).ready(function () {
         $('.scroll-down').animate({
             scrollTop: $('#scroll-here').offset().top

@@ -22,15 +22,16 @@ class CampaignController extends Controller
         $zone_id= $request->header('zoneId');
         try {
             $campaigns = Campaign::
-            whereHas('module.zones', function($query)use($zone_id){
+            whereHas('module.zones',function($query)use($zone_id){
                 $query->whereIn('zones.id', json_decode($zone_id, true));
             })
-            ->whereHas('store', function($query)use($zone_id){
-                $query->Active()->when(config('module.current_module_data'), function($query){
-                    $query->where('module_id', config('module.current_module_data')['id'])->whereHas('zone.modules',function($query){
-                        $query->where('modules.id', config('module.current_module_data')['id']);
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereHas('stores', function($q)use($zone_id){
+                        $q->whereIn('zone_id', json_decode($zone_id, true));
                     });
-                })->whereIn('zone_id', json_decode($zone_id, true));
+                }
             })
             ->running()->active()->get();
             $campaigns=Helpers::basic_campaign_data_formatting($campaigns, true);
@@ -59,7 +60,7 @@ class CampaignController extends Controller
         }
         try {
             $campaign = Campaign::with(['stores'=>function($q)use($zone_id,$longitude,$latitude){
-                $q->withOpen($longitude,$latitude)->when(config('module.current_module_data'), function($query){
+                $q->withOpen($longitude??0,$latitude??0)->where('campaign_status','confirmed')->when(config('module.current_module_data'), function($query){
                     $query->where('module_id', config('module.current_module_data')['id'])->whereHas('zone.modules',function($query){
                         $query->where('modules.id', config('module.current_module_data')['id']);
                     });

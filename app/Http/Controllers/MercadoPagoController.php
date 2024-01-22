@@ -2,36 +2,51 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Validator;
+use App\Models\PaymentRequest;
+use App\Traits\Processor;
 use MercadoPago\SDK;
 use MercadoPago\Payment;
 use MercadoPago\Payer;
-use Illuminate\Support\Facades\DB;
-use App\Models\Order;
-use App\Models\BusinessSetting;
-use App\CentralLogics\Helpers;
-use App\CentralLogics\OrderLogic;
 
 class MercadoPagoController extends Controller
 {
-    private $data;
-
-    public function __construct()
+    use Processor;
+    private PaymentRequest $paymentRequest;
+    private $config;
+    private $user;
+    public function __construct(PaymentRequest $paymentRequest, User $user)
     {
-        $this->data = Helpers::get_business_settings('mercadopago');
+        $config = $this->payment_config('mercadopago', 'payment_config');
+        if (!is_null($config) && $config->mode == 'live') {
+            $this->config = json_decode($config->live_values);
+        } elseif (!is_null($config) && $config->mode == 'test') {
+            $this->config = json_decode($config->test_values);
+        }
+        $this->paymentRequest = $paymentRequest;
+        $this->user = $user;
     }
     public function index(Request $request)
     {
-        $data = $this->data;
-
-        $order = Order::with(['details'])->where(['id' => session('order_id')])->first();
-
-        return view('payment-view-marcedo-pogo', compact('data', 'order'));
+        $validator = Validator::make($request->all(), [
+            'payment_id' => 'required|uuid'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_400, null, $this->error_processor($validator)), 400);
+        }
+        $data = $this->paymentRequest::where(['id' => $request['payment_id']])->where(['is_paid' => 0])->first();
+        if (!isset($data)) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_204), 200);
+        }
+        $config = $this->config;
+        return view('payment-views.payment-view-marcedo-pogo', compact('config', 'data'));
     }
     public function make_payment(Request $request)
     {
-
-        SDK::setAccessToken($this->data['access_token']);
+        SDK::setAccessToken($this->config->access_token);
         $payment = new Payment();
         $payment->transaction_amount = (float)$request['transactionAmount'];
         $payment->token = $request['token'];
@@ -39,7 +54,6 @@ class MercadoPagoController extends Controller
         $payment->installments = (int)$request['installments'];
         $payment->payment_method_id = $request['paymentMethodId'];
         $payment->issuer_id = (int)$request['issuer'];
-
         $payer = new Payer();
         $payer->email = $request['payer']['email'];
         $payer->identification = array(
@@ -47,75 +61,27 @@ class MercadoPagoController extends Controller
             "number" => $request['payer']['identification']['number']
         );
         $payment->payer = $payer;
-
         $payment->save();
-
-        $response = array(
-            'status' => $payment->status,
-            'status_detail' => $payment->status_detail,
-            'id' => $payment->id
-        );
-
-        if($payment->error)
-        {
-            $response['error'] = $payment->error->message;
-        }
-        if($payment->status == 'approved')
-        {
-            $order = Order::where(['id' => $request->order_id, 'user_id'=>$request->customer_id])->first();
-            try {
-                $order->transaction_reference = $payment->id;
-                $order->payment_method = 'mercadopago';
-                $order->payment_status = 'paid';
-                $order->order_status = 'confirmed';
-                $order->confirmed = now();
-                $order->save();
-                $fcm_token = $order->customer->cm_firebase_token;
-                $value = Helpers::order_status_update_message('confirmed',$order->module->module_type);
-                if ($value) {
-                    $data = [
-                        'title' =>translate('messages.order_placed_successfully'),
-                        'description' => $value,
-                        'order_id' => $order['id'],
-                        'image' => '',
-                        'type'=>'order_status'
-                    ];
-                    Helpers::send_push_notif_to_device($fcm_token, $data);
-                    DB::table('user_notifications')->insert([
-                        'data'=> json_encode($data),
-                        'user_id'=>$order->customer->id,
-                        'created_at'=>now(),
-                        'updated_at'=>now()
-                    ]);
-                }
-                $data = [
-                    'title' =>translate('messages.order_placed_successfully'),
-                    'description' => translate('messages.new_order_push_description'),
-                    'order_id' => $order->id,
-                    'image' => '',
-                    'type'=>'order_status',
-                ];
-                Helpers::send_push_notif_to_device($order->store->vendor->firebase_token, $data);
-                DB::table('user_notifications')->insert([
-                    'data'=> json_encode($data),
-                    'vendor_id'=>$order->store->vendor_id,
-                    'created_at'=>now(),
-                    'updated_at'=>now()
-                ]);
-            } catch (\Exception $e) {
+        if ($payment->status == 'approved') {
+            $this->paymentRequest::where(['id' => $request['payment_id']])->update([
+                'payment_method' => 'mercadopago',
+                'is_paid' => 1,
+                'transaction_id' => $payment->id,
+            ]);
+            $data = $this->paymentRequest::where(['id' => $request['payment_id']])->first();
+            if (isset($data) && function_exists($data->success_hook)) {
+                call_user_func($data->success_hook, $data);
             }
+            return $this->payment_response($data,'success');
         }
-        return response()->json($response);
+        $payment_data = $this->paymentRequest::where(['id' => $request['payment_id']])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
+        }
+        return $this->payment_response($payment_data,'fail');
     }
-
     public function get_test_user(Request $request)
     {
-        // curl -X POST \
-        // -H "Content-Type: application/json" \
-        // -H 'Authorization: Bearer PROD_ACCESS_TOKEN' \
-        // "https://api.mercadopago.com/users/test_user" \
-        // -d '{"site_id":"MLA"}'
-
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, "https://api.mercadopago.com/users/test_user");
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -123,11 +89,9 @@ class MercadoPagoController extends Controller
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
             'Content-Type: application/json',
-            'Authorization: Bearer '.$this->data['access_token']
+            'Authorization: Bearer ' . $this->config->access_token
         ));
         curl_setopt($curl, CURLOPT_POSTFIELDS, '{"site_id":"MLA"}');
         $response = curl_exec($curl);
-        dd($response);
-
     }
 }

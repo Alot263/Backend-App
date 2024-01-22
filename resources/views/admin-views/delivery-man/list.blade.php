@@ -24,13 +24,13 @@
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">
-                        {{translate('messages.deliveryman')}} {{translate('messages.list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$delivery_men->total()}}</span>
+                        {{translate('messages.deliveryman_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$deliveryMen->total()}}</span>
                     </h5>
                     @if(!isset(auth('admin')->user()->zone_id))
                     <div class="col-sm-auto min--240">
-                        <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_zone_filter('{{route('admin.users.delivery-man.list')}}', this.value)">
-                            <option value="all">{{ translate('messages.All Zones') }}</option>
+                        <select name="zone_id" class="form-control js-select2-custom zone-filter"
+                                data-url="{{route('admin.users.delivery-man.list')}}">
+                            <option value="all">{{ translate('messages.All_Zones') }}</option>
                             @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
                                 <option
                                     value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
@@ -40,18 +40,18 @@
                         </select>
                     </div>
                     @endif
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <form class="search-form">
                                     <!-- Search -->
-                        @csrf
+                        {{-- @csrf --}}
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control h--45px"
-                                    placeholder="{{translate('ex_:_search_name')}}" aria-label="Search" required>
+                                    placeholder="{{translate('ex_:_search_name')}}" value="{{ request()->get('search') }}" aria-label="Search" required>
                             <button type="submit" class="btn btn--secondary h--45px"><i class="tio-search"></i></button>
 
                         </div>
                         <!-- End Search -->
                     </form>
-                                        <!-- Unfold -->
+                    <!-- Unfold -->
                     <div class="hs-unfold mr-2">
                         <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--45px min-height-40" href="javascript:;"
                             data-hs-unfold-options='{
@@ -63,22 +63,7 @@
 
                         <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.copy') }}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.print') }}
-                            </a>
-                            <div class="dropdown-divider"></div> --}}
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item" href="{{route('admin.users.delivery-man.export', ['type'=>'excel',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -91,12 +76,6 @@
                                     alt="Image Description">
                                 .{{ translate('messages.csv') }}
                             </a>
-                            {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.pdf') }}
-                            </a> --}}
                         </div>
                     </div>
                     <!-- End Unfold -->
@@ -120,19 +99,20 @@
                         <th class="border-0 text-capitalize">{{translate('messages.contact_info')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.zone')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.total_orders')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.availability')}} {{translate('messages.status')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.availability_status')}}</th>
                         <th class="border-0 text-center text-capitalize">{{translate('messages.action')}}</th>
                     </tr>
                     </thead>
 
                     <tbody id="set-rows">
-                    @foreach($delivery_men as $key=>$dm)
+                    @foreach($deliveryMen as $key=>$dm)
                         <tr>
-                            <td>{{$key+$delivery_men->firstItem()}}</td>
+                            <td>{{$key+$deliveryMen->firstItem()}}</td>
                             <td>
                                 <a class="table-rest-info" href="{{route('admin.users.delivery-man.preview',[$dm['id']])}}">
-                                    <img onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                            src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}" alt="{{$dm['f_name']}} {{$dm['l_name']}}">
+                                    <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man/').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                                    alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                                     <div class="info">
                                         <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
                                         <span class="d-block text-body">
@@ -150,7 +130,7 @@
                                 @if($dm->zone)
                                 <label class="text--title font-medium mb-0">{{$dm->zone->name}}</label>
                                 @else
-                                <label class="text--title font-medium mb-0">{{translate('messages.zone').' '.translate('messages.deleted')}}</label>
+                                <label class="text--title font-medium mb-0">{{translate('messages.zone_deleted')}}</label>
                                 @endif
                             </td>
                             <td>
@@ -177,9 +157,14 @@
                             </td>
                             <td>
                                 <div class="btn--container justify-content-center">
+                                    <a class="btn action-btn btn--warning btn-outline-warning"
+                                            href="{{route('admin.users.delivery-man.preview',[$dm['id']])}}"
+                                            title="{{ translate('messages.view') }}"><i
+                                                class="tio-visible-outlined"></i>
+                                        </a>
                                     <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.users.delivery-man.edit',[$dm['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i>
                                         </a>
-                                        <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('delivery-man-{{$dm['id']}}','{{ translate('Want to remove this deliveryman ?') }}')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
+                                        <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="delivery-man-{{$dm['id']}}" data-message="{{ translate('Want to remove this deliveryman ?') }}" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
                                     </a>
                                     <form action="{{route('admin.users.delivery-man.delete',[$dm['id']])}}" method="post" id="delivery-man-{{$dm['id']}}">
                                         @csrf @method('delete')
@@ -190,13 +175,13 @@
                     @endforeach
                     </tbody>
                 </table>
-                @if(count($delivery_men) !== 0)
+                @if(count($deliveryMen) !== 0)
                 <hr>
                 @endif
                 <div class="page-area">
-                    {!! $delivery_men->links() !!}
+                    {!! $deliveryMen->links() !!}
                 </div>
-                @if(count($delivery_men) === 0)
+                @if(count($deliveryMen) === 0)
                 <div class="empty--data">
                     <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
                     <h5>
@@ -214,10 +199,11 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -251,15 +237,13 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
-    </script>
 
-    <script>
         $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

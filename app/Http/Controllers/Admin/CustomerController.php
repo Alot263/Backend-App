@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Order;
 use App\Models\User;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\CentralLogics\Helpers;
+use App\Models\Order;
 use App\Models\Newsletter;
+use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
 use App\Models\BusinessSetting;
+use Illuminate\Support\Facades\DB;
+use App\Exports\CustomerListExport;
+use App\Exports\CustomerOrderExport;
+use App\Exports\SubscriberListExport;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class CustomerController extends Controller
@@ -97,6 +101,27 @@ class CustomerController extends Controller
         return back();
     }
 
+    public function customer_order_export(Request $request)
+    {
+        $customer = User::find($request->id);
+
+        $orders = Order::latest()->where(['user_id' => $request->id])->Notpos()->get();
+        
+        $data = [
+            'orders'=>$orders,
+            'customer_id'=>$customer->id,
+            'customer_name'=>$customer->f_name.' '.$customer->l_name,
+            'customer_phone'=>$customer->phone,
+            'customer_email'=>$customer->email,
+        ];
+        
+        if ($request->type == 'excel') {
+            return Excel::download(new CustomerOrderExport($data), 'CustomerOrders.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new CustomerOrderExport($data), 'CustomerOrders.csv');
+        }
+    }
+
     public function subscribedCustomers()
     {
         $data['subscribedCustomers'] = Newsletter::orderBy('id', 'desc')->get();
@@ -105,10 +130,14 @@ class CustomerController extends Controller
 
     public function subscribed_customer_export(Request $request){
         $customers = Newsletter::orderBy('id', 'desc')->get();
-        if($request->type == 'excel'){
-            return (new FastExcel($customers))->download('Customers.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel($customers))->download('Customers.csv');
+        $data = [
+            'customers'=>$customers
+        ];
+        
+        if ($request->type == 'excel') {
+            return Excel::download(new SubscriberListExport($data), 'Subscribers.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new SubscriberListExport($data), 'Subscribers.csv');
         }
     }
 
@@ -151,13 +180,13 @@ class CustomerController extends Controller
             ->orWhere('key','like','ref_earning_%')
             ->orWhere('key','like','ref_earning_%')->get();
         $data = array_column($data->toArray(), 'value','key');
-        //dd($data);
+        // dd($data);
         return view('admin-views.customer.settings', compact('data'));
     }
 
     public function update_settings(Request $request)
     {
-
+// dd($request->all());
         if (env('APP_MODE') == 'demo') {
             Toastr::info(translate('messages.update_option_is_disable_for_demo'));
             return back();
@@ -167,6 +196,9 @@ class CustomerController extends Controller
             'add_fund_bonus'=>'nullable|numeric|max:100|min:0',
             'loyalty_point_exchange_rate'=>'nullable|numeric',
             'ref_earning_exchange_rate'=>'nullable|numeric',
+        ]);
+        BusinessSetting::updateOrInsert(['key' => 'customer_verification'], [
+            'value' => $request['customer_verification_status']??0
         ]);
         BusinessSetting::updateOrInsert(['key' => 'wallet_status'], [
             'value' => $request['customer_wallet']??0
@@ -192,17 +224,40 @@ class CustomerController extends Controller
         BusinessSetting::updateOrInsert(['key' => 'loyalty_point_minimum_point'], [
             'value' => $request['minimun_transfer_point']??0
         ]);
+        BusinessSetting::updateOrInsert(['key' => 'add_fund_status'], [
+            'value' => $request['add_fund_status']??0
+        ]);
 
         Toastr::success(translate('messages.customer_settings_updated_successfully'));
         return back();
     }
 
     public function export(Request $request){
-        $item = User::orderBy('order_count', 'desc')->get();
-        if($request->type == 'excel'){
-            return (new FastExcel(Helpers::export_customers($item)))->download('Customers.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel(Helpers::export_customers($item)))->download('Customers.csv');
+        $key = [];
+        if ($request->search) {
+            $key = explode(' ', $request['search']);
+        }
+        $customers = User::when(count($key) > 0, function ($query) use ($key) {
+            foreach ($key as $value) {
+                $query->orWhere('f_name', 'like', "%{$value}%")
+                    ->orWhere('l_name', 'like', "%{$value}%")
+                    ->orWhere('email', 'like', "%{$value}%")
+                    ->orWhere('phone', 'like', "%{$value}%");
+            };
+        })
+        ->orderBy('order_count', 'desc')->get();
+
+
+        $data = [
+            'customers'=>$customers,
+            'search'=>$request->search??null,
+
+        ];
+        
+        if ($request->type == 'excel') {
+            return Excel::download(new CustomerListExport($data), 'Customers.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new CustomerListExport($data), 'Customers.csv');
         }
     }
 }

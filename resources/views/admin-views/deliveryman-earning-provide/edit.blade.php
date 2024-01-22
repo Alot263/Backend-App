@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',translate('messages.edit').' '.translate('messages.account_transaction'))
+@section('title',translate('messages.edit_account_transaction'))
 
 @push('css_or_js')
 
@@ -21,7 +21,7 @@
     </div>
     <div class="card">
         <div class="card-header">
-            <h4 class="text-capitalize">{{translate('messages.add')}} {{translate('messages.account_transaction')}}</h4>
+            <h4 class="text-capitalize">{{translate('messages.add_account_transaction')}}</h4>
         </div>
         <div class="card-body">
             <form action="{{route('admin.account-transaction.store')}}" method='post' id="add_transaction">
@@ -40,7 +40,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="input-label" for="restaurant">{{translate('messages.store')}}<span class="input-label-secondary"></span></label>
-                            <select id="restaurant" name="store_id" data-placeholder="{{translate('messages.select')}} {{translate('messages.store')}}" class="form-control" title="Select Restaurant" {{$account_transaction->deliveryman?'disabled':''}}>
+                            <select id="restaurant" name="store_id" data-placeholder="{{translate('messages.select_store')}}" class="form-control" title="Select Restaurant" {{$account_transaction->deliveryman?'disabled':''}}>
 
                             </select>
                         </div>
@@ -48,7 +48,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label class="input-label" for="deliveryman">{{translate('messages.deliveryman')}}<span class="input-label-secondary"></span></label>
-                            <select id="deliveryman" name="deliveryman_id" data-placeholder="{{translate('messages.select')}} {{translate('messages.deliveryman')}}" class="form-control" title="Select deliveryman" {{$account_transaction->restaurant?'disabled':''}}>
+                            <select id="deliveryman" name="deliveryman_id" data-placeholder="{{translate('messages.select_deliveryman')}}" class="form-control" title="Select deliveryman" {{$account_transaction->restaurant?'disabled':''}}>
 
                             </select>
                         </div>
@@ -85,29 +85,9 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/deliveryman-earning-provide.js"></script>
 <script>
-    $(document).on('ready', function () {
-        // INITIALIZATION OF SELECT2
-        // =======================================================
-        $('.js-select2-custom').each(function () {
-            var select2 = $.HSCore.components.HSSelect2.init($(this));
-        });
-
-        $('#type').on('change', function() {
-            if($('#type').val() == 'store')
-            {
-                $('#restaurant').removeAttr("disabled");
-                $('#deliveryman').val("").trigger( "change" );
-                $('#deliveryman').attr("disabled","true");
-            }
-            else if($('#type').val() == 'deliveryman')
-            {
-                $('#deliveryman').removeAttr("disabled");
-                $('#restaurant').val("").trigger( "change" );
-                $('#restaurant').attr("disabled","true");
-            }
-        });
-    });
+    "use strict";
     $('#restaurant').select2({
         ajax: {
             url: '{{url('/')}}/admin/store/get-restaurants',
@@ -135,7 +115,7 @@
 
     $('#deliveryman').select2({
         ajax: {
-            url: '{{url('/')}}/admin/delivery-man/get-deliverymen',
+            url: '{{url('/')}}/admin/users/delivery-man/get-deliverymen',
             data: function (params) {
                 return {
                     q: params.term, // search term
@@ -157,8 +137,7 @@
             }
         }
     });
-</script>
-<script>
+
     $('#add_transaction').on('submit', function (e) {
         e.preventDefault();
         var formData = new FormData(this);

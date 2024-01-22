@@ -95,7 +95,7 @@
                                         <div class="btn--container justify-content-center">
                                             <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.users.contact.contact-view',[$contact['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-invisible"></i>
                                             </a>
-                                            <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('contact-{{$contact['id']}}','{{ translate('messages.Want to delete this message?') }}')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
+                                            <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="contact-{{$contact['id']}}" data-message="{{ translate('messages.Want to delete this message?') }}" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
                                             </a>
                                             <form action="{{route('admin.users.contact.contact-delete',[$contact['id']])}}"
                                                     method="post" id="contact-{{$contact['id']}}">
@@ -131,37 +131,10 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/contact-index.js"></script>
 
     <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .columns(1)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            $('#column3_search').on('change', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-    <script>
+        "use strict";
         $('#search-form').on('submit', function () {
             var formData = new FormData(this);
             $.ajaxSetup({

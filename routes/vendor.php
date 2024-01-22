@@ -4,17 +4,6 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
-    /*authentication*/
-    Route::group(['namespace' => 'Auth', 'prefix' => 'auth', 'as' => 'auth.'], function () {
-        Route::get('login', 'LoginController@login')->name('login');
-        Route::post('login', 'LoginController@submit');
-        Route::get('logout', 'LoginController@logout')->name('logout');
-        Route::group(['prefix' => 'employee', 'as' => 'employee.'], function () {
-            Route::post('login', 'EmployeeLoginController@submit')->name('login');
-            Route::get('logout', 'EmployeeLoginController@logout')->name('logout');
-        });
-    });
-    /*authentication*/
 
     Route::group(['middleware' => ['vendor']], function () {
         Route::get('lang/{locale}', 'LanguageController@lang')->name('lang');
@@ -42,10 +31,10 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
                 Route::post('discount', 'POSController@update_discount')->name('discount');
                 Route::get('customers', 'POSController@get_customers')->name('customers');
                 Route::post('order', 'POSController@place_order')->name('order');
-                Route::get('orders', 'POSController@order_list')->name('orders');
-                Route::post('search', 'POSController@search')->name('search');
-                Route::get('order-details/{id}', 'POSController@order_details')->name('order-details');
-                Route::get('invoice/{id}', 'POSController@generate_invoice');
+                // Route::get('orders', 'POSController@order_list')->name('orders');
+                // Route::post('search', 'POSController@search')->name('search');
+                // Route::get('order-details/{id}', 'POSController@order_details')->name('order-details');
+                // Route::get('invoice/{id}', 'POSController@generate_invoice');
                 Route::post('customer-store', 'POSController@customer_store')->name('customer-store');
                 Route::get('data', 'POSController@extra_charge')->name('extra_charge');
             });
@@ -59,10 +48,10 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('get-all', 'CategoryController@get_all')->name('get-all');
             Route::get('list', 'CategoryController@index')->name('add');
             Route::get('sub-category-list', 'CategoryController@sub_index')->name('add-sub-category');
-            Route::post('search', 'CategoryController@search')->name('search');
-            Route::post('sub-search', 'CategoryController@sub_search')->name('sub-search');
-            Route::get('export-categories/{type}', 'CategoryController@export_categories')->name('export-categories');
-            Route::get('export-sub-categories/{type}', 'CategoryController@export_sub_categories')->name('export-sub-categories');
+//            Route::post('search', 'CategoryController@search')->name('search');
+//            Route::post('sub-search', 'CategoryController@sub_search')->name('sub-search');
+            Route::get('export-categories', 'CategoryController@export_categories')->name('export-categories');
+            Route::get('export-sub-categories', 'CategoryController@export_sub_categories')->name('export-sub-categories');
         });
 
         Route::group(['prefix' => 'custom-role', 'as' => 'custom-role.', 'middleware' => ['module:custom_role']], function () {
@@ -71,7 +60,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('edit/{id}', 'CustomRoleController@edit')->name('edit');
             Route::post('update/{id}', 'CustomRoleController@update')->name('update');
             Route::delete('delete/{id}', 'CustomRoleController@distroy')->name('delete');
-            Route::post('search', 'CustomRoleController@search')->name('search');
+//            Route::post('search', 'CustomRoleController@search')->name('search');
         });
 
         Route::group(['prefix' => 'delivery-man', 'as' => 'delivery-man.', 'middleware' => ['module:deliveryman']], function () {
@@ -84,7 +73,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('edit/{id}', 'DeliveryManController@edit')->name('edit');
             Route::post('update/{id}', 'DeliveryManController@update')->name('update');
             Route::delete('delete/{id}', 'DeliveryManController@delete')->name('delete');
-            Route::post('search', 'DeliveryManController@search')->name('search');
+//            Route::post('search', 'DeliveryManController@search')->name('search');
             Route::get('get-deliverymen', 'DeliveryManController@get_deliverymen')->name('get-deliverymen');
             Route::post('transation/search', 'DeliveryManController@transaction_search')->name('transaction-search');
 
@@ -100,7 +89,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('edit/{id}', 'EmployeeController@edit')->name('edit');
             Route::post('update/{id}', 'EmployeeController@update')->name('update');
             Route::delete('delete/{id}', 'EmployeeController@distroy')->name('delete');
-            Route::post('search', 'EmployeeController@search')->name('search');
+//            Route::post('search', 'EmployeeController@search')->name('search');
             Route::get('list-export', 'EmployeeController@list_export')->name('export-employee');
         });
 
@@ -118,21 +107,39 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('remove-image', 'ItemController@remove_image')->name('remove-image');
             Route::get('get-categories', 'ItemController@get_categories')->name('get-categories');
             Route::get('recommended/{id}/{status}', 'ItemController@recommended')->name('recommended');
+            Route::get('pending/item/list', 'ItemController@pending_item_list')->name('pending_item_list');
+            Route::get('requested/item/view/{id}', 'ItemController@requested_item_view')->name('requested_item_view');
+
+            Route::get('product-gallery', 'ItemController@product_gallery')->name('product_gallery');
+
 
             //Mainul
             Route::get('get-variations', 'ItemController@get_variations')->name('get-variations');
             Route::get('stock-limit-list', 'ItemController@stock_limit_list')->name('stock-limit-list');
             Route::post('stock-update', 'ItemController@stock_update')->name('stock-update');
 
+            Route::post('food-variation-generate', 'ItemController@food_variation_generator')->name('food-variation-generate');
+            Route::post('variation-generate', 'ItemController@variation_generator')->name('variation-generate');
+
             //Import and export
             Route::get('bulk-import', 'ItemController@bulk_import_index')->name('bulk-import');
             Route::post('bulk-import', 'ItemController@bulk_import_data');
             Route::get('bulk-export', 'ItemController@bulk_export_index')->name('bulk-export-index');
             Route::post('bulk-export', 'ItemController@bulk_export_data')->name('bulk-export');
+
+
+            Route::get('flash-sale', 'ItemController@flash_sale')->name('flash_sale');
+
         });
 
         Route::group(['prefix' => 'banner', 'as' => 'banner.', 'middleware' => ['module:banner']], function () {
             Route::get('list', 'BannerController@list')->name('list');
+            Route::post('store', 'BannerController@store')->name('store');
+            Route::get('edit/{banner}', 'BannerController@edit')->name('edit');
+            Route::post('update/{banner}', 'BannerController@update')->name('update');
+            Route::get('status/{id}/{status}', 'BannerController@status_update')->name('status_update');
+            Route::delete('delete/{banner}', 'BannerController@delete')->name('delete');
+            // Route::post('search', 'BannerController@search')->name('search');
             Route::get('join_campaign/{id}/{status}', 'BannerController@status')->name('status');
         });
 
@@ -141,7 +148,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('item/list', 'CampaignController@itemlist')->name('itemlist');
             Route::get('remove-store/{campaign}/{store}', 'CampaignController@remove_store')->name('remove-store');
             Route::get('add-store/{campaign}/{store}', 'CampaignController@addstore')->name('add-store');
-            Route::post('search', 'CampaignController@search')->name('search');
+            // Route::post('search', 'CampaignController@search')->name('search');
             Route::post('search-item', 'CampaignController@searchItem')->name('searchItem');
         });
 
@@ -149,8 +156,22 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('/', 'WalletController@index')->name('index');
             Route::post('request', 'WalletController@w_request')->name('withdraw-request');
             Route::delete('close/{id}', 'WalletController@close_request')->name('close-request');
+            Route::get('method-list', 'WalletController@method_list')->name('method-list');
+            Route::post('make-collected-cash-payment', 'WalletController@make_payment')->name('make_payment');
+            Route::post('make-wallet-adjustment', 'WalletController@make_wallet_adjustment')->name('make_wallet_adjustment');
+
+            Route::get('wallet-payment-list', 'WalletController@wallet_payment_list')->name('wallet_payment_list');
+            Route::get('disbursement-list', 'WalletController@getDisbursementList')->name('getDisbursementList');
+            Route::get('export', 'WalletController@getDisbursementExport')->name('export');
+
         });
 
+        Route::group(['prefix' => 'withdraw-method', 'as' => 'wallet-method.', 'middleware' => ['module:wallet']], function () {
+            Route::get('/', 'WalletMethodController@index')->name('index');
+            Route::post('store/', 'WalletMethodController@store')->name('store');
+            Route::get('default/{id}/{default}', 'WalletMethodController@default')->name('default');
+            Route::delete('delete/{id}', 'WalletMethodController@delete')->name('delete');
+        });
 
         Route::group(['prefix' => 'coupon', 'as' => 'coupon.', 'middleware' => ['module:coupon']], function () {
             Route::get('add-new', 'CouponController@add_new')->name('add-new');
@@ -159,9 +180,9 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::post('update/{id}', 'CouponController@update');
             Route::get('status/{id}/{status}', 'CouponController@status')->name('status');
             Route::delete('delete/{id}', 'CouponController@delete')->name('delete');
-            Route::post('search', 'CouponController@search')->name('search');
+//            Route::post('search', 'CouponController@search')->name('search');
         });
-        
+
         Route::group(['prefix' => 'addon', 'as' => 'addon.', 'middleware' => ['module:addon']], function () {
             Route::get('add-new', 'AddOnController@index')->name('add-new');
             Route::post('store', 'AddOnController@store')->name('store');
@@ -173,7 +194,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
         Route::group(['prefix' => 'order', 'as' => 'order.' , 'middleware' => ['module:order']], function () {
             Route::get('list/{status}', 'OrderController@list')->name('list');
             Route::put('status-update/{id}', 'OrderController@status')->name('status-update');
-            Route::post('search', 'OrderController@search')->name('search');
+//            Route::post('search', 'OrderController@search')->name('search');
             Route::post('add-to-cart', 'OrderController@add_to_cart')->name('add-to-cart');
             Route::post('remove-from-cart', 'OrderController@remove_from_cart')->name('remove-from-cart');
             Route::get('update/{order}', 'OrderController@update')->name('update');
@@ -186,6 +207,10 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::post('add-payment-ref-code/{id}', 'OrderController@add_payment_ref_code')->name('add-payment-ref-code');
             Route::post('update-order-amount', 'OrderController@edit_order_amount')->name('update-order-amount');
             Route::post('update-discount-amount', 'OrderController@edit_discount_amount')->name('update-discount-amount');
+            Route::post('add-order-proof/{id}', 'OrderController@add_order_proof')->name('add-order-proof');
+            Route::get('remove-proof-image', 'OrderController@remove_proof_image')->name('remove-proof-image');
+            Route::get('export-orders/{file_type}/{status}/{type}', 'OrderController@export_orders')->name('export');
+
         });
 
         Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.', 'middleware' => ['module:store_setup']], function () {
@@ -194,6 +219,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('remove-schedule/{store_schedule}', 'BusinessSettingsController@remove_schedule')->name('remove-schedule');
             Route::get('update-active-status', 'BusinessSettingsController@active_status')->name('update-active-status');
             Route::post('update-setup/{store}', 'BusinessSettingsController@store_setup')->name('update-setup');
+            Route::post('update-meta-data/{store}', 'BusinessSettingsController@updateStoreMetaData')->name('update-meta-data');
             Route::get('toggle-settings-status/{store}/{status}/{menu}', 'BusinessSettingsController@store_status')->name('toggle-settings');
         });
 
@@ -205,12 +231,14 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('bank-view', 'ProfileController@bank_view')->name('bankView');
             Route::get('bank-edit', 'ProfileController@bank_edit')->name('bankInfo');
             Route::post('bank-update', 'ProfileController@bank_update')->name('bank_update');
+            Route::post('bank-delete', 'ProfileController@bank_delete')->name('bank_delete');
         });
 
         Route::group(['prefix' => 'store', 'as' => 'shop.', 'middleware' => ['module:my_shop']], function () {
             Route::get('view', 'RestaurantController@view')->name('view');
             Route::get('edit', 'RestaurantController@edit')->name('edit');
             Route::post('update', 'RestaurantController@update')->name('update');
+            Route::post('update-message', 'RestaurantController@update_message')->name('update-message');
         });
 
         Route::group(['prefix' => 'message', 'as' => 'message.'], function () {
@@ -224,7 +252,8 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('expense-report', 'ReportController@expense_report')->name('expense-report');
             Route::get('expense-export', 'ReportController@expense_export')->name('expense-export');
             Route::post('expense-report-search', 'ReportController@expense_search')->name('expense-report-search');
+            Route::get('disbursement-report', 'ReportController@disbursement_report')->name('disbursement-report');
+            Route::get('disbursement-report-export/{type}', 'ReportController@disbursement_report_export')->name('disbursement-report-export');
         });
-
     });
 });

@@ -23,7 +23,7 @@
                         {{ translate('Store Report') }}
                     </h1>
                     <span>
-                        Monitor store’s <strong class="font-bold text--title">business</strong> analytics & Reports
+                        {{ translate('Monitor_store’s_business_analytics_&_Reports') }}
                     </span>
                 </div>
             </div>
@@ -44,9 +44,6 @@
                 <a href="{{ route('admin.transactions.report.store-order-report') }}"
                     class="nav-link">{{ translate('Order Report') }}</a>
             </li>
-            {{-- <li class="nav-item">
-                <a href="" class="nav-link">{{ translate('Transactions Report') }}</a>
-            </li> --}}
         </ul>
 
         <div class="card filter--card">
@@ -58,9 +55,8 @@
                     @csrf
                     <div class="row g-3">
                         <div class="col-md-4 col-sm-6">
-                            <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_zone_filter('{{ url()->full() }}',this.value)" id="zone">
-                                <option value="all">{{ translate('messages.All Zones') }}</option>
+                            <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id" id="zone">
+                                <option value="all">{{ translate('messages.All_Zones') }}</option>
                                 @foreach (\App\Models\Zone::orderBy('name')->get() as $z)
                                     <option value="{{ $z['id'] }}"
                                         {{ isset($zone) && $zone->id == $z['id'] ? 'selected' : '' }}>
@@ -70,26 +66,31 @@
                             </select>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <select name="store_id" onchange="set_store_filter('{{ url()->full() }}',this.value)"
-                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.store') }}"
-                                class="js-data-example-ajax form-control">
+                            <select name="store_id"
+                                    data-placeholder="{{ translate('messages.select_store') }}"
+                                    class="js-data-example-ajax form-control set-filter" data-url="{{ url()->full() }}" data-filter="store_id">
                                 @if (isset($store))
                                     <option value="{{ $store->id }}" selected>{{ $store->name }}</option>
                                 @else
-                                    <option value="all" selected>{{ translate('messages.all') }}
-                                        {{ translate('messages.stores') }}</option>
+                                    <option value="all" selected>{{ translate('messages.all_stores') }}</option>
                                 @endif
                             </select>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <select class="form-control" name="filter" onchange="set_time_filter('{{ url()->full() }}',this.value)">
-                                <option value="all_time" {{ isset($filter) && $filter == "all_time" ? 'selected' : '' }}>{{ translate('messages.All Time') }}</option>
-                                <option value="this_year" {{ isset($filter) && $filter == "this_year" ? 'selected' : '' }}>{{ translate('messages.This Year') }}</option>
-                                <option value="previous_year" {{ isset($filter) && $filter == "previous_year" ? 'selected' : '' }}>{{ translate('messages.Previous Year') }}</option>
-                                <option value="this_month" {{ isset($filter) && $filter == "this_month" ? 'selected' : '' }}>{{ translate('messages.This Month') }}</option>
-                                <option value="this_week" {{ isset($filter) && $filter == "this_week" ? 'selected' : '' }}>{{ translate('messages.This Week') }}</option>
+                            <select class="form-control set-filter" data-url="{{ url()->full() }}" data-filter="filter" name="filter">
+                                <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
+                                    {{ translate('messages.All Time') }}</option>
+                                <option value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
+                                    {{ translate('messages.This Year') }}</option>
+                                <option value="previous_year"
+                                    {{ isset($filter) && $filter == 'previous_year' ? 'selected' : '' }}>{{ translate('messages.Previous Year') }}
+                                </option>
+                                <option value="this_month"
+                                    {{ isset($filter) && $filter == 'this_month' ? 'selected' : '' }}>{{ translate('messages.This Month') }}</option>
+                                <option value="this_week" {{ isset($filter) && $filter == 'this_week' ? 'selected' : '' }}>
+                                    {{ translate('messages.This Week') }}</option>
                                 <option value="custom" {{ isset($filter) && $filter == 'custom' ? 'selected' : '' }}>
-                                    {{ translate('messages.Custom') }}</option>
+                                    {{ translate('Custom') }}</option>
                             </select>
                         </div>
                         @if (isset($filter) && $filter == 'custom')
@@ -121,14 +122,6 @@
                         <h4 class="subtitle">
                             {{ \App\CentralLogics\Helpers::number_format_short($orders->sum('order_amount')) }}</h4>
                         <h6 class="subtext">{{ translate('Gross Sale') }}</h6>
-                        {{-- <div class="info-txt">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M7.5 3V3.75H9.96975L6.75 6.96975L5.14012 5.35988C5.0698 5.28957 4.97444 5.25008 4.875 5.25008C4.77556 5.25008 4.6802 5.28957 4.60988 5.35988L0.75 9.21975L1.28025 9.75L4.875 6.15525L6.48487 7.76513C6.5552 7.83543 6.65056 7.87492 6.75 7.87492C6.84944 7.87492 6.9448 7.83543 7.01513 7.76513L10.5 4.28025V6.75H11.25V3H7.5Z"
-                                    fill="#00AA6D" />
-                            </svg> 10% more from last month
-                        </div> --}}
                     </div>
                 </div>
                 <div class="left-content-card">
@@ -137,7 +130,6 @@
                         <h4 class="subtitle">
                             {{ \App\CentralLogics\Helpers::number_format_short($orders->sum('total_tax_amount')) }}</h4>
                         <h6 class="subtext">{{ translate('Total Tax') }}</h6>
-                        {{-- <div class="info-txt text-danger">Store Wise Tax</div> --}}
                     </div>
                 </div>
                 <div class="left-content-card">
@@ -147,14 +139,6 @@
                             {{ \App\CentralLogics\Helpers::number_format_short($orders->sum('transaction_sum_admin_commission')+$orders->sum('transaction_sum_delivery_fee_comission')-$orders->sum('transaction_sum_admin_expense')) }}
                         </h4>
                         <h6 class="subtext">{{ translate('Total Commission') }}</h6>
-                        {{-- <div class="info-txt d-flex flex-wrap align-items-center flex-wrap">
-                            <span class="badge badge-primary px-2">
-                                $3,453 Due
-                            </span>
-                            <span class="text--primary">
-                                $30,000 Collected
-                            </span>
-                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -239,9 +223,6 @@
                             <h3 class="title">
                                 {{ \App\CentralLogics\Helpers::number_format_short($orders->sum('transaction_sum_store_amount')) }}
                             </h3>
-                            {{-- <div class="subtxt">Incomplete Settlement amount <strong
-                                    class="text--title font-medium">$12,834</strong> </div>
-                            <a href="" class="trx-btn">View All Transaction</a> --}}
                         </div>
                     </div>
                 </div>
@@ -253,13 +234,13 @@
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">{{ translate('Total Sales') }}</h5>
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <form class="search-form">
                         <!-- Search -->
-                        @csrf
+                        {{-- @csrf --}}
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control"
                                 placeholder="{{ translate('Search by product..') }}"
-                                aria-label="{{ translate('messages.search') }}" required>
+                                aria-label="{{ translate('messages.search') }}" value="{{ request()?->search ?? null}}" required>
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
 
                         </div>
@@ -278,22 +259,7 @@
 
                         <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                        <a id="export-copy" class="dropdown-item" href="javascript:;">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                alt="Image Description">
-                            {{ translate('messages.copy') }}
-                        </a>
-                        <a id="export-print" class="dropdown-item" href="javascript:;">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                alt="Image Description">
-                            {{ translate('messages.print') }}
-                        </a>
-                        <div class="dropdown-divider"></div> --}}
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item"
                                 href="{{ route('admin.transactions.report.store-sales-report-export', ['type' => 'excel', request()->getQueryString()]) }}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
@@ -387,16 +353,17 @@
 
 
     @push('script')
+    @endpush
+
+
+    @push('script_2')
         <script src="{{ asset('public/assets/admin') }}/vendor/chart.js/dist/Chart.min.js"></script>
         <script src="{{ asset('public/assets/admin') }}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
         <script
             src="{{ asset('public/assets/admin') }}/vendor/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js">
         </script>
-    @endpush
-
-
-    @push('script_2')
         <script>
+            "use strict";
             // Bar Charts
             Chart.plugins.unregister(ChartDataLabels);
 
@@ -404,7 +371,7 @@
                 $.HSCore.components.HSChartJS.init($(this));
             });
 
-            var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
+            let updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
 
             $('.js-data-example-ajax').select2({
                 ajax: {
@@ -425,7 +392,7 @@
                         };
                     },
                     __port: function(params, success, failure) {
-                        var $request = $.ajax(params);
+                        let $request = $.ajax(params);
 
                         $request.then(success);
                         $request.fail(failure);
@@ -438,7 +405,7 @@
 
             $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

@@ -31,9 +31,15 @@
                         <div class="row align-items-md-center">
                             <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
                                 <div class="d-flex flex-wrap align-items-center food--media">
-                                    <img class="avatar avatar-xxl avatar-4by3 mr-4"
-                                        src="{{ asset('storage/app/public/product') }}/{{ $product['image'] }}"
-                                        onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
+                                    <img class="avatar avatar-xxl avatar-4by3 mr-4 onerror-image"
+                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $product['image'] ?? '',
+                                        asset('storage/app/public/product').'/'.$product['image'] ?? '',
+                                        asset('public/assets/admin/img/160x160/img2.jpg'),
+                                        'product/'
+                                    ) }}"
+
+                                    data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                                         alt="Image Description">
                                     <div class="d-block">
                                         <div class="rating--review">
@@ -231,9 +237,16 @@
                         @if ($product->store)
                             <a class="resturant--information-single"
                                 href="{{ route('admin.store.view', $product->store_id) }}">
-                                <img class="img--120 rounded mx-auto mb-3"
-                                    onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"
-                                    src="{{ asset('storage/app/public/store/' . $product->store->logo) }}"
+                                <img class="img--120 rounded mx-auto mb-3 onerror-image"
+                                data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"
+
+                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $product->store->logo ?? '',
+                                        asset('storage/app/public/store').'/'.$product->store->logo ?? '',
+                                        asset('public/assets/admin/img/160x160/img1.jpg'),
+                                        'store/'
+                                    ) }}"
+
                                     alt="Image Description">
                                 <div class="text-center">
                                     <h5 class="text-capitalize text--title font-semibold text-hover-primary d-block mb-1">
@@ -245,8 +258,7 @@
                                 </div>
                             </a>
                         @else
-                            <span class="badge-info">{{ translate('messages.store') }}
-                                {{ translate('messages.deleted') }}</span>
+                            <span class="badge-info">{{ translate('messages.store_deleted') }}</span>
                         @endif
                     </div>
                 </div>
@@ -296,13 +308,11 @@
                                     </span>
                                     @if (config('module.' . $product->module->module_type)['item_available_time'])
                                         <span class="d-block mb-1">
-                                            {{ translate('messages.available') }} {{ translate('messages.time') }}
-                                            {{ translate('messages.starts') }} :
+                                            {{ translate('messages.available_time_starts') }} :
                                             <strong>{{ date(config('timeformat'), strtotime($product['available_time_starts'])) }}</strong>
                                         </span>
                                         <span class="d-block mb-1">
-                                            {{ translate('messages.available') }} {{ translate('messages.time') }}
-                                            {{ translate('messages.ends') }} :
+                                            {{ translate('messages.available_time_ends') }} :
                                             <strong>{{ date(config('timeformat'), strtotime($product['available_time_ends'])) }}</strong>
                                         </span>
                                     @endif
@@ -376,8 +386,8 @@
                             @endif
                             @if ($product->tags)
                                 <td>
-                                    @foreach($product->tags as $c) 
-                                        {{$c->tag.','}} 
+                                    @foreach($product->tags as $c)
+                                        {{$c->tag.','}}
                                     @endforeach
                                 </td>
                             @endif
@@ -391,7 +401,41 @@
     <!-- Card -->
     <div class="card">
         <div class="card-header border-0">
-            <h4 class="card-title">{{ translate('messages.product') }} {{ translate('messages.reviews') }}</h4>
+            <h4 class="card-title">{{ translate('messages.product_reviews') }}</h4>
+
+
+
+            <div class="hs-unfold mr-2">
+                <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                    data-hs-unfold-options='{
+                            "target": "#usersExportDropdown",
+                            "type": "css-animation"
+                        }'>
+                    <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                </a>
+
+                <div id="usersExportDropdown"
+                    class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+
+                    <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                    <a id="export-excel" class="dropdown-item" href="{{ route('admin.item.item_wise_reviews_export', ['type' => 'excel', 'store'=> $product->store?->name,'id' => $product['id'],request()->getQueryString()]) }}">
+                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                            src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                            alt="Image Description">
+                        {{ translate('messages.excel') }}
+                    </a>
+                    <a id="export-csv" class="dropdown-item" href="{{ route('admin.item.item_wise_reviews_export', ['type' => 'csv', 'store'=> $product->store?->name, 'id' => $product['id'], request()->getQueryString()]) }}">
+                        <img class="avatar avatar-xss avatar-4by3 mr-2"
+                            src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                            alt="Image Description">
+                        .{{ translate('messages.csv') }}
+                    </a>
+
+                </div>
+            </div>
+
+
+
         </div>
         <!-- Table -->
         <div class="table-responsive datatable-custom">
@@ -430,9 +474,15 @@
                                     <a class="d-flex align-items-center"
                                         href="{{ route('admin.customer.view', [$review['user_id']]) }}">
                                         <div class="avatar avatar-circle">
-                                            <img class="avatar-img" width="75" height="75"
-                                                onerror="this.src='{{ asset('public/assets/admin/img/160x160/img1.jpg') }}'"
-                                                src="{{ asset('storage/app/public/profile/' . $review->customer->image) }}"
+                                            <img class="avatar-img onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img1.jpg') }}"  width="75" height="75"
+                                            
+                                                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                                    $review->customer->image ?? '',
+                                                    asset('storage/app/public/profile').'/'.$review->customer->image ?? '',
+                                                    asset('public/assets/admin/img/160x160/img1.jpg'),
+                                                    'profile/'
+                                                ) }}"
+
                                                 alt="Image Description">
                                         </div>
                                         <div class="ml-3">
@@ -471,8 +521,8 @@
                                 <label class="toggle-switch toggle-switch-sm"
                                     for="reviewCheckbox{{ $review->id }}">
                                     <input type="checkbox"
-                                        onclick="status_form_alert('status-{{ $review['id'] }}','{{ $review->status ? translate('messages.you_want_to_hide_this_review_for_customer') : translate('messages.you_want_to_show_this_review_for_customer') }}', event)"
-                                        class="toggle-switch-input" id="reviewCheckbox{{ $review->id }}"
+                                           data-id="status-{{ $review['id'] }}" data-message="{{ $review->status ? translate('messages.you_want_to_hide_this_review_for_customer') : translate('messages.you_want_to_show_this_review_for_customer') }}"
+                                        class="toggle-switch-input status_form_alert" id="reviewCheckbox{{ $review->id }}"
                                         {{ $review->status ? 'checked' : '' }}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
@@ -511,7 +561,10 @@
 
 @push('script_2')
 <script>
-    function status_form_alert(id, message, e) {
+    "use strict";
+    $(".status_form_alert").on("click", function (e) {
+        const id = $(this).data('id');
+        const message = $(this).data('message');
         e.preventDefault();
         Swal.fire({
             title: '{{ translate('messages.are_you_sure') }}',
@@ -520,14 +573,14 @@
             showCancelButton: true,
             cancelButtonColor: 'default',
             confirmButtonColor: '#FC6A57',
-            cancelButtonText: 'No',
-            confirmButtonText: 'Yes',
+            cancelButtonText: '{{translate('messages.no')}}',
+            confirmButtonText: '{{translate('messages.yes')}}',
             reverseButtons: true
         }).then((result) => {
             if (result.value) {
                 $('#' + id).submit()
             }
         })
-    }
+    })
 </script>
 @endpush

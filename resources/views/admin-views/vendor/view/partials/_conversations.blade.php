@@ -1,18 +1,18 @@
-<style>
-    div.scroll-down {
-        max-height: 300px;
-        overflow-y: scroll;
-    }
 
-</style>
 <div class="card h-100">
     <!-- Header -->
     <div class="card-header">
         <div class="chat-user-info w-100 d-flex align-items-center">
             <div class="chat-user-info-img">
-                <img class="avatar-img"
-                    src="{{asset('storage/app/public/profile/'.$user['image'])}}"
-                    onerror="this.src='{{asset('public/assets/admin')}}/img/160x160/img1.jpg'"
+                <img class="avatar-img onerror-image"
+
+                src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                    $user['image'] ?? '',
+                    asset('storage/app/public/profile').'/'.$user['image'] ?? '',
+                    asset('public/assets/admin/img/160x160/img1.jpg'),
+                    'profile/'
+                ) }}" 
+                    data-onerror-image="{{asset('public/assets/admin')}}/img/160x160/img1.jpg"
                     alt="Image Description">
             </div>
             <div class="chat-user-info-content">
@@ -33,7 +33,7 @@
                             @if($con->file!=null)
                             @foreach (json_decode($con->file) as $img)
                             <br>
-                                <img style="width:100%"
+                                <img class="w-100-p"
                                 src="{{asset('storage/app/public/conversation').'/'.$img}}">
                                 @endforeach
                             @endif
@@ -49,7 +49,7 @@
                             @if($con->file!=null)
                             @foreach (json_decode($con->file) as $img)
                             <br>
-                                <img style="width:100%"
+                                <img class="w-100-p"
                                 src="{{asset('storage/app/public/conversation').'/'.$img}}">
                                 @endforeach
                             @endif
@@ -65,21 +65,10 @@
 
     </div>
     <!-- Body -->
-    {{-- <div class="card-footer border-0 conv-reply-form">
-
-        <form action="javascript:" method="post" id="reply-form">
-            @csrf
-            <div class="quill-custom_">
-                <textarea class="form-control" name="reply"></textarea>
-                <button type="submit" onclick="replyConvs('{{route('admin.message.store',[$user->id])}}')"
-                        class="btn btn-primary btn--primary con-reply-btn">{{__('messages.send')}} {{__('messages.reply')}}
-                </button>
-            </div>
-        </form>
-    </div> --}}
 </div>
-
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script>
+    "use strict";
     $(document).ready(function () {
         $('.scroll-down').animate({
             scrollTop: $('#scroll-here').offset().top

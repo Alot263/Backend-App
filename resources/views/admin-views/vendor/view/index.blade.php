@@ -13,6 +13,7 @@
     @include('admin-views.vendor.view.partials._header',['store'=>$store])
 
     <!-- Page Heading -->
+    @if($store->vendor->status)
     <div class="row g-3 text-capitalize">
         <!-- Earnings (Monthly) Card Example -->
         <div class="col-md-4">
@@ -29,7 +30,11 @@
                     </div>
                 </div>
                 <div class="card-footer pt-0 bg-transparent border-0">
-                        <a class="btn text-white text-capitalize bg--title h--45px w-100" href="{{$store->vendor->status ? route('admin.transactions.account-transaction.index') : '#'}}" title="{{translate('messages.goto')}} {{translate('messages.account_transaction')}}">{{translate('messages.collect_cash_from_store')}}</a>
+                    <button class="btn text-white text-capitalize bg--title h--45px w-100" id="collect_cash"
+                                        type="button" data-toggle="modal" data-target="#collect-cash"
+                                        title="Collect Cash">{{ translate('messages.collect_cash_from_store') }}
+                                    </button>
+                        {{-- <a class="btn text-white text-capitalize bg--title h--45px w-100" href="{{$store->vendor->status ? route('admin.transactions.account-transaction.index') : '#'}}" title="{{translate('messages.goto_account_transaction')}}">{{translate('messages.collect_cash_from_store')}}</a> --}}
                 </div>
             </div>
         </div>
@@ -39,7 +44,7 @@
                 <div class="col-sm-6">
                     <div class="resturant-card card--bg-2">
                         <h4 class="title">{{\App\CentralLogics\Helpers::format_currency($wallet->pending_withdraw)}}</h4>
-                        <div class="subtitle">{{translate('messages.pending')}} {{translate('messages.withdraw')}}</div>
+                        <div class="subtitle">{{translate('messages.pending_withdraw')}}</div>
                         <img class="resturant-icon w--30" src="{{asset('public/assets/admin/img/transactions/pending.png')}}" alt="transaction">
                     </div>
                 </div>
@@ -56,7 +61,7 @@
                 <!-- Collected Cash Card Example -->
                 <div class="col-sm-6">
                     <div class="resturant-card card--bg-4">
-                        <h4 class="title">{{\App\CentralLogics\Helpers::format_currency($wallet->balance)}}</h4>
+                        <h4 class="title">{{\App\CentralLogics\Helpers::format_currency($wallet->balance>0?$wallet->balance:0)}}</h4>
                         <div class="subtitle">{{translate('messages.withdraw_able_balance')}}</div>
                         <img class="resturant-icon w--30" src="{{asset('public/assets/admin/img/transactions/withdraw-balance.png')}}" alt="transaction">
                     </div>
@@ -74,13 +79,14 @@
 
         </div>
     </div>
+    @endif
     <div class="card mt-4">
         <div class="card-header">
             <h5 class="card-title m-0 d-flex align-items-center">
                 <span class="card-header-icon mr-2">
                     <i class="tio-shop-outlined"></i>
                 </span>
-                <span class="ml-1">{{translate('messages.store')}} {{translate('messages.info')}}</span>
+                <span class="ml-1">{{translate('messages.store_info')}}</span>
             </h5>
         </div>
         <div class="card-body">
@@ -88,8 +94,15 @@
                 <div class="col-lg-6">
                     <div class="resturant--info-address">
                         <div class="logo">
-                            <img onerror="this.src='{{asset('public/assets/admin/img/100x100/1.png')}}'"
-                        src="{{asset('storage/app/public/store')}}/{{$store->logo}}" alt="{{$store->name}} Logo">
+                            <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/100x100/1.png')}}"
+                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                $store->logo ?? '',
+                                asset('storage/app/public/store').'/'.$store->logo ?? '',
+                                asset('public/assets/admin/img/100x100/1.png'),
+                                'store/'
+                            ) }}"
+
+                            alt="{{$store->name}} Logo">
                         </div>
                         <ul class="address-info list-unstyled list-unstyled-py-3 text-dark">
                             <li>
@@ -125,14 +138,25 @@
                         <span class="card-header-icon mr-2">
                             <i class="tio-user"></i>
                         </span>
-                        <span class="ml-1">{{translate('messages.owner')}} {{translate('messages.info')}}</span>
+                        <span class="ml-1">{{translate('messages.owner_info')}}</span>
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="resturant--info-address">
                         <div class="avatar avatar-xxl avatar-circle avatar-border-lg">
-                            <img class="avatar-img" onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                        src="{{asset('storage/app/public/vendor')}}/{{$store->vendor->image}}" alt="Image Description">
+                            <img class="avatar-img onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                $store->vendor->image ?? '',
+                                asset('storage/app/public/vendor').'/'.$store->vendor->image ?? '',
+                                asset('public/assets/admin/img/160x160/img1.jpg'),
+                                'vendor/'
+                            ) }}"
+
+
+
+
+                            alt="Image Description">
                         </div>
                         <ul class="address-info address-info-2 list-unstyled list-unstyled-py-3 text-dark">
                             <li>
@@ -151,6 +175,7 @@
                 </div>
             </div>
         </div>
+        @if($store->vendor->status)
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header">
@@ -178,11 +203,51 @@
                         </li>
                         @else
                         <li class="my-auto">
-                            <center class="card-subtitle">{{ translate('messages.No Data found') }}</center>
+                            <div class="text-center card-subtitle">{{ translate('messages.No Data found') }}</div>
                         </li>
                         @endif
                     </ul>
                 </div>
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
+
+<div class="modal fade" id="collect-cash" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{translate('messages.collect_cash_from_store')}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{{route('admin.transactions.account-transaction.store')}}" method='post' id="add_transaction"
+                      >
+                    @csrf
+                    <input type="hidden" name="type" value="store">
+                    <input type="hidden" name="store_id" value="{{ $store->id }}">
+                    <div class="form-group">
+                        <label class="input-label" >{{translate('messages.payment_method')}} <span
+                                class="input-label-secondary text-danger">*</span></label>
+                            <input class="form-control" type="text" name="method" id="method" required maxlength="191" placeholder="{{translate('messages.Ex_:_Card')}}">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label" >{{translate('messages.reference')}}</label>
+                        <input  class="form-control" type="text" name="ref" id="ref" maxlength="191">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label" >{{translate('messages.amount')}} <span
+                                class="input-label-secondary text-danger">*</span></label>
+                            <input class="form-control" type="number" min=".01" step="0.01" name="amount" id="amount" max="999999999999.99" placeholder="{{translate('messages.Ex_:_1000')}}">
+                    </div>
+                    <div class="btn--container justify-content-end">
+                        {{-- <button type="reset" class="btn btn--reset">{{translate('reset')}}</button> --}}
+                        <button type="submit" id="submit_new_customer" class="btn btn--primary">{{translate('submit')}}</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -191,14 +256,14 @@
 
 @push('script_2')
     <!-- Page level plugins -->
+    <script src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initMap&v=3.45.8" ></script>
     <script>
+        "use strict";
         // Call the dataTables jQuery plugin
         $(document).ready(function () {
             $('#dataTable').DataTable();
         });
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initMap&v=3.45.8" ></script>
-    <script>
+
         const myLatLng = { lat: {{$store->latitude}}, lng: {{$store->longitude}} };
         let map;
         initMap();
@@ -213,12 +278,11 @@
                 title: "{{$store->name}}",
             });
         }
-    </script>
-    <script>
+
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -252,7 +316,7 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
 
@@ -273,5 +337,40 @@
             }
         })
     }
+
+        $('#add_transaction').on('submit', function (e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.post({
+                url: '{{route('admin.transactions.account-transaction.store')}}',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data.errors) {
+                        for (let i = 0; i < data.errors.length; i++) {
+                            toastr.error(data.errors[i].message, {
+                                CloseButton: true,
+                                ProgressBar: true
+                            });
+                        }
+                    } else {
+                        toastr.success('{{translate('messages.transaction_saved')}}', {
+                            CloseButton: true,
+                            ProgressBar: true
+                        });
+                        setTimeout(function () {
+                            location.href = '{{route('admin.store.view', $store->id)}}';
+                        }, 2000);
+                    }
+                }
+            });
+        });
     </script>
 @endpush

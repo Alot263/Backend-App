@@ -2,55 +2,111 @@
 
 namespace App\Http\Controllers;
 
-ini_set('memory_limit', '-1');
-
-use App\CentralLogics\Helpers;
-use App\CentralLogics\OrderLogic;
-use App\Library\SslCommerz\SslCommerzNotification;
-use App\Models\Order;
-use Brian2694\Toastr\Facades\Toastr;
-use Illuminate\Support\Facades\DB;
+use App\Library\OrderPlace;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
+use App\Traits\Processor;
+use Illuminate\Contracts\Foundation\Application;
+use App\Models\PaymentRequest;
 
 class SslCommerzPaymentController extends Controller
 {
+    use Processor;
+
+    private $store_id;
+    private $store_password;
+    private bool $host;
+    private string $direct_api_url;
+    private PaymentRequest $payment;
+    private $user;
+
+    public function __construct(PaymentRequest $payment, User $user)
+    {
+        $config = $this->payment_config('ssl_commerz', 'payment_config');
+        if (!is_null($config) && $config->mode == 'live') {
+            $values = json_decode($config->live_values);
+        } elseif (!is_null($config) && $config->mode == 'test') {
+            $values = json_decode($config->test_values);
+        }
+
+        if ($config) {
+            $this->store_id = $values->store_id;
+            $this->store_password = $values->store_password;
+
+            # REQUEST SEND TO SSLCOMMERZ
+            $this->direct_api_url = "https://sandbox.sslcommerz.com/gwprocess/v4/api.php";
+            $this->host = true;
+
+            if ($config->mode == 'live') {
+                $this->direct_api_url = "https://securepay.sslcommerz.com/gwprocess/v4/api.php";
+                $this->host = false;
+            }
+        }
+        $this->payment = $payment;
+        $this->user = $user;
+    }
+
     public function index(Request $request)
     {
-        $order = Order::with(['details'])->where(['id' => $request->order_id])->first();
-        $tr_ref = Str::random(6) . '-' . rand(1, 1000);
+        $validator = Validator::make($request->all(), [
+            'payment_id' => 'required|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_400, null, $this->error_processor($validator)), 400);
+        }
+
+        $data = $this->payment::where(['id' => $request['payment_id']])->where(['is_paid' => 0])->first();
+        if (!isset($data)) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_204), 200);
+        }
+
+        $payment_amount = $data['payment_amount'];
+
+        $payer_information = json_decode($data['payer_information']);
 
         $post_data = array();
-        $post_data['total_amount'] = $order->order_amount;
-        $post_data['currency'] = Helpers::currency_code();
-        $post_data['tran_id'] = $tr_ref;
+        $post_data['store_id'] = $this->store_id;
+        $post_data['store_passwd'] = $this->store_password;
+        $post_data['total_amount'] = round($payment_amount, 2);
+        $post_data['currency'] = $data['currency_code'];
+        $post_data['tran_id'] = uniqid();
+
+        $post_data['success_url'] = url('/') . '/payment/sslcommerz/success?payment_id=' . $data['id'];
+        $post_data['fail_url'] = url('/') . '/payment/sslcommerz/failed?payment_id=' . $data['id'];
+        $post_data['cancel_url'] = url('/') . '/payment/sslcommerz/canceled?payment_id=' . $data['id'];
 
         # CUSTOMER INFORMATION
-        $post_data['cus_name'] = $order->customer['f_name'];
-        $post_data['cus_email'] = $order->customer['email'] == null ? "example@example.com" : $order->customer['email'];
-        $post_data['cus_add1'] = 'Customer Address';
+        $post_data['cus_name'] = $payer_information->name;
+        $post_data['cus_email'] = $payer_information->email && $payer_information->email != '' ? $payer_information->email : 'example@example.com';
+        $post_data['cus_add1'] = 'N/A';
         $post_data['cus_add2'] = "";
         $post_data['cus_city'] = "";
         $post_data['cus_state'] = "";
         $post_data['cus_postcode'] = "";
-        $post_data['cus_country'] = "Bangladesh";
-        $post_data['cus_phone'] = $order->customer['phone'] == null ? '0000000000' : $order->customer['phone'];
+        $post_data['cus_country'] = "";
+        $post_data['cus_phone'] = $payer_information->phone ?? '0000000000';
         $post_data['cus_fax'] = "";
 
         # SHIPMENT INFORMATION
-        $post_data['ship_name'] = "Shipping";
-        $post_data['ship_add1'] = "address 1";
-        $post_data['ship_add2'] = "address 2";
-        $post_data['ship_city'] = "City";
-        $post_data['ship_state'] = "State";
-        $post_data['ship_postcode'] = "ZIP";
+        $post_data['ship_name'] = "N/A";
+        $post_data['ship_add1'] = "N/A";
+        $post_data['ship_add2'] = "N/A";
+        $post_data['ship_city'] = "N/A";
+        $post_data['ship_state'] = "N/A";
+        $post_data['ship_postcode'] = "N/A";
         $post_data['ship_phone'] = "";
-        $post_data['ship_country'] = "Country";
+        $post_data['ship_country'] = "N/A";
 
         $post_data['shipping_method'] = "NO";
-        $post_data['product_name'] = "Computer";
-        $post_data['product_category'] = "Goods";
-        $post_data['product_profile'] = "physical-goods";
+        $post_data['product_name'] = "N/A";
+        $post_data['product_category'] = "N/A";
+        $post_data['product_profile'] = "service";
 
         # OPTIONAL PARAMETERS
         $post_data['value_a'] = "ref001";
@@ -58,152 +114,114 @@ class SslCommerzPaymentController extends Controller
         $post_data['value_c'] = "ref003";
         $post_data['value_d'] = "ref004";
 
-        DB::table('orders')
-            ->where('id', $order['id'])
-            ->update([
-                'transaction_reference' => $tr_ref,
-                'payment_method' => 'ssl_commerz_payment',
-                'order_status' => 'failed',
-                'failed' => now(),
-                'updated_at' => now(),
-            ]);
+        $handle = curl_init();
+        curl_setopt($handle, CURLOPT_URL, $this->direct_api_url);
+        curl_setopt($handle, CURLOPT_TIMEOUT, 30);
+        curl_setopt($handle, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($handle, CURLOPT_POST, 1);
+        curl_setopt($handle, CURLOPT_POSTFIELDS, $post_data);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, $this->host); # KEEP IT FALSE IF YOU RUN FROM LOCAL PC
 
-        try {
-            $sslc = new SslCommerzNotification();
-            $payment_options = $sslc->makePayment($post_data, 'hosted');
-            if (!is_array($payment_options)) {
-                Toastr::error(translate('messages.your_currency_is_not_supported',['method'=>translate('messages.sslcommerz')]));
-                return back();
-            }
-        } catch (\Exception $exception) {
-            Toastr::error(translate('messages.misconfiguration_or_data_missing'));
+        $content = curl_exec($handle);
+        $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if ($code == 200 && !(curl_errno($handle))) {
+            curl_close($handle);
+            $sslcommerzResponse = $content;
+        } else {
+            curl_close($handle);
             return back();
         }
-    }
 
-    public function success(Request $request)
-    {
-        $tran_id = $request->input('tran_id');
-        $amount = $request->input('amount');
-        $currency = $request->input('currency');
-        $sslc = new SslCommerzNotification();
+        $sslcz = json_decode($sslcommerzResponse, true);
 
-        $order = Order::where('transaction_reference', $tran_id)->first();
-
-        $validation = $sslc->orderValidate($tran_id, $amount, $currency, $request->all());
-        if ($validation == TRUE) {
-            $order->order_status='confirmed';
-            $order->payment_method='ssl_commerz_payment';
-            $order->transaction_reference=$tran_id;
-            $order->payment_status='paid';
-            $order->confirmed=now();
-            $order->save();
-            try {
-                Helpers::send_order_notification($order);
-            } catch (\Exception $e) {
-            }
-
-            if ($order->callback != null) {
-                return redirect($order->callback . '&status=success');
-            }
-
-            return \redirect()->route('payment-success');
-
+        if (isset($sslcz['GatewayPageURL']) && $sslcz['GatewayPageURL'] != "") {
+            echo "<meta http-equiv='refresh' content='0;url=" . $sslcz['GatewayPageURL'] . "'>";
+            exit;
         } else {
-            DB::table('orders')
-                ->where('transaction_reference', $tran_id)
-                ->update(['order_status' => 'failed', 'payment_status' => 'unpaid', 'failed'=>now()]);
-            if ($order->callback != null) {
-                return redirect($order->callback . '&status=fail');
-            }
-            return \redirect()->route('payment-fail');
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_204), 200);
         }
     }
 
-    public function fail(Request $request)
+    # FUNCTION TO CHECK HASH VALUE
+    protected function SSLCOMMERZ_hash_verify($store_passwd, $post_data)
     {
-        $tran_id = $request->input('tran_id');
-        DB::table('orders')
-            ->where('transaction_reference', $tran_id)
-            ->update(['order_status' => 'failed', 'payment_status' => 'unpaid', 'failed'=>now()]);
+        if (isset($post_data) && isset($post_data['verify_sign']) && isset($post_data['verify_key'])) {
+            # NEW ARRAY DECLARED TO TAKE VALUE OF ALL POST
+            $pre_define_key = explode(',', $post_data['verify_key']);
 
-        $order_detials = DB::table('orders')
-            ->where('transaction_reference', $tran_id)
-            ->select('id', 'transaction_reference', 'order_status', 'order_amount', 'callback')->first();
-
-        if ($order_detials->callback != null) {
-            return redirect($order_detials->callback . '&status=fail');
-        }
-        return \redirect()->route('payment-fail');
-    }
-
-    public function cancel(Request $request)
-    {
-        $tran_id = $request->input('tran_id');
-        DB::table('orders')
-            ->where('transaction_reference', $tran_id)
-            ->update(['order_status' => 'canceled', 'payment_status' => 'unpaid']);
-
-        $order_detials = DB::table('orders')
-            ->where('transaction_reference', $tran_id)
-            ->select('id', 'transaction_reference', 'order_status', 'order_amount', 'callback')->first();
-
-        if ($order_detials->callback != null) {
-            return redirect($order_detials->callback . '&status=cancel');
-        }
-        return \redirect()->route('payment-fail');
-    }
-
-    public function ipn(Request $request)
-    {
-        #Received all the payement information from the gateway
-        if ($request->input('tran_id')) #Check transation id is posted or not.
-        {
-            $tran_id = $request->input('tran_id');
-            #Check order status in order tabel against the transaction id or order id.
-            $order_details = DB::table('orders')
-                ->where('transaction_reference', $tran_id)
-                ->select('transaction_reference', 'order_status', 'order_amount')->first();
-
-            if ($order_details->order_status == 'pending') {
-                $sslc = new SslCommerzNotification();
-                $validation = $sslc->orderValidate($tran_id, $order_details->order_amount, 'BDT', $request->all());
-                if ($validation == TRUE) {
-                    /*
-                    That means IPN worked. Here you need to update order status
-                    in order table as confirmed or Complete.
-                    Here you can also sent sms or email for successful transaction to customer
-                    */
-                    $update_product = DB::table('orders')
-                        ->where('transaction_reference', $tran_id)
-                        ->update(['order_status' => 'confirmed', 'payment_status' => 'paid']);
-
-                    echo "Transaction is successfully completed";
-                } else {
-                    /*
-                    That means IPN worked, but Transation validation failed.
-                    Here you need to update order status as Failed in order table.
-                    */
-                    $update_product = DB::table('orders')
-                        ->where('transaction_reference', $tran_id)
-                        ->update(['order_status' => 'confirmed', 'payment_status' => 'unpaid']);
-
-                    echo "validation Fail";
+            $new_data = array();
+            if (!empty($pre_define_key)) {
+                foreach ($pre_define_key as $value) {
+                    if (isset($post_data[$value])) {
+                        $new_data[$value] = ($post_data[$value]);
+                    }
                 }
+            }
+            # ADD MD5 OF STORE PASSWORD
+            $new_data['store_passwd'] = md5($store_passwd);
 
-            } else if ($order_details->order_status == 'confirmed' || $order_details->order_status == 'complete') {
+            # SORT THE KEY AS BEFORE
+            ksort($new_data);
 
-                #That means Order status already updated. No need to udate database.
+            $hash_string = "";
+            foreach ($new_data as $key => $value) {
+                $hash_string .= $key . '=' . ($value) . '&';
+            }
+            $hash_string = rtrim($hash_string, '&');
 
-                echo "Transaction is already successfully completed";
+            if (md5($hash_string) == $post_data['verify_sign']) {
+
+                return true;
             } else {
-                #That means something wrong happened. You can redirect customer to your product page.
-
-                echo "Invalid Transaction";
+                $this->error = "Verification signature not matched";
+                return false;
             }
         } else {
-            echo "Invalid Data";
+            $this->error = 'Required data mission. ex: verify_key, verify_sign';
+            return false;
         }
     }
 
+    public function success(Request $request): JsonResponse|Redirector|RedirectResponse|Application
+    {
+        if ($request['status'] == 'VALID' && $this->SSLCOMMERZ_hash_verify($this->store_password, $request)) {
+
+            $this->payment::where(['id' => $request['payment_id']])->update([
+                'payment_method' => 'ssl_commerz',
+                'is_paid' => 1,
+                'transaction_id' => $request->input('tran_id')
+            ]);
+
+            $data = $this->payment::where(['id' => $request['payment_id']])->first();
+
+            if (isset($data) && function_exists($data->success_hook)) {
+                call_user_func($data->success_hook, $data);
+            }
+            return $this->payment_response($data, 'success');
+        }
+        $payment_data = $this->payment::where(['id' => $request['payment_id']])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
+        }
+        return $this->payment_response($payment_data, 'fail');
+    }
+
+    public function failed(Request $request): JsonResponse|Redirector|RedirectResponse|Application
+    {
+        $payment_data = $this->payment::where(['id' => $request['payment_id']])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
+        }
+        return $this->payment_response($payment_data, 'fail');
+    }
+
+    public function canceled(Request $request): JsonResponse|Redirector|RedirectResponse|Application
+    {
+        $payment_data = $this->payment::where(['id' => $request['payment_id']])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
+        }
+        return $this->payment_response($payment_data, 'cancel');
+    }
 }

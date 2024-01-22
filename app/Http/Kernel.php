@@ -17,7 +17,7 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
-        \App\Http\Middleware\TrustProxies::class,
+        // \App\Http\Middleware\TrustProxies::class,
         // \Fruitcake\Cors\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
@@ -75,5 +75,6 @@ class Kernel extends HttpKernel
         'localization' => \App\Http\Middleware\LocalizationMiddleware::class,
         'module-check' => \App\Http\Middleware\ModuleCheckMiddleware::class,
         'current-module' => \App\Http\Middleware\CurrentModule::class,
+        'apiGuestCheck' => \App\Http\Middleware\APIGuestMiddleware::class,
     ];
 }

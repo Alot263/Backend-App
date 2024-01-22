@@ -16,17 +16,15 @@
                     <div class="d-flex align-items-center">
                         <img src="{{asset('/public/assets/admin/img/new-img/users.svg')}}" alt="img">
                         <div class="w-0 flex-grow pl-3">
-                            {{-- <h1 class="page-header-title mb-0">{{translate('messages.welcome')}}, {{auth('admin')->user()->f_name}}.</h1> --}}
                             <h1 class="page-header-title mb-0">{{ translate('messages.User Overview') }}</h1>
-                            <p class="page-header-text m-0">{{translate('Hello, here you can manage your users by zone.')}}</p>
+                            <p class="page-header-text m-0">{{translate('Hello,_here_you_can_manage_your_users_by_zone.')}}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-sm-auto min--280">
-                    <select name="zone_id" class="form-control js-select2-custom"
-                           onchange="set_zone_filter('{{ url()->full() }}',this.value)">
-                        <option value="all">{{ translate('messages.All Zones') }}</option>
+                    <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id">
+                        <option value="all">{{ translate('messages.All_Zones') }}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $zone)
                             <option
                                 value="{{$zone['id']}}" {{$params['zone_id'] == $zone['id']?'selected':''}}>
@@ -48,9 +46,9 @@
                             +{{$total_customers >= 4 ? $total_customers - 2 : $total_customers}}
                         </div>
                         @foreach ($customers as $key => $customer)
-                            <img src="{{ asset('storage/app/public/profile') }}/{{ $customer['image'] }}"
-                            onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" alt="new-img">
-                        @endforeach 
+                            <img src="{{\App\CentralLogics\Helpers::onerror_image_helper($customer['image'], asset('storage/app/public/profile/').'/'.$customer['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'profile/') }}"
+                                 class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="new-img">
+                        @endforeach
                     </div>
                     <h3 class="title">{{$total_customers}}</h3>
                     <h5 class="subtitle text-capitalize">{{translate('messages.total_customer')}}</h5>
@@ -64,9 +62,10 @@
                             +{{$total_deliveryman >= 4 ? $total_deliveryman - 2 :  $total_deliveryman}}
                         </div>
                         @foreach ($delivery_man as $key => $dm)
-                            <img src="{{ asset('storage/app/public/delivery-man') }}/{{ $dm['image'] }}"
-                            onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" alt="new-img">
-                        @endforeach 
+                            <img src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man/').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'delivery-man/') }}"
+                                 class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"
+                             alt="new-img">
+                        @endforeach
                     </div>
                     <h3 class="title">{{$total_deliveryman}}</h3>
                     <h5 class="subtitle text-capitalize">{{translate('messages.total_delivery_man')}}</h5>
@@ -83,8 +82,8 @@
                         @if ($key == 2)
                             @break
                         @endif
-                        <img src="{{ asset('storage/app/public/delivery-man') }}/{{ $item['image'] }}"
-                        onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" alt="new-img">
+                        <img src="{{\App\CentralLogics\Helpers::onerror_image_helper($item['image'], asset('storage/app/public/delivery-man/').'/'.$item['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'delivery-man/') }}"
+                             class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="new-img">
                         @endforeach
                     </div>
                     <h3 class="title">{{$total_employees}}</h3>
@@ -392,11 +391,12 @@
     <script async defer src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initialize&libraries=drawing,places&v=3.49"></script>
 
     <script>
-        var map; // Global declaration of the map
-        var drawingManager;
-        var lastpolygon = null;
-        var polygons = [];
-        var dmMarkers = [];
+        "use strict";
+        let map; // Global declaration of the map
+        let drawingManager;
+        let lastpolygon = null;
+        let polygons = [];
+        let dmMarkers = [];
 
         function resetMap(controlDiv) {
             // Set CSS for the control border.
@@ -432,26 +432,26 @@
         function initialize() {
             @php($default_location=\App\Models\BusinessSetting::where('key','default_location')->first())
             @php($default_location=$default_location->value?json_decode($default_location->value, true):0)
-            var myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
-            var dmbounds = new google.maps.LatLngBounds(null);
-            var myOptions = {
+            let myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
+            let dmbounds = new google.maps.LatLngBounds(null);
+            let myOptions = {
                 zoom: 13,
                 center: myLatlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
+            let deliveryMan = <?php echo json_encode($deliveryMen); ?>;
             map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
 
-            var infowindow = new google.maps.InfoWindow();
+            let infowindow = new google.maps.InfoWindow();
 
             map.fitBounds(dmbounds);
-            for (var i = 0; i < deliveryMan.length; i++) {
+            for (let i = 0; i < deliveryMan.length; i++) {
                 if (deliveryMan[i].lat) {
-                    var contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
-                    var point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
+                    let contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
+                    let point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
                     dmbounds.extend(point);
                     map.fitBounds(dmbounds);
-                    var marker = new google.maps.Marker({
+                    let marker = new google.maps.Marker({
                         position: point,
                         map: map,
                         title: deliveryMan[i].image,
@@ -474,7 +474,7 @@
             };
         }
         $('#search-form').on('submit', function (e) {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -488,7 +488,7 @@
                 processData: false,
                 success: function (data) {
                     if(data.dm){
-                        var id = data.dm.id;
+                        let id = data.dm.id;
                         map.panTo(dmMarkers[id].getPosition());
                         map.setZoom(20);
                         dmMarkers[id].setAnimation(google.maps.Animation.BOUNCE);
@@ -511,7 +511,7 @@
                 url: '{{route('admin.zone.zoneCoordinates')}}',
                 dataType: 'json',
                 success: function (data) {
-                    for(var i=0; i<data.length;i++)
+                    for(let i=0; i<data.length;i++)
                     {
                         polygons.push(new google.maps.Polygon({
                             paths: data[i],
@@ -532,14 +532,14 @@
         });
 
 
-    var options = {
+    let options = {
           series: [{
-          name: 'New Customer Growth',
+          name: '{{ translate('New_Customer_Growth') }}',
           data: [{{$last_year_users > 0 ? number_format($user_data[1]/$last_year_users,2) : 0}},
            {{$user_data[1] > 0 ? number_format($user_data[2]/$user_data[1],2) : 0}},
-           {{$user_data[2] > 0 ? number_format($user_data[3]/$user_data[2],2) : 0}}, 
-           {{$user_data[3] > 0 ? number_format($user_data[4]/$user_data[3],2) : 0}}, 
-           {{$user_data[4] > 0 ? number_format($user_data[5]/$user_data[4],2) : 0}}, 
+           {{$user_data[2] > 0 ? number_format($user_data[3]/$user_data[2],2) : 0}},
+           {{$user_data[3] > 0 ? number_format($user_data[4]/$user_data[3],2) : 0}},
+           {{$user_data[4] > 0 ? number_format($user_data[5]/$user_data[4],2) : 0}},
            {{$user_data[5] > 0 ? number_format($user_data[6]/$user_data[5],2) : 0}},
            {{$user_data[6] > 0 ? number_format($user_data[7]/$user_data[6],2) : 0}},
            {{$user_data[7] > 0 ? number_format($user_data[8]/$user_data[7],2) : 0}},
@@ -569,7 +569,7 @@
         },
         xaxis: {
         //   type: 'datetime',
-          categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+          categories: ["{{ translate('Jan') }}", "{{ translate('Feb') }}", "{{ translate('Mar') }}", "{{ translate('Apr') }}", "{{ translate('May') }}", "{{ translate('Jun') }}", "{{ translate('Jul') }}", "{{ translate('Aug') }}", "{{ translate('Sep') }}", "{{ translate('Oct') }}", "{{ translate('Nov') }}", "{{ translate('Dec') }}" ]
         },
         tooltip: {
           x: {
@@ -578,7 +578,7 @@
         },
         };
 
-        var chart = new ApexCharts(document.querySelector("#customer-growth-chart"), options);
+        let chart = new ApexCharts(document.querySelector("#customer-growth-chart"), options);
         chart.render();
 
 

@@ -37,7 +37,7 @@
                         <h4><i class="tio-chart-bar-4 fz-30px"></i>{{translate('messages.dashboard_order_statistics')}}</h4>
                     </div>
                     <div class="col-md-3">
-                        <select class="custom-select" name="statistics_type" onchange="order_stats_update(this.value)">
+                        <select class="custom-select order_stats_update" name="statistics_type">
                             <option
                                 value="overall" {{$params['statistics_type'] == 'overall'?'selected':''}}>
                                 {{translate('messages.Overall Statistics')}}
@@ -218,10 +218,13 @@
             $.HSCore.components.HSChartJS.init($(this));
         });
 
-        var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
-    </script>
+        let updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
 
-    <script>
+        $('.order_stats_update').on('change',function (){
+            let type = $(this).val();
+            order_stats_update(type);
+        })
+
         function order_stats_update(type) {
             $.ajaxSetup({
                 headers: {
@@ -245,14 +248,12 @@
                 }
             });
         }
-    </script>
 
-    <script>
         function insert_param(key, value) {
             key = encodeURIComponent(key);
             value = encodeURIComponent(value);
             // kvp looks like ['key1=value1', 'key2=value2', ...]
-            var kvp = document.location.search.substr(1).split('&');
+            let kvp = document.location.search.substr(1).split('&');
             let i = 0;
 
             for (; i < kvp.length; i++) {

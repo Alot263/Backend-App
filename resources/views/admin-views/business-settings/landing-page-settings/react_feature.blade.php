@@ -85,8 +85,7 @@
                                 <div class="custom-file mt-2">
                                     <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                         accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                    <label class="custom-file-label" for="customFileEg1">{{ translate('messages.choose') }}
-                                        {{ translate('messages.file') }}</label>
+                                    <label class="custom-file-label" for="customFileEg1">{{ translate('messages.choose_file') }}</label>
                                 </div>
                             </div>
                         </div>

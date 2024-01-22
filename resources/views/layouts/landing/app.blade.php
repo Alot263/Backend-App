@@ -1,15 +1,7 @@
-@php($background_Change = \App\Models\BusinessSetting::where(['key' => 'backgroundChange'])->first())
-@php($background_Change = isset($background_Change->value) ? json_decode($background_Change->value, true) : null)
+
 <!DOCTYPE html>
 <?php
     $landing_site_direction = session()->get('landing_site_direction');
-    // if (env('APP_MODE') == 'demo') {
-    //     $landing_site_direction = session()->get('landing_site_direction');
-    // }else{
-    //     $landing_site_direction = \App\Models\BusinessSetting::where('key', 'landing_site_direction')->first();
-    //     $landing_site_direction = $landing_site_direction->value ?? 'ltr';
-    // }
-
 ?>
 <html dir="{{ $landing_site_direction }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -47,8 +39,8 @@
 <body>
     @php($landing_page_text = \App\Models\BusinessSetting::where(['key' => 'landing_page_text'])->first())
     @php($landing_page_text = isset($landing_page_text->value) ? json_decode($landing_page_text->value, true) : null)
-    @php($landing_page_links = \App\Models\BusinessSetting::where(['key' => 'landing_page_links'])->first())
-    @php($landing_page_links = isset($landing_page_links->value) ? json_decode($landing_page_links->value, true) : null)
+    @php($fixed_link = \App\Models\DataSetting::where(['key'=>'fixed_link','type'=>'admin_landing_page'])->first())
+    @php($fixed_link = isset($fixed_link->value)?json_decode($fixed_link->value, true):null)
     <!-- ==== Preloader ==== -->
     <div id="landing-loader"></div>
     <!-- ==== Preloader ==== -->
@@ -60,9 +52,16 @@
                     @php($fav = \App\Models\BusinessSetting::where(['key' => 'icon'])->first()->value ?? '')
                     @php($logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value ?? '')
                     <a href="{{route('home')}}" class="logo">
-                        <img
-                        onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
-                    src="{{ asset('storage/app/public/business/' . $fav) }}" alt="">
+                        <img class="onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+
+                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                        $fav,
+                        asset('storage/app/public/business/').'/'. $fav,
+                        asset('public/assets/admin/img/160x160/img2.jpg'),
+                        'business/'
+                    ) }}"
+
+                    alt="image">
                     </a>
                     <ul class="menu">
                         <li>
@@ -80,10 +79,10 @@
                         <li>
                             <a href="{{route('contact-us')}}"  class="{{ Request::is('contact-us') ? 'active' : '' }}"><span>{{ translate('messages.contact_us') }}</span></a>
                         </li>
-                        @if ($landing_page_links &&$landing_page_links['web_app_url_status'])
+                        @if ($fixed_link &&$fixed_link['web_app_url_status'])
                                 <div class="mt-2">
                                     <a class="cmn--btn me-xl-auto py-2"
-                                    href="{{ $landing_page_links['web_app_url'] }}" target="_blank">{{ translate('messages.browse_web') }}</a>
+                                    href="{{ $fixed_link['web_app_url'] }}" target="_blank">{{ translate('messages.browse_web') }}</a>
                                 </div>
                         @endif
                     </ul>
@@ -92,9 +91,9 @@
                         <span></span>
                         <span></span>
                     </div>
-                    @php( $local = session()->has('landing_local')?session('landing_local'):'en')
+                    @php( $local = session()->has('landing_local')?session('landing_local'):null)
                     @php($lang = \App\Models\BusinessSetting::where('key', 'system_language')->first())
-                    @if ($lang)  
+                    @if ($lang)
                         <div class="dropdown--btn-hover position-relative">
                             <a class="dropdown--btn border-0 px-3 header--btn text-capitalize d-flex" href="javascript:void(0)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="20">
@@ -103,7 +102,9 @@
                                 @foreach(json_decode($lang['value'],true) as $data)
                                 @if($data['code']==$local)
                                             <span class="me-1">{{$data['code']}}</span>
-                                        @endif
+                                    @elseif(!$local &&  $data['default'] == true)
+                                            <span class="me-1">{{$data['code']}}</span>
+                                    @endif
                                     @endforeach
                             </a>
                             <ul class="dropdown-list py-0" style="min-width:120px; top:100%">
@@ -122,10 +123,10 @@
                             </ul>
                         </div>
                     @endif
-                    @if ($toggle_dm_registration || $toggle_store_registration)
+                    @if (isset($toggle_dm_registration) || isset($toggle_store_registration))
                     <div class="dropdown--btn-hover position-relative">
                         <a class="dropdown--btn header--btn text-capitalize d-flex align-items-center" href="javascript:void(0)">
-                            <span class="me-1">Join us</span>
+                            <span class="me-1">{{ translate('Join us') }}</span>
                             <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M6.00224 5.46105L1.33333 0.415128C1.21002 0.290383 1 0.0787335 1 0.0787335C1 0.0787335 0.708488 -0.0458817 0.584976 0.0788632L0.191805 0.475841C0.0680976 0.600389 7.43292e-08 0.766881 7.22135e-08 0.9443C7.00978e-08 1.12172 0.0680976 1.28801 0.191805 1.41266L5.53678 6.80682C5.66068 6.93196 5.82624 7.00049 6.00224 7C6.17902 7.00049 6.34439 6.93206 6.46839 6.80682L11.8082 1.41768C11.9319 1.29303 12 1.12674 12 0.949223C12 0.771804 11.9319 0.605509 11.8082 0.480765L11.415 0.0838844C11.1591 -0.174368 10.9225 0.222512 10.6667 0.480765L6.00224 5.46105Z"
@@ -163,13 +164,19 @@
     <!-- ======= Footer Section ======= -->
 
     <footer>
+        @php($fixed_newsletter_title = \App\Models\DataSetting::where(['type' => 'admin_landing_page','key' => 'fixed_newsletter_title'])->first())
+        @php($fixed_newsletter_title = isset($fixed_newsletter_title->value) ? $fixed_newsletter_title->value: null)
+        @php($fixed_newsletter_sub_title = \App\Models\DataSetting::where(['type' => 'admin_landing_page','key' => 'fixed_newsletter_sub_title'])->first())
+        @php($fixed_newsletter_sub_title = isset($fixed_newsletter_sub_title->value) ? $fixed_newsletter_sub_title->value: null)
+        @php($fixed_footer_article_title = \App\Models\DataSetting::where(['type' => 'admin_landing_page','key' => 'fixed_footer_article_title'])->first())
+        @php($fixed_footer_article_title = isset($fixed_footer_article_title->value) ? $fixed_footer_article_title->value: null)
         <div class="newsletter-section">
             <div class="container">
                 <div class="newsletter-wrapper">
                     <div class="newsletter-content position-relative">
-                        <h3 class="title">{{ isset($landing_page_text['newsletter_title']) ? $landing_page_text['newsletter_title'] : '' }}</h3>
+                        <h3 class="title">{{ $fixed_newsletter_title }}</h3>
                         <div class="text">
-                            {{ isset($landing_page_text['newsletter_sub_title']) ? $landing_page_text['newsletter_sub_title'] : '' }}
+                            {{ $fixed_newsletter_sub_title }}
                         </div>
                         <form method="post" action="{{route('newsletter.subscribe')}}">
                             @csrf
@@ -203,12 +210,11 @@
                     <div class="footer-widget">
                         <div class="footer-logo">
                             <a class="logo">
-                                <img onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
-                            src="{{ asset('storage/app/public/business/' . $logo) }}" alt="">
+                                <img  class="onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" src="{{ \App\CentralLogics\Helpers::onerror_image_helper($logo, asset('storage/app/public/business/') .'/'. $logo, asset('public/assets/admin/img/upload-img.png') , 'business/') }}" alt="image">
                             </a>
                         </div>
                         <div class="txt">
-                            {{ isset($landing_page_text) ? $landing_page_text['footer_article'] : '' }}
+                            {{ $fixed_footer_article_title }}
                         </div>
                         <ul class="social-icon">
                             @php($social_media = \App\Models\SocialMedia::where('status', 1)->get())
@@ -222,22 +228,24 @@
                                 @endforeach
                             @endif
                         </ul>
-
-                        @if (isset($landing_page_links['app_url_android_status']) || isset( $landing_page_links['app_url_ios_status']))
+                        @php($landing_page_links = \App\Models\DataSetting::where(['type' => 'admin_landing_page','key' => 'download_user_app_links'])->first())
+                        @php($landing_page_links = isset($landing_page_links->value) ? json_decode($landing_page_links->value, true) : null)
+                        @if (isset($landing_page_links['playstore_url_status']) || isset( $landing_page_links['apple_store_url_status']))
                         <div class="app-btn-grp">
-                            @if (isset($landing_page_links['app_url_android_status']))
-                            <a href="{{ isset($landing_page_links['app_url_android']) ? $landing_page_links['app_url_android'] : '' }}">
+                            @if (isset($landing_page_links['playstore_url_status']))
+                            <a href="{{ isset($landing_page_links['playstore_url']) ? $landing_page_links['playstore_url'] : '' }}">
                                 <img src="{{ asset('public/assets/landing/img/google.svg') }}" alt="">
                             </a>
                             @endif
-                            @if (isset($landing_page_links['app_url_ios_status']))
-                            <a href="{{ isset($landing_page_links['app_url_ios']) ? $landing_page_links['app_url_ios'] : '' }}">
+                            @if (isset($landing_page_links['apple_store_url_status']))
+                            <a href="{{ isset($landing_page_links['apple_store_url']) ? $landing_page_links['apple_store_url'] : '' }}">
                                 <img src="{{ asset('public/assets/landing/img/apple.svg') }}" alt="">
                             </a>
                             @endif
                         </div>
                         @endif
                     </div>
+                    @php($landing_data =\App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key', ['shipping_policy_status','refund_policy_status','cancellation_policy_status'])->pluck('value','key')->toArray())
                     <div class="footer-widget widget-links">
                         <h5 class="subtitle mt-2 text-white">{{translate("messages.Suppport")}}</h5>
                         <ul>
@@ -248,20 +256,17 @@
                                 <a href="{{route('terms-and-conditions')}}">{{ translate('messages.terms_and_condition') }}</a>
                             </li>
 
-                            @php($config=\App\CentralLogics\Helpers::get_business_settings('refund'))
-                            @if ($config && ($config['status']==1))
+                            @if (isset($landing_data['refund_policy_status']) && $landing_data['refund_policy_status']  == 1)
                             <li>
                                 <a href="{{route('refund')}}">{{ translate('messages.Refund Policy') }}</a>
                             </li>
                             @endif
-                            @php($config=\App\CentralLogics\Helpers::get_business_settings('shipping_policy'))
-                            @if ($config && ($config['status']==1))
+                            @if (isset($landing_data['shipping_policy_status']) && $landing_data['shipping_policy_status']  == 1)
                             <li>
                                 <a href="{{route('shipping-policy')}}">{{ translate('messages.Shipping Policy') }}</a>
                             </li>
                             @endif
-                            @php($config=\App\CentralLogics\Helpers::get_business_settings('cancelation'))
-                            @if ($config && ($config['status']==1))
+                            @if (isset($landing_data['cancellation_policy_status']) && $landing_data['cancellation_policy_status']  == 1)
                             <li>
                                 <a href="{{route('cancelation')}}">{{ translate('messages.Cancelation Policy') }}</a>
                             </li>
@@ -270,7 +275,7 @@
                         </ul>
                     </div>
                     <div class="footer-widget widget-links">
-                        <h5 class="subtitle mt-2 text-white">{{translate("messages.Contact")}} {{translate("messages.Us")}} </h5>
+                        <h5 class="subtitle mt-2 text-white">{{translate("messages.Contact_Us")}} </h5>
                         <ul>
                             <li>
                                 <a>
@@ -344,8 +349,8 @@
 
 
     <script>
-
-        $(".main-category-slider").owlCarousel({
+     "use strict";
+ $(".main-category-slider").owlCarousel({
             loop: true,
             nav: false,
             dots: true,
@@ -355,12 +360,11 @@
             rtl: {{ $landing_site_direction === 'rtl'?'true':'false' }},
         });
         $(".testimonial-slider").owlCarousel({
-            loop: true,
+            loop: false,
             margin: 22,
             responsiveClass: true,
             nav: false,
             dots: false,
-            loop: true,
             autoplay: true,
             autoplayTimeout: 2000,
             autoplayHoverPause: true,
@@ -380,10 +384,10 @@
         });
         $(".owl-prev").html('<i class="fas fa-angle-left">');
         $(".owl-next").html('<i class="fas fa-angle-right">');
-        var sync1 = $("#sync1");
-        var sync2 = $("#sync2");
-        var thumbnailItemClass = ".owl-item";
-        var slides = sync1
+        let sync1 = $("#sync1");
+         let sync2 = $("#sync2");
+         let thumbnailItemClass = ".owl-item";
+         let slides = sync1
             .owlCarousel({
                 startPosition: 12,
                 items: 1,
@@ -402,12 +406,12 @@
             .on("changed.owl.carousel", syncPosition);
 
         function syncPosition(el) {
-            $owl_slider = $(this).data("owl.carousel");
-            var loop = $owl_slider.options.loop;
-
+            let  $owl_slider = $(this).data("owl.carousel");
+            let loop = $owl_slider.options.loop;
+            let current;
             if (loop) {
-                var count = el.item.count - 1;
-                var current = Math.round(
+                let count = el.item.count - 1;
+                 current = Math.round(
                     el.item.index - el.item.count / 2 - 0.5
                 );
                 if (current < 0) {
@@ -417,24 +421,24 @@
                     current = 0;
                 }
             } else {
-                var current = el.item.index;
+                 current = el.item.index;
             }
 
-            var owl_thumbnail = sync2.data("owl.carousel");
-            var itemClass = "." + owl_thumbnail.options.itemClass;
+            let owl_thumbnail = sync2.data("owl.carousel");
+            let itemClass = "." + owl_thumbnail.options.itemClass;
 
-            var thumbnailCurrentItem = sync2
+            let thumbnailCurrentItem = sync2
                 .find(itemClass)
                 .removeClass("synced")
                 .eq(current);
             thumbnailCurrentItem.addClass("synced");
 
             if (!thumbnailCurrentItem.hasClass("active")) {
-                var duration = 500;
+                let duration = 500;
                 sync2.trigger("to.owl.carousel", [current, duration, true]);
             }
         }
-        var thumbs = sync2
+        let thumbs = sync2
             .owlCarousel({
                 startPosition: 12,
                 items: 2,
@@ -459,7 +463,7 @@
                     },
                 },
                 onInitialized: function (e) {
-                    var thumbnailCurrentItem = $(e.target)
+                    let thumbnailCurrentItem = $(e.target)
                         .find(thumbnailItemClass)
                         .eq(this._current);
                     thumbnailCurrentItem.addClass("synced");
@@ -467,13 +471,13 @@
             })
             .on("click", thumbnailItemClass, function (e) {
                 e.preventDefault();
-                var duration = 500;
-                var itemIndex = $(e.target).parents(thumbnailItemClass).index();
+                let duration = 500;
+                let itemIndex = $(e.target).parents(thumbnailItemClass).index();
                 sync1.trigger("to.owl.carousel", [itemIndex, duration, true]);
             })
             .on("changed.owl.carousel", function (el) {
-                var number = el.item.index;
-                $owl_slider = sync1.data("owl.carousel");
+                let number = el.item.index;
+                let  $owl_slider = sync1.data("owl.carousel");
                 $owl_slider.to(number, 500, true);
             });
         sync1.owlCarousel();

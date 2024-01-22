@@ -28,27 +28,42 @@ class AddOnController extends Controller
             'name' => 'required|array',
             'name.*' => 'max:191',
             'price' => 'required|numeric|between:0,999999999999.99',
+            'name.0' => 'required',
         ],[
             'name.required' => translate('messages.Name is required!'),
+            'name.0.required'=>translate('default_name_is_required'),
         ]);
 
         $addon = new AddOn();
-        $addon->name = $request->name[array_search('en', $request->lang)];
+        $addon->name = $request->name[array_search('default', $request->lang)];
         $addon->price = $request->price;
         $addon->store_id = \App\CentralLogics\Helpers::get_store_id();
         $addon->save();
+        $default_lang = str_replace('_', '-', app()->getLocale());
+
         $data = [];
         foreach($request->lang as $index=>$key)
         {
-            if($request->name[$index] && $key != 'en')
-            {
-                array_push($data, Array(
-                    'translationable_type'  => 'App\Models\AddOn',
-                    'translationable_id'    => $addon->id,
-                    'locale'                => $key,
-                    'key'                   => 'name',
-                    'value'                 => $request->name[$index],
-                ));
+            if($default_lang == $key && !($request->name[$index])){
+                if ($key != 'default') {
+                    array_push($data, array(
+                        'translationable_type' => 'App\Models\AddOn',
+                        'translationable_id' => $addon->id,
+                        'locale' => $key,
+                        'key' => 'name',
+                        'value' => $addon->name,
+                    ));
+                }
+            }else{
+                if ($request->name[$index] && $key != 'default') {
+                    array_push($data, Array(
+                        'translationable_type'  => 'App\Models\AddOn',
+                        'translationable_id'    => $addon->id,
+                        'locale'                => $key,
+                        'key'                   => 'name',
+                        'value'                 => $request->name[$index],
+                    ));
+                }
             }
         }
         if(count($data))
@@ -80,26 +95,44 @@ class AddOnController extends Controller
         $request->validate([
             'name' => 'required|max:191',
             'price' => 'required|numeric|between:0,999999999999.99',
+            'name.0' => 'required',
         ], [
             'name.required' => translate('messages.Name is required!'),
+            'name.0.required'=>translate('default_name_is_required'),
         ]);
 
         $addon = AddOn::find($id);
-        $addon->name = $request->name[array_search('en', $request->lang)];
+        $addon->name = $request->name[array_search('default', $request->lang)];
         $addon->price = $request->price;
         $addon->save();
 
+        $default_lang = str_replace('_', '-', app()->getLocale());
+
         foreach($request->lang as $index=>$key)
         {
-            if($request->name[$index] && $key != 'en')
-            {
-                Translation::updateOrInsert(
-                    ['translationable_type'  => 'App\Models\AddOn',
-                        'translationable_id'    => $addon->id,
-                        'locale'                => $key,
-                        'key'                   => 'name'],
-                    ['value'                 => $request->name[$index]]
-                );
+            if($default_lang == $key && !($request->name[$index])){
+                if ($key != 'default') {
+                    Translation::updateOrInsert(
+                        [
+                            'translationable_type' => 'App\Models\AddOn',
+                            'translationable_id' => $addon->id,
+                            'locale' => $key,
+                            'key' => 'name'
+                        ],
+                        ['value' => $addon->name]
+                    );
+                }
+            }else{
+
+                if ($request->name[$index] && $key != 'default') {
+                    Translation::updateOrInsert(
+                        ['translationable_type'  => 'App\Models\AddOn',
+                            'translationable_id'    => $addon->id,
+                            'locale'                => $key,
+                            'key'                   => 'name'],
+                        ['value'                 => $request->name[$index]]
+                    );
+                }
             }
         }
         

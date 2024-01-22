@@ -12,7 +12,7 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title">{{translate('messages.location')}} {{translate('messages.coverage')}} {{translate('messages.setup')}}</h1>
+                    <h1 class="page-header-title">{{translate('messages.location_coverage_setup')}}</h1>
                     <span class="badge badge-soft-danger text-left">
                         This location setup is for your Main branch. Carefully set your restaurant location and coverage area. If you want to ignore the coverage area then keep the input box empty.<br>
                         You can ignore this when you have only the default branch and you don't want coverage area.

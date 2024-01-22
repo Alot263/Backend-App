@@ -24,9 +24,11 @@
                 @if(isset($module_section_type))
                     <div class="min--280 max-sm-flex-grow-1">
                         <!-- Select -->
-                        <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_filter('{{url()->full()}}',this.value,'module_id')" title="{{translate('messages.select')}} {{translate('messages.modules')}}">
-                            <option value="" {{!request('module_id') ? 'selected':''}}>{{translate('messages.all')}} {{translate('messages.modules')}}</option>
+                        <select name="zone_id" class="form-control js-select2-custom set-filter"
+                            data-url="{{url()->full()}}"
+                            data-filter="module_id"
+                            title="{{translate('messages.select_modules')}}">
+                            <option value="" {{!request('module_id') ? 'selected':''}}>{{translate('messages.all_modules')}}</option>
                             @foreach (\App\Models\Module::notParcel()->where('module_type',$module_section_type)->get() as $module)
                                 <option
                                     value="{{$module->id}}" {{request('module_id') == $module->id?'selected':''}}>
@@ -99,7 +101,7 @@
                                 {{translate('messages.print')}}
                             </a>
                             <div class="dropdown-divider"></div>
-                            <span class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
+                            <span class="dropdown-header">{{translate('messages.download_options')}}</span>
                             <a id="export-excel" class="dropdown-item" href="javascript:;">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                         src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
@@ -123,9 +125,8 @@
                     <!-- End Unfold -->
                     <!-- Unfold -->
                     <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:;"
-                            onclick="$('#datatableFilterSidebar,.hs-unfold-overlay').show(500)">
-                            <i class="tio-filter-list mr-1"></i> Filters <span class="badge badge-success badge-pill ml-1" id="filter_count"></span>
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:" id="filter-button-on">
+                            <i class="tio-filter-list mr-1"></i> {{ translate('Filters') }} <span class="badge badge-success badge-pill ml-1" id="filter_count"></span>
                         </a>
                     </div>
                     <!-- End Unfold -->
@@ -214,7 +215,7 @@
                                         <!-- End Checkbox Switch -->
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="mr-2">{{translate('messages.order')}} {{translate('messages.status')}}</span>
+                                        <span class="mr-2">{{translate('messages.order_status')}}</span>
 
                                         <!-- Checkbox Switch -->
                                         <label class="toggle-switch toggle-switch-sm" for="toggleColumn_order_status">
@@ -278,7 +279,7 @@
                         <th class="border-0">{{translate('messages.customer_information')}}</th>
                         <th class="border-0">{{translate('messages.store')}}</th>
                         <th class="border-0">{{translate('messages.total_amount')}}</th>
-                        <th class="border-0 text-center">{{translate('messages.order')}} {{translate('messages.status')}}</th>
+                        <th class="border-0 text-center">{{translate('messages.order_status')}}</th>
                         <th class="border-0 text-center">{{translate('messages.actions')}}</th>
                     </tr>
                     </thead>
@@ -299,7 +300,7 @@
                                     <a class="text-body text-capitalize"
                                        href="{{route('admin.users.customer.view',[$order['user_id']])}}">{{$order->customer['f_name'].' '.$order->customer['l_name']}}</a>
                                 @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                 @endif
                             </td>
                             <td>
@@ -370,7 +371,7 @@
                                     @endif
                                 </div>
                             </td>
-                                
+
                         </tr>
 
                     @endforeach
@@ -399,11 +400,10 @@
         <div id="datatableFilterSidebar" class="hs-unfold-content_ sidebar sidebar-bordered sidebar-box-shadow initial-hidden">
             <div class="card card-lg sidebar-card sidebar-footer-fixed">
                 <div class="card-header">
-                    <h4 class="card-header-title">{{translate('messages.order')}} {{translate('messages.filter')}}</h4>
+                    <h4 class="card-header-title">{{translate('messages.order_filter')}}</h4>
 
                     <!-- Toggle Button -->
-                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-xs btn-ghost-dark ml-2" href="javascript:;"
-                    onclick="$('#datatableFilterSidebar,.hs-unfold-overlay').hide(500)">
+                    <a class="js-hs-unfold-invoker_ btn btn-icon btn-xs btn-ghost-dark ml-2" href="javascript:" id="filter-button-off">
                         <i class="tio-clear tio-lg"></i>
                     </a>
                     <!-- End Toggle Button -->
@@ -433,7 +433,7 @@
 
                     <hr class="my-4">
                     @if($status == 'all')
-                    <small class="text-cap mb-3">{{translate('messages.order')}} {{translate('messages.status')}}</small>
+                    <small class="text-cap mb-3">{{translate('messages.order_status')}}</small>
 
                     <!-- Custom Checkbox -->
                     <div class="custom-control custom-radio mb-2">
@@ -484,7 +484,7 @@
                         <label class="custom-control-label text-uppercase" for="scheduled">{{translate('messages.scheduled')}}</label>
                     </div>
                     <hr class="my-4">
-                    <small class="text-cap mb-3">{{translate('messages.order')}} {{translate('messages.type')}}</small>
+                    <small class="text-cap mb-3">{{translate('messages.order_type')}}</small>
                     <div class="custom-control custom-radio mb-2">
                         <input type="radio" id="take_away" name="order_type" class="custom-control-input" value="take_away" {{isset($order_type)?($order_type=='take_away'?'checked':''):''}}>
                         <label class="custom-control-label text-uppercase" for="take_away">{{translate('messages.take_away')}}</label>
@@ -495,7 +495,7 @@
                     </div>
                     <hr class="my-4">
                     @endif
-                    <small class="text-cap mb-3">{{translate('messages.date')}} {{translate('messages.between')}}</small>
+                    <small class="text-cap mb-3">{{translate('messages.date_between')}}</small>
 
                     <div class="row">
                         <div class="col-12">
@@ -503,7 +503,7 @@
                                 <input type="date" name="from_date" class="form-control" id="date_from" value="{{isset($from_date)?$from_date:''}}">
                             </div>
                         </div>
-                        <div class="col-12 text-center">----TO----</div>
+                        <div class="col-12 text-center">----{{ translate('messages.to') }}----</div>
                         <div class="col-12">
                             <div class="form-group">
                                 <input type="date" name="to_date" class="form-control" id="date_to" value="{{isset($to_date)?$to_date:''}}">
@@ -515,10 +515,10 @@
                     <div class="card-footer sidebar-footer">
                         <div class="row gx-2">
                             <div class="col">
-                                <button type="reset" class="btn btn-block btn-white" id="reset">Clear all filters</button>
+                                <button type="reset" class="btn btn-block btn-white" id="reset">{{ translate('Clear_all_filters') }}</button>
                             </div>
                             <div class="col">
-                                <button type="submit" class="btn btn-block btn-primary">Save</button>
+                                <button type="submit" class="btn btn-block btn-primary">{{ translate('Save') }}</button>
                             </div>
                         </div>
                     </div>
@@ -526,12 +526,23 @@
                 </form>
             </div>
         </div>
+
         <!-- End Order Filter Modal -->
 @endsection
 
 @push('script_2')
-    <!-- <script src="{{asset('public/assets/admin')}}/js/bootstrap-select.min.js"></script> -->
+
     <script>
+
+    document.getElementById('filter-button-on').addEventListener('click', function() {
+        $('#datatableFilterSidebar, .hs-unfold-overlay').show(500);
+    });
+
+    
+    document.getElementById('filter-button-off').addEventListener('click', function() {
+        $('#datatableFilterSidebar, .hs-unfold-overlay').hide(500);
+    });
+
         <?php
             $filter_count=0;
             if(isset($zone_ids) && count($zone_ids) > 0) $filter_count += 1;

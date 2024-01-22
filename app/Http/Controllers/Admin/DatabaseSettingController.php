@@ -18,7 +18,7 @@ class DatabaseSettingController extends Controller
                                 'failed_jobs','migrations','oauth_access_tokens','oauth_auth_codes',
                                 'oauth_clients','oauth_personal_access_clients','oauth_refresh_tokens',
                                 'password_resets','personal_access_tokens','phone_or_email_verifications',
-                                'social_medias','soft_credentials','users','jobs');
+                                'social_medias','soft_credentials','users','jobs','data_settings');
         $tables = array_values(array_diff($tables, $filter_tables));
 
         $rows = [];

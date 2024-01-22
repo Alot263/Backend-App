@@ -3,8 +3,9 @@
     <td>{{$key+1}}</td>
         <td>
             <a class="table-rest-info" href="{{route('admin.users.delivery-man.preview',[$dm['id']])}}">
-                <img onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                        src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}" alt="{{$dm['f_name']}} {{$dm['l_name']}}">
+                <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man/').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                 <div class="info">
                     <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
                     <span class="d-block text-body">
@@ -22,7 +23,7 @@
         @if($dm->zone)
         <label class="text--title font-medium mb-0">{{$dm->zone->name}}</label>
         @else
-        <label class="text--title font-medium mb-0">{{translate('messages.zone').' '.translate('messages.deleted')}}</label>
+        <label class="text--title font-medium mb-0">{{translate('messages.zone_deleted')}}</label>
         @endif
     </td>
     <td>
@@ -51,7 +52,7 @@
         <div class="btn--container justify-content-center">
             <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.users.delivery-man.edit',[$dm['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i>
                 </a>
-                <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('delivery-man-{{$dm['id']}}','{{ translate('Want to remove this deliveryman ?') }}')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
+            <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="delivery-man-{{$dm['id']}}" data-message="{{ translate('Want to remove this deliveryman ?') }}" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
             </a>
             <form action="{{route('admin.users.delivery-man.delete',[$dm['id']])}}" method="post" id="delivery-man-{{$dm['id']}}">
                 @csrf @method('delete')
@@ -60,3 +61,4 @@
     </td>
 </tr>
 @endforeach
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>

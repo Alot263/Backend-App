@@ -19,7 +19,7 @@
                     {{translate('Store Report')}}
                 </h1>
                 <span>
-                    Monitor store’s  <strong class="font-bold text--title">business</strong> analytics & Reports
+                    {{ translate('Monitor_store’s_business_analytics_&_Reports') }}
                 </span>
             </div>
         </div>
@@ -35,34 +35,31 @@
             <a href="{{route('admin.transactions.report.store-sales-report')}}" class="nav-link">{{translate('Sales Report')}}</a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('admin.report.store-order-report') }}" class="nav-link">{{translate('Order Report')}}</a>
+            <a href="{{ route('admin.transactions.report.store-order-report') }}" class="nav-link">{{translate('Order Report')}}</a>
         </li>
-        {{-- <li class="nav-item">
-            <a href="" class="nav-link">{{translate('Transactions Report')}}</a>
-        </li> --}}
     </ul>
 
     <div class="card border-0 mb-3">
         <div class="card-body">
             <div class="statistics-btn-grp">
                 <label>
-                    <input type="radio" name="filter" value="all_time" {{ isset($filter) && $filter == "all_time" ? 'checked' : '' }} onchange="set_time_filter('{{ url()->full() }}',this.value)" hidden>
+                    <input type="radio" name="filter" value="all_time" {{ isset($filter) && $filter == "all_time" ? 'checked' : '' }} data-url="{{ url()->full() }}" data-filter="filter" class="set-filter" hidden>
                     <span>{{ translate('All Time') }}</span>
                 </label>
                 <label>
-                    <input type="radio" name="filter" value="this_year" {{ isset($filter) && $filter == "this_year" ? 'checked' : '' }} onchange="set_time_filter('{{ url()->full() }}',this.value)" hidden>
+                    <input type="radio" name="filter" value="this_year" {{ isset($filter) && $filter == "this_year" ? 'checked' : '' }} data-url="{{ url()->full() }}" data-filter="filter" class="set-filter" hidden>
                     <span>{{ translate('This Year') }}</span>
                 </label>
                 <label>
-                    <input type="radio" name="filter" value="previous_year" {{ isset($filter) && $filter == "previous_year" ? 'checked' : '' }} onchange="set_time_filter('{{ url()->full() }}',this.value)" hidden>
+                    <input type="radio" name="filter" value="previous_year" {{ isset($filter) && $filter == "previous_year" ? 'checked' : '' }} data-url="{{ url()->full() }}" data-filter="filter" class="set-filter" hidden>
                     <span>{{ translate('Previous Year') }}</span>
                 </label>
                 <label>
-                    <input type="radio" name="filter" value="this_month" {{ isset($filter) && $filter == "this_month" ? 'checked' : '' }} onchange="set_time_filter('{{ url()->full() }}',this.value)" hidden>
+                    <input type="radio" name="filter" value="this_month" {{ isset($filter) && $filter == "this_month" ? 'checked' : '' }} data-url="{{ url()->full() }}" data-filter="filter" class="set-filter" hidden>
                     <span>{{ translate('This Month') }}</span>
                 </label>
                 <label>
-                    <input type="radio" name="filter" value="this_week" {{ isset($filter) && $filter == "this_week" ? 'checked' : '' }} onchange="set_time_filter('{{ url()->full() }}',this.value)" hidden>
+                    <input type="radio" name="filter" value="this_week" {{ isset($filter) && $filter == "this_week" ? 'checked' : '' }} data-url="{{ url()->full() }}" data-filter="filter" class="set-filter" hidden>
                     <span>{{ translate('This Week') }}</span>
                 </label>
             </div>
@@ -224,12 +221,12 @@
         <div class="card-header border-0 py-2">
             <div class="search--button-wrapper">
                 <h5 class="card-title">{{translate('messages.Total Stores')}}</h5>
-                <form action="javascript:" id="search-form" class="search-form">
+                <form class="search-form">
                                 <!-- Search -->
-                    @csrf
+                    {{-- @csrf --}}
                     <div class="input-group input--group">
                         <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                placeholder="{{translate('ex_:_Search_Store_Name')}}" aria-label="{{translate('messages.search')}}" required>
+                                placeholder="{{translate('ex_:_Search_Store_Name')}}" value="{{ request()?->search ?? null}}" aria-label="{{translate('messages.search')}}" required>
                         <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
 
                     </div>
@@ -247,8 +244,7 @@
 
                     <div id="usersExportDropdown"
                         class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                        <span class="dropdown-header">{{ translate('messages.download') }}
-                            {{ translate('messages.options') }}</span>
+                        <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                         <a id="export-excel" class="dropdown-item" href="{{route('admin.transactions.report.store-summary-report-export', ['type'=>'excel',request()->getQueryString()])}}">
                             <img class="avatar avatar-xss avatar-4by3 mr-2"
                                 src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -352,6 +348,10 @@
 
 
 @push('script')
+@endpush
+
+
+@push('script_2')
     <script src="{{asset('public/assets/admin')}}/vendor/chart.js/dist/Chart.min.js"></script>
     <script src="{{asset('public/assets/admin')}}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
     <script src="{{asset('public/assets/admin')}}/vendor/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -360,22 +360,19 @@
     <!-- Apex Charts -->
     <script src="{{asset('/public/assets/admin/js/apex-charts/apexcharts.js')}}"></script>
     <!-- Apex Charts -->
-@endpush
-
-
-@push('script_2')
 
     <!-- Dognut Pie Chart -->
     <script>
-        var options = {
+        "use strict";
+        let options = {
             series: [{{ count($order_payment_methods)>0?isset($order_payment_methods[0])?$order_payment_methods[0]->order_count:0:0 }}, {{ count($order_payment_methods)>0?isset($order_payment_methods[1])?$order_payment_methods[1]->order_count:0:0 }}, {{ count($order_payment_methods)>0?isset($order_payment_methods[2])?$order_payment_methods[2]->order_count:0:0 }}],
             chart: {
                 width: 320,
                 type: 'donut',
             },
-            labels: ['Cash Payments ({{ count($order_payment_methods)>0?isset($order_payment_methods[0])?$order_payment_methods[0]->total_order_amount:0:0 }})',
-                'Digital Payments ({{ count($order_payment_methods)>0?isset($order_payment_methods[1])?$order_payment_methods[1]->total_order_amount:0:0 }})',
-                'Wallet ({{ count($order_payment_methods)>0?isset($order_payment_methods[2])?$order_payment_methods[2]->total_order_amount:0:0 }})'
+            labels: ['{{ translate('Cash Payments') }} ({{ count($order_payment_methods)>0?isset($order_payment_methods[0])?$order_payment_methods[0]->total_order_amount:0:0 }})',
+                '{{ translate('Digital Payments') }} ({{ count($order_payment_methods)>0?isset($order_payment_methods[1])?$order_payment_methods[1]->total_order_amount:0:0 }})',
+                '{{ translate('Wallet') }} ({{ count($order_payment_methods)>0?isset($order_payment_methods[2])?$order_payment_methods[2]->total_order_amount:0:0 }})'
             ],
             dataLabels: {
                 enabled: false,
@@ -400,14 +397,11 @@
             },
         };
 
-        var chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
+        let chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
         chart.render();
-    </script>
     <!-- Dognut Pie Chart -->
 
 
-
-<script>
     // Bar Charts
     Chart.plugins.unregister(ChartDataLabels);
 
@@ -415,11 +409,11 @@
         $.HSCore.components.HSChartJS.init($(this));
     });
 
-    var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
+    let updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
 
     $('#search-form').on('submit', function (e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             // let new_url= location.href+"&search="+formData.get('search');
             // window.history.pushState('', 'New Page Title', new_url);
             $.ajaxSetup({

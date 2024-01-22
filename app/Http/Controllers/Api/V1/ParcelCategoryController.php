@@ -19,7 +19,7 @@ class ParcelCategoryController extends Controller
             $parcel_categories=Helpers::parcel_category_data_formatting($parcel_categories, true);
             return response()->json($parcel_categories, 200);
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
             return response()->json([], 200);
         }
     }

@@ -13,23 +13,10 @@
             <h1 class="page-header-title"><i class="tio-filter-list"></i> {{translate('messages.stores')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$stores->total()}}</span></h1>
             <div class="page-header-select-wrapper">
 
-                {{-- <div class="select-item">
-                    <select name="module_id" class="form-control js-select2-custom"
-                            onchange="set_filter('{{url()->full()}}',this.value,'module_id')" title="{{translate('messages.select')}} {{translate('messages.modules')}}">
-                        <option value="" {{!request('module_id') ? 'selected':''}}>{{translate('messages.all')}} {{translate('messages.modules')}}</option>
-                        @foreach (\App\Models\Module::notParcel()->get() as $module)
-                            <option
-                                value="{{$module->id}}" {{request('module_id') == $module->id?'selected':''}}>
-                                {{$module['module_name']}}
-                            </option>
-                        @endforeach
-                    </select>
-                </div> --}}
                 @if(!isset(auth('admin')->user()->zone_id))
                 <div class="select-item">
-                    <select name="zone_id" class="form-control js-select2-custom"
-                            onchange="set_filter('{{url()->full()}}',this.value,'zone_id')">
-                        <option value="" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All Zones') }}</option>
+                    <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{url()->full()}}" data-filter="zone_id">
+                        <option value="" {{!request('zone_id')?'selected':''}}>{{ translate('messages.All_Zones') }}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
                             <option
                                 value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
@@ -123,13 +110,12 @@
             <!-- Header -->
             <div class="card-header py-2">
                 <div class="search--button-wrapper">
-                    <h5 class="card-title">{{translate('messages.stores')}} {{translate('messages.list')}}</h5>
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <h5 class="card-title">{{translate('messages.stores_list')}}</h5>
+                    <form  class="search-form">
                                     <!-- Search -->
-                        @csrf
                         <div class="input-group input--group">
-                            <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                    placeholder="{{translate('ex_:_Search_Store_Name')}}" aria-label="{{translate('messages.search')}}" required>
+                            <input id="datatableSearch_" type="search" value="{{ request()?->search ?? null }}" name="search" class="form-control"
+                                    placeholder="{{translate('ex_:_Search_Store_Name')}}" aria-label="{{translate('messages.search')}}" >
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
 
                         </div>
@@ -147,22 +133,8 @@
 
                         <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.copy') }}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.print') }}
-                            </a>
-                            <div class="dropdown-divider"></div> --}}
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
+
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item" href="{{route('admin.store.export', ['type'=>'excel',request()->getQueryString()])}}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
                                     src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -175,12 +147,7 @@
                                     alt="Image Description">
                                 .{{ translate('messages.csv') }}
                             </a>
-                            {{-- <a id="export-pdf" class="dropdown-item" href="{{route('admin.store.export', ['type'=>'excel',request()->getQueryString()])}}">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
-                                    alt="Image Description">
-                                {{ translate('messages.pdf') }}
-                            </a> --}}
+
                         </div>
                     </div>
                     <!-- End Unfold -->
@@ -218,8 +185,16 @@
                             <td>
                                 <div>
                                     <a href="{{route('admin.store.view', $store->id)}}" class="table-rest-info" alt="view store">
-                                    <img class="img--60 circle" onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                            src="{{asset('storage/app/public/store')}}/{{$store['logo']}}">
+                                    <img class="img--60 circle onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                                $store['logo'] ?? '',
+                                                asset('storage/app/public/store').'/'.$store['logo'] ?? '',
+                                                asset('public/assets/admin/img/160x160/img1.jpg'),
+                                                'store/'
+                                            ) }}"
+
+                                            >
                                         <div class="info"><div class="text--title">
                                             {{Str::limit($store->name,20,'...')}}
                                             </div>
@@ -244,12 +219,11 @@
                                 </div>
                             </td>
                             <td>
-                                {{$store->zone?$store->zone->name:translate('messages.zone').' '.translate('messages.deleted')}}
-                                {{--<span class="d-block font-size-sm">{{$banner['image']}}</span>--}}
+                                {{$store->zone?$store->zone->name:translate('messages.zone_deleted')}}
                             </td>
                             <td>
                                 <label class="toggle-switch toggle-switch-sm" for="featuredCheckbox{{$store->id}}">
-                                    <input type="checkbox" onclick="location.href='{{route('admin.store.featured',[$store->id,$store->featured?0:1])}}'" class="toggle-switch-input" id="featuredCheckbox{{$store->id}}" {{$store->featured?'checked':''}}>
+                                    <input type="checkbox" data-url="{{route('admin.store.featured',[$store->id,$store->featured?0:1])}}" class="toggle-switch-input redirect-url" id="featuredCheckbox{{$store->id}}" {{$store->featured?'checked':''}}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
                                     </span>
@@ -260,7 +234,7 @@
                                 @if(isset($store->vendor->status))
                                     @if($store->vendor->status)
                                     <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$store->id}}">
-                                        <input type="checkbox" onclick="status_change_alert('{{route('admin.store.status',[$store->id,$store->status?0:1])}}', '{{translate('messages.you_want_to_change_this_store_status')}}', event)" class="toggle-switch-input" id="stocksCheckbox{{$store->id}}" {{$store->status?'checked':''}}>
+                                        <input type="checkbox" data-url="{{route('admin.store.status',[$store->id,$store->status?0:1])}}" data-message="{{translate('messages.you_want_to_change_this_store_status')}}" class="toggle-switch-input status_change_alert" id="stocksCheckbox{{$store->id}}" {{$store->status?'checked':''}}>
                                         <span class="toggle-switch-label">
                                             <span class="toggle-switch-indicator"></span>
                                         </span>
@@ -275,11 +249,16 @@
 
                             <td>
                                 <div class="btn--container justify-content-center">
+                                    <a class="btn action-btn btn--warning btn-outline-warning"
+                                            href="{{route('admin.store.view', $store->id)}}"
+                                            title="{{ translate('messages.view') }}"><i
+                                                class="tio-visible-outlined"></i>
+                                        </a>
                                     <a class="btn action-btn btn--primary btn-outline-primary"
-                                    href="{{route('admin.store.edit',[$store['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.store')}}"><i class="tio-edit"></i>
+                                    href="{{route('admin.store.edit',[$store['id']])}}" title="{{translate('messages.edit_store')}}"><i class="tio-edit"></i>
                                     </a>
-                                    <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                                    onclick="form_alert('vendor-{{$store['id']}}','{{translate('You want to remove this store')}}')" title="{{translate('messages.delete')}} {{translate('messages.store')}}"><i class="tio-delete-outlined"></i>
+                                    <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:"
+                                    data-url="vendor-{{$store['id']}}" data-message="{{translate('You want to remove this store')}}" title="{{translate('messages.delete_store')}}"><i class="tio-delete-outlined"></i>
                                     </a>
                                     <form action="{{route('admin.store.delete',[$store['id']])}}" method="post" id="vendor-{{$store['id']}}">
                                         @csrf @method('delete')
@@ -315,17 +294,24 @@
 
 @push('script_2')
     <script>
+        "use strict";
+        $('.status_change_alert').on('click', function (event) {
+            let url = $(this).data('url');
+            let message = $(this).data('message');
+            status_change_alert(url, message, event)
+        })
+
         function status_change_alert(url, message, e) {
             e.preventDefault();
             Swal.fire({
-                title: 'Are you sure?',
+                title: '{{ translate('Are you sure?') }}' ,
                 text: message,
                 type: 'warning',
                 showCancelButton: true,
                 cancelButtonColor: 'default',
                 confirmButtonColor: '#FC6A57',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Yes',
+                cancelButtonText: '{{translate('messages.no')}}',
+                confirmButtonText: '{{translate('messages.yes')}}',
                 reverseButtons: true
             }).then((result) => {
                 if (result.value) {
@@ -336,7 +322,7 @@
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -370,37 +356,9 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
     </script>
 
-    <script>
-        $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.store.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.total);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-    </script>
 @endpush

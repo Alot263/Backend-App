@@ -14,7 +14,7 @@
             <div class="btn--container justify-content-center">
                 <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.attribute.edit',[$attribute['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i>
                 </a>
-                <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('attribute-{{$attribute['id']}}','Want to delete this attribute ?')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
+                <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="attribute-{{$attribute['id']}}" data-message="{{ translate('Want to delete this attribute ?') }}" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
                 </a>
                 <form action="{{route('admin.attribute.delete',[$attribute['id']])}}"
                         method="post" id="attribute-{{$attribute['id']}}">

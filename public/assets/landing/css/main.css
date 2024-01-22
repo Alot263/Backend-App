@@ -1753,7 +1753,7 @@ header.active::after {
     color: var(--base-1);
     font-weight: 600;
     font-size: 49px;
-    line-height: 35px;
+    line-height: 50x;
     margin-bottom: 10px;
 }
 
@@ -2620,6 +2620,7 @@ header.active::after {
     font-size: 22px;
     line-height: 43px;
     text-align: center;
+    direction: ltr;
 }
 
 .counter-item .icon {

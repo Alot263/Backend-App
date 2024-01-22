@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',translate('messages.customer_wallet').' '.translate('messages.report'))
+@section('title',translate('messages.customer_wallet_report'))
 
 @push('css_or_js')
 
@@ -15,7 +15,7 @@
                     <img src="{{asset('/public/assets/admin/img/wallet.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                     {{translate('messages.customer_wallet')}} {{translate('messages.report')}}
+                     {{translate('messages.customer_wallet_report')}}
                 </span>
             </h1>
         </div>
@@ -27,23 +27,23 @@
                     <span class="card-header-icon">
                         <i class="tio-filter-outlined"></i>
                     </span>
-                    <span>{{translate('messages.filter')}} {{translate('messages.options')}}</span>
+                    <span>{{translate('messages.filter_options')}}</span>
                 </h4>
             </div>
             <div class="card-body">
                 <form action="{{route('admin.users.customer.wallet.report')}}" method="get">
                     <div class="row g-3">
                         <div class="col-sm-6">
-                            <input type="date" name="from" id="from_date" value="{{request()->get('from')}}" class="form-control" title="{{translate('messages.from')}} {{translate('messages.date')}}">
+                            <input type="date" name="from" id="from_date" value="{{request()->get('from')}}" class="form-control" title="{{translate('messages.from_date')}}">
                         </div>
                         <div class="col-sm-6">
-                            <input type="date" name="to" id="to_date" value="{{request()->get('to')}}" class="form-control" title="{{ucfirst(translate('messages.to'))}} {{translate('messages.date')}}">
+                            <input type="date" name="to" id="to_date" value="{{request()->get('to')}}" class="form-control" title="{{translate('messages.to_date')}}">
                         </div>
                         <div class="col-sm-6">
                             @php
                             $transaction_status=request()->get('transaction_type');
                             @endphp
-                            <select name="transaction_type" id="" class="form-control" title="{{translate('messages.select')}} {{translate('messages.transaction_type')}}">
+                            <select name="transaction_type" id="" class="form-control" title="{{translate('messages.select_transaction_type')}}">
                                 <option value="">{{translate('messages.all')}}</option>
                                 <option value="add_fund_by_admin" {{isset($transaction_status) && $transaction_status=='add_fund_by_admin'?'selected':''}} >{{translate('messages.add_fund_by_admin')}}</option>
                                 <!-- <option value="add_fund" {{isset($transaction_status) && $transaction_status=='add_fund'?'selected':''}}>{{translate('messages.add_fund_by_customer')}}</option> -->
@@ -135,6 +135,40 @@
                     </span>
                     <span>{{translate('messages.transactions')}}</span>
                 </h4>
+                <!-- Unfold -->
+                <div class="hs-unfold mr-2">
+                    <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                        data-hs-unfold-options='{
+                                "target": "#usersExportDropdown",
+                                "type": "css-animation"
+                            }'>
+                        <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                    </a>
+
+                    <div id="usersExportDropdown"
+                        class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                        <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                        <a id="export-excel" class="dropdown-item" href="{{route('admin.users.customer.wallet.export', ['type'=>'excel',request()->getQueryString()])}}">
+                            <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                alt="Image Description">
+                            {{ translate('messages.excel') }}
+                        </a>
+                        <a id="export-csv" class="dropdown-item" href="{{route('admin.users.customer.wallet.export', ['type'=>'csv',request()->getQueryString()])}}">
+                            <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                alt="Image Description">
+                            .{{ translate('messages.csv') }}
+                        </a>
+                        {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
+                            <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
+                                alt="Image Description">
+                            {{ translate('messages.pdf') }}
+                        </a> --}}
+                    </div>
+                </div>
+                <!-- End Unfold -->
             </div>
             <!-- End Header -->
 
@@ -146,10 +180,11 @@
                         <thead class="thead-light">
                             <tr>
                                 <th class="border-0">{{translate('sl')}}</th>
-                                <th class="border-0">{{translate('messages.transaction')}} {{translate('messages.id')}}</th>
+                                <th class="border-0">{{translate('messages.transaction_id')}}</th>
                                 <th class="border-0">{{translate('messages.customer')}}</th>
                                 <th class="border-0">{{translate('messages.credit')}}</th>
                                 <th class="border-0">{{translate('messages.debit')}}</th>
+                                <th class="border-0">{{translate('messages.bonus')}}</th>
                                 <th class="border-0">{{translate('messages.balance')}}</th>
                                 <th class="border-0">{{translate('messages.transaction_type')}}</th>
                                 <th class="border-0">{{translate('messages.reference')}}</th>
@@ -165,6 +200,7 @@
                                 <td><a href="{{route('admin.users.customer.view',['user_id'=>$wt->user_id])}}">{{Str::limit($wt->user?$wt->user->f_name.' '.$wt->user->l_name:translate('messages.not_found'),20,'...')}}</a></td>
                                 <td>{{$wt->credit}}</td>
                                 <td>{{$wt->debit}}</td>
+                                <td>{{$wt->admin_bonus}}</td>
                                 <td>{{$wt->balance}}</td>
                                 <td>
                                     <span class="badge badge-soft-{{$wt->transaction_type=='order_refund'

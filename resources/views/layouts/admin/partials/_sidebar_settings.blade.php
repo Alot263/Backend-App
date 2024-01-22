@@ -5,8 +5,12 @@
                 <!-- Logo -->
                 @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
                 <a class="navbar-brand" href="{{ route('admin.business-settings.business-setup') }}" aria-label="Front">
-                    <img class="navbar-brand-logo initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
-                    <img class="navbar-brand-logo-mini initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
+                       <img class="navbar-brand-logo initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
+                    alt="Logo">
+                    <img class="navbar-brand-logo-mini initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
+                    alt="Logo">
                 </a>
                 <!-- End Logo -->
 
@@ -40,78 +44,10 @@
                 <ul class="navbar-nav navbar-nav-lg nav-tabs">
 
                 <!-- Business Settings -->
-                @if (\App\CentralLogics\Helpers::module_permission_check('settings'))
                 <li class="nav-item">
-                    <small class="nav-subtitle" title="{{ translate('messages.business') }} {{ translate('messages.settings') }}">{{ translate('messages.business') }}
-                        {{ translate('messages.settings') }}</small>
+                    <small class="nav-subtitle" title="{{ translate('messages.business_settings') }}">{{ translate('messages.business_management') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/business-setup') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.business-setup') }}" title="{{ translate('messages.business') }} {{ translate('messages.setup') }}">
-                        <span class="tio-settings nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.business') }}
-                            {{ translate('messages.setup') }}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{Request::is('admin/business-settings/social-media')?'active':''}}">
-                    <a class="nav-link " href="{{route('admin.business-settings.social-media.index')}}" title="{{translate('messages.Social Media')}}">
-                        <span class="tio-facebook nav-icon"></span>
-                        <span class="text-truncate">{{translate('messages.Social Media')}}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/payment-method') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.payment-method') }}" title="{{ translate('messages.payment') }} {{ translate('messages.methods') }}">
-                        <span class="tio-atm nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.payment') }}
-                            {{ translate('messages.methods') }}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/mail-config') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.mail-config') }}" title="{{ translate('messages.mail') }} {{ translate('messages.config') }}">
-                        <span class="tio-email nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.mail') }}
-                            {{ translate('messages.config') }}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/sms-module') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.sms-module') }}" title="{{ translate('messages.sms_system_module') }}">
-                        <span class="tio-message nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.sms_system_module') }}</span>
-                    </a>
-                </li>
-
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/fcm-index') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.fcm-index') }}" title="{{ translate('messages.notification_settings') }}">
-                        <span class="tio-notifications nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.notification_settings') }}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/order-cancel-reasons') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.order-cancel-reasons.index') }}" title="{{ translate('messages.order_cancellation_reasons') }}">
-                        <span class="tio-appointment-cancelled nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.order_cancellation_reasons') }}</span>
-                    </a>
-                </li>
-
-                {{-- <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/order-cancel-reasons') ? 'active' : '' }}">
-                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.order-cancel-reasons.index') }}" title="{{translate('messages.order_cancellation_reasons')}}">
-                        <i class="tio-settings nav-icon"></i>
-                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
-                            {{translate('messages.order_cancellation_reasons')}}
-                        </span>
-                    </a>
-                </li> --}}
-
-                @endif
-                <!-- End Business Settings -->
-
-                <!-- module settings -->
-
-                <li class="nav-item">
-                    <small class="nav-subtitle" title="{{ translate('messages.module') }} {{ translate('messages.section') }}">{{ translate('messages.module_management') }}</small>
-                    <small class="tio-more-horizontal nav-subtitle-replacer"></small>
-                </li>
-
                 @if (\App\CentralLogics\Helpers::module_permission_check('zone'))
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/zone*') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.zone.home') }}" title="{{ translate('messages.zone_setup') }}">
@@ -126,18 +62,18 @@
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/module') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" id="tourb-3" href="javascript:" title="{{ translate('messages.system_module_setup') }}">
                         <i class="tio-globe nav-icon"></i>
-                        <span class="text-truncate">{{ translate('messages.system_module_setup') }}</span>
+                        <span class="text-truncate">{{ translate('messages.module_setup') }}</span>
                     </a>
                     <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display:{{ Request::is('admin/business-settings/module*') ? 'block' : 'none' }}">
-                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/module/create') ? 'active' : '' }}">
-                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.module.create') }}" title="{{ translate('messages.add') }} {{ translate('messages.module') }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/module/store') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.module.create') }}" title="{{ translate('messages.add_Business_Module') }}">
                                 <span class="tio-circle nav-indicator-icon"></span>
                                 <span class="text-truncate">
-                                    {{ translate('messages.add') }} {{ translate('messages.module') }}
+                                    {{ translate('messages.add_Business_Module') }}
                                 </span>
                             </a>
                         </li>
-                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/module') ? 'active' : '' }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/module*') ? 'active' : '' }}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.business-settings.module.index') }}" title="{{ translate('messages.modules') }}">
                                 <span class="tio-circle nav-indicator-icon"></span>
                                 <span class="text-truncate">
@@ -148,106 +84,158 @@
                     </ul>
                 </li>
                 @endif
-                <!-- End module settings -->
-
-                <!-- web & adpp Settings -->
                 @if (\App\CentralLogics\Helpers::module_permission_check('settings'))
-                <li class="nav-item">
-                    <small class="nav-subtitle" title="{{ translate('messages.business') }} {{ translate('messages.settings') }}">{{ translate('messages.web_and_app') }}
-                        {{ translate('messages.settings') }}</small>
-                    <small class="tio-more-horizontal nav-subtitle-replacer"></small>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/app-settings*') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.app-settings') }}" title="{{ translate('messages.app_settings') }}">
-                        <span class="tio-android nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.app_settings') }}</span>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/business-setup*') || Request::is('admin/business-settings/language*') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.business-settings.business-setup') }}" title="{{ translate('messages.business_setup') }}">
+                        <span class="tio-settings nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.business_settings') }}</span>
                     </a>
                 </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/landing-page-settings*') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.landing-page-settings', 'index') }}" title="{{ translate('messages.landing_page_settings') }}">
-                        <span class="tio-website nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.landing_page_settings') }}</span>
-                    </a>
-                </li>
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/config*') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.config-setup') }}" title="{{ translate('messages.third_party_apis') }}">
-                        <span class="tio-key nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.third_party_apis') }}</span>
-                    </a>
-                </li>
-
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages*') ? 'active' : '' }}">
-                    <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.pages') }} {{ translate('messages.setup') }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.pages_setup') }}">
                         <i class="tio-pages nav-icon"></i>
-                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.pages') }}
-                            {{ translate('messages.setup') }}</span>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.pages_&_social_media') }}</span>
                     </a>
                     <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ Request::is('admin/business-settings/pages*') ? 'block' : 'none' }}">
 
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/terms-and-conditions') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.terms-and-conditions') }}" title="{{ translate('messages.terms_and_condition') }}">
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/business-settings/pages/social-media')?'active':''}}">
+                            <a class="nav-link " href="{{route('admin.business-settings.social-media.index')}}" title="{{translate('messages.Social Media')}}">
                                 <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('messages.terms_and_condition') }}</span>
+                                <span class="text-truncate">{{translate('messages.Social Media')}}</span>
                             </a>
                         </li>
 
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/privacy-policy') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.privacy-policy') }}" title="{{ translate('messages.privacy_policy') }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/admin-landing-page-settings*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.admin-landing-page-settings','fixed-data') }}" title="{{ translate('messages.admin_landing_page_settings') }}">
                                 <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('messages.privacy_policy') }}</span>
+                                <span class="text-truncate">{{ translate('messages.admin_landing_page') }}</span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/react-landing-page-settings*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.react-landing-page-settings','header') }}" title="{{ translate('messages.react_landing_page') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.react_landing_page') }}</span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/flutter-landing-page-settings*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.flutter-landing-page-settings','fixed-data') }}" title="{{ translate('messages.flutter_landing_page') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.flutter_landing_page') }}</span>
                             </a>
                         </li>
 
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/about-us') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.about-us') }}" title="{{ translate('messages.about_us') }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/pages/business-page*') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.business_pages') }}">
                                 <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('messages.about_us') }}</span>
+                                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.business_pages') }}</span>
                             </a>
-                        </li>
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/refund') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.refund') }}" title="{{ translate('messages.Refund Policy') }}">
-                                <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('Refund Policy') }}</span>
-                            </a>
-                        </li>
+                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ Request::is('admin/business-settings/pages/business-page*') ? 'block' : 'none' }}">
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/terms-and-conditions') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.terms-and-conditions') }}" title="{{ translate('messages.terms_and_condition') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('messages.terms_and_condition') }}</span>
+                                    </a>
+                                </li>
 
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/cancelation') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.cancelation') }}" title="{{ translate('messages.Cancelation Policy') }}">
-                                <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('Cancelation Policy') }}</span>
-                            </a>
-                        </li>
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/privacy-policy') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.privacy-policy') }}" title="{{ translate('messages.privacy_policy') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('messages.privacy_policy') }}</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/about-us') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.about-us') }}" title="{{ translate('messages.about_us') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('messages.about_us') }}</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/refund') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.refund') }}" title="{{ translate('messages.Refund Policy') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('Refund Policy') }}</span>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/cancelation') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.cancelation') }}" title="{{ translate('messages.Cancelation Policy') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('Cancelation Policy') }}</span>
+                                    </a>
+                                </li>
 
 
-                        <li class="nav-item {{ Request::is('admin/business-settings/pages/shipping-policy') ? 'active' : '' }}">
-                            <a class="nav-link " href="{{ route('admin.business-settings.shipping-policy') }}" title="{{ translate('messages.shipping_policy') }}">
-                                <span class="tio-circle nav-indicator-icon"></span>
-                                <span class="text-truncate">{{ translate('Shipping Policy') }}</span>
-                            </a>
+                                <li class="nav-item {{ Request::is('admin/business-settings/pages/business-page/shipping-policy') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.business-settings.shipping-policy') }}" title="{{ translate('messages.shipping_policy') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('Shipping Policy') }}</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </li>
-
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/file-manager*') ? 'active' : '' }}">
                     <a class="nav-link " href="{{ route('admin.business-settings.file-manager.index') }}" title="{{ translate('messages.gallery') }}">
                         <span class="tio-album nav-icon"></span>
                         <span class="text-truncate text-capitalize">{{ translate('messages.gallery') }}</span>
                     </a>
                 </li>
-
-                <li class="navbar-vertical-aside-has-menu {{Request::is('admin/business-settings/social-login/view')?'active':''}}">
-                <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.business-settings.social-login.view')}}">
-                    <i class="tio-twitter nav-icon"></i>
-                    <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
-                        {{translate('messages.social_login')}}
-                    </span>
-                </a>
+                <li class="nav-item">
+                    <small class="nav-subtitle" title="{{ translate('messages.business_settings') }}">{{ translate('messages.system_management') }}</small>
+                    <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
-
-                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/recaptcha*') ? 'active' : '' }}">
-                    <a class="nav-link " href="{{ route('admin.business-settings.recaptcha_index') }}" title="{{ translate('messages.reCaptcha') }}">
-                        <span class="tio-top-security-outlined nav-icon"></span>
-                        <span class="text-truncate">{{ translate('messages.reCaptcha') }}</span>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/third-party*') || Request::is('admin/business-settings/fcm*') || Request::is('admin/business-settings/login-url-setup*') || Request::is('admin/business-settings/offline-payment*') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" title="{{ translate('messages.3rd_party_&_configurations') }}">
+                        <span class="nav-icon tio-account-square-outlined"></span>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.3rd_party_&_configurations') }}</span>
+                    </a>
+                    <ul class="js-navbar-vertical-aside-submenu nav nav-sub"  style="display:{{ Request::is('admin/business-settings/third-party*')|| Request::is('admin/business-settings/fcm*') ||Request::is('admin/business-settings/login-url-setup*') || Request::is('admin/business-settings/offline-payment*') ? 'block' : 'none' }}">
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/third-party*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.third-party.payment-method') }}" title="{{ translate('messages.3rd_party') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.3rd_party') }}</span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/fcm*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.fcm-index') }}" title="{{ translate('messages.firebase_notification') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.firebase_notification') }}</span>
+                            </a>
+                        </li>
+                        <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/login-url-setup*') ? 'active' : '' }}">
+                            <a class="nav-link " href="{{ route('admin.business-settings.login_url_page') }}" title="{{ translate('messages.login_url_page') }}">
+                                <span class="tio-circle nav-indicator-icon"></span>
+                                <span class="text-truncate">{{ translate('messages.login_url_page') }}</span>
+                            </a>
+                        </li>
+                        @if (\App\CentralLogics\Helpers::get_mail_status('offline_payment_status'))
+                            <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/offline*') ? 'active' : '' }}">
+                                <a class="nav-link " href="{{ route('admin.business-settings.offline') }}" title="{{ translate('messages.Offline_Payment_Setup') }}">
+                                    <span class="tio-circle nav-indicator-icon"></span>
+                                    <span class="text-truncate">{{ translate('messages.Offline_Payment_Setup') }}</span>
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
+                </li>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/react*') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.business-settings.react-setup') }}"
+                        title="{{ translate('messages.react_site') }}">
+                        <span class="tio-rear-window-defrost nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.react_site') }}</span>
+                    </a>
+                </li>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/email-setup*') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.business-settings.email-setup',['admin','forgot-password']) }}" title="{{ translate('messages.email_template') }}">
+                        <span class="tio-email nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.email_template') }}</span>
+                    </a>
+                </li>
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/app-settings*') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.business-settings.app-settings') }}" title="{{ translate('messages.app_settings') }}">
+                        <span class="tio-android nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.app_settings') }}</span>
                     </a>
                 </li>
 
@@ -260,6 +248,47 @@
                     </a>
                 </li>
                 @endif
+
+                <!-- Dashboards -->
+                <li class="navbar-vertical-aside-has-menu {{Request::is('admin/business-settings/system-addon')?'show active':''}}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                       href="{{route('admin.business-settings.system-addon.index')}}" title="{{translate('system_addons')}}">
+                        <i class="tio-add-circle-outlined nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                        {{translate('system_addons')}}
+                    </span>
+                    </a>
+                </li>
+                <!-- End Dashboards -->
+
+
+                @if(count(config('addon_admin_routes'))>0)
+                    <li class="nav-item">
+                        <small
+                            class="nav-subtitle">{{translate('messages.addon_menus')}}</small>
+                        <small class="tio-more-horizontal nav-subtitle-replacer"></small>
+                    </li>
+                    <li class="navbar-vertical-aside-has-menu {{Request::is('admin/payment/configuration/*') || Request::is('admin/sms/configuration/*')?'active':''}}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:" >
+                            <i class="tio-puzzle nav-icon"></i>
+                            <span  class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{translate('Addon Menus')}}</span>
+                        </a>
+                        <ul class="js-navbar-vertical-aside-submenu nav nav-sub" style="display: {{Request::is('admin/payment/configuration/*') || Request::is('admin/sms/configuration/*')?'block':'none'}}">
+                            @foreach(config('addon_admin_routes') as $routes)
+                                @foreach($routes as $route)
+                                    <li class="navbar-vertical-aside-has-menu {{Request::is($route['path'])  ? 'active' :''}}">
+                                        <a class="js-navbar-vertical-aside-menu-link nav-link "
+                                        href="{{ $route['url'] }}" title="{{ translate($route['name']) }}">
+                                            <span class="tio-circle nav-indicator-icon"></span>
+                                            <span class="text-truncate">{{ translate($route['name']) }}</span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            @endforeach
+                        </ul>
+                    </li>
+                @endif
+            <!--addon end-->
                 <!-- End web & adpp Settings -->
 
                 <li class="nav-item py-5">
@@ -276,10 +305,12 @@
                                 }'>
                             <div class="cmn--media right-dropdown-icon d-flex align-items-center">
                                 <div class="avatar avatar-sm avatar-circle">
-                                    <img class="avatar-img"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                        alt="Image Description">
+                                    <img class="avatar-img onerror-image"
+                                    data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                    alt="Image Description">
                                     <span class="avatar-status avatar-sm-status avatar-status-success"></span>
                                 </div>
                                 <div class="media-body pl-3">
@@ -297,10 +328,12 @@
                             <div class="dropdown-item-text">
                                 <div class="media align-items-center">
                                     <div class="avatar avatar-sm avatar-circle mr-2">
-                                        <img class="avatar-img"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                                alt="Image Description">
+                                        <img class="avatar-img onerror-image"
+                                        data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                        alt="Image Description">
                                     </div>
                                     <div class="media-body">
                                         <span class="card-title h5">{{auth('admin')->user()->f_name}}</span>
@@ -317,21 +350,7 @@
 
                             <div class="dropdown-divider"></div>
 
-                            <a class="dropdown-item" href="javascript:" onclick="Swal.fire({
-                                title: '{{translate("logout_warning_message")}}',
-                                showDenyButton: true,
-                                showCancelButton: true,
-                                confirmButtonColor: '#FC6A57',
-                                cancelButtonColor: '#363636',
-                                confirmButtonText: `Yes`,
-                                denyButtonText: `Don't Logout`,
-                                }).then((result) => {
-                                if (result.value) {
-                                location.href='{{route('admin.auth.logout')}}';
-                                } else{
-                                Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
-                                }
-                                })">
+                            <a class="dropdown-item log-out" href="javascript:" >
                                 <span class="text-truncate pr-2" title="Sign out">{{translate('messages.sign_out')}}</span>
                             </a>
                         </div>

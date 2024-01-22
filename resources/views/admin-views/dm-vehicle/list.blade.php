@@ -33,7 +33,7 @@
                             <form id="search-form">
                                 <!-- Search -->
                                 <div class="input--group input-group input-group-merge input-group-flush">
-                                    <input id="datatableSearch" type="search" name="search" class="form-control" placeholder="{{ translate('Ex: Search by type...') }}" aria-label="Search here">
+                                    <input id="datatableSearch" type="search" name="search" class="form-control" placeholder="{{ translate('Ex_:_Search_by_type...') }}" aria-label="Search here">
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
@@ -86,7 +86,7 @@
                                     </td>
                                     <td>
                                         <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$vehicle->id}}">
-                                            <input type="checkbox" onclick="location.href='{{route('admin.users.delivery-man.vehicle.status',[$vehicle['id'],$vehicle->status?0:1])}}'"class="toggle-switch-input" id="stocksCheckbox{{$vehicle->id}}" {{$vehicle->status?'checked':''}}>
+                                            <input type="checkbox" data-url="{{route('admin.users.delivery-man.vehicle.status',[$vehicle['id'],$vehicle->status?0:1])}}" class="toggle-switch-input redirect-url" id="stocksCheckbox{{$vehicle->id}}" {{$vehicle->status?'checked':''}}>
                                             <span class="toggle-switch-label">
                                                 <span class="toggle-switch-indicator"></span>
                                             </span>
@@ -95,12 +95,12 @@
                                     <td>
                                         <div class="btn--container justify-content-center">
                                             <a class="btn btn-sm btn--primary btn-outline-primary action-btn"
-                                                href="{{route('admin.users.delivery-man.vehicle.edit',[$vehicle['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.vehicle')}}"><i class="tio-edit"></i>
+                                                href="{{route('admin.users.delivery-man.vehicle.edit',[$vehicle['id']])}}" title="{{translate('messages.edit_vehicle')}}"><i class="tio-edit"></i>
                                             </a>
-                                            <a class="btn btn-sm btn--danger btn-outline-danger action-btn" href="javascript:"
-                                                onclick="form_alert('vehicle-{{$vehicle['id']}}','{{translate('messages.Want_to_delete_this_item')}}')" title="{{translate('messages.delete')}} {{translate('messages.vehicle')}}"><i class="tio-delete-outlined"></i>
+                                            <a class="btn btn-sm btn--danger btn-outline-danger action-btn form-alert" href="javascript:"
+                                                data-id="vehicle-{{$vehicle['id']}}" data-message="{{translate('messages.Want_to_delete_this_item')}}" title="{{translate('messages.delete_vehicle')}}"><i class="tio-delete-outlined"></i>
                                             </a>
-                                            <form action="{{route('admin.users.delivery-man.vehicle.delete',['vehicle' =>$vehicle['id']])}}"
+                                            <form action="{{route('admin.users.delivery-man.vehicle.delete',['id' =>$vehicle['id']])}}"
                                                         method="post" id="vehicle-{{$vehicle['id']}}">
                                                 @csrf @method('delete')
                                             </form>
@@ -137,6 +137,7 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================

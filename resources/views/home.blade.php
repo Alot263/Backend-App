@@ -1,7 +1,7 @@
 @extends('layouts.landing.app')
-@section('title', translate("messages.landing_page") . ' | ' . \App\CentralLogics\Helpers::get_settings('business_name') != 'null' ? \App\CentralLogics\Helpers::get_settings('business_name') :
-    'Sixam Mart')
+@section('title', translate("messages.landing_page") . ' | ' . \App\CentralLogics\Helpers::get_settings('business_name') != 'null' ? \App\CentralLogics\Helpers::get_settings('business_name') :'Sixam Mart')
 @section('content')
+
         <!-- Basic Settings -->
         @php($front_end_url = \App\Models\BusinessSetting::where(['key' => 'front_end_url'])->first())
         @php($front_end_url = $front_end_url ? $front_end_url->value : null)
@@ -16,11 +16,13 @@
     <section class="banner-section position-relative">
         <div class="container">
             <div class="banner-content wow fadeInUp">
-                <h1 class="title">{{ isset($landing_page_text['header_title_1']) ? $landing_page_text['header_title_1'] : '' }}</h1>
-                <img class="w-100" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
-                    src="{{ asset('storage/app/public/business/' . $logo) }}" alt="">
+                <h1 class="title">{{ $landing_data['fixed_header_title'] }}</h1>
+                <img class="w-100 onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                src="{{\App\CentralLogics\Helpers::onerror_image_helper($logo, asset('storage/app/public/business/').'/' . $logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/')}}"
+
+                alt="">
                 <div class="text">
-                    {{ isset($landing_page_text['header_title_2']) ? $landing_page_text['header_title_2'] : '' }}
+                    {{ $landing_data['fixed_header_sub_title'] }}
                 </div>
             </div>
         </div>
@@ -1885,9 +1887,9 @@
     <section class="ecommerce-venture-section">
         <div class="container max-w1060">
             <div class="section-header wow fadeInUp">
-                <h2 class="title">{{ isset($landing_page_text['module_section_title']) ? $landing_page_text['module_section_title'] : '' }}</h2>
+                <h2 class="title">{{ $landing_data['fixed_module_title'] }}</h2>
                 <p>
-                    {{ isset($landing_page_text['module_section_sub_title']) ? $landing_page_text['module_section_sub_title'] : '' }}
+                    {{ $landing_data['fixed_module_sub_title'] }}
                 </p>
             </div>
             <div class="nav--tabs-wrapper">
@@ -1896,7 +1898,10 @@
                     <div class="owl-theme owl-carousel" id="sync2">
                         @foreach ($modules as $key => $item)
                         <div class="item">
-                            <img class="__img-50" src="{{ asset('storage/app/public/module/') }}/{{ isset($item['icon']) ? $item['icon'] : null }}" onerror="this.src='{{asset('public/assets/admin/img/100x100/2.png')}}'" alt="">
+                            <img class="__img-50 onerror-image"  data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}"
+                            src="{{\App\CentralLogics\Helpers::onerror_image_helper($item['icon'] ?? '', asset('storage/app/public/module/').'/' . $item['icon']??'', asset('public/assets/admin/img/100x100/2.png') ,'module/')}}"
+
+                            alt="image">
                             <div class="txt d-block">{{translate("messages.{$item->module_name}")}}</div>
                         </div>
                         @endforeach
@@ -1915,7 +1920,10 @@
                         </div>
                         <div class="col-lg-6 col-md-8">
                             <div class="venture-img mx-1">
-                                <img src="{{ asset('storage/app/public/module/') }}/{{ isset($item['thumbnail']) ? $item['thumbnail'] : null }}" onerror="this.src='{{asset('public/assets/admin/img/100x100/2.png')}}'" alt="">
+                                <img  src="{{\App\CentralLogics\Helpers::onerror_image_helper($item['thumbnail']?? '', asset('storage/app/public/module/').'/' . $item['thumbnail']?? '', asset('public/assets/admin/img/100x100/2.png') ,'module/')}}"
+
+                                class="onerror-image"  data-onerror-image="{{asset('public/assets/admin/img/100x100/2.png')}}"
+                                alt="image">
                             </div>
                         </div>
                     </div>
@@ -1926,15 +1934,14 @@
     <!-- ==== Ecommerce Venture Section Ends Here ==== -->
 
     <!-- ==== Main Category Section Starts Here ==== -->
-    @php($promotion_banner = \App\Models\BusinessSetting::where(['key' => 'promotion_banner'])->first())
-    @php($promotion_banner = isset($promotion_banner->value) ? json_decode($promotion_banner->value, true) : null)
+    @php($promotion_banner = $landing_data['promotional_banners'])
     @if ($promotion_banner && count($promotion_banner) > 0)
     <section class="main-category overflow-hidden pt-30 pb-50">
         <div class="container">
             <div class="main-category-slider owl-theme owl-carousel">
                 @foreach ($promotion_banner as $item)
                 <div class="category-slide-item"
-                    style="background: url({{ asset('public/assets/landing') }}/image/{{ isset($item['img']) ? $item['img'] : null }}) no-repeat center center / cover">
+                    style="background: url({{asset('storage/app/public/promotional_banner')}}/{{ isset($item['image']) ? $item['image'] : null }}) no-repeat center center / cover">
                     <div>
                         <h2 class="title">{{$item['title'] ?? ''}}</h2>
                         <div class="text">{{$item['sub_title'] ?? ''}}</div>
@@ -1955,15 +1962,14 @@
                 <div class=" col-lg-6 pe-lg-5">
                     <div class="learn-feature-content wow fadeInUp">
                         <div class="section-header text-start mb-0">
-                            <h2 class="title">{{ isset($landing_page_text['feature_section_title']) ? $landing_page_text['feature_section_title'] : '' }}</span></h2>
+                            <h2 class="title">{{ $landing_data['feature_title'] }}</span></h2>
                             <div class="text">
-                                {!! isset($landing_page_text['feature_section_description']) ? $landing_page_text['feature_section_description'] : '' !!}
+                                {{ $landing_data['feature_short_description'] }}
                             </div>
                         </div>
                     </div>
                 </div>
-                @php($feature = \App\Models\BusinessSetting::where(['key' => 'feature'])->first())
-                @php($feature = isset($feature->value) ? json_decode($feature->value, true) : [])
+                @php($feature = $landing_data['features'])
                     <?php
                         $array1 = array_slice($feature, 0, ceil(count($feature)/2));
                         $array2 = array_slice($feature, ceil(count($feature)/2));
@@ -1980,13 +1986,13 @@
                                     <div class="col-12">
                                         <div class="learn-feature-item">
                                             <div class="learn-feature-icon">
-                                                <img src="{{ asset('public/assets/landing') }}/image/{{ $item['img'] }}"
+                                                <img src="{{ asset('storage/app/public/admin_feature')}}/{{ $item['image'] }}"
                                                  alt="{{$item['title'] ?? ''}}">
                                             </div>
                                             <div class="learn-feature-item-content">
                                                 <h5 class="subttle">{{$item['title'] ?? ''}}</h5>
                                                 <div class="text">
-                                                    {{$item['feature_description'] ?? ''}}
+                                                    {{$item['sub_title'] ?? ''}}
                                                 </div>
                                             </div>
                                         </div>
@@ -2002,12 +2008,12 @@
                                     <div class="col-12">
                                         <div class="learn-feature-item">
                                             <div class="learn-feature-icon">
-                                                <img src="{{ asset('public/assets/landing') }}/image/{{ $item['img'] }}" alt="{{$item['title']}}">
+                                                <img src="{{ asset('storage/app/public/admin_feature')}}/{{ $item['image'] }}" alt="{{$item['title']}}">
                                             </div>
                                             <div class="learn-feature-item-content">
                                                 <h5 class="subttle">{{$item['title'] ?? ''}}</h5>
                                                 <div class="text">
-                                                    {{$item['feature_description'] ?? ''}}
+                                                    {{$item['sub_title'] ?? ''}}
                                                 </div>
                                             </div>
                                         </div>
@@ -2031,12 +2037,12 @@
                 <div class="col-lg-5 col-xl-6 text-lg-start">
                     <div class="section-header text-lg-start mb-3 wow fadeInUp">
                         <h2 class="title">
-                            <div>{{ isset($landing_page_text['refer_section_title']) ? $landing_page_text['refer_section_title'] : '' }}</div>
-                            <div class="text--base">{{ isset($landing_page_text['refer_section_sub_title']) ? $landing_page_text['refer_section_sub_title'] : '' }}</div>
+                            <div>{{ $landing_data['fixed_referal_title'] }}</div>
+                            {{-- <div class="text--base">{{ isset($landing_page_text['refer_section_sub_title']) ? $landing_page_text['refer_section_sub_title'] : '' }}</div> --}}
                         </h2>
                     </div>
                     <div class="text">
-                        {!! isset($landing_page_text['refer_section_description']) ? $landing_page_text['refer_section_description'] : '' !!}
+                        {{ $landing_data['fixed_referal_sub_title'] }}
                     </div>
                 </div>
                 <div class="col-lg-7 col-xl-6 text-lg-end">
@@ -2604,21 +2610,25 @@
     <section class="earn-money-section">
         <div class="container">
             <div class="section-header wow fadeInUp">
-                <h2 class="title">{{ isset($landing_page_text['joinus_section_title']) ? $landing_page_text['joinus_section_title'] : '' }}</h2>
-                <div class="text">{{ isset($landing_page_text['joinus_section_title']) ? $landing_page_text['joinus_section_sub_title'] : '' }}</div>
+                <h2 class="title">{{ $landing_data['earning_title'] }}</h2>
+                <div class="text">{{ $landing_data['earning_sub_title'] }}</div>
             </div>
         </div>
         <div class="container-fluid p-0">
             <!-- Earn Money Item -->
-            @php($join_as_images = \App\Models\BusinessSetting::where(['key' => 'join_as_images'])->first())
-            @php($join_as_images = isset($join_as_images->value) ? json_decode($join_as_images->value, true) : null)
+            @php($join_as_seller = $landing_data['seller_app_earning_links'])
             <div class="earn-item wow fadeInUp">
                 <div class="earn-item-img"
-                    style="background: url({{ asset('public/assets/landing') }}/image/{{ isset($join_as_images['seller_banner_bg']) ? $join_as_images['seller_banner_bg'] : null }}) no-repeat center center / cover;">
+                    style="background: url({{ asset('storage/app/public/earning') }}/{{ isset($landing_data['earning_seller_image']) ? $landing_data['earning_seller_image'] : null }}) no-repeat center center / cover;">
                     <div class="position-relative">
-                        @if (isset($landing_page_links['seller_app_url_status']))
-                            <a href="{{ isset($landing_page_links['seller_app_url']) ? $landing_page_links['seller_app_url'] : '' }}" class="cmn--btn">{{translate("messages.Download Seller App")}}</a>
-                        @endif
+                        <div class="d-flex flex-column flex-wrap gap-3">
+                            @if (isset($join_as_seller['playstore_url_status']) && $join_as_seller['playstore_url_status'] == '1')
+                                <a href="{{ isset($join_as_seller['playstore_url']) ? $join_as_seller['playstore_url'] : '' }}" class="cmn--btn">{{translate("messages.Download_Seller_App_From_Playstore")}}</a>
+                            @endif
+                            @if (isset( $join_as_seller['apple_store_url_status']) &&  $join_as_seller['apple_store_url_status'] == '1')
+                                <a href="{{ isset($join_as_seller['apple_store_url']) ? $join_as_seller['apple_store_url'] : '' }}" class="cmn--btn">{{translate("messages.Download_Seller_App_From_Appstore")}}</a>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="earn-item-cont">
@@ -2629,13 +2639,19 @@
                 </div>
             </div>
             <!-- Earn Money Item -->
+            @php($join_as_dm = $landing_data['dm_app_earning_links'])
             <div class="earn-item wow fadeInUp">
                 <div class="earn-item-img"
-                    style="background: url({{ asset('public/assets/landing') }}/image/{{ isset($join_as_images['deliveryman_banner_bg']) ? $join_as_images['deliveryman_banner_bg'] : null }}) no-repeat center center / cover;">
+                    style="background: url({{ asset('storage/app/public/earning') }}/{{ isset($landing_data['earning_delivery_image']) ? $landing_data['earning_delivery_image'] : null }}) no-repeat center center / cover;">
                     <div class="position-relative">
-                        @if (isset($landing_page_links['deliveryman_app_url_status']))
-                            <a href="{{ isset($landing_page_links['deliveryman_app_url']) ? $landing_page_links['deliveryman_app_url'] : '' }}" class="cmn--btn me-xl-auto">{{translate("messages.Download Deliveryman App")}}</a>
-                        @endif
+                        <div class="d-flex flex-column flex-wrap gap-3">
+                            @if (isset($join_as_dm['playstore_url_status']) && $join_as_dm['playstore_url_status'] == '1')
+                                <a href="{{ isset($join_as_dm['playstore_url']) ? $join_as_dm['playstore_url'] : '' }}" class="cmn--btn me-xl-auto">{{translate("messages.Download_Deliveryman_App_From_Playstore")}}</a>
+                            @endif
+                            @if (isset($join_as_dm['apple_store_url_status']) && $join_as_dm['apple_store_url_status'] == '1')
+                                <a href="{{ isset($join_as_dm['apple_store_url']) ? $join_as_dm['apple_store_url'] : '' }}" class="cmn--btn me-xl-auto">{{translate("messages.Download_Deliveryman_App_From_Appstore")}}</a>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="earn-item-cont">
@@ -3298,9 +3314,6 @@
         </svg>
         <!-- Shape 3 -->
         <svg class="e-shape-3" viewBox="0 0 567 122" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- <path
-            d="M-582.837 89.5926C-498.678 115.494 -378.341 128.602 -274.377 121.626C-192.545 116.161 -126.314 99.5684 -56.7372 85.8613C45.8295 65.6487 160.17 51.1155 280.868 42.9748C393.048 35.3853 561.343 50.5711 656.049 31.4276C718.216 18.883 765.813 -1.05388 781.239 -25.008C800.599 -54.9961 755.095 -93.1643 700.509 -113.085C589.774 -153.51 351.912 -158.264 222.748 -192.32C118.13 -219.91 95.7742 -258.665 -1.35038 -289.125C-82.4246 -314.547 -201.738 -325.361 -301.286 -317.236C-400.834 -309.111 -477.627 -282.721 -500.755 -250.113C-517.044 -227.101 -508.262 -202.147 -511.566 -178.071L-511.586 -177.657C-514.876 -155.413 -537.121 -134.597 -575.185 -117.39C-586.038 -112.47 -596.666 -107.515 -606.994 -102.497C-663.223 -75.0238 -709.701 -43.8916 -711.933 -9.20875C-714.194 26.0594 -666.917 63.6462 -582.759 89.5472L-582.837 89.5926Z"
-            fill="url(#paint0_linear_28_12)" /> -->
             <path
                 d="M0.771484 56.7829C2.51171 39.3589 24.7719 26.9408 54.061 19.8095C83.3362 12.7292 119.288 10.3136 155.143 8.25515C233.743 3.70573 306.53 -0.0574563 389.079 0.0314772C423.192 0.0674218 466.707 2.41053 502.013 4.2893C513.305 4.91499 525.072 5.70358 536.723 8.36127C548.374 11.019 560.178 15.9867 564.655 21.558C569.606 27.7792 564.004 33.0555 554.76 35.4425C545.392 37.8016 532.993 37.8981 520.962 38.0786C419.801 39.3776 321.934 48.6861 260.387 77.7089C243.206 85.8148 229.033 95.3111 212.083 103.524C195.134 111.737 174.739 118.73 148.349 120.944C121.96 123.157 88.4465 119.954 59.6276 110.022C21.5201 96.887 -0.954816 74.1559 0.785346 56.7319L0.771484 56.7829Z"
                 fill="url(#paint1_linear_28_12)" />
@@ -3339,21 +3352,22 @@
     <!-- ==== Earn Money Section Ends Here ==== -->
 
     <!-- ==== Special Feature Section Starts Here ==== -->
-    @php($special = \App\Models\BusinessSetting::where(['key' => 'speciality'])->first())
-    @php($special = isset($special->value) ? json_decode($special->value, true) : null)
+    @php($special = $landing_data['criterias'])
     @if ($special && count($special) > 0)
     <section class="special-feature-section pt-80 pb-80 overflow-hidden position-relative">
         <div class="container">
             <div class="section-header wow fadeInUp">
-                @php($business_name = \App\Models\BusinessSetting::where(['key' => 'business_name'])->first()->value ?? '')
-                <h2 class="title">{{translate("What is so special about")}} <span class="text--base">{{$business_name ?? ''}}</span></h2>
+                <h2 class="title">{{ $landing_data['why_choose_title'] }}</h2>
             </div>
             <div class="special-feature-wrapper wow fadeInUp">
                 @foreach ($special as $item)
+                @if ($item->status == '1')
+
                 <div class="feature-card">
                     <div class="feature-card-icon">
-                        <img src="{{ asset('public/assets/landing') }}/image/{{ isset($item['img']) ? $item['img'] : null }}" alt="{{$item['title']}}"
-                        onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'">
+                        <img  src="{{\App\CentralLogics\Helpers::onerror_image_helper($item['image'] ?? '', asset('storage/app/public/special_criteria/').'/' .$item['image']?? '', asset('public/assets/admin/img/160x160/img2.jpg'),'special_criteria/')}}"
+                        alt="{{$item['title']}}"
+                        class="onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}">
                     </div>
                     <div class="feature-card-cont">
                         <h4 class="subtitle">
@@ -3369,6 +3383,7 @@
                         </h4>
                     </div>
                 </div>
+                @endif
                 @endforeach
             </div>
         </div>
@@ -3437,8 +3452,8 @@
     <!-- ==== Special Feature Section Ends Here ==== -->
 
     <!-- ==== Counter Section Starts Here ==== -->
-    @php($counter = \App\Models\BusinessSetting::where(['key' => 'counter_section'])->first())
-    @php($counter = isset($counter->value) ? json_decode($counter->value, true) : null)
+    @php($counter = $landing_data['counter_section'])
+    @if (isset($counter) && $counter['status'] == '1')
     <section class="counter-section  mb--186px">
         <div class="container">
             <div class="counter-wrapper">
@@ -3456,7 +3471,7 @@
                                         fill="#6DEBB0" />
                                 </svg>
                             </div>
-                            <h4 class="title"> <span class=" odometer" data-odometer-final="{{$counter['app_download_count_numbers'] ?? 0}}"></span> <span>+</span>
+                            <h4 class="title text-right"> <span class=" odometer" data-odometer-final="{{$counter['app_download_count_numbers'] ?? 0}}"></span> <span>+</span>
                             </h4>
                             <div class="text">{{translate("messages.Download")}}</div>
                         </div>
@@ -3515,25 +3530,50 @@
                             </h4>
                             <div class="text">{{translate("messages.Deliveryman")}}</div>
                         </div>
-                        {{-- <div class="counter-item wow fadeInUp">
+                        <div class="counter-item wow fadeInUp">
                             <div class="icon">
-                                <svg width="32" height="18" viewBox="0 0 32 18" fill="none"
+                                <svg width="32" height="26" viewBox="0 0 32 26" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
-                                        d="M0.00376287 7.00839C0.192297 6.67574 0.354437 6.32798 0.569367 6.01423C1.77222 4.24891 2.99393 2.49871 4.19301 0.733391C4.53614 0.230634 4.97354 -0.00373514 5.58062 4.49862e-05C9.54739 0.00760524 13.5104 0.00760524 17.4771 4.49862e-05C17.99 4.49862e-05 18.3934 0.173928 18.7441 0.55194C20.4334 2.3664 22.134 4.17331 23.8383 5.97643C23.9552 6.09739 24.1173 6.19189 24.2757 6.25237C25.9348 6.88365 27.5977 7.50359 29.2606 8.13109C31.0592 8.80774 31.9377 10.1497 31.9981 12.0738C32.0433 13.5027 31.2854 13.9109 30.2183 13.8353C29.6791 13.7975 29.1361 13.8277 28.6723 13.8277C28.3744 14.391 28.1557 14.9467 27.8164 15.4192C26.3119 17.5285 23.0125 17.5285 21.5156 15.4192C21.2214 15.0034 21.0367 14.5044 20.8293 14.0319C20.7652 13.8845 20.7086 13.8202 20.5465 13.8202C17.1529 13.824 13.7592 13.8202 10.3656 13.824C10.3355 13.824 10.3053 13.8353 10.3656 13.824C10.0602 14.3948 9.83773 14.9504 9.50213 15.423C8.02025 17.5058 4.73976 17.5209 3.23902 15.457C2.94491 15.0525 2.7526 14.5687 2.55275 14.1037C2.46603 13.9034 2.40193 13.7862 2.16437 13.8164C1.97961 13.8391 1.79108 13.8088 1.60254 13.824C0.825781 13.8769 0.27149 13.582 0 12.8298V7.00462L0.00376287 7.00839ZM11.6326 5.93862H20.2863C20.2599 5.88948 20.2524 5.86302 20.2335 5.84034C19.2418 4.78568 18.2577 3.72725 17.2547 2.68015C17.1717 2.59321 16.9983 2.5554 16.8701 2.5554C15.226 2.54784 13.5858 2.54785 11.9418 2.55163C11.84 2.55163 11.7419 2.56296 11.6326 2.56674V5.93484V5.93862ZM9.05342 5.93862V2.55163C8.0655 2.55163 7.10021 2.54785 6.13491 2.55919C6.04818 2.55919 5.9426 2.66503 5.88604 2.75198C5.19978 3.73481 4.52482 4.72142 3.8461 5.70803C3.80085 5.77229 3.76314 5.84412 3.70658 5.93862H9.05342ZM24.6377 14.4704C25.4371 14.4704 26.0856 13.8353 26.1007 13.0339C26.1158 12.2325 25.4559 11.5672 24.6415 11.5635C23.8383 11.5635 23.1897 12.2023 23.1822 12.9999C23.1709 13.8088 23.827 14.4704 24.6415 14.4704H24.6377ZM6.35738 14.4704C7.16431 14.4704 7.81287 13.8391 7.82041 13.0415C7.82795 12.2174 7.19448 11.571 6.37624 11.5672C5.55423 11.5634 4.9132 12.2061 4.91697 13.0264C4.92074 13.8353 5.55423 14.4704 6.36115 14.4704H6.35738Z"
-                                        fill="#76C5FF" />
+                                        d="M2.89821 20.0516C2.40405 15.6726 5.28959 12.687 8.5281 12.1385C9.00902 12.0589 9.50318 12.0279 9.99293 12.0191C11.1533 12.0014 12.3137 12.0147 13.4741 12.0147C14.2065 12.0147 14.4315 12.3464 14.1448 13.0099C13.88 13.638 13.5976 14.2572 13.3506 14.8897C12.7549 16.398 13.58 18.0877 15.1816 18.2381C16.8229 18.3929 18.5216 18.415 20.1453 18.1717C22.1395 17.8798 23.2867 15.8982 23.022 13.7972C22.8146 12.1562 22.669 10.5108 22.4969 8.86535C22.4484 8.40092 22.3999 7.93648 22.3425 7.43224C22.7352 7.43224 23.0926 7.41013 23.4411 7.44551C23.5294 7.45436 23.6353 7.62686 23.675 7.74629C24.2927 9.73672 24.8971 11.7316 25.506 13.7264C25.7001 14.3545 25.8899 14.9826 26.0928 15.6372C25.9958 15.677 25.9075 15.7124 25.8193 15.7478C24.3633 16.3449 23.3264 17.3269 22.9381 18.9015C22.7837 19.5341 22.8367 20.1047 23.472 20.4762C23.525 20.5072 23.5603 20.6222 23.5558 20.6929C23.5426 20.8433 23.4985 20.9937 23.4588 21.1795H23.1279C19.682 21.1795 16.2317 21.1795 12.7858 21.1795C12.5829 21.1795 12.4549 21.1485 12.3446 20.9362C12.0181 20.3214 11.4754 20.0339 10.7783 20.0339C8.28102 20.0339 5.77934 20.0339 3.28206 20.0339H2.8938L2.89821 20.0516ZM8.03394 17.7648C7.29711 17.7648 6.56028 17.7648 5.82787 17.7648C5.40872 17.7648 5.1484 17.9904 5.15281 18.3398C5.15722 18.6671 5.41313 18.9015 5.81463 18.9015C7.27505 18.906 8.73547 18.906 10.1959 18.9015C10.5974 18.9015 10.8489 18.6715 10.8489 18.3354C10.8489 17.9815 10.6018 17.7648 10.1738 17.7648C9.45906 17.7648 8.7487 17.7648 8.03394 17.7648ZM8.56781 16.6059C9.12374 16.6059 9.67967 16.6148 10.24 16.6059C10.6195 16.5971 10.8533 16.3626 10.8489 16.0353C10.8489 15.7036 10.6106 15.4824 10.2312 15.4824C9.12815 15.4824 8.02511 15.4692 6.92649 15.4913C6.74559 15.4913 6.50734 15.6107 6.39703 15.7522C6.12348 16.1149 6.40586 16.5838 6.90443 16.6059C7.46036 16.628 8.01629 16.6103 8.57222 16.6103L8.56781 16.6059Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M10.2756 10.8829C10.1521 10.8873 10.0329 10.9006 9.91381 10.9006C6.8915 10.9006 3.86918 10.9006 0.846869 10.9006C0.158575 10.9006 0.00415039 10.7414 0.00415039 10.0514C0.00415039 7.79112 0.00415039 5.53529 0.00415039 3.27505V2.89465H1.73371C1.73371 3.08485 1.72488 3.27062 1.73371 3.4564C1.74694 3.76602 1.96314 3.9916 2.24993 4.01372C2.52789 4.03583 2.78821 3.83237 2.83233 3.52717C2.86322 3.32813 2.8588 3.12908 2.87204 2.89908H7.42978C7.42978 3.03177 7.42978 3.18658 7.42978 3.33697C7.4386 3.7439 7.67686 4.02256 8.01218 4.01372C8.33868 4.00487 8.5637 3.73948 8.56811 3.34582C8.56811 3.20428 8.56811 3.05831 8.56811 2.89465H10.2712V10.8829H10.2756Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M31.4645 21.8582C31.3322 23.7336 29.9379 25.1491 28.1334 25.2154C25.8832 25.295 24.1536 23.1852 24.661 20.9824C24.7228 20.717 24.8199 20.602 25.1243 20.6064C27.0524 20.6241 28.9805 20.6241 30.9086 20.6064C31.1954 20.6064 31.3101 20.7082 31.341 20.9691C31.3763 21.2655 31.4248 21.5619 31.4645 21.8626V21.8582Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M4.62678 21.1986H4.97534C6.88138 21.1986 8.78743 21.1986 10.6935 21.1986C11.2494 21.1986 11.4744 21.4242 11.4391 21.9682C11.3156 23.9144 9.68309 25.3387 7.75058 25.2281C6.02543 25.1308 4.54736 23.5473 4.57384 21.7515C4.57384 21.5746 4.60913 21.4021 4.63119 21.1986H4.62678Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M31.9999 19.4743H24.0095C24.0272 18.8727 24.2743 18.3817 24.636 17.9527C25.3243 17.1344 26.1935 16.6567 27.2701 16.6346C27.9672 16.6213 28.6908 16.5815 29.3659 16.7275C30.6851 17.0194 31.6072 17.82 31.9646 19.1823C31.9867 19.2664 31.9867 19.3548 31.9999 19.4743Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M0.0039219 1.70243C0.0039219 1.31319 -0.00490238 0.946069 0.0039219 0.578945C0.0127462 0.260476 0.228941 0.0393172 0.542203 0.00393172C0.630445 -0.00491465 0.718688 0.00393172 0.811343 0.00393172C3.69688 0.00393172 6.58683 0.00393172 9.47237 0.00393172C10.121 0.00393172 10.2974 0.185282 10.3019 0.844336C10.3019 1.123 10.3019 1.40166 10.3019 1.71128H0.0039219V1.70243Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M25.1394 4.01562V6.28029C25.0379 6.28914 24.9497 6.30241 24.8658 6.30241C23.8422 6.30241 22.8142 6.30683 21.7906 6.30241C21.0802 6.30241 20.5684 5.82028 20.564 5.16565C20.5596 4.50217 21.0846 4.01562 21.8082 4.01562C22.9113 4.01562 24.0099 4.01562 25.1394 4.01562Z"
+                                        fill="#F9AD76" />
+                                    <path
+                                        d="M11.4383 10.8974C11.4383 10.4595 11.425 10.0836 11.4383 9.70318C11.4559 9.38028 11.65 9.18124 11.9721 9.17682C12.6737 9.16355 13.3752 9.16355 14.0767 9.18124C14.4959 9.19451 14.8224 9.54836 14.8533 9.95972C14.8841 10.3932 14.6018 10.7957 14.1694 10.8532C13.8076 10.9019 13.437 10.8886 13.0707 10.893C12.5369 10.8974 12.003 10.893 11.4338 10.893L11.4383 10.8974Z"
+                                        fill="#F9AD76" />
                                 </svg>
 
                             </div>
-                            <h4 class="title"> <span class=" odometer" data-odometer-final="900"></span>
+                            <h4 class="title"> <span class=" odometer" data-odometer-final="{{$counter['customer_count_numbers'] ?? 0}}"></span> <span>+</span>
                             </h4>
-                            <div class="text">{{translate("messages.Car provider")}}</div>
-                        </div> --}}
+                            <div class="text">{{translate("messages.customer")}}</div>
+                        </div>
                     </div>
                     @php($fav = \App\Models\BusinessSetting::where(['key' => 'icon'])->first()->value ?? '')
                     <div class="right-side d-flex word-nowrap align-items-center">
-                        <img onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
-                        src="{{ asset('storage/app/public/business/' . $fav) }}" alt="">
+                        <img class="onerror-image"  data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                        src="{{ asset('storage/app/public/business/' . $fav) }}"
+                        src="{{\App\CentralLogics\Helpers::onerror_image_helper($fav, asset('storage/app/public/business/').'/' . $fav, asset('public/assets/admin/img/160x160/img2.jpg'),'business/')}}"
+
+
+                        alt="image">
                         {{translate("messages.Still increasing")}}
                     </div>
                 </div>
@@ -3541,31 +3581,31 @@
             </div>
         </div>
     </section>
+    @endif
     <!-- ==== Counter Section Ends Here ==== -->
 
     <!-- ==== Download App Starts Here ==== -->
-    @php($download = \App\Models\BusinessSetting::where(['key' => 'download_app_section'])->first())
-    @php($download = isset($download->value) ? json_decode($download->value, true) : null)
-    @if (isset($landing_page_links['app_url_android_status'] ) || isset($landing_page_links['app_url_ios_status']))
+    @php($landing_page_links = $landing_data['download_user_app_links'])
+    @if ((isset($landing_page_links['playstore_url_status']) && $landing_page_links['playstore_url_status'] == '1') || (isset($landing_page_links['apple_store_url_status']) && $landing_page_links['apple_store_url_status'] == '1'))
     <section class="download-app-section pb-30">
         <div class="container">
             <div class="row justify-content-center g-4">
                 <div class="col-lg-6 col-md-9">
                     <div class="download-app-content wow fadeInUp">
-                        <h2 class="title">{{ isset($landing_page_text['download_app_section_title']) ? $landing_page_text['download_app_section_title'] : '' }}</h2>
-                        <h3 class="subtitle">{{ isset($landing_page_text['download_app_section_sub_title']) ? $landing_page_text['download_app_section_sub_title'] : '' }}</h3>
-                        <div class="btn-grp justify-content-xl-center">
-                            @if (isset($landing_page_links['seller_app_url_status']))
-                                <a href="{{ isset($landing_page_links['seller_app_url']) ? $landing_page_links['seller_app_url'] : '' }}" class="cmn--btn">{{translate("messages.Download the Seller App")}}</a>
+                        <h2 class="title">{{ $landing_data['download_user_app_title'] }}</h2>
+                        <h3 class="subtitle">{{ $landing_data['download_user_app_sub_title'] }}</h3>
+                        <div class="btn-grp">
+                            @if (isset($landing_page_links['playstore_url_status']) && $landing_page_links['playstore_url_status'] == '1')
+                                <a href="{{ $landing_page_links['playstore_url'] }}" class="cmn--btn">{{translate("messages.Download_the_User_App_from_Playstore")}}</a>
                             @endif
-                            @if (isset($landing_page_links['deliveryman_app_url_status']))
-                            <a href="{{ isset($landing_page_links['deliveryman_app_url']) ? $landing_page_links['deliveryman_app_url'] : ''}}" class="cmn--btn me-xl-auto">{{translate("messages.Download the deliveryman App")}}</a>
+                            @if (isset($landing_page_links['apple_store_url_status']) && $landing_page_links['apple_store_url_status'] == '1')
+                            <a href="{{ $landing_page_links['apple_store_url'] }}" class="cmn--btn me-xl-auto">{{translate("messages.Download_the_User_App_from_Applestore")}}</a>
                             @endif
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-9">
-                    <img class="mw-100" src="{{ asset('public/assets/landing') }}/image/{{ isset($download['img']) ? $download['img'] : null }}" alt="">
+                    <img class="mw-100" src="{{ asset('storage/app/public/download_user_app_image') }}/{{ isset($landing_data['download_user_app_image']) ? $landing_data['download_user_app_image'] : null }}" alt="">
                 </div>
             </div>
         </div>
@@ -3574,13 +3614,12 @@
     <!-- ==== Download App Ends Here ==== -->
 
     <!-- ==== Testimonial Starts Here ==== -->
-    @php($testimonial = \App\Models\BusinessSetting::where(['key' => 'testimonial'])->first())
-    @php($testimonial = isset($testimonial->value) ? json_decode($testimonial->value, true) : null)
+    @php($testimonial = $landing_data['testimonials'])
     @if ($testimonial && count($testimonial) > 0)
     <section class="testimonial-section overflow-hidden position-relative">
         <div class="container">
             <div class="section-header wow fadeInUp">
-                <h2 class="title">{{ isset($landing_page_text['testimonial_title']) ? $landing_page_text['testimonial_title'] : '' }}</span></h2>
+                <h2 class="title">{{ $landing_data['testimonial_title'] }}</span></h2>
             </div>
             <div class="testimonial-slider owl-theme owl-carousel wow fadeInUp">
                 @foreach ($testimonial as $data)
@@ -3591,18 +3630,25 @@
                                 fill="#71DAA6" />
                         </svg>
                         <blockquote>
-                            {{ $data['detail'] }}
+                            {{ $data['review'] }}
                         </blockquote>
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="user">
-                                <img src="{{ asset('public/assets/landing') }}/image/{{ $data['img'] }}" alt="">
+                                <img
+
+
+                                src="{{\App\CentralLogics\Helpers::onerror_image_helper($data['reviewer_image'] , asset('storage/app/public/reviewer_image/').'/'.$data['reviewer_image'], asset('public/assets/admin/img/160x160/img2.jpg'),'reviewer_image/')}}"
+
+                                alt="image">
                                 <div>
                                     <h6 class="name">{{ $data['name'] }}</h6>
-                                    <span class="designation">{{ $data['position'] }}</span>
+                                    <span class="designation">{{ $data['designation'] }}</span>
                                 </div>
                             </div>
-                            @if (isset($data['brand_image']))
-                            <img style="max-height: 35px; max-width:75px" src="{{ asset('public/assets/landing') }}/image/{{ $data['brand_image'] }}" alt="">
+                            @if (isset($data['company_image']))
+                            <img style="max-height: 35px; max-width:75px"
+                            src="{{\App\CentralLogics\Helpers::onerror_image_helper($data['company_image'] , asset('storage/app/public/reviewer_company_image/').'/'.$data['company_image'], asset('public/assets/admin/img/160x160/img2.jpg'),'reviewer_company_image/')}}"
+                            alt="image">
                             @endif
                         </div>
                     </div>
@@ -3690,4 +3736,14 @@
     <!-- ==== Testimonial Ends Here ==== -->
 @endsection
 @push('script_2')
+<script>
+"use strict";
+    $(document).ready(function() {
+        "use strict";
+        $('.onerror-image').on('error', function() {
+            let img = $(this).data('onerror-image')
+            $(this).attr('src', img);
+        });
+    });
+</script>
 @endpush

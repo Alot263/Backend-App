@@ -5,45 +5,43 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^7.3|^8.1",
         "ext-curl": "*",
         "ext-json": "*",
-        "barryvdh/laravel-cors": "^2.0",
+        "ext-simplexml": "*",
+        "beyondcode/laravel-websockets": "^1.14",
         "brian2694/laravel-toastr": "^5.54",
         "doctrine/dbal": "^3.3",
-        "fideloper/proxy": "^4.4",
         "firebase/php-jwt": "^6.4",
-        "fruitcake/laravel-cors": "^2.0",
         "gregwar/captcha": "^1.1",
-        "grimzy/laravel-mysql-spatial": "5.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.5",
-        "kingflamez/laravelrave": "^4.2",
-        "laravel/framework": "^8.12",
-        "laravel/passport": "^10.1",
+        "laravel/framework": "^10.0",
+        "laravel/passport": "^11.0",
         "laravel/tinker": "^2.5",
         "laravelpkg/laravelchk": "dev-master",
+        "maatwebsite/excel": "^3.1",
         "madnest/madzipper": "*",
+        "matanyadaev/laravel-eloquent-spatial": "^3.1",
         "mercadopago/dx-php": "2.4.3",
         "mpdf/mpdf": "^8.0",
-        "nexmo/laravel": "^2.4",
-        "paypal/rest-api-sdk-php": "^1.14",
-        "rap2hpoutre/fast-excel": "^3.0",
-        "razorpay/razorpay": "^2.5",
-        "stripe/stripe-php": "^7.77",
-        "symfony/symfony": "5.4.x",
-        "twilio/sdk": "^6.28",
-        "unicodeveloper/laravel-paystack": "1.0.*",
-        "web-token/jwt-framework": "^2.2"
+        "nwidart/laravel-modules": "9.0",
+        "paypal/paypal-checkout-sdk": "^1.0",
+        "rap2hpoutre/fast-excel": "^5.2",
+        "razorpay/razorpay": "^2.8",
+        "stripe/stripe-php": "^10.10",
+        "twilio/sdk": "^6.39",
+        "unicodeveloper/laravel-paystack": "^1.0",
+        "xendit/xendit-php": "^2.19"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",
-        "facade/ignition": "^2.5",
+        "spatie/laravel-ignition": "^2.0",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.2",
-        "nunomaduro/collision": "^5.0",
-        "phpunit/phpunit": "^9.3.3"
+        "nunomaduro/collision": "^6.1",
+        "phpunit/phpunit": "^10.0"
     },
     "autoload": {
         "files": [
@@ -59,12 +57,18 @@
             "app/CentralLogics/coupon.php",
             "app/CentralLogics/sms_module.php",
             "app/CentralLogics/filemanager.php",
-            "vendor/laravelpkg/laravelchk/src/Http/Controllers/LaravelchkController.php"
+            "app/Library/Constants.php",
+            "app/Library/Constant.php",
+            "app/Library/Responses.php",
+            "app/Utils/language.php",
+            "app/Utils/settings.php",
+            "app/Utils/constant.php"
         ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Modules\\": "Modules/"
         }
     },
     "autoload-dev": {

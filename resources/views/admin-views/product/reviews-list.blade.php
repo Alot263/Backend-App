@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/items.png')}}" class="w--22" alt="">
                 </span>
                 <span>
-                    {{translate('messages.item')}} {{translate('messages.reviews')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span>
+                    {{translate('messages.item_reviews')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span>
                 </span>
             </h1>
         </div>
@@ -25,14 +25,42 @@
             <!-- Header -->
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper justify-content-end">
-                    <form id="search-form" class="search-form">
+                    <form  class="search-form">
                         <!-- Search -->
                         <div class="input-group input--group">
-                            <input id="datatableSearch" name="search" type="search" class="form-control min-height-45" placeholder="{{translate('ex_:_search_item_name')}}" aria-label="{{translate('messages.search_here')}}">
+                            <input id="datatableSearch" name="search" value="{{ request()?->search ?? null }}" type="search" class="form-control min-height-45" placeholder="{{translate('ex_:_search_item_name')}}" aria-label="{{translate('messages.search_here')}}">
                             <button type="submit" class="btn btn--secondary min-height-45"><i class="tio-search"></i></button>
                         </div>
                         <!-- End Search -->
                     </form>
+                    <div class="hs-unfold mr-2">
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                            data-hs-unfold-options='{
+                                    "target": "#usersExportDropdown",
+                                    "type": "css-animation"
+                                }'>
+                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                        </a>
+
+                        <div id="usersExportDropdown"
+                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                            <a id="export-excel" class="dropdown-item" href="{{ route('admin.item.reviews_export', ['type' => 'excel', request()->getQueryString()]) }}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.excel') }}
+                            </a>
+                            <a id="export-csv" class="dropdown-item" href="{{ route('admin.item.reviews_export', ['type' => 'csv', request()->getQueryString()]) }}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                    alt="Image Description">
+                                .{{ translate('messages.csv') }}
+                            </a>
+
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- End Header -->
@@ -65,8 +93,14 @@
                             <td>
                                 @if ($review->item)
                                     <a class="media align-items-center" href="{{route('admin.item.view',[$review->item['id']])}}">
-                                        <img class="avatar avatar-lg mr-3" src="{{asset('storage/app/public/product')}}/{{$review->item['image']}}"
-                                            onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'" alt="{{$review->item->name}} image">
+                                        <img class="avatar avatar-lg mr-3 onerror-image"
+                                        src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                            $review->item['image'] ?? '',
+                                            asset('storage/app/public/product').'/'.$review->item['image'] ?? '',
+                                            asset('public/assets/admin/img/160x160/img2.jpg'),
+                                            'product/'
+                                        ) }}" 
+                                        data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}" alt="{{$review->item->name}} image">
                                         <div class="media-body">
                                             <h5 class="text-hover-primary mb-0">{{Str::limit($review->item['name'],20,'...')}}</h5>
                                         </div>
@@ -97,7 +131,10 @@
                             </td>
                             <td>
                                 <label class="toggle-switch toggle-switch-sm" for="reviewCheckbox{{$review->id}}">
-                                    <input type="checkbox" onclick="status_form_alert('status-{{$review['id']}}','{{$review->status?translate('messages.you_want_to_hide_this_review_for_customer'):translate('messages.you_want_to_show_this_review_for_customer')}}', event)" class="toggle-switch-input" id="reviewCheckbox{{$review->id}}" {{$review->status?'checked':''}}>
+                                    <input type="checkbox"
+                                           data-id="status-{{ $review['id'] }}" data-message="{{ $review->status ? translate('messages.you_want_to_hide_this_review_for_customer') : translate('messages.you_want_to_show_this_review_for_customer') }}"
+                                           class="toggle-switch-input status_form_alert" id="reviewCheckbox{{ $review->id }}"
+                                            {{ $review->status ? 'checked' : '' }}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
                                     </span>
@@ -133,58 +170,35 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
         });
 
-        function status_form_alert(id, message, e) {
+        $(".status_form_alert").on("click", function (e) {
+            const id = $(this).data('id');
+            const message = $(this).data('message');
             e.preventDefault();
             Swal.fire({
-                title: '{{translate('messages.are_you_sure')}}',
+                title: '{{ translate('messages.are_you_sure') }}',
                 text: message,
                 type: 'warning',
                 showCancelButton: true,
                 cancelButtonColor: 'default',
                 confirmButtonColor: '#FC6A57',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Yes',
+                cancelButtonText: '{{translate('messages.no')}}',
+                confirmButtonText: '{{translate('messages.yes')}}',
                 reverseButtons: true
             }).then((result) => {
                 if (result.value) {
-                    $('#'+id).submit()
+                    $('#' + id).submit()
                 }
             })
-        }
+        })
 
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.item.reviews.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('.page-area').hide();
-                    $('#itemCount').html(data.count);
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
+
     </script>
 @endpush

@@ -5,11 +5,11 @@
             <thead class="thead-light">
                 <tr>
                     <th class="w--1 border-0">{{translate('sl')}}</th>
-                    <th class="w--1 border-0">{{translate('messages.order')}} {{translate('messages.id')}}</th>
+                    <th class="w--1 border-0">{{translate('messages.order_id')}}</th>
                     <th class="w--2 border-0">{{translate('messages.total_order_amount')}}</th>
-                    <th class="w--3 border-0">{{translate('messages.store')}} {{translate('messages.earned')}}</th>
-                    <th class="w--1 border-0">{{translate('messages.admin')}}  {{translate('messages.earned')}}</th>
-                    <th class="w--1 border-0">{{translate('messages.delivery')}}  {{translate('messages.fee')}}</th>
+                    <th class="w--3 border-0">{{translate('messages.store_earned')}}</th>
+                    <th class="w--1 border-0">{{translate('messages.admin_earned')}}</th>
+                    <th class="w--1 border-0">{{translate('messages.delivery_fee')}}</th>
                     <th class="w--1 border-0">{{translate('messages.vat/tax')}}</th>
                 </tr>
             </thead>

@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',translate('messages.update').' '.translate('messages.notification'))
+@section('title',translate('messages.update_notification'))
 
 @push('css_or_js')
 
@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/notification.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{translate('messages.notification')}} {{translate('messages.update')}}
+                    {{translate('messages.notification_update')}}
                 </span>
             </h1>
         </div>
@@ -37,18 +37,18 @@
                                     <div class="form-group mb-0">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.zone')}}</label>
                                         <select name="zone" id="zone" class="form-control js-select2-custom" >
-                                            <option value="" {{isset($notification->zone_id)?'':'selected'}}>{{translate('messages.all')}} {{translate('messages.zone')}}</option>
-                                            @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
-                                                <option value="{{$z['id']}}"  {{$notification->zone_id==$z['id']?'selected':''}}>{{$z['name']}}</option>
+                                            <option value="all" {{isset($notification->zone_id)?'':'selected'}}>{{translate('messages.all_zone')}}</option>
+                                            @foreach($zones as $zone)
+                                                <option value="{{$zone['id']}}"  {{$notification->zone_id==$zone['id']?'selected':''}}>{{$zone['name']}}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group mb-0">
-                                        <label class="input-label" for="tergat">{{translate('messages.send')}} {{translate('messages.to')}}</label>
+                                        <label class="input-label" for="tergat">{{translate('messages.send_to')}}</label>
 
-                                        <select name="tergat" class="form-control" id="tergat" data-placeholder="{{translate('messages.select')}} {{translate('messages.tergat')}}" required>
+                                        <select name="tergat" class="form-control" id="tergat" data-placeholder="{{translate('messages.select_tergat')}}" required>
                                             <option value="customer" {{$notification->tergat=='customer'?'selected':''}}>{{translate('messages.customer')}}</option>
                                             <option value="deliveryman" {{$notification->tergat=='deliveryman'?'selected':''}}>{{translate('messages.deliveryman')}}</option>
                                             <option value="store" {{$notification->tergat=='store'?'selected':''}}>{{translate('messages.store')}}</option>
@@ -69,14 +69,15 @@
                                     {{translate('messages.image')}}
                                     <small class="text-danger">* ( {{translate('messages.ratio')}} 900x300 )</small>
                                 </label>
-                                <center class="py-3 my-auto">
-                                    <img class="img--vertical" id="viewer"
-                                        src="{{asset('storage/app/public/notification')}}/{{$notification['image']}}"  onerror="src='{{asset('public/assets/admin/img/900x400/img1.jpg')}}'" alt="image"/>
-                                </center>
+                                <div class="text-center py-3 my-auto">
+                                    <img class="img--vertical onerror-image" id="viewer"
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($notification['image'], asset('storage/app/public/notification/').'/'.$notification['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'notification/') }}"
+                                    data-onerror-image="{{asset('public/assets/admin/img/900x400/img1.jpg')}}" alt="image"/>
+                                </div>
                                 <div class="custom-file">
                                     <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                         accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                                 </div>
                             </div>
                         </div>
@@ -94,24 +95,9 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/notification.js"></script>
     <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-
-                reader.onload = function (e) {
-                    $('#viewer').attr('src', e.target.result);
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        $("#customFileEg1").change(function () {
-            readURL(this);
-        });
-    </script>
-        <script>
+        "use strict";
             $('#reset_btn').click(function(){
                 $('#zone').val("{{$notification->zone_id}}").trigger('change');
                 $('#viewer').attr('src', "{{asset('storage/app/public/notification')}}/{{$notification['image']}}");

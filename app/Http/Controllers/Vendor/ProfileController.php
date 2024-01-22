@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Vendor;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
@@ -34,7 +35,7 @@ class ProfileController extends Controller
         $request->validate([
             'f_name' => 'required|max:100',
             'l_name' => 'nullable|max:100',
-            'email' => 'required|unique:'.$table.',email,'.$seller->id,
+            'email' => 'required|email|unique:'.$table.',email,'.$seller->id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|max:20|unique:'.$table.',phone,'.$seller->id,
         ], [
             'f_name.required' => translate('messages.first_name_is_required'),
@@ -56,7 +57,7 @@ class ProfileController extends Controller
     public function settings_password_update(Request $request)
     {
         $request->validate([
-            'password' => 'required|same:confirm_password|min:6',
+            'password' => ['required', 'same:confirm_password', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'confirm_password' => 'required',
         ]);
 
@@ -89,6 +90,18 @@ class ProfileController extends Controller
     {
         $data = Helpers::get_vendor_data();
         return view('vendor-views.profile.bankEdit', compact('data'));
+    }
+
+    public function bank_delete()
+    {
+        $data = Helpers::get_vendor_data();
+        $data->bank_name = null;
+        $data->branch = null;
+        $data->holder_name = null;
+        $data->account_no = null;
+        $data->save();
+        Toastr::success(translate('messages.bank_info_updated_successfully'));
+        return redirect()->route('vendor.profile.bankView');
     }
 
 }

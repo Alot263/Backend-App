@@ -57,7 +57,7 @@ class ConversationController extends Controller
                 if($receiver->vendor_id){
                     $vendor = Vendor::find($receiver->vendor_id);
                     $fcm_token=$vendor->firebase_token;
-                    $fcm_token_web=$vendor->fcm_token_web;
+                    $fcm_token_web = "store_panel_{$vendor->stores[0]->id}_message";
                 }elseif($receiver->deliveryman_id){
                     $delivery_man = DeliveryMan::find($receiver->deliveryman_id);
                     $fcm_token=$delivery_man->fcm_token;
@@ -70,7 +70,7 @@ class ConversationController extends Controller
                 if($receiver->vendor_id){
                     $vendor = Vendor::find($receiver->vendor_id);
                     $fcm_token=$vendor->firebase_token;
-                    $fcm_token_web=$vendor->fcm_token_web;
+                    $fcm_token_web = "store_panel_{$vendor->stores[0]->id}_message";
                 }elseif($receiver->deliveryman_id){
                     $delivery_man = DeliveryMan::find($receiver->deliveryman_id);
                     $fcm_token=$delivery_man->fcm_token;
@@ -97,7 +97,7 @@ class ConversationController extends Controller
 
                 $receiver_id = $receiver->id;
                 $fcm_token=$vendor->firebase_token;
-                $fcm_token_web=$vendor->fcm_token_web;
+                $fcm_token_web = "store_panel_{$vendor->stores[0]->id}_message";
 
             }else if($request->receiver_type == 'delivery_man'){
                 $receiver = UserInfo::where('deliveryman_id',$request->receiver_id)->first();
@@ -168,14 +168,14 @@ class ConversationController extends Controller
                     ];
                     Helpers::send_push_notif_to_device($fcm_token, $data);
                     if($fcm_token_web){
-                        Helpers::send_push_notif_to_device($fcm_token_web, $data);
+                        Helpers::send_push_notif_to_topic($data, $fcm_token_web, 'message');
                     }
 
                 }
             }
 
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
 
         $messages = Message::where(['conversation_id' => $conversation->id])->latest()->paginate($limit, ['*'], 'page', $offset);
@@ -239,21 +239,34 @@ class ConversationController extends Controller
         $limit = $request['limit']??10;
         $offset = $request['offset']??1;
 
-        $sender = UserInfo::where('user_id', $request->user()->id)->first();
+        $sender = UserInfo::where('user_id', $request?->user()?->id)->first();
         if(!$sender){
             $sender = new UserInfo();
-            $sender->user_id = $request->user()->id;
-            $sender->f_name = $request->user()->f_name;
-            $sender->l_name = $request->user()->l_name;
-            $sender->phone = $request->user()->phone;
-            $sender->email = $request->user()->email;
-            $sender->image = $request->user()->image;
+            $sender->user_id = $request?->user()?->id;
+            $sender->f_name = $request?->user()?->f_name;
+            $sender->l_name = $request?->user()?->l_name;
+            $sender->phone = $request?->user()?->phone;
+            $sender->email = $request?->user()?->email;
+            $sender->image = $request?->user()?->image;
             $sender->save();
         }
 
-        $conversations = Conversation::with('sender','receiver','last_message')->where(['sender_id' => $sender->id])->orWhere(['receiver_id' => $sender->id])->orderBy('last_message_time', 'DESC')->paginate($limit, ['*'], 'page', $offset);
+        $conversations = Conversation::with('sender','receiver','last_message')
+        ->where(function($q) use($sender){
+                    $q->where(['sender_id' => $sender->id])->orWhere(['receiver_id' => $sender->id]);
+                })
+        ->when(isset($request->type) , function($query) use($request) {
+            $query->where(function($q) use($request){
+                $q->where('receiver_type', $request->type)->where('sender_type','customer')
+                    ->orWhere(function($q) use($request){
+                        $q->where('sender_type', $request->type)->where('receiver_type','customer');
+                });
+            });
+        })
+        ->orderBy('last_message_time', 'DESC')->paginate($limit, ['*'], 'page', $offset);
 
         $data =  [
+            'type'=>$request->type ?? null,
             'total_size' => intval($conversations->total()),
             'limit' => intval($limit),
             'offset' => intval($offset),
@@ -549,7 +562,7 @@ class ConversationController extends Controller
             }
 
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
 
         $messages = Message::where(['conversation_id' => $conversation->id])->latest()->paginate($limit, ['*'], 'page', $offset);

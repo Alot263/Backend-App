@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
-use App\CentralLogics\Helpers;
 use Carbon\CarbonInterval;
-use App\Http\Controllers\Controller;
 use App\Models\DeliveryMan;
 use Illuminate\Http\Request;
+use App\CentralLogics\Helpers;
 use Illuminate\Support\Carbon;
 use App\Models\BusinessSetting;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use App\CentralLogics\SMS_module;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Modules\Gateways\Traits\SmsGateway;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class DMPasswordResetController extends Controller
 {
@@ -52,7 +55,22 @@ class DMPasswordResetController extends Controller
                 'token' => $token,
                 'created_at' => now(),
             ]);
-            $response = SMS_module::send($request['phone'],$token);
+            $mail_status = Helpers::get_mail_status('forget_password_mail_status_dm');
+            if (config('mail.status') && $mail_status == '1') {
+                Mail::to($deliveryman['email'])->send(new \App\Mail\DmPasswordResetMail($token,$deliveryman['f_name']));
+            }
+            //for payment and sms gateway addon
+            $published_status = 0;
+            $payment_published_status = config('get_payment_publish_status');
+            if (isset($payment_published_status[0]['is_published'])) {
+                $published_status = $payment_published_status[0]['is_published'];
+            }
+
+            if($published_status == 1){
+                $response = SmsGateway::send($request['phone'],$token);
+            }else{
+                $response = SMS_module::send($request['phone'],$token);
+            }
             if($response == 'success')
             {
                 return response()->json(['message' => translate('messages.otp_sent_successfull')], 200);
@@ -169,7 +187,7 @@ class DMPasswordResetController extends Controller
         $validator = Validator::make($request->all(), [
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'reset_token'=> 'required',
-            'password'=> 'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'confirm_password'=> 'required|same:password',
         ]);
 

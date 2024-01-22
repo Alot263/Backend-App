@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class DeliveryManController extends Controller
 {
@@ -24,26 +25,24 @@ class DeliveryManController extends Controller
 
     public function list(Request $request)
     {
-        $delivery_men = DeliveryMan::where('store_id', Helpers::get_store_id())->latest()->paginate(config('default_pagination'));
+        $key = explode(' ', $request['search']);
+        $delivery_men = DeliveryMan::where('store_id', Helpers::get_store_id())
+                 ->when( isset($key) , function($query) use($key){
+                    $query->where(function ($q) use ($key) {
+                        foreach ($key as $value) {
+                            $q->orWhere('f_name', 'like', "%{$value}%")
+                                ->orWhere('l_name', 'like', "%{$value}%")
+                                ->orWhere('email', 'like', "%{$value}%")
+                                ->orWhere('phone', 'like', "%{$value}%")
+                                ->orWhere('identity_number', 'like', "%{$value}%");
+                        }
+                    });
+                }
+        )->latest()->paginate(config('default_pagination'));
         return view('vendor-views.delivery-man.list', compact('delivery_men'));
     }
 
-    public function search(Request $request){
-        $key = explode(' ', $request['search']);
-        $delivery_men=DeliveryMan::where(function ($q) use ($key) {
-            foreach ($key as $value) {
-                $q->orWhere('f_name', 'like', "%{$value}%")
-                    ->orWhere('l_name', 'like', "%{$value}%")
-                    ->orWhere('email', 'like', "%{$value}%")
-                    ->orWhere('phone', 'like', "%{$value}%")
-                    ->orWhere('identity_number', 'like', "%{$value}%");
-            }
-        })->where('store_id', Helpers::get_store_id())->get();
-        return response()->json([
-            'view'=>view('vendor-views.delivery-man.partials._table',compact('delivery_men'))->render(),
-            'count'=>$delivery_men->count()
-        ]);
-    }
+
 
     public function reviews_list(){
         $reviews=DMReview::with(['delivery_man','customer'])->latest()->paginate(config('default_pagination'));
@@ -72,7 +71,7 @@ class DeliveryManController extends Controller
             'identity_number' => 'required|max:30',
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
-            'password'=>'required|min:6',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {
@@ -183,7 +182,7 @@ class DeliveryManController extends Controller
             'identity_number' => 'required|max:30',
             'email' => 'required|unique:delivery_men,email,'.$id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$id,
-            'password'=>'nullable|min:6',
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {

@@ -15,11 +15,16 @@
         @endif
     </td>
     <td>
-        @if ($order->customer)
-            <a class="text-body text-capitalize"
-                href="{{ route('admin.users.customer.view', [$order['user_id']]) }}">
-                <strong>{{ $order->customer['f_name'] . ' ' . $order->customer['l_name'] }}</strong>
-            </a>
+        @if($order->is_guest)
+        @php($customer_details = json_decode($order['delivery_address'],true))
+        <strong>{{$customer_details['contact_person_name']}}</strong>
+        <div>{{$customer_details['contact_person_number']}}</div>
+
+        @elseif ($order->customer)
+        <a class="text-body text-capitalize"
+            href="{{ route('admin.users.customer.view', [$order['user_id']]) }}">
+            <strong>{{ $order->customer['f_name'] . ' ' . $order->customer['l_name'] }}</strong>
+        </a>
         @else
             <label class="badge badge-danger">{{ translate('messages.invalid') }}
                 {{ translate('messages.customer') }}
@@ -102,7 +107,7 @@
                 </span>
             @elseif($order['order_status']=='failed')
                 <span class="badge badge-soft-danger">
-                  {{translate('messages.payment')}}  {{translate('messages.failed')}}
+                  {{translate('messages.payment_failed')}}
                 </span>
             @elseif($order['order_status']=='handover')
                 <span class="badge badge-soft-danger">
@@ -121,7 +126,7 @@
                   {{str_replace('_',' ',$order['order_status'])}}
                 </span>
             @endif
-           
+
     </td>
 
 

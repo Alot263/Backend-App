@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{{__('messages.welcome')}}</title>
+  <title>{{translate('messages.welcome')}}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style type="text/css">
@@ -113,23 +113,23 @@
       <img src="{{asset('public/assets/admin/img/tick.png')}}" style="height: 50px; width:50px; margin-top:40px;">
       
       <div class="congrats-box">
-          <span style="font-weight: 700;font-size: 22px;line-height: 135.5%; display:block; margin-bottom:10px;">{{__('messages.Transaction Sucessfull')}}</span>
-          <span style="font-weight: 400;font-size: 16px;line-height: 135.5%; color:#727272; margin-bottom:7px; display:block;">{{__('messages.amount sucessfully credited to your wallet',['amount'=>$data->credit.' '.\App\CentralLogics\Helpers::currency_code()])}}</span>
-          <span style="font-weight: 400;font-size: 14px;line-height: 135.5%;color: #182E4B;display:block; margin-bottom:10px;"><span style="font-weight: 700;font-size: 14px;line-height: 18.79px;color: #182E4B;color: #EF7822;">{{__('messages.note')}}: </span>{{in_array($data->transaction_type,$note_message)?$note_message[$data->transaction_type]:translate('messages.add_fund_to_wallet')}} </span>
-          <span style="font-weight: 700;font-size: 14px;line-height: 135.5%;color: #182E4B; display:block; margin-bottom: 5px;">{{__('messages.dear')}} {{$data->user->f_name.' '.$data->user->l_name}}</span>
-          <span style="font-weight: 400;font-size: 12px;line-height: 135.5%;text-align: center;color: #182E4B;display:block; margin-bottom:34px;">{{__('messages.Thank you for joinning with')}} <span style="color: #EF7822;">{{$company_name}}!</span></span>
+          <span style="font-weight: 700;font-size: 22px;line-height: 135.5%; display:block; margin-bottom:10px;">{{translate('messages.Transaction Sucessfull')}}</span>
+          <span style="font-weight: 400;font-size: 16px;line-height: 135.5%; color:#727272; margin-bottom:7px; display:block;">{{translate('messages.amount sucessfully credited to your wallet',['amount'=>$data->credit.' '.\App\CentralLogics\Helpers::currency_code()])}}</span>
+          <span style="font-weight: 400;font-size: 14px;line-height: 135.5%;color: #182E4B;display:block; margin-bottom:10px;"><span style="font-weight: 700;font-size: 14px;line-height: 18.79px;color: #182E4B;color: #EF7822;">{{translate('messages.note')}}: </span>{{in_array($data->transaction_type,$note_message)?$note_message[$data->transaction_type]:translate('messages.add_fund_to_wallet')}} </span>
+          <span style="font-weight: 700;font-size: 14px;line-height: 135.5%;color: #182E4B; display:block; margin-bottom: 5px;">{{translate('messages.dear')}} {{$data->user->f_name.' '.$data->user->l_name}}</span>
+          <span style="font-weight: 400;font-size: 12px;line-height: 135.5%;text-align: center;color: #182E4B;display:block; margin-bottom:34px;">{{translate('messages.Thank you for joinning with')}} <span style="color: #EF7822;">{{$company_name}}!</span></span>
       </div>
   
       <div style="background-color: #F5F5F5; width: 90%;margin:auto;margin-top:30px;padding: 10px 20px 20px 5px;">
           <table style="width: 100%; text-transform: capitalize; font-size: 11px;line-height: 13px;text-align: center;color: #242A30;">
               <tbody>
                   <tr style="font-weight: 700;">
-                      <th class="col" style="width:10%;">{{__('messages.sl')}}</th>
-                      <th class="col" style="width:35%;">{{__('messages.transaction')}} {{__('messages.id')}}</th>
-                      <th class="col" style="width:20%">{{__('messages.transaction')}} {{__('messages.date')}}</th>
-                      <th class="col" style="width:15%">{{__('messages.credit')}}</th>
-                      <th class="col" style="width:15%">{{__('messages.debit')}}</th>
-                      <th class="col" style="width:15%;">{{__('messages.balance')}}</th>
+                      <th class="col" style="width:10%;">{{translate('messages.sl')}}</th>
+                      <th class="col" style="width:35%;">{{translate('messages.transaction')}} {{translate('messages.id')}}</th>
+                      <th class="col" style="width:20%">{{translate('messages.transaction')}} {{translate('messages.date')}}</th>
+                      <th class="col" style="width:15%">{{translate('messages.credit')}}</th>
+                      <th class="col" style="width:15%">{{translate('messages.debit')}}</th>
+                      <th class="col" style="width:15%;">{{translate('messages.balance')}}</th>
                   </tr>
                 
                   <tr style="font-weight:400;">
@@ -145,7 +145,7 @@
       </div>
 
       
-      <span style="font-weight: 400;font-size: 12px;line-height: 135.5%;color: #5D6774;display:block;margin-top:43px;">{{__('messages.If you require any assistance or have feedback or suggestions about our site, you can email us at')}}
+      <span style="font-weight: 400;font-size: 12px;line-height: 135.5%;color: #5D6774;display:block;margin-top:43px;">{{translate('messages.If you require any assistance or have feedback or suggestions about our site, you can email us at')}}
           <a href="mailto:{{$company_email}}" class="email">{{$company_email}}</a>
       </span>
   </div>
@@ -171,13 +171,13 @@
               </tr>                 
               <tr>
                   <th >
-                      <div style="font-weight: 400;font-size: 11px;line-height: 22px;color: #242A30;"><span style="margin-inline-end:5px;"> <a href="tel:{{$company_phone}}" style="text-decoration: none; color: inherit;">{{__('messages.phone')}}: {{$company_phone}}</a></span> <span><a href="mailto:{{$company_email}}" style="text-decoration: none; color: inherit;">{{__('messages.email')}}: {{$company_email}}</a></span></div>
+                      <div style="font-weight: 400;font-size: 11px;line-height: 22px;color: #242A30;"><span style="margin-inline-end:5px;"> <a href="tel:{{$company_phone}}" style="text-decoration: none; color: inherit;">{{translate('messages.phone')}}: {{$company_phone}}</a></span> <span><a href="mailto:{{$company_email}}" style="text-decoration: none; color: inherit;">{{translate('messages.email')}}: {{$company_email}}</a></span></div>
                       @if ($company_links['web_app_url_status'])
                       <div style="font-weight: 400;font-size: 11px;line-height: 22px;color: #242A30;">
                           <a href="{{$company_links['web_app_url']}}" style="text-decoration: none; color: inherit;">{{$company_links['web_app_url']}}</a></div>
                       @endif 
                       <div style="font-weight: 400;font-size: 11px;line-height: 22px;color: #242A30;">{{$company_address}}</div>
-                      <span style="font-weight: 400;font-size: 10px;line-height: 22px;color: #242A30;">{{__('messages.All copy right reserved',['year'=>date('Y'),'title'=>$company_name])}}</span>
+                      <span style="font-weight: 400;font-size: 10px;line-height: 22px;color: #242A30;">{{translate('messages.All copy right reserved',['year'=>date('Y'),'title'=>$company_name])}}</span>
                   </th>
               </tr>
 

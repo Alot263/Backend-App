@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 
 class DeliveryManController extends Controller
 {
@@ -97,8 +98,7 @@ class DeliveryManController extends Controller
             'identity_number' => 'required',
             'email' => 'required|unique:delivery_men',
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men',
-            'password'=>'required|min:6',
-            'vehicle_id' => 'required',
+            'password' => ['required', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {
@@ -206,8 +206,7 @@ class DeliveryManController extends Controller
             'f_name' => 'required',
             'email' => 'required|unique:delivery_men,email,'.$id,
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10|unique:delivery_men,phone,'.$id,
-            'password'=>'nullable|min:6',
-            'vehicle_id' => 'required',
+            'password' => ['nullable', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
         ]);
 
         if ($validator->fails()) {

@@ -14,7 +14,7 @@
         <td>
             <div class="d-flex flex-wrap justify-content-center">
                 <label class="toggle-switch toggle-switch-sm" for="campaignCheckbox{{$campaign->id}}">
-                    <input type="checkbox" onclick="location.href='{{route('admin.campaign.status',['item',$campaign['id'],$campaign->status?0:1])}}'"class="toggle-switch-input" id="campaignCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
+                    <input type="checkbox" data-url="{{route('admin.campaign.status',['item',$campaign['id'],$campaign->status?0:1])}}" class="toggle-switch-input redirect-url" id="campaignCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
                     <span class="toggle-switch-label">
                         <span class="toggle-switch-indicator"></span>
                     </span>
@@ -24,10 +24,10 @@
         <td>
             <div class="btn--container justify-content-center">
                 <a class="btn action-btn btn--primary btn-outline-primary"
-                    href="{{route('admin.campaign.edit',['item',$campaign['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.campaign')}}"><i class="tio-edit"></i>
+                    href="{{route('admin.campaign.edit',['item',$campaign['id']])}}" title="{{translate('messages.edit_campaign')}}"><i class="tio-edit"></i>
                 </a>
-                <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                    onclick="form_alert('campaign-{{$campaign['id']}}','Want to delete this item ?')" title="{{translate('messages.delete')}} {{translate('messages.campaign')}}"><i class="tio-delete-outlined"></i>
+                <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:"
+                   data-id="campaign-{{$campaign['id']}}" data-message="{{ translate('Want to delete this item ?') }}" title="{{translate('messages.delete_campaign')}}"><i class="tio-delete-outlined"></i>
                 </a>
                 <form action="{{route('admin.campaign.delete-item',[$campaign['id']])}}"
                             method="post" id="campaign-{{$campaign['id']}}">

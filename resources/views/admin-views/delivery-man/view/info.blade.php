@@ -17,19 +17,22 @@
                 <span>{{translate('messages.deliveryman_preview')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$reviews->total()}}</span></span>
             </h1>
             <div class="row">
-                @if($dm->application_status == 'approved')
+                @if($deliveryMan->application_status == 'approved')
                 <div class="col-md-12">
                     <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
                         <!-- Nav -->
                         <ul class="nav nav-tabs mb-3 border-0 nav--tabs">
                             <li class="nav-item">
-                                <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
+                                <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
+                                <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
+                                <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'disbursement'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
                             </li>
                         </ul>
                         <!-- End Nav -->
@@ -38,12 +41,10 @@
                 @else
                 <div class="col-md-12">
                     <div class="btn--container justify-content-end">
-                        <a class="btn btn--primary text-capitalize font-weight-bold"
-                        onclick="request_alert('{{route('admin.users.delivery-man.application',[$dm['id'],'approved'])}}','{{translate('messages.you_want_to_approve_this_application')}}')"
+                        <a class="btn btn--primary text-capitalize font-weight-bold request-alert" data-url="{{route('admin.users.delivery-man.application',[$deliveryMan['id'],'approved'])}}" data-message="{{translate('messages.you_want_to_approve_this_application')}}"
                             href="javascript:"><i class="tio-checkmark-circle-outlined font-weight-bold pr-1"></i> {{translate('messages.approve')}}</a>
-                        @if($dm->application_status !='denied')
-                        <a class="btn btn--danger text-capitalize font-weight-bold"
-                        onclick="request_alert('{{route('admin.users.delivery-man.application',[$dm['id'],'denied'])}}','{{translate('messages.you_want_to_deny_this_application')}}')"
+                        @if($deliveryMan->application_status !='denied')
+                        <a class="btn btn--danger text-capitalize font-weight-bold request-alert" data-url="{{route('admin.users.delivery-man.application',[$deliveryMan['id'],'denied'])}}" data-message="{{translate('messages.you_want_to_deny_this_application')}}"
                             href="javascript:"><i class="tio-clear-circle-outlined font-weight-bold pr-1"></i> {{translate('messages.deny')}}</a>
                         @endif
                     </div>
@@ -53,13 +54,13 @@
             </div>
         </div>
         <!-- End Page Header -->
-
+        @if($deliveryMan->application_status == 'approved')
         <div class="row mb-3 row-3">
             <!-- Earnings (Monthly) Card Example -->
-            <div class="col-sm-6 col-md-4">
+            <div class="col-sm-6 mb-2 col-md-4">
                 <div class="resturant-card card--bg-1">
                     <h2 class="title">
-                        {{$dm->total_delivered_orders()->count()}}
+                        {{$deliveryMan->total_delivered_orders()->count()}}
                     </h2>
                     <h5 class="subtitle">
                         {{translate('messages.total_delivered_orders')}}
@@ -69,47 +70,128 @@
             </div>
 
             <!-- Collected Cash Card Example -->
-            <div class="col-sm-6 col-md-4">
-                <div class="resturant-card card--bg-2">
+            <div class="col-sm-6 mb-2 col-md-4">
+                <div class="resturant-card bg--3">
                     <h2 class="title">
-                        {{\App\CentralLogics\Helpers::format_currency($dm->wallet?$dm->wallet->collected_cash:0.0)}}
+                        {{\App\CentralLogics\Helpers::format_currency($deliveryMan->wallet?$deliveryMan->wallet->collected_cash:0.0)}}
                     </h2>
                     <h5 class="subtitle">
                         {{translate('messages.cash_in_hand')}}
                     </h5>
-                    <img class="resturant-icon w--30" src="{{asset('public/assets/admin/img/withdraw-amount.png')}}" alt="img">
+                    <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/withdraw-amount.png')}}" alt="transactions">
                 </div>
             </div>
 
             <!-- Total Earning Card Example -->
-            <div class="col-sm-6 col-md-4">
-                <div class="resturant-card card--bg-3">
+            <div class="col-sm-6 mb-2 col-md-4">
+                <div class="resturant-card bg--1">
                     <h2 class="title">
-                        {{\App\CentralLogics\Helpers::format_currency($dm->wallet?$dm->wallet->total_earning:0.00)}}
+                        {{\App\CentralLogics\Helpers::format_currency($deliveryMan->wallet?$deliveryMan->wallet->total_earning:0.00)}}
                     </h2>
                     <h5 class="subtitle">
                         {{translate('messages.total_earning')}}
                     </h5>
-                    <img class="resturant-icon w--30" src="{{asset('public/assets/admin/img/pending.png')}}" alt="img">
+                    <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
                 </div>
             </div>
 
+            <!-- Total Earning Card Example -->
+
+                <?php
+                $balance = 0;
+                if($deliveryMan->wallet){
+                    $balance = $deliveryMan->wallet->total_earning - ($deliveryMan->wallet->total_withdrawn + $deliveryMan->wallet->pending_withdraw + $deliveryMan->wallet->collected_cash );
+                }
+
+                ?>
+            @if($deliveryMan->earning)
+
+                @if ($balance > 0)
+                    <div class="col-sm-6 mb-2 col-md-4">
+                        <div class="resturant-card bg--1">
+                            <h2 class="title">
+                                {{\App\CentralLogics\Helpers::format_currency(abs($balance))}}
+                            </h2>
+                            <h5 class="subtitle">
+                                {{translate('messages.Withdraw_Able_Balance')}}
+                            </h5>
+                            <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
+                        </div>
+                    </div>
+                @elseif($balance < 0)
+                    <div class="col-sm-6 mb-2 col-md-4">
+                        <div class="resturant-card bg--1">
+                            <h2 class="title">
+                                {{\App\CentralLogics\Helpers::format_currency(abs($deliveryMan->wallet->collected_cash))}}
+                            </h2>
+                            <h5 class="subtitle">
+                                {{translate('messages.Payable_Balance')}}
+                            </h5>
+                            <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
+                        </div>
+                    </div>
+
+                @else
+                    <div class="col-sm-6 mb-2 col-md-4">
+                        <div class="resturant-card bg--1">
+                            <h2 class="title">
+                                {{\App\CentralLogics\Helpers::format_currency(0)}}
+                            </h2>
+                            <h5 class="subtitle">
+                                {{translate('messages.Balance')}}
+                            </h5>
+                            <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
+                        </div>
+                    </div>
+
+                @endif
+
+
+                <div class="col-sm-6 mb-2 col-md-4">
+                    <div class="resturant-card bg--1">
+                        <h2 class="title">
+                            {{\App\CentralLogics\Helpers::format_currency($deliveryMan->wallet?$deliveryMan->wallet->total_withdrawn:0.00)}}
+                        </h2>
+                        <h5 class="subtitle">
+                            {{translate('messages.Total_withdrawn')}}
+                        </h5>
+                        <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
+                    </div>
+                </div>
+
+                <div class="col-sm-6 mb-2 col-md-4">
+                    <div class="resturant-card bg--1">
+                        <h2 class="title">
+                            {{\App\CentralLogics\Helpers::format_currency($deliveryMan->wallet?$deliveryMan->wallet->pending_withdraw:0.00)}}
+                        </h2>
+                        <h5 class="subtitle">
+                            {{translate('messages.Pending_withdraw')}}
+                        </h5>
+                        <img class="resturant-icon" src="{{asset('/public/assets/admin/img/transactions/pending.png')}}" alt="transactions">
+                    </div>
+                </div>
+
+            @endif
         </div>
+    </div>
+    </div>
+    </div>
+        @endif
 
         <!-- Card -->
         <div class="card mb-3">
             <div class="card-header py-2">
                 <div class="search--button-wrapper">
                     <h4 class="card-title">
-                        {{$dm['f_name'].' '.$dm['l_name']}}
+                        {{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}
 
-                        (@if($dm->zone)
-                            {{$dm->zone->name}}
-                        @else {{translate('messages.zone').' '.translate('messages.deleted')}}
+                        (@if($deliveryMan->zone)
+                            {{$deliveryMan->zone->name}}
+                        @else {{translate('messages.zone_deleted')}}
                         @endif )
-                        @if($dm->application_status=='approved')
-                            @if($dm['status'])
-                                @if($dm['active'])
+                        @if($deliveryMan->application_status=='approved')
+                            @if($deliveryMan['status'])
+                                @if($deliveryMan['active'])
                                     <label class="badge badge-soft-primary">{{translate('messages.online')}}</label>
                                 @else
                                     <label class="badge badge-soft-danger">{{translate('messages.offline')}}</label>
@@ -119,12 +201,12 @@
                             @endif
 
                         @else
-                        <label class="badge badge-soft-{{$dm->application_status=='pending'?'info':'danger'}}">{{translate('messages.'.$dm->application_status)}}</label>
+                        <label class="badge badge-soft-{{$deliveryMan->application_status=='pending'?'info':'danger'}}">{{translate('messages.'.$deliveryMan->application_status)}}</label>
                         @endif
                     </h4>
-                    @if($dm->application_status=='approved')
-                    <a  href="javascript:"  onclick="request_alert('{{route('admin.users.delivery-man.status',[$dm['id'],$dm->status?0:1])}}','{{$dm->status?translate('messages.you_want_to_suspend_this_deliveryman'):translate('messages.you_want_to_unsuspend_this_deliveryman')}}')" class="btn font-medium {{$dm->status?'btn--danger':'btn-success'}}">
-                            {{$dm->status?translate('messages.suspend_this_delivery_man'):translate('messages.unsuspend_this_delivery_man')}}
+                    @if($deliveryMan->application_status=='approved')
+                    <a  href="javascript:" class="btn font-medium request-alert {{$deliveryMan->status?'btn--danger':'btn-success'}}" data-url="{{route('admin.users.delivery-man.status',[$deliveryMan['id'],$deliveryMan->status?0:1])}}" data-message="{{$deliveryMan->status?translate('messages.you_want_to_suspend_this_deliveryman'):translate('messages.you_want_to_unsuspend_this_deliveryman')}}">
+                            {{$deliveryMan->status?translate('messages.suspend_this_delivery_man'):translate('messages.unsuspend_this_delivery_man')}}
                     </a>
                     @endif
                     <div class="hs-unfold">
@@ -132,14 +214,12 @@
                             <button class="btn btn-secondary dropdown-toggle" type="button"
                                     id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
                                     aria-expanded="false">
-                                {{translate('messages.type')}} ({{$dm->earning?translate('messages.freelancer'):translate('messages.salary_based')}})
+                                {{translate('messages.type')}} ({{$deliveryMan->earning?translate('messages.freelancer'):translate('messages.salary_based')}})
                             </button>
                             <div class="dropdown-menu text-capitalize" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item {{$dm->earning?'active':''}}"
-                                onclick="request_alert('{{route('admin.users.delivery-man.earning',[$dm['id'],1])}}','{{translate('messages.want_to_enable_earnings')}}')"
+                                <a class="dropdown-item {{$deliveryMan->earning?'active':''}} request-alert" data-url="{{route('admin.users.delivery-man.earning',[$deliveryMan['id'],1])}}" data-message="{{translate('messages.want_to_enable_earnings')}}"
                                     href="javascript:">{{translate('messages.freelancer')}}</a>
-                                <a class="dropdown-item {{$dm->earning?'':'active'}}"
-                                onclick="request_alert('{{route('admin.users.delivery-man.earning',[$dm['id'],0])}}','{{translate('messages.want_to_disable_earnings')}}')"
+                                <a class="dropdown-item {{$deliveryMan->earning?'':'active'}} request-alert" data-url="{{route('admin.users.delivery-man.earning',[$deliveryMan['id'],0])}}" data-message="{{translate('messages.want_to_disable_earnings')}}"
                                     href="javascript:">{{translate('messages.salary_based')}}</a>
                             </div>
                         </div>
@@ -152,11 +232,11 @@
                     <div class="col-md-4">
 
                         <h2 class="title">{{ translate('Vehicle Information') }}</h2>
-                            @if (isset($dm->vehicle))
-                            <div>{{ translate('Vehicle_Type') }} : {{ $dm->vehicle->type}}</div>
-                            <div>{{ translate('Vehicle_Extra_Charges') }} : {{ $dm->vehicle->extra_charges}}</div>
-                            <div>{{ translate('Vehicle_minimum_coverage_area') }} : {{ $dm->vehicle->starting_coverage_area}}</div>
-                            <div>{{ translate('Vehicle_maximum_coverage_area') }} : {{ $dm->vehicle->maximum_coverage_area}}</div>
+                            @if (isset($deliveryMan->vehicle))
+                            <div>{{ translate('Vehicle_Type') }} : {{ $deliveryMan->vehicle->type}}</div>
+                            <div>{{ translate('Vehicle_Extra_Charges') }} : {{ $deliveryMan->vehicle->extra_charges}}</div>
+                            <div>{{ translate('Vehicle_minimum_coverage_area') }} : {{ $deliveryMan->vehicle->starting_coverage_area}}</div>
+                            <div>{{ translate('Vehicle_maximum_coverage_area') }} : {{ $deliveryMan->vehicle->maximum_coverage_area}}</div>
                             @else
                             <div>{{ translate('No_vehicle_data_found') }}</div>
                             @endif
@@ -164,15 +244,15 @@
                     </div>
                     <div class="col-md-4">
                         <div class="d-flex align-items-center justify-content-center">
-                            <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120"
-                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                 src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}"
+                            <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120 onerror-image"
+                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($deliveryMan['image'], asset('storage/app/public/delivery-man/').'/'.$deliveryMan['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
                                  alt="Image Description">
                             <div class="d-block">
                                 <div class="rating--review">
-                                    <h1 class="title">{{count($dm->rating)>0?number_format($dm->rating[0]->average, 1):0}}<span class="out-of">/5</span></h1>
-                                    @if (count($dm->rating)>0)
-                                    @if ($dm->rating[0]->average == 5)
+                                    <h1 class="title">{{count($deliveryMan->rating)>0?number_format($deliveryMan->rating[0]->average, 1):0}}<span class="out-of">/5</span></h1>
+                                    @if (count($deliveryMan->rating)>0)
+                                    @if ($deliveryMan->rating[0]->average == 5)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
@@ -180,7 +260,7 @@
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 5 && $dm->rating[0]->average > 4.5)
+                                    @elseif ($deliveryMan->rating[0]->average < 5 && $deliveryMan->rating[0]->average > 4.5)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
@@ -188,7 +268,7 @@
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star-half"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 4.5 && $dm->rating[0]->average > 4)
+                                    @elseif ($deliveryMan->rating[0]->average < 4.5 && $deliveryMan->rating[0]->average > 4)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
@@ -196,7 +276,7 @@
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 4 && $dm->rating[0]->average > 3)
+                                    @elseif ($deliveryMan->rating[0]->average < 4 && $deliveryMan->rating[0]->average > 3)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
@@ -204,7 +284,7 @@
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 3 && $dm->rating[0]->average > 2)
+                                    @elseif ($deliveryMan->rating[0]->average < 3 && $deliveryMan->rating[0]->average > 2)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star"></i></span>
@@ -212,7 +292,7 @@
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 2 && $dm->rating[0]->average > 1)
+                                    @elseif ($deliveryMan->rating[0]->average < 2 && $deliveryMan->rating[0]->average > 1)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
@@ -220,7 +300,7 @@
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average < 1 && $dm->rating[0]->average > 0)
+                                    @elseif ($deliveryMan->rating[0]->average < 1 && $deliveryMan->rating[0]->average > 0)
                                     <div class="rating">
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
@@ -228,7 +308,7 @@
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average == 1)
+                                    @elseif ($deliveryMan->rating[0]->average == 1)
                                     <div class="rating">
                                         <span><i class="tio-star"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
@@ -236,7 +316,7 @@
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
                                     </div>
-                                    @elseif ($dm->rating[0]->average == 0)
+                                    @elseif ($deliveryMan->rating[0]->average == 0)
                                     <div class="rating">
                                         <span><i class="tio-star-outlined"></i></span>
                                         <span><i class="tio-star-outlined"></i></span>
@@ -247,8 +327,8 @@
                                     @endif
                                     @endif
                                     <div class="info">
-                                        {{-- <span class="mr-3">{{$dm->rating->count()}} {{translate('messages.rating')}}</span> --}}
-                                        <span>{{$dm->reviews->count()}} {{translate('messages.reviews')}}</span>
+                                        {{-- <span class="mr-3">{{$deliveryMan->rating->count()}} {{translate('messages.rating')}}</span> --}}
+                                        <span>{{$deliveryMan->reviews->count()}} {{translate('messages.reviews')}}</span>
                                     </div>
                                 </div>
 
@@ -259,10 +339,10 @@
                     <div class="col-md-4">
                         <ul class="list-unstyled list-unstyled-py-2 mb-0 rating--review-right py-3">
 
-                        @php($total=$dm->reviews->count())
+                        @php($total=$deliveryMan->reviews->count())
                         <!-- Review Ratings -->
                             <li class="d-flex align-items-center font-size-sm">
-                                @php($five=\App\CentralLogics\Helpers::dm_rating_count($dm['id'],5))
+                                @php($five=\App\CentralLogics\Helpers::dm_rating_count($deliveryMan['id'],5))
                                 <span
                                     class="progress-name mr-3">{{translate('excellent')}}</span>
                                 <div class="progress flex-grow-1">
@@ -277,7 +357,7 @@
 
                             <!-- Review Ratings -->
                             <li class="d-flex align-items-center font-size-sm">
-                                @php($four=\App\CentralLogics\Helpers::dm_rating_count($dm['id'],4))
+                                @php($four=\App\CentralLogics\Helpers::dm_rating_count($deliveryMan['id'],4))
                                 <span class="progress-name mr-3">{{translate('good')}}</span>
                                 <div class="progress flex-grow-1">
                                     <div class="progress-bar" role="progressbar"
@@ -291,7 +371,7 @@
 
                             <!-- Review Ratings -->
                             <li class="d-flex align-items-center font-size-sm">
-                                @php($three=\App\CentralLogics\Helpers::dm_rating_count($dm['id'],3))
+                                @php($three=\App\CentralLogics\Helpers::dm_rating_count($deliveryMan['id'],3))
                                 <span class="progress-name mr-3">{{translate('average')}}</span>
                                 <div class="progress flex-grow-1">
                                     <div class="progress-bar" role="progressbar"
@@ -305,7 +385,7 @@
 
                             <!-- Review Ratings -->
                             <li class="d-flex align-items-center font-size-sm">
-                                @php($two=\App\CentralLogics\Helpers::dm_rating_count($dm['id'],2))
+                                @php($two=\App\CentralLogics\Helpers::dm_rating_count($deliveryMan['id'],2))
                                 <span class="progress-name mr-3">{{translate('below_average')}}</span>
                                 <div class="progress flex-grow-1">
                                     <div class="progress-bar" role="progressbar"
@@ -319,7 +399,7 @@
 
                             <!-- Review Ratings -->
                             <li class="d-flex align-items-center font-size-sm">
-                                @php($one=\App\CentralLogics\Helpers::dm_rating_count($dm['id'],1))
+                                @php($one=\App\CentralLogics\Helpers::dm_rating_count($deliveryMan['id'],1))
                                 <span class="progress-name mr-3">{{translate('poor')}}</span>
                                 <div class="progress flex-grow-1">
                                     <div class="progress-bar" role="progressbar"
@@ -336,10 +416,94 @@
             </div>
             <!-- End Body -->
         </div>
-        <!-- End Card -->
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="tio-user"></i>
+                    <span>{{ translate('Identity Documents') }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="pl-3"><span class="te">{{ translate('Identity_Type') }}</span> : {{ translate($deliveryMan->identity_type)}}</div>
+                <div class="pl-3"><span class="te">{{ translate('messages.identification_number') }}</span> : {{ $deliveryMan->identity_number}}</div>
+                <div class="row g-3">
+                    @foreach (json_decode($deliveryMan->identity_image) as $key => $img)
+                        <div class="col-auto">
+                                <button class="btn w-100" data-toggle="modal"
+                                    data-target="#image-{{ $key }}">
+                                    <div class="gallary-card">
+                                        <img data-onerror-image="{{ asset('/public/assets/admin/img/900x400/img1.jpg') }}"
+                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper($img, asset('storage/app/public/delivery-man/').'/'.$img, asset('public/assets/admin/img/900x400/img1.jpg'), 'delivery-man/') }}" class="w-100 onerror-image">
+                                    </div>
+                                </button>
+                                <div class="modal fade" id="image-{{ $key }}" tabindex="-1" role="dialog"
+                                aria-labelledby="myModlabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="myModlabel">
+                                                {{ translate('messages.Identity_Image') }}</h4>
+                                            <button type="button" class="close" data-dismiss="modal"><span
+                                                    aria-hidden="true">&times;</span><span
+                                                    class="sr-only">{{ translate('messages.Close') }}</span></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <img data-onerror-image="{{ asset('/public/assets/admin/img/900x400/img1.jpg') }}"
+                                            src="{{\App\CentralLogics\Helpers::onerror_image_helper($img, asset('storage/app/public/delivery-man/').'/'.$img, asset('public/assets/admin/img/900x400/img1.jpg'), 'delivery-man/') }}"
+
+                                                class="w-100 onerror-image">
+                                        </div>
+                                        <div class="modal-footer">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
 
         <!-- Card -->
         <div class="card">
+            <!-- Header -->
+            <div class="card-header py-2 border-0">
+                <h5 class="card-header-title">
+                        {{translate('messages.review_list')}}
+                </h5>
+                <div class="search--button-wrapper justify-content-end">
+                    <!-- Unfold -->
+                    <div class="hs-unfold mr-2">
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                            data-hs-unfold-options='{
+                                    "target": "#usersExportDropdown",
+                                    "type": "css-animation"
+                                }'>
+                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                        </a>
+
+                        <div id="usersExportDropdown"
+                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                            <a id="export-excel" class="dropdown-item" href="{{route('admin.users.delivery-man.review-export', ['type'=>'excel','id'=>$deliveryMan->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.excel') }}
+                            </a>
+                            <a id="export-csv" class="dropdown-item" href="{{route('admin.users.delivery-man.review-export', ['type'=>'csv','id'=>$deliveryMan->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                    alt="Image Description">
+                                .{{ translate('messages.csv') }}
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Unfold -->
+                </div>
+            </div>
+            <!-- End Header -->
             <!-- Table -->
             <div class="card-body p-0">
                 <div class="table-responsive datatable-custom">
@@ -379,7 +543,6 @@
                                         href="{{route('admin.customer.view',[$review['user_id']])}}">
                                             <div class="avatar avatar-circle">
                                                 <img class="avatar-img" width="75" height="75"
-                                                    {{-- onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'" --}}
                                                     src="{{asset('storage/app/public/profile/')}}/{{$review->customer?$review->customer->image:''}}"
                                                     alt="Image Description">
                                             </div>
@@ -441,6 +604,12 @@
 
 @push('script_2')
 <script>
+    "use strict";
+    $('.request-alert').on('click', function(){
+        let url = $(this).data('url');
+        let message = $(this).data('message');
+        request_alert(url, message);
+    })
     function request_alert(url, message) {
         Swal.fire({
             title: '{{translate('messages.are_you_sure')}}',

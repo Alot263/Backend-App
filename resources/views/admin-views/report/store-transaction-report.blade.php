@@ -19,7 +19,7 @@
                     {{translate('Store Wise Report')}}
                 </h1>
                 <span>
-                    Monitor store’s  <strong class="font-bold text--title">business</strong> analytics & Reports
+                    {{ translate('Monitor_store’s_business_analytics_&_Reports') }}
                 </span>
             </div>
         </div>
@@ -270,8 +270,7 @@
                             {{ translate('messages.print') }}
                         </a>
                         <div class="dropdown-divider"></div> --}}
-                        <span class="dropdown-header">{{ translate('messages.download') }}
-                            {{ translate('messages.options') }}</span>
+                        <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                         <a id="export-excel" class="dropdown-item" href="{{route('admin.store.export', ['type'=>'excel',request()->getQueryString()])}}">
                             <img class="avatar avatar-xss avatar-4by3 mr-2"
                                 src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
@@ -323,7 +322,7 @@
                                 </div>
                             </td>
                             <td class="pl-0">
-                                078 8502 2342 
+                                078 8502 2342
                             </td>
                             <td class="pl-0">
                                 Visa Card
@@ -358,7 +357,7 @@
                                 </div>
                             </td>
                             <td class="pl-0">
-                                078 8502 2342 
+                                078 8502 2342
                             </td>
                             <td class="pl-0">
                                 Visa Card
@@ -393,7 +392,7 @@
                                 </div>
                             </td>
                             <td class="pl-0">
-                                078 8502 2342 
+                                078 8502 2342
                             </td>
                             <td class="pl-0">
                                 Visa Card
@@ -426,7 +425,7 @@
     <script src="{{asset('public/assets/admin')}}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
     <script src="{{asset('public/assets/admin')}}/vendor/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.min.js"></script>
 
-    
+
     <!-- Apex Charts -->
     <script src="{{asset('/public/assets/admin/js/apex-charts/apexcharts.js')}}"></script>
     <!-- Apex Charts -->

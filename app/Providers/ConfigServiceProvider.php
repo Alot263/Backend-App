@@ -2,13 +2,14 @@
 
 namespace App\Providers;
 
-use App\Models\BusinessSetting;
+use Carbon\Carbon;
 use App\Models\Module;
+use App\Models\Setting;
+use App\Models\BusinessSetting;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 Carbon::setWeekStartsAt(Carbon::MONDAY);
 Carbon::setWeekEndsAt(Carbon::SUNDAY);
 class ConfigServiceProvider extends ServiceProvider
@@ -50,22 +51,28 @@ class ConfigServiceProvider extends ServiceProvider
                 Config::set('mail', $config);
             }
 
-            $data = BusinessSetting::where(['key' => 'paystack'])->first();
-            $paystack = json_decode($data['value'], true);
-            if ($paystack) {
+            $gateway=
+            [ 'paytm',
+            'razor_pay',
+            'flutterwave',
+            'paypal',
+            'ssl_commerz',
+            'paystack' ];
+
+            $data= Setting::whereIn('key_name',$gateway)->pluck('live_values','key_name')->toArray();
+            if (isset($data['paystack'])) {
                 $config = array(
-                    'publicKey' => env('PAYSTACK_PUBLIC_KEY', $paystack['publicKey']),
-                    'secretKey' => env('PAYSTACK_SECRET_KEY', $paystack['secretKey']),
-                    'paymentUrl' => env('PAYSTACK_PAYMENT_URL', $paystack['paymentUrl']),
-                    'merchantEmail' => env('MERCHANT_EMAIL', $paystack['merchantEmail']),
+                    'publicKey' => env('PAYSTACK_PUBLIC_KEY',data_get($data,'paystack.public_key',null)),
+                    'secretKey' => env('PAYSTACK_SECRET_KEY', data_get($data,'paystack.secret_key',null)),
+                    'paymentUrl' => env('PAYSTACK_PAYMENT_URL',data_get($data,'paystack.callback_url',null)),
+                    'merchantEmail' => env('MERCHANT_EMAIL', data_get($data,'paystack.merchant_email',null)),
                 );
                 Config::set('paystack', $config);
             }
 
-            $data = BusinessSetting::where(['key' => 'ssl_commerz_payment'])->first();
-            $ssl = json_decode($data['value'], true);
-            if ($ssl) {
-                if ($mode == 'live') {
+
+            if (data_get($data,'ssl_commerz',null)) {
+                if ( data_get($data,'ssl_commerz.mode',null) == 'live') {
                     $url = "https://securepay.sslcommerz.com";
                     $host = false;
                 } else {
@@ -76,8 +83,8 @@ class ConfigServiceProvider extends ServiceProvider
                     'projectPath' => env('PROJECT_PATH'),
                     'apiDomain' => env("API_DOMAIN_URL", $url),
                     'apiCredentials' => [
-                        'store_id' => $ssl['store_id'],
-                        'store_password' => $ssl['store_password'],
+                        'store_id' => data_get($data,'ssl_commerz.store_id',null),
+                        'store_password' => data_get($data,'ssl_commerz.store_password',null),
                     ],
                     'apiUrl' => [
                         'make_payment' => "/gwprocess/v4/api.php",
@@ -95,19 +102,15 @@ class ConfigServiceProvider extends ServiceProvider
                 Config::set('sslcommerz', $config);
             }
 
-            $data = BusinessSetting::where(['key' => 'paypal'])->first();
-            $paypal = json_decode($data['value'], true);
-            if ($paypal) {
-
-                if ($mode == 'live') {
+            if (data_get($data,'paypal',null)) {
+                if (data_get($data,'paypal.mode',null) == 'live') {
                     $paypal_mode = "live";
                 } else {
                     $paypal_mode = "sandbox";
                 }
-
                 $config = array(
-                    'client_id' => $paypal['paypal_client_id'], // values : (local | production)
-                    'secret' => $paypal['paypal_secret'],
+                    'client_id' => data_get($data,'paypal.client_id',null), // values : (local | production)
+                    'secret' => data_get($data,'paypal.client_secret',null),
                     'settings' => array(
                         'mode' => env('PAYPAL_MODE', $paypal_mode), //live||sandbox
                         'http.ConnectionTimeOut' => 30,
@@ -119,25 +122,42 @@ class ConfigServiceProvider extends ServiceProvider
                 Config::set('paypal', $config);
             }
 
-            $data = BusinessSetting::where(['key' => 'flutterwave'])->first();
-            $flutterwave = json_decode($data['value'], true);
-            if ($flutterwave) {
+            if (data_get($data,'flutterwave',null)) {
                 $config = array(
-                    'publicKey' => env('FLW_PUBLIC_KEY', $flutterwave['public_key']), // values : (local | production)
-                    'secretKey' => env('FLW_SECRET_KEY', $flutterwave['secret_key']),
-                    'secretHash' => env('FLW_SECRET_HASH', $flutterwave['hash']),
+                    'publicKey' => env('FLW_PUBLIC_KEY',data_get($data,'flutterwave.public_key',null)), // values : (local | production)
+                    'secretKey' => env('FLW_SECRET_KEY', data_get($data,'flutterwave.secret_key',null)),
+                    'secretHash' => env('FLW_SECRET_HASH', data_get($data,'flutterwave.hash',null)),
                 );
                 Config::set('flutterwave', $config);
             }
 
-            $data = BusinessSetting::where(['key' => 'razor_pay'])->first();
-            $razor = json_decode($data['value'], true);
-            if ($razor) {
+            if (data_get($data,'razor_pay',null)) {
                 $config = array(
-                    'razor_key' => env('RAZOR_KEY', $razor['razor_key']),
-                    'razor_secret' => env('RAZOR_SECRET', $razor['razor_secret'])
+                    'razor_key' => env('RAZOR_KEY', data_get($data,'razor_pay.api_key',null)),
+                    'razor_secret' => env('RAZOR_SECRET', data_get($data,'razor_pay.api_secret',null))
                 );
                 Config::set('razor', $config);
+            }
+
+            if (data_get($data,'paytm',null)) {
+                $PAYTM_STATUS_QUERY_NEW_URL='https://securegw-stage.paytm.in/merchant-status/getTxnStatus';
+                $PAYTM_TXN_URL='https://securegw-stage.paytm.in/theia/processTransaction';
+                if (data_get($data,'paytm.mode',null) == 'live') {
+                    $PAYTM_STATUS_QUERY_NEW_URL='https://securegw.paytm.in/merchant-status/getTxnStatus';
+                    $PAYTM_TXN_URL='https://securegw.paytm.in/theia/processTransaction';
+                }
+                $config = array(
+                    'PAYTM_ENVIRONMENT' => ($mode=='live')?'PROD':'TEST',
+                    'PAYTM_MERCHANT_KEY' => env('PAYTM_MERCHANT_KEY',data_get($data,'paytm.merchant_key',null)),
+                    'PAYTM_MERCHANT_MID' => env('PAYTM_MERCHANT_MID', data_get($data,'paytm.merchant_id',null)),
+                    'PAYTM_MERCHANT_WEBSITE' => env('PAYTM_MERCHANT_WEBSITE', data_get($data,'paytm.merchant_website_link',null)),
+                    'PAYTM_REFUND_URL' => env('PAYTM_REFUND_URL', data_get($data,'paytm.paytm_refund_url',null)),
+                    'PAYTM_STATUS_QUERY_URL' => env('PAYTM_STATUS_QUERY_URL', $PAYTM_STATUS_QUERY_NEW_URL),
+                    'PAYTM_STATUS_QUERY_NEW_URL' => env('PAYTM_STATUS_QUERY_NEW_URL', $PAYTM_STATUS_QUERY_NEW_URL),
+                    'PAYTM_TXN_URL' => env('PAYTM_TXN_URL', $PAYTM_TXN_URL),
+                );
+
+                Config::set('config_paytm', $config);
             }
 
             $odv = BusinessSetting::where(['key' => 'order_delivery_verification'])->first();
@@ -206,33 +226,6 @@ class ConfigServiceProvider extends ServiceProvider
             }
             else{
                 Config::set('toggle_veg_non_veg', false);
-            }
-
-            //paytm
-            $paytm = BusinessSetting::where(['key' => 'paytm'])->first();
-            $paytm = isset($paytm)?json_decode($paytm->value, true):null;
-
-            if (isset($paytm)) {
-
-                $PAYTM_STATUS_QUERY_NEW_URL='https://securegw-stage.paytm.in/merchant-status/getTxnStatus';
-                $PAYTM_TXN_URL='https://securegw-stage.paytm.in/theia/processTransaction';
-                if ($mode == 'live') {
-                    $PAYTM_STATUS_QUERY_NEW_URL='https://securegw.paytm.in/merchant-status/getTxnStatus';
-                    $PAYTM_TXN_URL='https://securegw.paytm.in/theia/processTransaction';
-                }
-
-                $config = array(
-                    'PAYTM_ENVIRONMENT' => ($mode=='live')?'PROD':'TEST',
-                    'PAYTM_MERCHANT_KEY' => env('PAYTM_MERCHANT_KEY', $paytm['paytm_merchant_key']),
-                    'PAYTM_MERCHANT_MID' => env('PAYTM_MERCHANT_MID', $paytm['paytm_merchant_mid']),
-                    'PAYTM_MERCHANT_WEBSITE' => env('PAYTM_MERCHANT_WEBSITE', $paytm['paytm_merchant_website']),
-                    'PAYTM_REFUND_URL' => env('PAYTM_REFUND_URL', $paytm['paytm_refund_url']),
-                    'PAYTM_STATUS_QUERY_URL' => env('PAYTM_STATUS_QUERY_URL', $PAYTM_STATUS_QUERY_NEW_URL),
-                    'PAYTM_STATUS_QUERY_NEW_URL' => env('PAYTM_STATUS_QUERY_NEW_URL', $PAYTM_STATUS_QUERY_NEW_URL),
-                    'PAYTM_TXN_URL' => env('PAYTM_TXN_URL', $PAYTM_TXN_URL),
-                );
-
-                Config::set('config_paytm', $config);
             }
       
         } catch (\Exception $ex) {

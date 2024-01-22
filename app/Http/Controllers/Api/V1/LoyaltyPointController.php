@@ -31,7 +31,8 @@ class LoyaltyPointController extends Controller
         {
             $wallet_transaction = CustomerLogic::create_wallet_transaction($request->user()->id,$request->point,'loyalty_point',$request->reference);
             CustomerLogic::create_loyalty_point_transaction($request->user()->id, $wallet_transaction->transaction_id, $request->point, 'point_to_wallet');
-            if(config('mail.status')) {
+            $mail_status = Helpers::get_mail_status('add_fund_mail_status_user');
+            if(config('mail.status') && $mail_status=='1') {
                 Mail::to($request->user()->email)->send(new \App\Mail\AddFundToWallet($wallet_transaction));
             }
 

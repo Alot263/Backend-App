@@ -14,9 +14,9 @@
             <div class="page-header-select-wrapper">
                 @if(!isset(auth('admin')->user()->zone_id))
                 <div class="col-sm-auto min--240">
-                    <select name="zone_id" class="form-control js-select2-custom"
-                            onchange="set_zone_filter('{{ url()->full() }}', this.value)">
-                        <option value="all">{{ translate('messages.All Zones') }}</option>
+                    <select name="zone_id" class="form-control js-select2-custom zone-filter"
+                            data-url="{{ url()->full() }}">
+                        <option value="all">{{ translate('messages.All_Zones') }}</option>
                         @foreach(\App\Models\Zone::orderBy('name')->get() as $z)
                             <option
                                 value="{{$z['id']}}" {{isset($zone) && $zone->id == $z['id']?'selected':''}}>
@@ -51,7 +51,7 @@
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">
-                        {{translate('messages.deliveryman')}} {{translate('messages.list')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$delivery_men->total()}}</span>
+                        {{translate('messages.deliveryman_list')}} <span class="badge badge-soft-dark ml-2" id="itemCount">{{$deliveryMen->total()}}</span>
                     </h5>
                     <form action="javascript:" id="search-form" class="search-form">
                         <!-- Search -->
@@ -82,19 +82,20 @@
                         <th class="border-0 text-capitalize">{{translate('messages.contact_info')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.zone')}}</th>
                         <th class="border-0 text-capitalize">{{translate('messages.total_orders')}}</th>
-                        <th class="border-0 text-capitalize">{{translate('messages.availability')}} {{translate('messages.status')}}</th>
+                        <th class="border-0 text-capitalize">{{translate('messages.availability_status')}}</th>
                         <th class="border-0 text-center text-capitalize">{{translate('messages.action')}}</th>
                     </tr>
                     </thead>
 
                     <tbody id="set-rows">
-                    @foreach($delivery_men as $key=>$dm)
+                    @foreach($deliveryMen as $key=>$dm)
                         <tr>
-                            <td>{{$key+$delivery_men->firstItem()}}</td>
+                            <td>{{$key+$deliveryMen->firstItem()}}</td>
                             <td>
                                 <a class="table-rest-info" href="{{route('admin.users.delivery-man.preview',[$dm['id']])}}">
-                                    <img onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                            src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}" alt="{{$dm['f_name']}} {{$dm['l_name']}}">
+                                    <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man/').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                                    alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                                     <div class="info">
                                         <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
                                         <span class="d-block text-body">
@@ -112,7 +113,7 @@
                                 @if($dm->zone)
                                 <label class="text--title font-medium mb-0">{{$dm->zone->name}}</label>
                                 @else
-                                <label class="text--title font-medium mb-0">{{translate('messages.zone').' '.translate('messages.deleted')}}</label>
+                                <label class="text--title font-medium mb-0">{{translate('messages.zone_deleted')}}</label>
                                 @endif
                             </td>
                             <td>
@@ -143,32 +144,30 @@
                                 @else
                                 <div class="col-md-12">
                                     <div class="btn--container justify-content-end">
-                                        <a class="btn action-btn btn--primary btn-outline-primary" data-toggle="tooltip" data-placement="top"
-                                        data-original-title="{{ translate('messages.approve') }}"
-                                        onclick="request_alert('{{route('admin.users.delivery-man.application',[$dm['id'],'approved'])}}','{{translate('messages.you_want_to_approve_this_application')}}')"
+                                        <a class="btn action-btn btn--primary btn-outline-primary request-alert" data-toggle="tooltip" data-placement="top"
+                                        data-original-title="{{ translate('messages.approve') }}" data-url="{{route('admin.users.delivery-man.application',[$dm['id'],'approved'])}}" data-message="{{translate('messages.you_want_to_approve_this_application')}}"
                                             href="javascript:"><i class="tio-done font-weight-bold"></i> </a>
                                         @if($dm->application_status !='denied')
-                                        <a class="btn action-btn btn--danger btn-outline-danger " data-toggle="tooltip" data-placement="top"
-                                        data-original-title="{{ translate('messages.deny') }}"
-                                        onclick="request_alert('{{route('admin.users.delivery-man.application',[$dm['id'],'denied'])}}','{{translate('messages.you_want_to_deny_this_application')}}')"
+                                        <a class="btn action-btn btn--danger btn-outline-danger request-alert" data-toggle="tooltip" data-placement="top"
+                                        data-original-title="{{ translate('messages.deny') }}" data-url="{{route('admin.users.delivery-man.application',[$dm['id'],'denied'])}}" data-message="{{translate('messages.you_want_to_deny_this_application')}}"
                                             href="javascript:"><i class="tio-clear font-weight-bold"></i></a>
                                         @endif
                                     </div>
                                 </div>
-                
+
                                 @endif
                             </td>
                         </tr>
                     @endforeach
                     </tbody>
                 </table>
-                @if(count($delivery_men) !== 0)
+                @if(count($deliveryMen) !== 0)
                 <hr>
                 @endif
                 <div class="page-area">
-                    {!! $delivery_men->links() !!}
+                    {!! $deliveryMen->links() !!}
                 </div>
-                @if(count($delivery_men) === 0)
+                @if(count($deliveryMen) === 0)
                 <div class="empty--data">
                     <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
                     <h5>
@@ -185,50 +184,9 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/deliveryman-new-denied-list.js"></script>
     <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .columns(1)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column2_search').on('keyup', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column3_search').on('keyup', function () {
-                datatable
-                    .columns(3)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column4_search').on('keyup', function () {
-                datatable
-                    .columns(4)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-
-    <script>
+        "use strict";
         function request_alert(url, message) {
             Swal.fire({
                 title: '{{translate('messages.are_you_sure')}}',
@@ -248,8 +206,9 @@
         }
 
         $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             set_filter('{!! url()->full() !!}',formData.get('search'),'search_by')
         });
     </script>
 @endpush
+

@@ -70,7 +70,7 @@
             <a class="btn btn-sm btn-white"
                         href="{{route('admin.pos.order-details',['id'=>$order['id']])}}"><i
                             class="tio-visible"></i> {{translate('messages.view')}}</a>
-            <btton class="btn btn-sm btn-white" target="_blank"
+            <button class="btn btn-sm btn-white" target="_blank"
                         type="button" onclick="print_invoice('{{$order->id}}')"><i
                             class="tio-download"></i> {{translate('messages.invoice')}}</button>
         </td>

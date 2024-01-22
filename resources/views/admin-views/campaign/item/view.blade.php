@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title','Item Campaign Preview')
+@section('title',translate('Item Campaign Preview'))
 
 @push('css_or_js')
 
@@ -31,23 +31,24 @@
             <div class="card-body">
                 <div class="row align-items-md-center">
                     <div class="col-md-6 col-lg-4 mb-3 mb-md-0">
-                            <img class="rounded img--ratio-3" src="{{asset('storage/app/public/campaign')}}/{{$campaign['image']}}" onerror="this.src='{{asset('/public/assets/admin/img/900x400/img1.jpg')}}'" alt="Image Description">
+                            <img class="rounded img--ratio-3 onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($campaign['image'], asset('storage/app/public/campaign/').'/'.$campaign['image'], asset('public/assets/admin/img/900x400/img1.jpg'), 'campaign/') }}"
+                            data-onerror-image="{{asset('/public/assets/admin/img/900x400/img1.jpg')}}" alt="Image Description">
                     </div>
                     <div class="col-md-6">
                         <span class="d-block mb-1">
-                            {{translate('messages.campaign')}} {{translate('messages.starts')}} {{translate('messages.from')}} :
+                            {{translate('messages.campaign_starts_from')}} :
                             <strong class="text--title">{{$campaign->start_date->format('Y-M-d')}}</strong>
                         </span>
                         <span class="d-block mb-1">
-                            {{translate('messages.campaign')}} {{translate('messages.ends')}} {{translate('messages.at')}} :
+                            {{translate('messages.campaign_ends_at')}} :
                             <strong class="text--title">{{$campaign->end_date->format('Y-M-d')}}</strong>
                         </span>
                         <span class="d-block mb-1">
-                            {{translate('messages.available')}} {{translate('messages.time')}} {{translate('messages.starts')}} :
+                            {{translate('messages.available_time_starts')}} :
                             <strong class="text--title">{{$campaign->start_time->format(config('timeformat'))}}</strong>
                         </span>
                         <span class="d-block">
-                            {{translate('messages.available')}} {{translate('messages.time')}} {{translate('messages.ends')}} :
+                            {{translate('messages.available_time_ends')}} :
                             <strong class="text--title">{{$campaign->end_time->format(config('timeformat'))}}</strong>
                         </span>
                     </div>
@@ -61,19 +62,19 @@
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <div class="text-center">
-                            <span class="mb-3">{{translate('messages.store')}} {{translate('messages.info')}}</span>
+                            <span class="mb-3">{{translate('messages.store_info')}}</span>
                             @if($campaign->store)
                             <div class="w-100 my-2">
                                 <a href="{{route('admin.store.view', $campaign->store_id)}}" title="{{$campaign->store['name']}}">
                                     <img
-                                        class="img--70 circle"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/store/'.$campaign->store->logo)}}"
+                                        class="img--70 circle onerror-image"
+                                        data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper($campaign->store->logo, asset('storage/app/public/store/').'/'.$campaign->store->logo, asset('public/assets/admin/img/160x160/img1.jpg'), 'store/') }}"
                                         alt="Image Description">
                                     <h5 class="input-label mt-2">{{$campaign->store['name']}}</h5>
                                 </a>
                                 @else
-                                <span class="badge-info">{{translate('messages.store')}} {{translate('messages.deleted')}}</span>
+                                <span class="badge-info">{{translate('messages.store_deleted')}}</span>
                                 @endif
                             </div>
                         </div>
@@ -88,7 +89,7 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th class="px-4 border-0 w--120px">
-                                            <h4 class="m-0">{{translate('messages.short')}} {{translate('messages.description')}}</h4>
+                                            <h4 class="m-0">{{translate('messages.short_description')}}</h4>
                                         </th>
                                         <th class="px-4 border-0 w--120px">
                                             <h4 class="m-0">{{translate('messages.price')}}</h4>
@@ -97,7 +98,7 @@
                                             <h4 class="m-0">{{translate('messages.variations')}}</h4>
                                         </th>
                                         <th class="px-4 border-0 w--120px">
-                                            <h4 class="m-0">Addons</h4>
+                                            <h4 class="m-0">{{ translate('Addons') }}</h4>
                                         </th>
                                     </tr>
                                 </thead>
@@ -130,7 +131,7 @@
                                                             </strong>
                                                         </span>
                                                     @break
-    
+
                                                 @else
                                                     <span class="d-block text-capitalize">
                                                         <strong>
@@ -145,12 +146,12 @@
                                                             - ({{ translate('messages.required') }})
                                                         @endif
                                                     </span>
-    
+
                                                     @if ($variation['min'] != 0 && $variation['max'] != 0)
                                                         ({{ translate('messages.Min_select') }}: {{ $variation['min'] }} -
                                                         {{ translate('messages.Max_select') }}: {{ $variation['max'] }})
                                                     @endif
-    
+
                                                     @if (isset($variation['values']))
                                                         @foreach ($variation['values'] as $value)
                                                             <span class="d-block text-capitalize">
@@ -222,9 +223,9 @@
                         <th class="border-0">{{translate('messages.date')}}</th>
                         <th class="border-0">{{translate('messages.customer')}}</th>
                         <th class="border-0">{{translate('messages.store')}}</th>
-                        <th class="border-0">{{translate('messages.payment')}} {{translate('messages.status')}}</th>
+                        <th class="border-0">{{translate('messages.payment_status')}}</th>
                         <th class="border-0">{{translate('messages.total')}}</th>
-                        <th class="border-0">{{translate('messages.order')}} {{translate('messages.status')}}</th>
+                        <th class="border-0">{{translate('messages.order_status')}}</th>
                     </tr>
                     </thead>
 
@@ -244,7 +245,7 @@
                                     <a class="text-body text-capitalize"
                                        href="{{route('admin.customer.view',[$order->order['user_id']])}}">{{$order->order->customer['f_name'].' '.$order->order->customer['l_name']}}</a>
                                 @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                 @endif
                             </td>
                             <td>

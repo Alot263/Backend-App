@@ -11,6 +11,8 @@ class Vendor extends Authenticatable
 {
     use Notifiable;
 
+    protected $fillable = ['remember_token'];
+
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime'

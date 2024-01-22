@@ -10,18 +10,21 @@ use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password;
 
 class SystemController extends Controller
 {
 
     public function store_data()
     {
-        $new_order = Order::StoreOrder()->where(['checked' => 0])->count();
-        $new_parcel_order = Order::ParcelOrder()->where(['checked' => 0])->count();
+        $new_order_count = Order::StoreOrder()->where(['checked' => 0])->count();
+        $new_order = Order::StoreOrder()->where(['checked' => 0])->latest()->first();
+        $new_parcel_order_count = Order::ParcelOrder()->where(['checked' => 0])->count();
+        $new_parcel_order = Order::ParcelOrder()->where(['checked' => 0])->latest()->first();
         return response()->json([
             'success' => 1,
 
-            'data' => ['new_order' => $new_order > 0 ? $new_order : $new_parcel_order, 'type' => $new_order > 0 ? 'store_order' : 'parcel_order',]
+            'data' => ['new_order' => $new_order_count > 0 ? $new_order_count : $new_parcel_order_count, 'type' => $new_order_count > 0 ? 'store_order' : 'parcel', 'module_id' => $new_order_count > 0 ? $new_order?->module_id : $new_parcel_order?->module_id]
         ]);
     }
 
@@ -64,7 +67,7 @@ class SystemController extends Controller
     public function settings_password_update(Request $request)
     {
         $request->validate([
-            'password' => 'required|same:confirm_password',
+            'password' => ['required','same:confirm_password', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised()],
             'confirm_password' => 'required',
         ]);
 
@@ -97,5 +100,29 @@ class SystemController extends Controller
             return response()->json(['message' => translate('Maintenance is off.')]);
         }
         return response()->json(['message' => translate('Maintenance is on.')]);
+    }
+
+    public function landing_page()
+    {
+        $landing_page = BusinessSetting::where('key', 'landing_page')->first();
+        if (isset($landing_page) == false) {
+            DB::table('business_settings')->insert([
+                'key' => 'landing_page',
+                'value' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        } else {
+            DB::table('business_settings')->where(['key' => 'landing_page'])->update([
+                'key' => 'landing_page',
+                'value' => $landing_page->value == 1 ? 0 : 1,
+                'updated_at' => now(),
+            ]);
+        }
+
+        if (isset($landing_page) && $landing_page->value) {
+            return response()->json(['message' => translate('landing_page_is_off.')]);
+        }
+        return response()->json(['message' => translate('landing_page_is_on.')]);
     }
 }

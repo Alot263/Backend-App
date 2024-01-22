@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\CentralLogics\Helpers;
-use App\Models\Order;
-use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Str;
+use App\Models\PaymentRequest;
+use App\Traits\Processor;
 use stdClass;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
 
@@ -276,60 +279,68 @@ class LiqPay
 
 class LiqPayController extends Controller
 {
-    public function payment(Request $request)
-    {
-        try{
-            $tran = Str::random(6) . '-' . rand(1, 1000);
-            $order = Order::with(['details'])->where(['id' => $request->order_id, 'user_id'=>$request->customer_id])->first();
-            $config = Helpers::get_business_settings('liqpay');
+    use Processor;
 
-            $public_key = $config['public_key'];
-            $private_key = $config['private_key'];
+    private PaymentRequest $payment;
+
+    public function __construct(PaymentRequest $payment)
+    {
+        $this->payment = $payment;
+    }
+
+    public function payment(Request $request): JsonResponse|string|RedirectResponse
+    {
+        try {
+            $config = $this->payment_config('liqpay', 'payment_config');
+            if (!is_null($config) && $config->mode == 'live') {
+                $values = json_decode($config->live_values);
+            } elseif (!is_null($config) && $config->mode == 'test') {
+                $values = json_decode($config->test_values);
+            }
+
+            $tran = Str::random(6) . '-' . rand(1, 1000);
+            $data = $this->payment::where(['id' => $request['payment_id']])->where(['is_paid' => 0])->first();
+            if (!isset($data)) {
+                return response()->json($this->response_formatter(GATEWAYS_DEFAULT_204), 200);
+            }
+
+            $public_key = $values->public_key;
+            $private_key = $values->private_key;
             $liqpay = new LiqPay($public_key, $private_key);
             $html = $liqpay->cnb_form(array(
                 'action' => 'pay',
-                'amount' => round($order->order_amount, 2),
-                'currency' => Helpers::currency_code(), //USD
+                'amount' => round($data->payment_amount, 2),
+                'currency' => $data->currency_code, //USD
                 'description' => 'Transaction ID: ' . $tran,
-                'order_id' => $order->id,
-                'result_url' => route('liqpay-callback',['order_id'=>$order->id]),
-                'server_url' => route('liqpay-callback',['order_id'=>$order->id]),
+                'order_id' => $data->attribute_id,
+                'result_url' => route('liqpay.callback', ['payment_id' => $data->id]),
+                'server_url' => route('liqpay.callback',['payment_id' => $data->id]),
                 'version' => '3'
             ));
             return $html;
-        }catch(\Exception $ex){
-            Toastr::error(translate('messages.config_your_account',['method'=>translate('messages.liqpay')]));
+        } catch (\Exception $ex) {
             return back();
         }
-
     }
 
-    public function callback(Request $request,$order_id)
+    public function callback(Request $request): JsonResponse|Redirector|RedirectResponse|Application
     {
-        $order = Order::with(['details'])->where(['id' => $order_id])->first();
-        $request['order_id'] = $order_id;
         if ($request['status'] == 'success') {
-            // $order->transaction_reference = $request->trxID;
-            $order->payment_method = 'LiqPay';
-            $order->payment_status = 'paid';
-            $order->order_status = 'confirmed';
-            $order->confirmed = now();
-            $order->save();
-            Helpers::send_order_notification($order);
-            if ($order->callback != null) {
-                return redirect($order->callback . '&status=success');
-            }else{
-                return \redirect()->route('payment-success');
+            $this->payment::where(['id' => $request['payment_id']])->update([
+                'payment_method' => 'liqpay',
+                'is_paid' => 1,
+                'transaction_id' => $request['transaction_id'],
+            ]);
+            $data = $this->payment::where(['id' => $request['payment_id']])->first();
+            if (isset($data) && function_exists($data->success_hook)) {
+                call_user_func($data->success_hook, $data);
             }
+            return $this->payment_response($data,'success');
         }
-
-        $order->order_status = 'failed';
-        $order->failed = now();
-        $order->save();
-        if ($order->callback != null) {
-            return redirect($order->callback . '&status=fail');
-        }else{
-            return \redirect()->route('payment-fail');
+        $payment_data = $this->payment::where(['id' => $request['payment_id']])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
         }
+        return $this->payment_response($payment_data,'fail');
     }
 }

@@ -2,51 +2,97 @@
 
 namespace App\CentralLogics;
 
-use App\Models\Store;
-use App\Models\OrderTransaction;
-use App\Models\Review;
-use App\Models\StoreSchedule;
 use Exception;
+use App\Models\Store;
+use App\Models\Review;
+use App\Models\DataSetting;
+use App\Models\StoreSchedule;
 
-use function Symfony\Component\VarDumper\Dumper\esc;
+use App\Models\OrderTransaction;
+use Illuminate\Support\Facades\DB;
 
 class StoreLogic
 {
-    public static function get_stores( $zone_id, $filter, $type, $limit = 10, $offset = 1, $featured=false,$longitude=0,$latitude=0)
+    public static function get_stores( $zone_id, $filter, $type, $store_type, $limit = 10, $offset = 1, $featured=false,$longitude=0,$latitude=0)
     {
         $paginator = Store::
-        withOpen($longitude,$latitude)
-        ->with(['discount'=>function($q){
-            return $q->validate();
-        }])
-        ->whereHas('module',function($query){
-            $query->active();
-        })
-        ->when($filter=='delivery', function($q){
-            return $q->delivery();
-        })
-        ->when($filter=='take_away', function($q){
-            return $q->takeaway();
-        })
-        ->when($featured, function($query){
-            $query->featured();
-        });
+        withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns'])
+            ->with(['discount'=>function($q){
+                return $q->validate();
+            }])
+            ->whereHas('module',function($query){
+                $query->active();
+            })
+            ->when($filter=='delivery', function($q){
+                return $q->delivery();
+            })
+            ->when($filter=='take_away', function($q){
+                return $q->takeaway();
+            })
+            ->when($featured, function($query){
+                $query->featured();
+            });
         if(config('module.current_module_data')) {
             $paginator = $paginator->whereHas('zone.modules', function($query){
                 $query->where('modules.id', config('module.current_module_data')['id']);
             })->module(config('module.current_module_data')['id'])
-            ->when(!config('module.current_module_data')['all_zone_service'], function($query)use($zone_id){
-                $query->whereIn('zone_id', json_decode($zone_id,true));
-            });
+                ->when(!config('module.current_module_data')['all_zone_service'], function($query)use($zone_id){
+                    $query->whereIn('zone_id', json_decode($zone_id,true));
+                });
         } else {
             $paginator = $paginator->whereIn('zone_id', json_decode($zone_id,true));
         }
         $paginator = $paginator->Active()
-        ->type($type)
-        ->orderBy('open', 'desc')
-        ->orderBy('distance')
-        ->paginate($limit, ['*'], 'page', $offset);
-        /*$paginator->count();*/
+            ->type($type)
+            ->when($store_type == 'all', function($q){
+                return $q->orderBy('open', 'desc')
+                    ->orderBy('distance');
+            })
+            ->when($store_type == 'newly_joined', function($q){
+                return $q->latest();
+            })
+            ->when($store_type == 'popular', function($q){
+                return $q->withCount('orders')
+                    ->orderBy('orders_count', 'desc');
+            })
+
+            ->paginate($limit, ['*'], 'page', $offset);
+
+        $paginator->each(function ($store) {
+            $category_ids = DB::table('items')
+                ->join('categories', 'items.category_id', '=', 'categories.id')
+                ->selectRaw('
+                CAST(categories.id AS UNSIGNED) as id,
+                categories.parent_id
+            ')
+                ->where('items.store_id', $store->id)
+                ->where('categories.status', 1)
+                ->groupBy('id', 'categories.parent_id')
+                ->get();
+
+            $data = json_decode($category_ids, true);
+
+            $mergedIds = [];
+
+            foreach ($data as $item) {
+                if ($item['id'] != 0) {
+                    $mergedIds[] = $item['id'];
+                }
+                if ($item['parent_id'] != 0) {
+                    $mergedIds[] = $item['parent_id'];
+                }
+            }
+
+            $category_ids = array_values(array_unique($mergedIds));
+
+            $store->category_ids = $category_ids;
+
+            $store->discount_status = !empty($store->items->where('discount', '>', 0));
+            unset($store['items']);
+        });
+
+        /*$paginator->total();*/
         return [
             'total_size' => $paginator->total(),
             'limit' => $limit,
@@ -55,85 +101,183 @@ class StoreLogic
         ];
     }
 
-    public static function get_latest_stores($zone_id, $limit = 10, $offset = 1, $type='all',$longitude=0,$latitude=0)
+    public static function get_latest_stores($zone_id, $limit = 50, $offset = 1, $type='all',$longitude=0,$latitude=0)
     {
-        $paginator = Store::withOpen($longitude,$latitude)
-        ->with(['discount'=>function($q){
-            return $q->validate();
-        }])
-        ->when(config('module.current_module_data'), function($query)use($zone_id){
-            $query->whereHas('zone.modules', function($query){
-                $query->where('modules.id', config('module.current_module_data')['id']);
-            })->module(config('module.current_module_data')['id']);
-            if(!config('module.current_module_data')['all_zone_service']) {
-                $query->whereIn('zone_id', json_decode($zone_id, true));
-            }
-        })
-        ->Active()
-        ->type($type)
-        ->latest()
-        ->limit(50)
-        ->get();
+        $paginator = Store::withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns'])
+            ->with(['discount'=>function($q){
+                return $q->validate();
+            }])
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->Active()
+            ->type($type)
+            ->latest()
+            ->paginate($limit??50, ['*'], 'page', $offset??1);
 
         return [
-            'total_size' => $paginator->count(),
-            'limit' => $limit,
-            'offset' => $offset,
-            'stores' => $paginator
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
         ];
     }
 
-    public static function get_popular_stores($zone_id, $limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    public static function get_popular_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
     {
-        $paginator = Store::withOpen($longitude,$latitude)
-        ->with(['discount'=>function($q){
-            return $q->validate();
-        }])
-        ->when(config('module.current_module_data'), function($query)use($zone_id){
-            $query->whereHas('zone.modules', function($query){
-                $query->where('modules.id', config('module.current_module_data')['id']);
-            })->module(config('module.current_module_data')['id']);
-            if(!config('module.current_module_data')['all_zone_service']) {
-                $query->whereIn('zone_id', json_decode($zone_id, true));
-            }
-        })
-        ->Active()
-        ->type($type)
-        ->withCount('orders')
-        ->orderBy('orders_count', 'desc')
-        ->limit(50)
-        ->get();
+        $paginator = Store::withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns'])
+            ->with(['discount'=>function($q){
+                return $q->validate();
+            }])
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->Active()
+            ->type($type)
+            ->withCount('orders')
+            ->orderBy('open', 'desc')
+            ->orderBy('distance')
+            ->orderBy('orders_count', 'desc')
+            ->paginate($limit??50, ['*'], 'page', $offset??1);
 
         return [
-            'total_size' => $paginator->count(),
-            'limit' => $limit,
-            'offset' => $offset,
-            'stores' => $paginator
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
         ];
     }
 
-    public static function get_store_details($store_id)
+    public static function get_discounted_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
     {
-        return Store::with(['discount'=>function($q){
+        $paginator = Store::withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns'])
+            ->with(['discount'=>function($q){
+                return $q->validate();
+            }])
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->where(function ($query) {
+                $query->whereHas('items', function ($q) {
+                    $q->Discounted();
+                });
+            })
+            ->Active()
+            ->type($type)
+            ->paginate($limit??50, ['*'], 'page', $offset??1);
+
+        $paginator->each(function ($store) {
+            $category_ids = DB::table('items')
+                ->join('categories', 'items.category_id', '=', 'categories.id')
+                ->selectRaw('
+                CAST(categories.id AS UNSIGNED) as id,
+                categories.parent_id
+            ')
+                ->where('items.store_id', $store->id)
+                ->where('categories.status', 1)
+                ->groupBy('id', 'categories.parent_id')
+                ->get();
+
+            $data = json_decode($category_ids, true);
+
+            $mergedIds = [];
+
+            foreach ($data as $item) {
+                if ($item['id'] != 0) {
+                    $mergedIds[] = $item['id'];
+                }
+                if ($item['parent_id'] != 0) {
+                    $mergedIds[] = $item['parent_id'];
+                }
+            }
+
+            $category_ids = array_values(array_unique($mergedIds));
+
+            $store->category_ids = $category_ids;
+
+            $store->discount_status = !empty($store->items->where('discount', '>', 0));
+            unset($store['items']);
+        });
+
+        return [
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
+        ];
+    }
+
+    public static function get_top_rated_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    {
+        $paginator = Store::withOpen($longitude??0,$latitude??0)->whereNotNull('rating')
+            ->withCount(['items','campaigns'])
+            ->with(['discount'=>function($q){
+                return $q->validate();
+            }])
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->Active()
+            ->type($type)
+            ->whereRaw("LENGTH(rating) > 0")
+            ->paginate($limit??50, ['*'], 'page', $offset??1);
+
+        return [
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
+        ];
+    }
+
+    public static function get_store_details($store_id,$longitude=0,$latitude=0)
+    {
+        return Store::withOpen($longitude??0,$latitude??0)->with(['discount'=>function($q){
             return $q->validate();
-        }, 'campaigns', 'schedules'])
-        ->when(config('module.current_module_data'), function($query){
-            $query->module(config('module.current_module_data')['id']);
-        })
-        ->when(is_numeric($store_id),function ($qurey) use($store_id){
-            $qurey->where('id', $store_id);
-        })
-        ->when(!is_numeric($store_id),function ($qurey) use($store_id){
-            $qurey->where('slug', $store_id);
-        })
-        ->first();
+        }, 'campaigns', 'schedules','activeCoupons'])
+            ->withCount(['items','campaigns'])
+            ->when(config('module.current_module_data'), function($query){
+                $query->module(config('module.current_module_data')['id']);
+            })
+            ->when(is_numeric($store_id),function ($qurey) use($store_id){
+                $qurey->where('id', $store_id);
+            })
+            ->when(!is_numeric($store_id),function ($qurey) use($store_id){
+                $qurey->where('slug', $store_id);
+            })
+            ->first();
     }
 
     public static function calculate_store_rating($ratings)
     {
         $total_submit = $ratings[0]+$ratings[1]+$ratings[2]+$ratings[3]+$ratings[4];
+        $positive_submit = $ratings[0]+$ratings[1]+$ratings[2];
         $rating = ($ratings[0]*5+$ratings[1]*4+$ratings[2]*3+$ratings[3]*2+$ratings[4])/($total_submit?$total_submit:1);
-        return ['rating'=>$rating, 'total'=>$total_submit];
+        $positive_rating = $total_submit>0?(($positive_submit*100)/$total_submit):0;
+        return ['rating'=>$rating, 'total'=>$total_submit, 'positive_rating'=>$positive_rating];
     }
 
     public static function update_store_rating($ratings, $product_rating)
@@ -158,27 +302,60 @@ class StoreLogic
     public static function search_stores($name, $zone_id, $category_id= null,$limit = 10, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
     {
         $key = explode(' ', $name);
-        $paginator = Store::whereHas('zone.modules', function($query){
+        $paginator = Store::withOpen($longitude??0,$latitude??0)->whereHas('zone.modules', function($query){
             $query->where('modules.id', config('module.current_module_data')['id']);
-        })->withOpen($longitude,$latitude)->with(['discount'=>function($q){
+        })->withCount(['items','campaigns'])->with(['discount'=>function($q){
             return $q->validate();
         }])->weekday()->where(function ($q) use ($key) {
             foreach ($key as $value) {
                 $q->orWhere('name', 'like', "%{$value}%");
             }
         })
-        ->when(config('module.current_module_data'), function($query)use($zone_id){
-            $query->module(config('module.current_module_data')['id']);
-            if(!config('module.current_module_data')['all_zone_service']) {
-                $query->whereIn('zone_id', json_decode($zone_id, true));
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->when($category_id, function($query)use($category_id){
+                $query->whereHas('items.category', function($q)use($category_id){
+                    return $q->whereId($category_id)->orWhere('parent_id', $category_id);
+                });
+            })
+            ->active()->orderBy('open', 'desc')->orderBy('distance')->type($type)->paginate($limit, ['*'], 'page', $offset);
+
+
+        $paginator->each(function ($store) {
+            $category_ids = DB::table('items')
+                ->join('categories', 'items.category_id', '=', 'categories.id')
+                ->selectRaw('
+                CAST(categories.id AS UNSIGNED) as id,
+                categories.parent_id
+            ')
+                ->where('items.store_id', $store->id)
+                ->where('categories.status', 1)
+                ->groupBy('id', 'categories.parent_id')
+                ->get();
+
+            $data = json_decode($category_ids, true);
+
+            $mergedIds = [];
+
+            foreach ($data as $item) {
+                if ($item['id'] != 0) {
+                    $mergedIds[] = $item['id'];
+                }
+                if ($item['parent_id'] != 0) {
+                    $mergedIds[] = $item['parent_id'];
+                }
             }
-        })
-        ->when($category_id, function($query)use($category_id){
-            $query->whereHas('items.category', function($q)use($category_id){
-                return $q->whereId($category_id)->orWhere('parent_id', $category_id);
-            });
-        })
-        ->active()->orderBy('open', 'desc')->orderBy('distance')->type($type)->paginate($limit, ['*'], 'page', $offset);
+
+            $category_ids = array_values(array_unique($mergedIds));
+
+            $store->category_ids = $category_ids;
+            $store->discount_status = !empty($store->items->where('discount', '>', 0));
+            unset($store['items']);
+        });
 
         return [
             'total_size' => $paginator->total(),
@@ -223,18 +400,39 @@ class StoreLogic
                 break;
             }
             $storage[] = [
-                'id'=>$item->id,
+                'id'=>$item->stores[0]->id,
+                'ownerId'=>$item->id,
                 'ownerFirstName'=>$item->f_name,
                 'ownerLastName'=>$item->l_name,
                 'storeName'=>$item->stores[0]->name,
-                'logo'=>$item->stores[0]->logo,
                 'phone'=>$item->phone,
                 'email'=>$item->email,
-                'delivery_time'=>$item->delivery_time,
+                'logo'=>$item->stores[0]->logo,
+                'CoverPhoto'=>$item->stores[0]->cover_photo,
                 'latitude'=>$item->stores[0]->latitude,
                 'longitude'=>$item->stores[0]->longitude,
+                'Address'=>$item->stores[0]->address ?? null,
                 'zone_id'=>$item->stores[0]->zone_id,
                 'module_id'=>$item->stores[0]->module_id,
+                'MinimumOrderAmount'=>$item->stores[0]->minimum_order,
+                'Comission'=>$item->stores[0]->comission ?? 0,
+                'Tax'=>$item->stores[0]->tax ?? 0,
+                'DeliveryTime'=>$item->stores[0]->delivery_time ?? '20-30',
+                'MinimumDeliveryFee'=>$item->stores[0]->minimum_shipping_charge ?? 0,
+                'PerKmDeliveryFee'=>$item->stores[0]->per_km_shipping_charge ?? 0,
+                'MaximumDeliveryFee'=>$item->stores[0]->maximum_shipping_charge ?? 0,
+                'ScheduleOrder'=> $item->stores[0]->schedule_order == 1 ? 'yes' : 'no',
+                'Status'=> $item->stores[0]->status == 1 ? 'active' : 'inactive',
+                'SelfDeliverySystem'=> $item->stores[0]->self_delivery_system == 1 ? 'active' : 'inactive',
+                'Veg'=> $item->stores[0]->veg == 1 ? 'yes' : 'no',
+                'NonVeg'=> $item->stores[0]->non_veg == 1 ? 'yes' : 'no',
+                'FreeDelivery'=> $item->stores[0]->free_delivery == 1 ? 'yes' : 'no',
+                'TakeAway'=> $item->stores[0]->take_away == 1 ? 'yes' : 'no',
+                'Delivery'=> $item->stores[0]->delivery == 1 ? 'yes' : 'no',
+                'ReviewsSection'=> $item->stores[0]->reviews_section == 1 ? 'active' : 'inactive',
+                'PosSystem'=> $item->stores[0]->pos_system == 1 ? 'active' : 'inactive',
+                'storeOpen'=> $item->stores[0]->active == 1 ? 'yes' : 'no',
+                'FeaturedStore'=> $item->stores[0]->featured == 1 ? 'yes' : 'no',
             ];
         }
 
@@ -299,5 +497,39 @@ class StoreLogic
             ];
         }
         return $data;
+    }
+
+    public static function get_recommended_stores($zone_id, $limit = 50, $offset = 1, $type = 'all',$longitude=0,$latitude=0)
+    {
+        $shuffle=null;
+        if(config('module.current_module_data')){
+            $shuffle= DataSetting::where(['key' => 'shuffle_recommended_store' , 'type' => config('module.current_module_data')['id']])?->first()?->value;
+        }
+        $paginator = Store::withOpen($longitude??0,$latitude??0)
+            ->withCount(['items','campaigns'])
+            ->wherehas('storeConfig', function ($q){
+                $q->where(['is_recommended_deleted'=> 0 , 'is_recommended' => 1]);
+            })
+            ->when(config('module.current_module_data'), function($query)use($zone_id){
+                $query->whereHas('zone.modules', function($query){
+                    $query->where('modules.id', config('module.current_module_data')['id']);
+                })->module(config('module.current_module_data')['id']);
+                if(!config('module.current_module_data')['all_zone_service']) {
+                    $query->whereIn('zone_id', json_decode($zone_id, true));
+                }
+            })
+            ->Active()
+            ->type($type)
+            ->when($shuffle == 1 , function($q){
+                $q->inRandomOrder();
+            })
+            ->paginate($limit??50, ['*'], 'page', $offset??1);
+
+        return [
+            'total_size' => $paginator->total(),
+            'limit' => $limit??50,
+            'offset' => $offset??1,
+            'stores' => $paginator->items()
+        ];
     }
 }

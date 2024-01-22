@@ -46,7 +46,7 @@
                     <input type="text" placeholder="{{translate('messages.title')}}" id="title"  name="title" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label class="input-label" for="sub_title">{{translate('messages.sub')}} {{translate('messages.title')}}</label>
+                    <label class="input-label" for="sub_title">{{translate('messages.sub_title')}}</label>
                     <input type="text" placeholder="{{translate('messages.sub_title')}}" id="sub_title"  name="sub_title" class="form-control" required>
                 </div>
 
@@ -55,7 +55,7 @@
                     <div class="custom-file">
                         <input type="file" name="image" id="customFileEg2" class="custom-file-input"
                                 accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                        <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                        <label class="custom-file-label" for="customFileEg2">{{translate('messages.choose_file')}}</label>
                     </div>
 
                     <center id="image-viewer-section2" class="initial-hidden pt-2">

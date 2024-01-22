@@ -33,11 +33,60 @@
         <div class="card-body">
             <form action="{{route('vendor.custom-role.update',[$role['id']])}}" method="post">
                 @csrf
-                <div class="form-group">
-                    <label for="name">{{translate('messages.role_name')}}</label>
-                    <input type="text" name="name" value="{{$role['name']}}" class="form-control" id="name" aria-describedby="emailHelp"
-                            placeholder="{{translate('role_name_example')}}">
+                @php($language=\App\Models\BusinessSetting::where('key','language')->first())
+                @php($language = $language->value ?? null)
+                @php($defaultLang = str_replace('_', '-', app()->getLocale()))
+                @if($language)
+                    <ul class="nav nav-tabs mb-4">
+                        <li class="nav-item">
+                            <a class="nav-link lang_link active"
+                            href="#"
+                            id="default-link">{{translate('messages.default')}}</a>
+                        </li>
+                        @foreach (json_decode($language) as $lang)
+                            <li class="nav-item">
+                                <a class="nav-link lang_link"
+                                    href="#"
+                                    id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="lang_form" id="default-form">
+                        <div class="form-group">
+                            <label class="input-label" for="default_title">{{translate('messages.role_name')}} ({{translate('messages.default')}})</label>
+                            <input type="text" name="name[]" id="default_title" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{$role?->getRawOriginal('name')}}"  >
+                        </div>
+                        <input type="hidden" name="lang[]" value="default">
+                    </div>
+                    @foreach(json_decode($language) as $lang)
+                        <?php
+                            if(count($role['translations'])){
+                                $translate = [];
+                                foreach($role['translations'] as $t)
+                                {
+                                    if($t->locale == $lang && $t->key=="name"){
+                                        $translate[$lang]['name'] = $t->value;
+                                    }
+                                }
+                            }
+                        ?>
+                        <div class="d-none lang_form" id="{{$lang}}-form">
+                            <div class="form-group">
+                                <label class="input-label" for="{{$lang}}_title">{{translate('messages.role_name')}} ({{strtoupper($lang)}})</label>
+                                <input type="text" name="name[]" id="{{$lang}}_title" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{$translate[$lang]['name']??''}}"  >
+                            </div>
+                            <input type="hidden" name="lang[]" value="{{$lang}}">
+                        </div>
+                    @endforeach
+                @else
+                <div id="default-form">
+                    <div class="form-group">
+                        <label class="input-label" for="name">{{translate('messages.role_name')}} ({{ translate('messages.default') }})</label>
+                        <input type="text" id="name" name="name[]" class="form-control" placeholder="{{translate('role_name_example')}}" value="{{$role['name']}}" maxlength="100" required>
+                    </div>
+                    <input type="hidden" name="lang[]" value="default">
                 </div>
+                @endif
 
                 <h5>{{translate('messages.module_permission')}} : </h5>
                 <hr>
@@ -46,21 +95,21 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="item" class="form-check-input"
                                     id="item" {{in_array('item',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="item">{{translate('messages.item')}}</label>
+                            <label class="form-check-label " for="item">{{translate('messages.item')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="order" class="form-check-input"
                                     id="order" {{in_array('order',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="order">{{translate('messages.order')}}</label>
+                            <label class="form-check-label " for="order">{{translate('messages.order')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="store_setup" class="form-check-input"
                                     id="store_setup" {{in_array('store_setup',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="store_setup">{{translate('messages.business')}} {{translate('messages.setup')}}</label>
+                            <label class="form-check-label " for="store_setup">{{translate('messages.business_setup')}}</label>
                         </div>
                     </div>
                     @if (config('module.'.\App\CentralLogics\Helpers::get_store_data()->module->module_type)['add_on'])
@@ -68,7 +117,7 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="addon" class="form-check-input"
                                     id="addon" {{in_array('addon',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="addon">{{translate('messages.addon')}}</label>
+                            <label class="form-check-label " for="addon">{{translate('messages.addon')}}</label>
                         </div>
                     </div>
                     @endif
@@ -76,43 +125,36 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="wallet" class="form-check-input"
                                     id="wallet" {{in_array('wallet',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="wallet">{{translate('messages.wallet')}}</label>
+                            <label class="form-check-label " for="wallet">{{translate('messages.wallet')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="bank_info" class="form-check-input"
                                     id="bank_info" {{in_array('bank_info',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="bank_info">{{translate('messages.bank_info')}}</label>
+                            <label class="form-check-label " for="bank_info">{{translate('messages.bank_info')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="employee" class="form-check-input"
                                     id="employee" {{in_array('employee',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="employee">{{translate('messages.Employee')}}</label>
+                            <label class="form-check-label " for="employee">{{translate('messages.Employee')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="my_shop" class="form-check-input"
                                     id="my_shop" {{in_array('my_shop',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="my_shop">{{translate('messages.my_shop')}}</label>
+                            <label class="form-check-label " for="my_shop">{{translate('messages.my_shop')}}</label>
                         </div>
                     </div>
-                    {{-- <div class="check-item">
-                        <div class="form-group form-check form--check">
-                            <input type="checkbox" name="modules[]" value="custom_role" class="form-check-input"
-                                    id="custom_role" {{in_array('custom_role',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="custom_role">{{translate('messages.custom_role')}}</label>
-                        </div>
-                    </div> --}}
-                    
+
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="campaign" class="form-check-input"
                                     id="campaign" {{in_array('campaign',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="campaign">{{translate('messages.campaign')}}</label>
+                            <label class="form-check-label " for="campaign">{{translate('messages.campaign')}}</label>
                         </div>
                     </div>
 
@@ -120,7 +162,7 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="reviews" class="form-check-input"
                                     id="reviews" {{in_array('reviews',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="reviews">{{translate('messages.reviews')}}</label>
+                            <label class="form-check-label " for="reviews">{{translate('messages.reviews')}}</label>
                         </div>
                     </div>
 
@@ -128,14 +170,14 @@
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="pos" class="form-check-input"
                                     id="pos" {{in_array('pos',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="pos">{{translate('messages.pos')}}</label>
+                            <label class="form-check-label " for="pos">{{translate('messages.pos')}}</label>
                         </div>
                     </div>
                     <div class="check-item">
                         <div class="form-group form-check form--check">
                             <input type="checkbox" name="modules[]" value="chat" class="form-check-input"
                                     id="chat" {{in_array('chat',(array)json_decode($role['modules']))?'checked':''}}>
-                            <label class="form-check-label qcont" for="chat">{{translate('messages.chat')}}</label>
+                            <label class="form-check-label " for="chat">{{translate('messages.chat')}}</label>
                         </div>
                     </div>
                 </div>
@@ -149,6 +191,3 @@
 </div>
 @endsection
 
-@push('script')
-
-@endpush

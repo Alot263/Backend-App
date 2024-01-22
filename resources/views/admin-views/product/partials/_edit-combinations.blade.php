@@ -1,9 +1,9 @@
 @if(count($combinations) > 0)
-    <table class="table table-bordered">
-        <thead class="thead-light">
+    <table class="table table-borderless table--vertical-middle">
+        <thead class="thead-light __bg-7">
         <tr>
             <th class="text-center border-0">
-                <span class="control-label">{{translate('messages.Variant')}}</span>
+                <span class="control-label m-0">{{translate('messages.Variant')}}</span>
             </th>
             <th class="text-center border-0">
                 <span class="control-label">{{translate('messages.Variant Price')}}</span>
@@ -19,8 +19,8 @@
 
         @foreach ($combinations as $key => $combination)
             <tr>
-                <td>
-                    <label for="" class="control-label">{{ $combination['type'] }}</label>
+                <td class="text-center">
+                    <label class="control-label m-0">{{ $combination['type'] }}</label>
                     <input value="{{ $combination['type'] }}" name="type[]" type="hidden">
                 </td>
                 <td>
@@ -31,8 +31,8 @@
                 </td>
                 @if ($stock)
                     <td>
-                        <input type="number" onkeyup="update_qty()" name="stock_{{ $combination['type'] }}" value="{{$combination['stock']??0}}" min="0" step="0.01"
-                                class="form-control" required>
+                        <input type="number" name="stock_{{ $combination['type'] }}" value="{{$combination['stock']??0}}" min="0" step="0.01"
+                                class="form-control update_qty" required>
                     </td>
                 @endif
 

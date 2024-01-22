@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', 'InstallController@step0');
+Route::get('/', 'InstallController@step0')->name('step0');
 Route::get('/step1', 'InstallController@step1')->name('step1');
 Route::get('/step2', 'InstallController@step2')->name('step2');
 Route::get('/step3/{error?}', 'InstallController@step3')->name('step3')->middleware('installation-check');

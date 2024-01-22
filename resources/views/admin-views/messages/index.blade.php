@@ -8,7 +8,7 @@
     <div class="content container-fluid">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-header-title">{{ __('messages.conversation') }} {{ __('messages.list') }}</h1>
+            <h1 class="page-header-title">{{ translate('messages.conversation_list') }}</h1>
         </div>
         <!-- End Page Header -->
 
@@ -26,7 +26,7 @@
                         </div>
                     </div>
                     <!-- Body -->
-                    <div class="card-body p-0 initial-19" style="overflow-y: scroll;height: 600px" id="conversation-list">
+                    <div class="card-body p-0 initial-19" id="conversation-list">
                         <div class="border-bottom"></div>
                         @include('admin-views.messages.data')
                     </div>
@@ -34,11 +34,11 @@
                 </div>
                 <!-- End Card -->
             </div>
-            <div class="col-lg-8 col-nd-6" id="view-conversation">
-                <center class="mt-2">
-                    <h4 class="initial-29">{{ __('messages.view') }} {{ __('messages.conversation') }}
+            <div class="col-lg-8 col-nd-6" id="admin-view-conversation">
+                <div class="text-center mt-2">
+                    <h4 class="initial-29">{{ translate('messages.view_conversation') }}
                     </h4>
-                </center>
+                </div>
                 {{-- view here --}}
             </div>
         </div>
@@ -51,7 +51,18 @@
 <script src="{{ asset('public/assets/admin/js/spartan-multi-image-picker.js') }}"></script>
 
     <script>
-        function viewConvs(url, id_to_active, conv_id, sender_id) {
+        "use strict";
+
+        $('.view-admin-conv').on('click', function (){
+            console.log('fiudegfuy')
+            let url = $(this).data('url');
+            let id_to_active = $(this).data('active-id');
+            let conv_id = $(this).data('conv-id');
+            let sender_id = $(this).data('sender-id');
+            viewAdminConvs(url, id_to_active, conv_id, sender_id);
+        })
+
+        function viewAdminConvs(url, id_to_active, conv_id, sender_id) {
             $('.customer-list').removeClass('conv-active');
             $('#' + id_to_active).addClass('conv-active');
             let new_url= "{{ route('admin.message.list') }}" + '?conversation=' + conv_id+ '&user=' + sender_id;
@@ -60,13 +71,13 @@
                 url: url,
                 success: function(data) {
                     window.history.pushState('', 'New Page Title', new_url);
-                    $('#view-conversation').html(data.view);
+                    $('#admin-view-conversation').html(data.view);
                     conversationList();
                 }
             });
 
         }
-        var page = 1;
+        let page = 1;
         $('#conversation-list').scroll(function() {
             if ($('#conversation-list').scrollTop() + $('#conversation-list').height() >= $('#conversation-list')
                 .height()) {
@@ -105,7 +116,7 @@
         }
 
         $(document).on('keyup', '#serach', function() {
-            var query = $('#serach').val();
+            let query = $('#serach').val();
             fetch_data(page, query);
         });
     </script>

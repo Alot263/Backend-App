@@ -7,7 +7,10 @@ use App\Traits\ActivationClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
+use Madnest\Madzipper\Facades\Madzipper;
 
 class InstallController extends Controller
 {
@@ -18,32 +21,52 @@ class InstallController extends Controller
         return view('installation.step0');
     }
 
-    public function step1()
+    public function step1(Request $request)
     {
-        $permission['curl_enabled'] = function_exists('curl_version');
-        $permission['db_file_write_perm'] = is_writable(base_path('.env'));
-        $permission['routes_file_write_perm'] = is_writable(base_path('app/Providers/RouteServiceProvider.php'));
-        return view('installation.step1', compact('permission'));
+        if (Hash::check('step_1', $request['token'])) {
+            $permission['curl_enabled'] = function_exists('curl_version');
+            $permission['db_file_write_perm'] = is_writable(base_path('.env'));
+            $permission['routes_file_write_perm'] = is_writable(base_path('app/Providers/RouteServiceProvider.php'));
+            return view('installation.step1', compact('permission'));
+        }
+        session()->flash('error', 'Access denied!');
+        return redirect()->route('step0');
     }
 
-    public function step2()
+    public function step2(Request $request)
     {
-        return view('installation.step2');
+        if (Hash::check('step_2', $request['token'])) {
+            return view('installation.step2');
+        }
+        session()->flash('error', 'Access denied!');
+        return redirect()->route('step0');
     }
 
-    public function step3()
+    public function step3(Request $request)
     {
-        return view('installation.step3');
+        if (Hash::check('step_3', $request['token'])) {
+            return view('installation.step3');
+        }
+        session()->flash('error', 'Access denied!');
+        return redirect()->route('step0');
     }
 
-    public function step4()
+    public function step4(Request $request)
     {
-        return view('installation.step4');
+        if (Hash::check('step_4', $request['token'])) {
+            return view('installation.step4');
+        }
+        session()->flash('error', 'Access denied!');
+        return redirect()->route('step0');
     }
 
-    public function step5()
+    public function step5(Request $request)
     {
-        return view('installation.step5');
+        if (Hash::check('step_5', $request['token'])) {
+            return view('installation.step5');
+        }
+        session()->flash('error', 'Access denied!');
+        return redirect()->route('step0');
     }
 
     public function purchase_code(Request $request)
@@ -60,11 +83,17 @@ class InstallController extends Controller
             'domain' => preg_replace("#^[^:/.]*[:/]+#i", "", url('/')),
         ];
         $response = $this->dmvf($post);
-        return redirect($response);
+
+        return redirect($response.'?token='.bcrypt('step_3'));
     }
 
     public function system_settings(Request $request)
     {
+        if (!Hash::check('step_6', $request['token'])) {
+            session()->flash('error', 'Access denied!');
+            return redirect()->route('step0');
+        }
+
         DB::table('admins')->insertOrIgnore([
             'f_name' => $request['f_name'],
             'l_name' => $request['l_name'],
@@ -80,9 +109,27 @@ class InstallController extends Controller
             'value' => $request['business_name']
         ]);
 
+        Helpers::insert_business_settings_key('system_language','[{"id":1,"direction":"ltr","code":"en","status":1,"default":true}]');
+
+        //version 2.2.0
+        Helpers::insert_data_settings_key('admin_login_url', 'login_admin' ,'admin');
+        Helpers::insert_data_settings_key('admin_employee_login_url', 'login_admin_employee' ,'admin-employee');
+        Helpers::insert_data_settings_key('store_login_url', 'login_store' ,'store');
+        Helpers::insert_data_settings_key('store_employee_login_url', 'login_store_employee' ,'store-employee');
+
         $previousRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.php');
         $newRouteServiceProvier = base_path('app/Providers/RouteServiceProvider.txt');
         copy($newRouteServiceProvier, $previousRouteServiceProvier);
+
+        Helpers::remove_dir('storage/app/public');
+        Storage::disk('public')->makeDirectory('/');
+
+        try {
+            Madzipper::make('installation/backup/public.zip')->extractTo('storage/app');
+        }catch (\Exception $exception){
+            info($exception);
+        }
+
         //sleep(5);
         return view('installation.step6');
     }
@@ -92,7 +139,7 @@ class InstallController extends Controller
         if (self::check_database_connection($request->DB_HOST, $request->DB_DATABASE, $request->DB_USERNAME, $request->DB_PASSWORD)) {
 
             $key = base64_encode(random_bytes(32));
-            $output = 'APP_NAME=6ammart'.time().
+            $output = 'APP_NAME=alot263'.time().
                     'APP_ENV=live
                     APP_KEY=base64:' . $key . '
                     APP_DEBUG=false
@@ -127,7 +174,8 @@ class InstallController extends Controller
                     BUYER_USERNAME=' . session('username') . '
                     SOFTWARE_ID=MzY3NzIxMTI=
 
-                    SOFTWARE_VERSION=2.1.0
+                    SOFTWARE_VERSION=2.5.1
+                    REACT_APP_KEY=45370351
                     ';
             $file = fopen(base_path('.env'), 'w');
             fwrite($file, $output);
@@ -135,14 +183,14 @@ class InstallController extends Controller
 
             $path = base_path('.env');
             if (file_exists($path)) {
-                return redirect('step4');
+                return redirect()->route('step4', ['token' => $request['token']]);
             } else {
                 session()->flash('error', 'Database error!');
-                return redirect('step3');
+                return redirect()->route('step3', ['token' => bcrypt('step_3')]);
             }
         } else {
-            session()->flash('error', 'Database error!');
-            return redirect('step3');
+            session()->flash('error', 'Database host error!');
+            return redirect()->route('step3', ['token' => bcrypt('step_3')]);
         }
     }
 
@@ -151,7 +199,7 @@ class InstallController extends Controller
         try {
             $sql_path = base_path('installation/backup/database.sql');
             DB::unprepared(file_get_contents($sql_path));
-            return redirect('step5');
+            return redirect()->route('step5', ['token' => bcrypt('step_5')]);
         } catch (\Exception $exception) {
             session()->flash('error', 'Your database is not clean, do you want to clean database then import?');
             return back();
@@ -164,19 +212,22 @@ class InstallController extends Controller
             Artisan::call('db:wipe', ['--force' => true]);
             $sql_path = base_path('installation/backup/database.sql');
             DB::unprepared(file_get_contents($sql_path));
-            return redirect('step5');
+            return redirect()->route('step5', ['token' => bcrypt('step_5')]);
         } catch (\Exception $exception) {
             session()->flash('error', 'Check your database permission!');
             return back();
         }
     }
 
-    function check_database_connection($db_host = "", $db_name = "", $db_user = "", $db_pass = "")
+    function check_database_connection($db_host = "", $db_name = "", $db_user = "", $db_pass = ""): bool
     {
-
-        if (@mysqli_connect($db_host, $db_user, $db_pass, $db_name)) {
-            return true;
-        } else {
+        try {
+            if (@mysqli_connect($db_host, $db_user, $db_pass, $db_name)) {
+                return true;
+            } else {
+                return false;
+            }
+        }catch(\Exception $exception){
             return false;
         }
     }

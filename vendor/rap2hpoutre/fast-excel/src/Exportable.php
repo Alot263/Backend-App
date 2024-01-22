@@ -2,13 +2,14 @@
 
 namespace Rap2hpoutre\FastExcel;
 
-use Box\Spout\Common\Entity\Style\Style;
-use Box\Spout\Common\Type;
-use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Generator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use OpenSpout\Common\Entity\Row;
+use OpenSpout\Common\Entity\Style\Style;
+use OpenSpout\Writer\Common\AbstractOptions;
+use OpenSpout\Writer\Common\Creator\WriterEntityFactory;
 
 /**
  * Trait Exportable.
@@ -26,20 +27,20 @@ trait Exportable
     private $rows_style;
 
     /**
-     * @param \Box\Spout\Reader\ReaderInterface|\Box\Spout\Writer\WriterInterface $reader_or_writer
+     * @param AbstractOptions $options
      *
      * @return mixed
      */
-    abstract protected function setOptions(&$reader_or_writer);
+    abstract protected function setOptions(&$options);
 
     /**
      * @param string        $path
      * @param callable|null $callback
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
      *
      * @return string
      */
@@ -51,13 +52,13 @@ trait Exportable
     }
 
     /**
-     * @param $path
+     * @param               $path
      * @param callable|null $callback
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\IOException
      *
      * @return \Symfony\Component\HttpFoundation\StreamedResponse|string
      */
@@ -74,31 +75,34 @@ trait Exportable
     }
 
     /**
-     * @param $path
+     * @param               $path
      * @param string        $function
      * @param callable|null $callback
      *
-     * @throws \Box\Spout\Common\Exception\IOException
-     * @throws \Box\Spout\Common\Exception\InvalidArgumentException
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
-     * @throws \Box\Spout\Writer\Exception\WriterNotOpenedException
-     * @throws \Box\Spout\Common\Exception\SpoutException
+     * @throws \OpenSpout\Common\Exception\IOException
+     * @throws \OpenSpout\Common\Exception\InvalidArgumentException
+     * @throws \OpenSpout\Common\Exception\UnsupportedTypeException
+     * @throws \OpenSpout\Writer\Exception\WriterNotOpenedException
+     * @throws \OpenSpout\Common\Exception\SpoutException
      */
     private function exportOrDownload($path, $function, callable $callback = null)
     {
-        if (Str::endsWith($path, Type::CSV)) {
-            $writer = WriterEntityFactory::createCSVWriter();
-        } elseif (Str::endsWith($path, Type::ODS)) {
-            $writer = WriterEntityFactory::createODSWriter();
+        if (Str::endsWith($path, 'csv')) {
+            $options = new \OpenSpout\Writer\CSV\Options();
+            $writer = new \OpenSpout\Writer\CSV\Writer($options);
+        } elseif (Str::endsWith($path, 'ods')) {
+            $options = new \OpenSpout\Writer\ODS\Options();
+            $writer = new \OpenSpout\Writer\ODS\Writer($options);
         } else {
-            $writer = WriterEntityFactory::createXLSXWriter();
+            $options = new \OpenSpout\Writer\XLSX\Options();
+            $writer = new \OpenSpout\Writer\XLSX\Writer($options);
         }
 
-        $this->setOptions($writer);
-        /* @var \Box\Spout\Writer\WriterInterface $writer */
+        $this->setOptions($options);
+        /* @var \OpenSpout\Writer\WriterInterface $writer */
         $writer->$function($path);
 
-        $has_sheets = ($writer instanceof \Box\Spout\Writer\XLSX\Writer || $writer instanceof \Box\Spout\Writer\ODS\Writer);
+        $has_sheets = ($writer instanceof \OpenSpout\Writer\XLSX\Writer || $writer instanceof \OpenSpout\Writer\ODS\Writer);
 
         // It can export one sheet (Collection) or N sheets (SheetCollection)
         $data = $this->transpose ? $this->transposeData() : ($this->data instanceof SheetCollection ? $this->data : collect([$this->data]));
@@ -136,11 +140,15 @@ trait Exportable
         foreach ($data as $key => $collection) {
             foreach ($collection as $row => $columns) {
                 foreach ($columns as $column => $value) {
-                    data_set($transposedData, implode('.', [
-                        $key,
-                        $column,
-                        $row,
-                    ]), $value);
+                    data_set(
+                        $transposedData,
+                        implode('.', [
+                            $key,
+                            $column,
+                            $row,
+                        ]),
+                        $value
+                    );
                 }
             }
         }
@@ -172,7 +180,7 @@ trait Exportable
 
         // is_array($first_row) ? $first_row : $first_row->toArray())
         $all_rows = $collection->map(function ($value) {
-            return WriterEntityFactory::createRowFromArray($value);
+            return Row::fromValues($value);
         })->toArray();
         if ($this->rows_style) {
             $this->addRowsWithStyle($writer, $all_rows, $this->rows_style);
@@ -186,8 +194,7 @@ trait Exportable
         $styled_rows = [];
         // Style rows one by one
         foreach ($all_rows as $row) {
-            $row = WriterEntityFactory::createRowFromArray($row->toArray(), $rows_style);
-            array_push($styled_rows, $row);
+            $styled_rows[] = Row::fromValues($row->toArray(), $rows_style);
         }
         $writer->addRows($styled_rows);
     }
@@ -208,7 +215,7 @@ trait Exportable
                 $this->writeHeader($writer, $item);
             }
             // Write rows (one by one).
-            $writer->addRow(WriterEntityFactory::createRowFromArray($item->toArray(), $this->rows_style));
+            $writer->addRow(Row::fromValues($item->toArray(), $this->rows_style));
         }
     }
 
@@ -229,8 +236,8 @@ trait Exportable
         }
 
         $keys = array_keys(is_array($first_row) ? $first_row : $first_row->toArray());
-
-        $writer->addRow(WriterEntityFactory::createRowFromArray($keys, $this->header_style));
+        $writer->addRow(Row::fromValues($keys, $this->header_style));
+//        $writer->addRow(WriterEntityFactory::createRowFromArray($keys, $this->header_style));
     }
 
     /**

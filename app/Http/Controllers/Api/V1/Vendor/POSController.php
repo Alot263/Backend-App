@@ -73,7 +73,7 @@ class POSController extends Controller
                         'quantity' => $c['quantity'],
                         'price' => $price,
                         'tax_amount' => Helpers::tax_calculate($product, $price),
-                        'discount_on_item' => Helpers::product_discount_calculate($product, $price, $store),
+                        'discount_on_item' => Helpers::product_discount_calculate($product, $price, $store)['discount_amount'],
                         'discount_type' => 'discount_on_product',
                         'variant' => json_encode($c['variant']),
                         'variation' => json_encode([$c['variation']]),
@@ -105,12 +105,12 @@ class POSController extends Controller
         $total_price = $product_price + $total_addon_price - $store_discount_amount;
         $tax = isset($request['tax'])?$request['tax']:$store->tax;
         $total_tax_amount= ($tax > 0)?(($total_price * $tax)/100):0;
-        $coupon_discount_amount = 0; 
+        $coupon_discount_amount = 0;
         $total_price = $product_price + $total_addon_price - $store_discount_amount - $coupon_discount_amount;
 
         $tax = $store->tax;
         $total_tax_amount= round(($tax > 0)?(($total_price * $tax)/100):0 ,2);
-        
+
         try {
             $order->store_discount_amount= $store_discount_amount;
             $order->total_tax_amount= $total_tax_amount;
@@ -126,7 +126,7 @@ class POSController extends Controller
                 'total_ammount' => $total_price+$order->delivery_charge+$total_tax_amount
             ], 200);
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
         Toastr::warning(translate('messages.failed_to_place_order'));
         return back();
@@ -199,7 +199,7 @@ class POSController extends Controller
         })
         ->limit(8)
         ->get([DB::raw('id, CONCAT(f_name, " ", l_name, " (", phone ,")") as text')]);
-        
+
         $data[]=(object)['id'=>false, 'text'=>translate('messages.walk_in_customer')];
 
         return response()->json($data);

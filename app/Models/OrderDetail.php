@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class OrderDetail extends Model
 {
@@ -37,5 +38,12 @@ class OrderDetail extends Model
     public function campaign()
     {
         return $this->belongsTo(ItemCampaign::class, 'item_campaign_id');
+    }
+
+    protected static function boot(){
+        parent::boot();
+        static::addGlobalScope('order', function (Builder $builder) {
+            $builder->Has('order');
+        });
     }
 }

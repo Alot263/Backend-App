@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Zone;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
+use MatanYadaev\EloquentSpatial\Objects\Point;
+use Illuminate\Validation\Rules\Password;
 class CustomerController extends Controller
 {
     public function address_list(Request $request)
@@ -49,8 +50,7 @@ class CustomerController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        $point = new Point($request->latitude,$request->longitude);
-        $zone = Zone::contains('coordinates', $point)->get(['id']);
+        $zone = Zone::whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))->get(['id']);
         if(count($zone) == 0)
         {
             $errors = [];
@@ -93,8 +93,7 @@ class CustomerController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
-        $point = new Point($request->latitude,$request->longitude);
-        $zone = Zone::active()->contains('coordinates', $point)->first();
+        $zone = Zone::whereContains('coordinates', new Point($request->latitude, $request->longitude, POINT_SRID))->get(['id']);
         if(!$zone)
         {
             $errors = [];
@@ -114,12 +113,12 @@ class CustomerController extends Controller
             'house' => $request->house,
             'longitude' => $request->longitude,
             'latitude' => $request->latitude,
-            'zone_id' => $zone->id,
+            'zone_id' => $zone[0]->id,
             'created_at' => now(),
             'updated_at' => now()
         ];
         DB::table('customer_addresses')->where('id',$id)->update($address);
-        return response()->json(['message' => translate('messages.updated_successfully'),'zone_id'=>$zone->id], 200);
+        return response()->json(['message' => translate('messages.updated_successfully'),'zone_id'=>$zone[0]->id], 200);
     }
 
     public function delete_address(Request $request)
@@ -179,7 +178,7 @@ class CustomerController extends Controller
     $user = User::findOrFail($request->user()->id);
     $user->current_language_key = $current_language;
     $user->save();
-    
+
         $data = $request->user();
         $data['userinfo'] = $data->userinfo;
         $data['order_count'] =(integer)$request->user()->orders->count();
@@ -194,6 +193,7 @@ class CustomerController extends Controller
             'f_name' => 'required',
             'l_name' => 'required',
             'email' => 'required|unique:users,email,'.$request->user()->id,
+            'password' => ['nullable', Password::min(8)],
         ], [
             'f_name.required' => 'First name is required!',
             'l_name.required' => 'Last name is required!',
@@ -217,16 +217,22 @@ class CustomerController extends Controller
             $pass = $request->user()->password;
         }
 
-        $userDetails = [
-            'f_name' => $request->f_name,
-            'l_name' => $request->l_name,
-            'email' => $request->email,
-            'image' => $imageName,
-            'password' => $pass,
-            'updated_at' => now()
-        ];
+        $user = User::where(['id' => $request->user()->id])->first();
+        $user->f_name = $request->f_name;
+        $user->l_name = $request->l_name;
+        $user->email = $request->email;
+        $user->image = $imageName;
+        $user->password = $pass;
+        $user->save();
 
-        User::where(['id' => $request->user()->id])->update($userDetails);
+        if($user->userinfo) {
+            $userinfo = $user->userinfo;
+            $userinfo->f_name = $request->f_name;
+            $userinfo->l_name = $request->l_name;
+            $userinfo->email = $request->email;
+            $userinfo->image = $imageName;
+            $userinfo->save();
+        }
 
         return response()->json(['message' => translate('messages.successfully_updated')], 200);
     }

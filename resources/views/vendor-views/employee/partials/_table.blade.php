@@ -11,10 +11,10 @@
         @if (auth('vendor_employee')->id()  != $e['id'])
         <div class="btn--container justify-content-center">
             <a class="btn action-btn btn--primary btn-outline-primary"
-                href="{{route('vendor.employee.edit',[$e['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.Employee')}}"><i class="tio-edit"></i>
+                href="{{route('vendor.employee.edit',[$e['id']])}}" title="{{translate('messages.edit_Employee')}}"><i class="tio-edit"></i>
             </a>
             <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                onclick="form_alert('employee-{{$e['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete')}} {{translate('messages.Employee')}}"><i class="tio-delete-outlined"></i>
+                onclick="form_alert('employee-{{$e['id']}}','{{translate('messages.Want_to_delete_this_role')}}')" title="{{translate('messages.delete_Employee')}}"><i class="tio-delete-outlined"></i>
             </a>
         </div>
         <form action="{{route('vendor.employee.delete',[$e['id']])}}"

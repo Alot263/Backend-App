@@ -30,8 +30,8 @@
                 <form method="get">
                     <div class="row g-3">
                         <div class="col-sm-6 col-md-3">
-                            <select class="form-control" name="filter"
-                                onchange="set_time_filter('{{ url()->full() }}',this.value)">
+                            <select class="form-control set-filter" name="filter"
+                                    data-url="{{ url()->full() }}" data-filter="filter">
                                 <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
                                     {{ translate('messages.All Time') }}</option>
                                 <option value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
@@ -75,7 +75,7 @@
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
                     <h3 class="card-title">
-                        {{ translate('messages.expense') }} {{ translate('messages.lists') }} <span
+                        {{ translate('messages.expense_lists') }} <span
                             class="badge badge-soft-secondary" id="countItems">{{ $expense->total() }}</span>
                     </h3>
                     <form  class="search-form">
@@ -147,7 +147,7 @@
                                         @if (isset($exp['order_id']))
                                         <a href="{{route('vendor.order.details',['id'=>$exp['order_id']])}}">{{$exp['order_id']}}</a>
                                         @else
-                                        <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.order')}} {{translate('messages.data')}}</label>
+                                        <label class="badge badge-danger">{{translate('messages.invalid_order_data')}}</label>
                                         @endif
                                 </td>
                                 <td class="text-center">
@@ -162,8 +162,11 @@
                                     <td class="text-center">
                                     @if (isset($exp->order->customer))
                                     {{ $exp->order->customer->f_name.' '.$exp->order->customer->l_name }}
+                                    @elseif($exp->order->is_guest)
+                                        @php($customer_details = json_decode($exp->order['delivery_address'],true))
+                                        {{$customer_details['contact_person_name']}}
                                     @else
-                                    <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                    <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
 
                                     @endif
                                 </td>
@@ -204,23 +207,6 @@
 @endpush
 
 @push('script_2')
-    <script>
-        $('#from_date,#to_date').change(function() {
-            let fr = $('#from_date').val();
-            let to = $('#to_date').val();
-            if (fr != '' && to != '') {
-                if (fr > to) {
-                    $('#from_date').val('');
-                    $('#to_date').val('');
-                    toastr.error('Invalid date range!', Error, {
-                        CloseButton: true,
-                        ProgressBar: true
-                    });
-                }
-            }
-
-        })
-
-    </script>
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/vendor/report.js"></script>
 @endpush
 

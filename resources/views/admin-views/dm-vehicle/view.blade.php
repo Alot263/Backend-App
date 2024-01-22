@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title',translate('vehicle view'))
+@section('title',translate('vehicle_view'))
 
 @push('css_or_js')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -34,35 +34,8 @@
                     <div class="card-header py-2">
                         <div class="search--button-wrapper">
                             <h5 class="card-title">{{ translate('messages.deliveryman') }}<span
-                                    class="badge badge-soft-dark ml-2" id="itemCount">{{ $delivery_men->total() }}</span>
+                                    class="badge badge-soft-dark ml-2" id="itemCount">{{ $deliveryMen->total() }}</span>
                             </h5>
-                            {{-- <form>
-                                <!-- Search -->
-                                <div class="input--group input-group input-group-merge input-group-flush">
-                                    <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                        placeholder="{{ translate('Search by name...') }}" aria-label="Search">
-                                    <button type="submit" class="btn btn--secondary">
-                                        <i class="tio-search"></i>
-                                    </button>
-                                </div>
-                                <!-- End Search -->
-                            </form> --}}
-
-                            {{-- <div class="hs-unfold ml-3">
-                                <div class="select-item">
-                                    <select name="zone_id" class="form-control js-select2-custom"
-                                        onchange="set_zone_filter('{{ url()->full() }}',this.value)">
-                                        <option selected disabled>{{ translate('messages.select_zone') }}</option>
-                                        <option value="all">{{ translate('messages.all_zones') }}</option>
-                                        @foreach (\App\Models\Zone::orderBy('name')->get() as $z)
-                                            <option value="{{ $z['id'] }}"
-                                                {{ isset($zone) && $zone->id == $z['id'] ? 'selected' : '' }}>
-                                                {{ $z['name'] }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div> --}}
                         </div>
                     </div>
                     <!-- End Header -->
@@ -82,18 +55,19 @@
                                 <th class="text-capitalize">{{ translate('messages.contact') }}</th>
                                 {{-- <th class="text-capitalize">{{translate('messages.zone')}}</th> --}}
                                 <th class="text-capitalize text-center">{{ translate('Total Orders') }}</th>
-                                <th class="text-capitalize">{{translate('messages.availability')}} {{translate('messages.status')}}</th>
+                                <th class="text-capitalize">{{translate('messages.availability_status')}}</th>
                                 <th class="text-capitalize text-center w-110px">{{translate('messages.action')}}</th>
                             </thead>
 
                             <tbody id="set-rows">
-                                @foreach($delivery_men as $key=>$dm)
+                                @foreach($deliveryMen as $key=>$dm)
                                     <tr>
-                                        <td>{{$key+$delivery_men->firstItem()}}</td>
+                                        <td>{{$key+$deliveryMen->firstItem()}}</td>
                                         <td>
-                                            <a class="table-rest-info" href="{{route('admin.delivery-man.preview',[$dm['id']])}}">
-                                                <img onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                        src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}" alt="{{$dm['f_name']}} {{$dm['l_name']}}">
+                                            <a class="table-rest-info" href="{{route('admin.users.delivery-man.preview',[$dm['id']])}}">
+                                                <img class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                                src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man/').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
+                                                alt="{{$dm['f_name']}} {{$dm['l_name']}}">
                                                 <div class="info">
                                                     <h5 class="text-hover-primary mb-0">{{$dm['f_name'].' '.$dm['l_name']}}</h5>
                                                     <span class="d-block text-body">
@@ -153,7 +127,7 @@
                             </tbody>
                         </table>
 
-                        @if (count($delivery_men) === 0)
+                        @if (count($deliveryMen) === 0)
                             <div class="empty--data">
                                 <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
                                 <h5>
@@ -164,7 +138,7 @@
                         <div class="page-area px-4 pb-3">
                             <div class="d-flex align-items-center justify-content-end">
                                 <div>
-                                    {!! $delivery_men->appends(request()->all())->links() !!}
+                                    {!! $deliveryMen->appends(request()->all())->links() !!}
                                 </div>
                             </div>
                         </div>
@@ -186,28 +160,12 @@
 
 @push('script_2')
     <script>
-                function status_change_alert(url, message, e) {
-            e.preventDefault();
-            Swal.fire({
-                title: 'Are you sure?',
-                text: message,
-                type: 'warning',
-                showCancelButton: true,
-                cancelButtonColor: 'default',
-                confirmButtonColor: '#FC6A57',
-                cancelButtonText: 'No',
-                confirmButtonText: 'Yes',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.value) {
-                    location.href=url;
-                }
-            })
-        }
+        "use strict";
+
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -241,7 +199,7 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
     </script>

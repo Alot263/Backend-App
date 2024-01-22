@@ -12,14 +12,14 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title">{{translate('messages.module')}} {{translate('messages.type')}}</h1>
+                    <h1 class="page-header-title">{{translate('messages.module_type')}}</h1>
                 </div>
             </div>
         </div>
         <!-- End Page Header -->
 
         <div class="card">
-            <div class="card-header"><h5>{{translate('messages.add').' '.translate('messages.new')}} {{translate('messages.module')}}</h5></div>
+            <div class="card-header"><h5>{{translate('messages.add_new_module')}}</h5></div>
             <div class="card-body">
                 <form action="{{route('admin.module.create')}}" method="get" enctype="multipart/form-data">
                     @csrf
@@ -36,28 +36,14 @@
                     <div class="form-group pt-2">
                         <button type="submit" class="btn btn-primary">{{translate('messages.add')}}</button>
                     </div>
-                    
+
                 </form>
             </div>
         </div>
 
         <div class="card mt-3">
             <div class="card-header pb-0">
-                <h5>{{translate('messages.module_type')}} {{translate('messages.list')}}</h5>
-                {{--<form id="dataSearch">
-                    @csrf
-                    <!-- Search -->
-                    <div class="input-group input-group-merge input-group-flush">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="tio-search"></i>
-                            </div>
-                        </div>
-                        <input type="search" name="search" class="form-control" placeholder="{{translate('messages.search_categories')}}" aria-label="{{translate('messages.search_categories')}}">
-                        <button type="submit" class="btn btn-light">{{translate('messages.search')}}</button>
-                    </div>
-                    <!-- End Search -->
-                </form>--}}
+                <h5>{{translate('messages.module_type_list')}}</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive datatable-custom">
@@ -98,8 +84,9 @@
 @endsection
 
 @push('script_2')
-    <script src="//cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
-    <script type="text/javascript">
+    <script src="{{asset('public/assets/admin/ckeditor/ckeditor.js')}}"></script>
+    <script>
+        "use strict";
         $(document).ready(function () {
             $('.ckeditor').ckeditor();
         });

@@ -15,7 +15,7 @@
                     <img src="{{asset('public/assets/admin/img/attribute.png')}}" class="w--26" alt="">
                 </span>
                 <span>
-                    {{translate('messages.add')}} {{translate('messages.new')}} {{translate('messages.attribute')}}
+                    {{translate('messages.add_new_attribute')}}
                 </span>
             </h1>
         </div>
@@ -26,10 +26,58 @@
                     <div class="card-body">
                         <form action="{{route('admin.attribute.store')}}" method="post">
                             @csrf
-                            <div class="form-group">
-                                <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}}</label>
-                                <input type="text" name="name" class="form-control" placeholder="{{translate('messages.ex_:_new_attribute')}}" maxlength="191" required>
-                            </div>
+                            @if ($language)
+                                    <ul class="nav nav-tabs mb-3 border-0">
+                                        <li class="nav-item">
+                                            <a class="nav-link lang_link active"
+                                            href="#"
+                                            id="default-link">{{translate('messages.default')}}</a>
+                                        </li>
+                                        @foreach ($language as $lang)
+                                            <li class="nav-item">
+                                                <a class="nav-link lang_link"
+                                                    href="#"
+                                                    id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <div class="lang_form" id="default-form">
+                                        <div class="form-group">
+                                            <label class="input-label"
+                                                for="default_title">{{ translate('messages.name') }}
+                                                ({{translate('messages.default')}})
+                                            </label>
+                                            <input type="text" name="name[]" id="default_title"
+                                                class="form-control" placeholder="{{ translate('messages.ex_:_new_attribute') }}"
+                                            >
+                                        </div>
+                                        <input type="hidden" name="lang[]" value="default">
+                                    </div>
+                                        @foreach ($language as $lang)
+                                            <div class="d-none lang_form"
+                                                id="{{ $lang }}-form">
+                                                <div class="form-group">
+                                                    <label class="input-label"
+                                                        for="{{ $lang }}_title">{{ translate('messages.name') }}
+                                                        ({{ strtoupper($lang) }})
+                                                    </label>
+                                                    <input type="text" name="name[]" id="{{ $lang }}_title"
+                                                        class="form-control" placeholder="{{ translate('messages.ex_:_new_attribute') }}">
+                                                </div>
+                                                <input type="hidden" name="lang[]" value="{{ $lang }}">
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div id="default-form">
+                                            <div class="form-group">
+                                                <label class="input-label"
+                                                    for="exampleFormControlInput1">{{ translate('messages.name') }} ({{ translate('messages.default') }})</label>
+                                                <input type="text" name="name[]" class="form-control"
+                                                    placeholder="{{ translate('messages.ex_:_new_attribute') }}">
+                                            </div>
+                                            <input type="hidden" name="lang[]" value="default">
+                                        </div>
+                                    @endif
                             <div class="btn--container justify-content-end">
                                 <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
                                 <button type="submit" class="btn btn--primary">{{translate('messages.submit')}}</button>
@@ -44,14 +92,14 @@
                     <div class="card-header py-2 border-0">
                         <div class="search--button-wrapper">
                             <h5 class="card-title">
-                                {{translate('messages.attribute')}} {{translate('messages.list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$attributes->total()}}</span>
+                                {{translate('messages.attribute_list')}}<span class="badge badge-soft-dark ml-2" id="itemCount">{{$attributes->total()}}</span>
                             </h5>
-                            <form action="javascript:" id="search-form" class="search-form">
+                            <form  class="search-form">
                                 <!-- Search -->
-                                @csrf
+
                                 <div class="input-group input--group">
-                                    <input id="datatableSearch_" type="search" name="search" class="form-control"
-                                            placeholder="{{translate('ex_:_attribute_name')}}" aria-label="Search" required>
+                                    <input id="datatableSearch_" value="{{ request()?->search ?? null }}" type="search" name="search" class="form-control"
+                                            placeholder="{{translate('ex_:_attribute_name')}}" aria-label="Search" >
                                     <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                                 </div>
                                 <!-- End Search -->
@@ -68,40 +116,21 @@
 
                                 <div id="usersExportDropdown"
                                     class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                                    {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                                    <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.copy') }}
-                                    </a>
-                                    <a id="export-print" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.print') }}
-                                    </a>
-                                    <div class="dropdown-divider"></div> --}}
-                                    <span class="dropdown-header">{{ translate('messages.download') }}
-                                        {{ translate('messages.options') }}</span>
-                                    <a id="export-excel" class="dropdown-item" href="{{route('admin.attribute.export-attributes', ['type'=>'excel'])}}">
+
+                                    <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                                    <a id="export-excel" class="dropdown-item" href="{{route('admin.attribute.export-attributes', ['type'=>'excel' , request()->getQueryString() ])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
                                             src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
                                             alt="Image Description">
                                         {{ translate('messages.excel') }}
                                     </a>
-                                    <a id="export-csv" class="dropdown-item" href="{{route('admin.attribute.export-attributes', ['type'=>'csv'])}}">
+                                    <a id="export-csv" class="dropdown-item" href="{{route('admin.attribute.export-attributes', ['type'=>'csv' , request()->getQueryString() ])}}">
                                         <img class="avatar avatar-xss avatar-4by3 mr-2"
                                             src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
                                             alt="Image Description">
                                         .{{ translate('messages.csv') }}
                                     </a>
-                                    {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                        <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
-                                            alt="Image Description">
-                                        {{ translate('messages.pdf') }}
-                                    </a> --}}
+
                                 </div>
                             </div>
                             <!-- End Unfold -->
@@ -142,8 +171,7 @@
                                         <div class="btn--container justify-content-center">
                                             <a class="btn action-btn btn--primary btn-outline-primary" href="{{route('admin.attribute.edit',[$attribute['id']])}}" title="{{translate('messages.edit')}}"><i class="tio-edit"></i>
                                             </a>
-                                            <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:" onclick="form_alert('attribute-{{$attribute['id']}}','{{ translate('Want to delete this attribute ?') }}')" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i>
-                                            </a>
+                                            <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:" data-id="attribute-{{$attribute['id']}}" data-message="{{ translate('Want to delete this attribute ?') }}" title="{{translate('messages.delete')}}"><i class="tio-delete-outlined"></i></a>
                                             <form action="{{route('admin.attribute.delete',[$attribute['id']])}}"
                                                     method="post" id="attribute-{{$attribute['id']}}">
                                                 @csrf @method('delete')
@@ -178,62 +206,20 @@
 @endsection
 
 @push('script_2')
-
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/attribute-index.js"></script>
     <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+        "use strict";
 
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .columns(1)
-                    .search(this.value)
-                    .draw();
-            });
+        $(".lang_link").click(function(e){
+            e.preventDefault();
+            $(".lang_link").removeClass('active');
+            $(".lang_form").addClass('d-none');
+            $(this).addClass('active');
 
-
-            $('#column3_search').on('change', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-    <script>
-        $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('admin.attribute.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('#itemCount').html(data.count);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
+            let form_id = this.id;
+            let lang = form_id.substring(0, form_id.length - 5);
+            console.log(lang);
+            $("#"+lang+"-form").removeClass('d-none');
+        })
     </script>
 @endpush

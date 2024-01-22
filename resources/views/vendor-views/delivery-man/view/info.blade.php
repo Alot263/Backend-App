@@ -39,7 +39,7 @@
                         {{$dm->orders->count()}}
                     </h2>
                     <h5 class="subtitle">
-                        {{translate('messages.total')}} {{translate('messages.delivered')}} {{translate('messages.orders')}}
+                        {{translate('messages.total_delivered_orders')}}
                     </h5>
                     <img class="resturant-icon w--30" src="{{asset('public/assets/admin/img/tick.png')}}" alt="img">
                 </div>
@@ -78,7 +78,11 @@
                 <div class="search--button-wrapper">
                     <h4 class="card-title mb-md-0">{{$dm['f_name'].' '.$dm['l_name']}}@if($dm['status']) @if($dm['active']) <label class="badge badge-soft-primary m-0 ml-2">{{translate('messages.online')}}</label> @else <label class="badge badge-soft-danger m-0 ml-2">{{translate('messages.offline')}}</label> @endif  @else <span class="badge badge-danger">{{translate('messages.suspended')}}</span> @endif</h4>
 
-                    <a  href="javascript:"  onclick="request_alert('{{route('vendor.delivery-man.status',[$dm['id'],$dm->status?0:1])}}','{{$dm->status?'Want to suspend this deliveryman ?':'Want to unsuspend this deliveryman'}}')" class="btn {{$dm->status?'btn-danger':'btn-success'}}">
+                    <a  href="javascript:"
+                        data-url="{{route('vendor.delivery-man.status',[$dm['id'],$dm->status?0:1])}}"
+                        data-title="{{translate('Are_you_sure_?')}}"
+                        data-message="{{$dm->status?'Want to suspend this deliveryman ?':'Want to unsuspend this deliveryman'}}"
+                        class="btn {{$dm->status?'btn-danger':'btn-success'}}  route-alert">
                             {{$dm->status?translate('messages.suspend_this_delivery_man'):translate('messages.unsuspend_this_delivery_man')}}
                     </a>
                 </div>
@@ -88,9 +92,9 @@
                 <div class="row gy-3 align-items-center">
                     <div class="col-md-6">
                         <div class="d-flex align-items-center justify-content-center">
-                            <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120"
-                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                 src="{{asset('storage/app/public/delivery-man')}}/{{$dm['image']}}"
+                            <img class="avatar avatar-xxl avatar-4by3 mr-4 img--120 onerror-image"
+                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($dm['image'], asset('storage/app/public/delivery-man').'/'.$dm['image'], asset('public/assets/admin/img/160x160/img1.jpg'), 'delivery-man/') }}"
                                  alt="Image Description">
                                  <div class="d-block">
                                     <div class="rating--review">
@@ -195,7 +199,7 @@
                                         @endif
                                     @endif
                                     <div class="info">
-                                        {{-- <span class="mr-3">{{$dm->rating->count()}} {{translate('messages.rating')}}</span> --}}
+
                                         <span>{{$dm->reviews->count()}} {{translate('messages.reviews')}}</span>
                                     </div>
                                     </div>
@@ -288,70 +292,7 @@
 
         <!-- Card -->
         <div class="card">
-            {{-- <div class="card-header py-2 justify-content-end border-0">
-                <div class="search--button-wrapper justify-content-end">
-                    <h5 class="card-title">{{translate('messages.reviewer_list')}} <span class="badge badge-soft-secondary">{{count($reviews)}}</span></h5>
-                    <form action="javascript:" id="search-form" class="search-form">
-                        @csrf
-                        <!-- Search -->
-                        <div class="input-group input--group">
-                            <input id="datatableSearch_" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_:_search_here')}}" aria-label="Search">
-                            <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-                        </div>
-                        <!-- End Search -->
-                    </form>
-                    <!-- Unfold -->
-                    <div class="hs-unfold mr-2">
-                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:;"
-                            data-hs-unfold-options='{
-                                "target": "#usersExportDropdown",
-                                "type": "css-animation"
-                            }'>
-                            <i class="tio-download-to mr-1"></i> {{translate('messages.export')}}
-                        </a>
 
-                        <div id="usersExportDropdown"
-                                class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            <span class="dropdown-header">{{translate('messages.options')}}</span>
-                            <a id="export-copy" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/illustrations/copy.svg"
-                                        alt="Image Description">
-                                {{translate('messages.copy')}}
-                            </a>
-                            <a id="export-print" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/illustrations/print.svg"
-                                        alt="Image Description">
-                                {{translate('messages.print')}}
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <span
-                                class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
-                            <a id="export-excel" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
-                                        alt="Image Description">
-                                {{translate('messages.excel')}}
-                            </a>
-                            <a id="export-csv" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/components/placeholder-csv-format.svg"
-                                        alt="Image Description">
-                                .{{translate('messages.csv')}}
-                            </a>
-                            <a id="export-pdf" class="dropdown-item" href="javascript:;">
-                                <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                        src="{{asset('public/assets/admin')}}/svg/components/pdf.svg"
-                                        alt="Image Description">
-                                {{translate('messages.pdf')}}
-                            </a>
-                        </div>
-                    </div>
-                    <!-- End Unfold -->
-                </div>
-            </div> --}}
-            <!-- Table -->
             <div class="table-responsive datatable-custom">
                 <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap card-table"
                        data-hs-datatables-options='{
@@ -387,9 +328,9 @@
                                 @if ($review->customer)
                                     <div class="d-flex align-items-center">
                                         <div class="avatar avatar-circle">
-                                            <img class="avatar-img" width="75" height="75"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                src="{{asset('storage/app/public/profile/'.$review->customer->image)}}"
+                                            <img class="avatar-img onerror-image" width="75" height="75"
+                                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($review->customer->image, asset('storage/app/public/profile/').'/'.$review->customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
                                                 alt="Image Description">
                                         </div>
                                         <div class="ml-3">
@@ -404,7 +345,7 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="text-wrap" style="width: 18rem;">
+                                <div class="text-wrap w-18rem" >
                                     <div class="d-flex mb-2">
                                         <label class="badge badge-soft-info">
                                             {{$review->rating}} <i class="tio-star"></i>
@@ -417,7 +358,8 @@
                             </td>
                             <td>
                                 @foreach(json_decode($review['attachment'],true) as $attachment)
-                                    <img width="100" onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'" src="{{asset('storage/app/public')}}/{{$attachment}}">
+                                    <img width="100" class="onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"  src="{{\App\CentralLogics\Helpers::onerror_image_helper($attachment, asset('storage/app/public').'/'.$attachment, asset('public/assets/admin/img/160x160/img2.jpg'), $attachment.'/') }}"
+                                    alt="image">
                                 @endforeach
                             </td>
                             <td>
@@ -429,6 +371,17 @@
                 </table>
             </div>
             <!-- End Table -->
+
+
+
+            @if(count($reviews) === 0)
+                <div class="empty--data">
+                    <img src="{{asset('/public/assets/admin/svg/illustrations/sorry.svg')}}" alt="public">
+                    <h5>
+                        {{translate('no_data_found')}}
+                    </h5>
+                </div>
+            @endif
 
             <!-- Footer -->
             <div class="card-footer">
@@ -446,24 +399,4 @@
     </div>
 @endsection
 
-@push('script_2')
-<script>
-    function request_alert(url, message) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: message,
-            type: 'warning',
-            showCancelButton: true,
-            cancelButtonColor: 'default',
-            confirmButtonColor: '#FC6A57',
-            cancelButtonText: 'No',
-            confirmButtonText: 'Yes',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.value) {
-                location.href = url;
-            }
-        })
-    }
-</script>
-@endpush
+

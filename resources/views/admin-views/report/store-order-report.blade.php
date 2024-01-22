@@ -19,7 +19,7 @@
                         {{ translate('Store Wise Report') }}
                     </h1>
                     <span>
-                        Monitor store’s <strong class="font-bold text--title">business</strong> analytics & Reports
+                        {{ translate('Monitor_store’s_business_analytics_&_Reports') }}
                     </span>
                 </div>
             </div>
@@ -40,9 +40,6 @@
                 <a href="{{ route('admin.transactions.report.store-order-report') }}"
                     class="nav-link active">{{ translate('Order Report') }}</a>
             </li>
-            {{-- <li class="nav-item">
-            <a href="" class="nav-link">{{translate('Transactions Report')}}</a>
-        </li> --}}
         </ul>
 
         <div class="card filter--card">
@@ -54,9 +51,8 @@
                     @csrf
                     <div class="row g-3">
                         <div class="col-md-4 col-sm-6">
-                            <select name="zone_id" class="form-control js-select2-custom"
-                                onchange="set_zone_filter('{{ url()->full() }}',this.value)" id="zone">
-                                <option value="all">{{ translate('messages.All Zones') }}</option>
+                            <select name="zone_id" class="form-control js-select2-custom set-filter" data-url="{{ url()->full() }}" data-filter="zone_id" id="zone">
+                                <option value="all">{{ translate('messages.All_Zones') }}</option>
                                 @foreach (\App\Models\Zone::orderBy('name')->get() as $z)
                                     <option value="{{ $z['id'] }}"
                                         {{ isset($zone) && $zone->id == $z['id'] ? 'selected' : '' }}>
@@ -66,20 +62,18 @@
                             </select>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <select name="store_id" onchange="set_store_filter('{{ url()->full() }}',this.value)"
-                                data-placeholder="{{ translate('messages.select') }} {{ translate('messages.store') }}"
-                                class="js-data-example-ajax form-control">
+                            <select name="store_id"
+                                data-placeholder="{{ translate('messages.select_store') }}"
+                                class="js-data-example-ajax form-control set-filter" data-url="{{ url()->full() }}" data-filter="store_id">
                                 @if (isset($store))
                                     <option value="{{ $store->id }}" selected>{{ $store->name }}</option>
                                 @else
-                                    <option value="all" selected>{{ translate('messages.all') }}
-                                        {{ translate('messages.stores') }}</option>
+                                    <option value="all" selected>{{ translate('messages.all_stores') }}</option>
                                 @endif
                             </select>
                         </div>
                         <div class="col-md-4 col-sm-6">
-                            <select class="form-control" name="filter"
-                                onchange="set_time_filter('{{ url()->full() }}',this.value)">
+                            <select class="form-control set-filter" data-url="{{ url()->full() }}" data-filter="filter" name="filter">
                                 <option value="all_time" {{ isset($filter) && $filter == 'all_time' ? 'selected' : '' }}>
                                     {{ translate('messages.All Time') }}</option>
                                 <option value="this_year" {{ isset($filter) && $filter == 'this_year' ? 'selected' : '' }}>
@@ -266,15 +260,15 @@
                         </div>
                         <div class="apex-legends">
                             <div class="before-bg-107980">
-                                <span>Total canceled
+                                <span>{{ translate('Total_canceled') }}
                                     ({{ $total_canceled_count }})</span>
                             </div>
                             <div class="before-bg-56B98F">
-                                <span>Total ongoing (
+                                <span>{{ translate('Total_ongoing') }} (
                                     {{ $total_ongoing_count }})</span>
                             </div>
                             <div class="before-bg-E5F5F1">
-                                <span>Total delivered
+                                <span>{{ translate('Total_delivered') }}
                                     ({{ $total_delivered_count }})</span>
                             </div>
                         </div>
@@ -291,13 +285,13 @@
             <div class="card-header border-0 py-2">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">{{ translate('Total Sales') }}</h5>
-                    <form action="javascript:" id="search-form" class="search-form">
+                    <form class="search-form">
                         <!-- Search -->
-                        @csrf
+                        {{-- @csrf --}}
                         <div class="input-group input--group">
                             <input id="datatableSearch_" type="search" name="search" class="form-control"
                                 placeholder="{{ translate('Search by ID..') }}"
-                                aria-label="{{ translate('messages.search') }}" required>
+                                aria-label="{{ translate('messages.search') }}" value="{{ request()?->search ?? null}}" required>
                             <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
 
                         </div>
@@ -316,22 +310,7 @@
 
                         <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                            {{-- <span class="dropdown-header">{{ translate('messages.options') }}</span>
-                        <a id="export-copy" class="dropdown-item" href="javascript:;">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                src="{{ asset('public/assets/admin') }}/svg/illustrations/copy.svg"
-                                alt="Image Description">
-                            {{ translate('messages.copy') }}
-                        </a>
-                        <a id="export-print" class="dropdown-item" href="javascript:;">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                src="{{ asset('public/assets/admin') }}/svg/illustrations/print.svg"
-                                alt="Image Description">
-                            {{ translate('messages.print') }}
-                        </a>
-                        <div class="dropdown-divider"></div> --}}
-                            <span class="dropdown-header">{{ translate('messages.download') }}
-                                {{ translate('messages.options') }}</span>
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
                             <a id="export-excel" class="dropdown-item"
                                 href="{{ route('admin.transactions.report.store-order-report-export', ['type' => 'excel', request()->getQueryString()]) }}">
                                 <img class="avatar avatar-xss avatar-4by3 mr-2"
@@ -367,6 +346,8 @@
                                 </th>
                                 <th class="border-top border-bottom text-capitalize text-center">
                                     {{ translate('Delivery Charge') }}</th>
+                                <th class="border-top border-bottom text-capitalize text-center">
+                                    {{ \App\CentralLogics\Helpers::get_business_data('additional_charge_name')??translate('messages.additional_charge') }}</th>
                                 <th class="border-top border-bottom text-capitalize text-center">{{ translate('Action') }}
                                 </th>
                             </tr>
@@ -392,16 +373,18 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if ($order->customer)
-                                            <a class="text-body text-capitalize"
-                                                href="{{ route('admin.transactions.customer.view', [$order['user_id']]) }}">
-                                                <strong>{{ $order->customer['f_name'] . ' ' . $order->customer['l_name'] }}</strong>
-                                                <div>{{ $order->customer['phone'] }}</div>
-                                            </a>
+                                        @if($order->is_guest)
+                                        @php($customer_details = json_decode($order['delivery_address'],true))
+                                        <strong>{{$customer_details['contact_person_name']}}</strong>
+                                        <div>{{$customer_details['contact_person_number']}}</div>
+                                        @elseif ($order->customer)
+                                        <a class="text-body text-capitalize"
+                                            href="{{ route('admin.transactions.customer.view', [$order['user_id']]) }}">
+                                            <strong>{{ $order->customer['f_name'] . ' ' . $order->customer['l_name'] }}</strong>
+                                            <div>{{ $order->customer['phone'] }}</div>
+                                        </a>
                                         @else
-                                            <label class="badge badge-danger">{{ translate('messages.invalid') }}
-                                                {{ translate('messages.customer') }}
-                                                {{ translate('messages.data') }}</label>
+                                            <label class="badge badge-danger">{{ translate('messages.invalid_customer_data') }}</label>
                                         @endif
                                     </td>
                                     <td>
@@ -428,6 +411,9 @@
                                     </td>
                                     <td class="text-center mw--85px">
                                         {{ \App\CentralLogics\Helpers::number_format_short($order['original_delivery_charge']) }}
+                                    </td>
+                                    <td class="text-center mw--85px">
+                                        {{ \App\CentralLogics\Helpers::number_format_short($order['additional_charge']) }}
                                     </td>
 
                                     <td>
@@ -474,6 +460,11 @@
 
 
 @push('script')
+    <!-- Apex Charts -->
+@endpush
+
+
+@push('script_2')
     <script src="{{ asset('public/assets/admin') }}/vendor/chart.js/dist/Chart.min.js"></script>
     <script src="{{ asset('public/assets/admin') }}/vendor/chart.js.extensions/chartjs-extensions.js"></script>
     <script
@@ -483,22 +474,18 @@
 
     <!-- Apex Charts -->
     <script src="{{ asset('/public/assets/admin/js/apex-charts/apexcharts.js') }}"></script>
-    <!-- Apex Charts -->
-@endpush
-
-
-@push('script_2')
     <!-- Dognut Pie Chart -->
     <script>
-        var options = {
+        "use strict";
+        let options = {
             series: [{{ $total_canceled_count}}, {{ $total_ongoing_count}}, {{ $total_delivered_count }}],
             chart: {
                 width: 320,
                 type: 'donut',
             },
-            labels: ['Total canceled ({{ $total_canceled_count}})',
-                'Total ongoing ({{ $total_ongoing_count}})',
-                'Total delivered  ({{ $total_delivered_count }})'
+            labels: ['{{ translate('Total canceled') }} ({{ $total_canceled_count}})',
+                '{{ translate('Total ongoing') }} ({{ $total_ongoing_count}})',
+                '{{ translate('Total delivered') }}  ({{ $total_delivered_count }})'
             ],
             dataLabels: {
                 enabled: false,
@@ -523,14 +510,13 @@
             },
         };
 
-        var chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
+        let chart = new ApexCharts(document.querySelector("#dognut-pie"), options);
         chart.render();
-    </script>
+
     <!-- Dognut Pie Chart -->
 
 
 
-    <script>
         // Bar Charts
         Chart.plugins.unregister(ChartDataLabels);
 
@@ -538,7 +524,7 @@
             $.HSCore.components.HSChartJS.init($(this));
         });
 
-        var updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
+        let updatingChart = $.HSCore.components.HSChartJS.init($('#updatingData'));
 
         $('.js-data-example-ajax').select2({
             ajax: {
@@ -559,7 +545,7 @@
                     };
                 },
                 __port: function(params, success, failure) {
-                    var $request = $.ajax(params);
+                    let $request = $.ajax(params);
 
                     $request.then(success);
                     $request.fail(failure);
@@ -571,7 +557,7 @@
 
         $('#search-form').on('submit', function(e) {
             e.preventDefault();
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -588,7 +574,6 @@
                 },
                 success: function(data) {
                     $('#set-rows').html(data.view);
-                    // $('#countItems').html(data.count);
                     $('.page-area').hide();
                 },
                 complete: function() {

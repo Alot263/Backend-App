@@ -22,8 +22,16 @@
         </label>
     </td>
     <td>
+        <label class="toggle-switch toggle-switch-sm" for="featuredCheckbox{{$category->id}}">
+            <input type="checkbox" onclick="location.href='{{route('admin.category.featured',[$category['id'],$category->featured?0:1])}}'"class="toggle-switch-input" id="featuredCheckbox{{$category->id}}" {{$category->featured?'checked':''}}>
+            <span class="toggle-switch-label mx-auto">
+                <span class="toggle-switch-indicator"></span>
+            </span>
+        </label>
+    </td>
+    <td>
         <form action="{{route('admin.category.priority',$category->id)}}">
-            <select name="priority" id="priority" class="form-control form--control-select mx-auto {{$category->priority == 0 ? 'text-title':''}} {{$category->priority == 1 ? 'text-info':''}} {{$category->priority == 2 ? 'text-success':''}} " onchange="this.form.submit()"> 
+            <select name="priority" id="priority" class="form-control form--control-select mx-auto {{$category->priority == 0 ? 'text-title':''}} {{$category->priority == 1 ? 'text-info':''}} {{$category->priority == 2 ? 'text-success':''}} " onchange="this.form.submit()">
                 <option value="0" class="text--title" {{$category->priority == 0?'selected':''}}>{{translate('messages.normal')}}</option>
                 <option value="1" class="text--title" {{$category->priority == 1?'selected':''}}>{{translate('messages.medium')}}</option>
                 <option value="2" class="text--title" {{$category->priority == 2?'selected':''}}>{{translate('messages.high')}}</option>
@@ -33,10 +41,10 @@
     <td>
         <div class="btn--container justify-content-center">
             <a class="btn action-btn btn--primary btn-outline-primary"
-                href="{{route('admin.category.edit',[$category['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.category')}}"><i class="tio-edit"></i>
+                href="{{route('admin.category.edit',[$category['id']])}}" title="{{translate('messages.edit_category')}}"><i class="tio-edit"></i>
             </a>
             <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-            onclick="form_alert('category-{{$category['id']}}','Want to delete this category')" title="{{translate('messages.delete')}} {{translate('messages.category')}}"><i class="tio-delete-outlined"></i>
+            onclick="form_alert('category-{{$category['id']}}','Want to delete this category')" title="{{translate('messages.delete_category')}}"><i class="tio-delete-outlined"></i>
             </a>
             <form action="{{route('admin.category.delete',[$category['id']])}}" method="post" id="category-{{$category['id']}}">
                 @csrf @method('delete')

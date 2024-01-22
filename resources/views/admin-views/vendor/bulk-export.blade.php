@@ -46,35 +46,35 @@
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.type')}}<span
                                         class="input-label-secondary"></span></label>
-                                <select name="type" id="type" data-placeholder="{{translate('messages.select')}} {{translate('messages.type')}}" class="form-control" required title="Select Type">
-                                    <option value="all">{{translate('messages.all')}} {{translate('messages.data')}}</option>
-                                    <option value="date_wise">{{translate('messages.date')}} {{translate('messages.wise')}}</option>
-                                    <option value="id_wise">{{translate('messages.id')}} {{translate('messages.wise')}}</option>
+                                <select name="type" id="type" data-placeholder="{{translate('messages.select_type')}}" class="form-control" required title="Select Type">
+                                    <option value="all">{{translate('messages.all_data')}}</option>
+                                    <option value="date_wise">{{translate('messages.date_wise')}}</option>
+                                    <option value="id_wise">{{translate('messages.id_wise')}}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group id_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.start')}} {{translate('messages.id')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.start_id')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="number" name="start_id" class="form-control">
                             </div>
                             <div class="form-group date_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.from')}} {{translate('messages.date')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.from_date')}}<span
                                         class="input-label-secondary"></span></label>
-                                <input type="date" name="from_date" class="form-control">
+                                <input type="date" name="from_date" id="date_from" class="form-control">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-group id_wise">
-                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.end')}} {{translate('messages.id')}}<span
+                                <label class="input-label" for="exampleFormControlSelect1">{{translate('messages.end_id')}}<span
                                         class="input-label-secondary"></span></label>
                                 <input type="number" name="end_id" class="form-control">
                             </div>
                             <div class="form-group date_wise">
-                                <label class="input-label text-capitalize" for="exampleFormControlSelect1">{{translate('messages.to')}} {{translate('messages.date')}}<span
+                                <label class="input-label text-capitalize" for="exampleFormControlSelect1">{{translate('messages.to_date')}}<span
                                         class="input-label-secondary"></span></label>
-                                <input type="date" name="to_date" class="form-control">
+                                <input type="date" name="to_date" id="date_to" class="form-control">
                             </div>
                         </div>
                         <div class="col-12">
@@ -93,6 +93,8 @@
 @push('script_2')
 <script>
     $(document).on('ready', function (){
+        $('#date_from').attr('max',(new Date()).toISOString().split('T')[0]);
+        $('#date_to').attr('max',(new Date()).toISOString().split('T')[0]);
         $('.id_wise').hide();
         $('.date_wise').hide();
         $('#type').on('change', function()

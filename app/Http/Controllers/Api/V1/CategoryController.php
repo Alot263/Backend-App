@@ -34,7 +34,7 @@ class CategoryController extends Controller
                 });
             })
             ->orderBy('priority','desc')->get();
-            return response()->json(Helpers::category_data_formatting($categories, true), 200);
+            return response()->json($categories, 200);
         } catch (\Exception $e) {
             return response()->json([], 200);
         }
@@ -44,7 +44,7 @@ class CategoryController extends Controller
     {
         try {
             $categories = Category::with('parent')->where(['parent_id' => $id,'status'=>1])->orderBy('priority','desc')->get();
-            return response()->json(Helpers::category_data_formatting($categories, true), 200);
+            return response()->json($categories, 200);
         } catch (\Exception $e) {
             return response()->json([], 200);
         }
@@ -73,6 +73,35 @@ class CategoryController extends Controller
         $type = $request->query('type', 'all');
 
         $data = CategoryLogic::products($id, $zone_id, $request['limit'], $request['offset'], $type);
+        $data['products'] = Helpers::product_data_formatting($data['products'] , true, false, app()->getLocale());
+        return response()->json($data, 200);
+    }
+
+    public function get_category_products(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [];
+            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'limit' => 'required',
+            'offset' => 'required',
+            'category_ids' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $zone_id= $request->header('zoneId');
+
+        $type = $request->query('type', 'all');
+        $category_ids = $request['category_ids']?json_decode($request['category_ids']):'';
+
+        $data = CategoryLogic::category_products($category_ids, $zone_id, $request['limit'], $request['offset'], $type);
         $data['products'] = Helpers::product_data_formatting($data['products'] , true, false, app()->getLocale());
         return response()->json($data, 200);
     }
@@ -106,6 +135,36 @@ class CategoryController extends Controller
         return response()->json($data, 200);
     }
 
+    public function get_category_stores(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [];
+            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'limit' => 'required',
+            'offset' => 'required',
+            'category_ids' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $zone_id= $request->header('zoneId');
+        $longitude= $request->header('longitude');
+        $latitude= $request->header('latitude');
+        $type = $request->query('type', 'all');
+        $category_ids = $request['category_ids']?json_decode($request['category_ids']):'';
+
+        $data = CategoryLogic::category_stores($category_ids, $zone_id, $request['limit'], $request['offset'], $type,$longitude,$latitude);
+        $data['stores'] = Helpers::store_data_formatting($data['stores'] , true);
+        return response()->json($data, 200);
+    }
+
 
 
     public function get_all_products($id,Request $request)
@@ -124,5 +183,32 @@ class CategoryController extends Controller
         } catch (\Exception $e) {
             return response()->json([], 200);
         }
+    }
+
+    public function get_featured_category_products(Request $request)
+    {
+        if (!$request->hasHeader('zoneId')) {
+            $errors = [];
+            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+            return response()->json([
+                'errors' => $errors
+            ], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'limit' => 'required',
+            'offset' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+
+        $zone_id= $request->header('zoneId');
+
+        $type = $request->query('type', 'all');
+
+        $data = CategoryLogic::featured_category_products($zone_id, $request['limit'], $request['offset'], $type);
+        $data['products'] = Helpers::product_data_formatting($data['products'] , true, false, app()->getLocale());
+        return response()->json($data, 200);
     }
 }

@@ -41,7 +41,7 @@
                     <div class="col-sm-6 col-lg-4">
                         <div class="form-group">
                             <label class="d-flex justify-content-between switch toggle-switch-sm text-dark" for="app_url_android_status">
-                                <span>{{translate('messages.user')}} {{translate('messages.app_url')}} ({{translate('messages.play_store')}}) </span>
+                                <span>{{translate('messages.user_app_url')}} ({{translate('messages.play_store')}}) </span>
                                 <input type="checkbox" class="toggle-switch-input" name="app_url_android_status" id="app_url_android_status" value="1" {{(isset($landing_page_links) && $landing_page_links['app_url_android_status'])?'checked':''}}>
                                 <span class="toggle-switch-label">
                                     <span class="toggle-switch-indicator"></span>
@@ -53,7 +53,7 @@
                     <div class="col-sm-6 col-lg-4">
                         <div class="form-group">
                             <label class="d-flex justify-content-between switch toggle-switch-sm text-dark" for="app_url_ios_status">
-                                <span>{{translate('messages.user')}} {{translate('messages.app_url')}} ({{translate('messages.app_store')}}) </span>
+                                <span>{{translate('messages.user_app_url')}} ({{translate('messages.app_store')}}) </span>
                                 <input type="checkbox" class="toggle-switch-input" name="app_url_ios_status" id="app_url_ios_status" value="1" {{(isset($landing_page_links) && $landing_page_links['app_url_ios_status'])?'checked':''}}>
                                 <span class="toggle-switch-label">
                                     <span class="toggle-switch-indicator"></span>

@@ -9,6 +9,8 @@ class VendorEmployee extends Authenticatable
 {
     use Notifiable;
 
+    protected $fillable = ['remember_token'];
+
     protected $hidden = [
         'password',
         'auth_token',

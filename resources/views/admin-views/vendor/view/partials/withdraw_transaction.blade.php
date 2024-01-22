@@ -37,7 +37,6 @@
         </table>
     </div>
 </div>
-</div>
 @if(count($withdraw_transaction) !== 0)
 <hr>
 @endif

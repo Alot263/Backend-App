@@ -12,7 +12,7 @@
         <div class="d-print-none pb-3">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title mb-0">{{translate('messages.customer')}} {{translate('messages.id')}} #{{$customer['id']}}</h1>
+                    <h1 class="page-header-title mb-0">{{translate('messages.customer_id')}} #{{$customer['id']}}</h1>
                     <span>
                         <i class="tio-date-range"></i>
                         {{translate('messages.joined_at')}} : {{date('d M Y '.config('timeformat'),strtotime($customer['created_at']))}}
@@ -23,12 +23,12 @@
                 <div class="col-sm-auto">
                     <a class="btn btn-icon btn-sm btn-soft-secondary rounded-circle mr-1"
                        href="{{route('admin.users.customer.view',[$customer['id']-1])}}"
-                       data-toggle="tooltip" data-placement="top" title="Previous customer">
+                       data-toggle="tooltip" data-placement="top" title="{{ translate('Previous_customer') }}">
                         <i class="tio-arrow-backward"></i>
                     </a>
                     <a class="btn btn-icon btn-sm btn-soft-secondary rounded-circle"
                        href="{{route('admin.users.customer.view',[$customer['id']+1])}}" data-toggle="tooltip"
-                       data-placement="top" title="Next customer">
+                       data-placement="top" title="{{ translate('Next_customer') }}">
                         <i class="tio-arrow-forward"></i>
                     </a>
                 </div>
@@ -41,7 +41,7 @@
                 <div class="resturant-card card--bg-1">
                     <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/1.png')}}" alt="public">
                     <div class="title text-capitalize">{{$customer->wallet_balance??0}}</div>
-                    <div class="subtitle">{{__('messages.wallet')}} {{__('messages.balance')}}</div>
+                    <div class="subtitle">{{translate('messages.wallet_balance')}}</div>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@
                 <div class="resturant-card card--bg-2">
                     <img class="resturant-icon" src="{{asset('public/assets/admin/img/customer-loyality/2.png')}}" alt="public">
                     <div class="title text-capitalize">{{$customer->loyalty_point??0}}</div>
-                    <div class="subtitle    ">{{__('messages.loyalty_point_balance')}}</div>
+                    <div class="subtitle    ">{{translate('messages.loyalty_point_balance')}}</div>
                 </div>
             </div>
         </div>
@@ -58,7 +58,7 @@
         <div class="row" id="printableArea">
             <div class="col-lg-8 mb-3 mb-lg-0">
                 <div class="card">
-                    <div class="card-header border-0 py-2">
+                    <div class="card-header border-0 py-2 d-flex gap-2">
                         <div class="search--button-wrapper">
                             <h5 class="card-title"> {{translate('order_list')}} <span class="badge badge-soft-secondary">{{ $orders->total() }}</span></h5>
                             <div class="min--260">
@@ -70,6 +70,40 @@
                                 </div>
                             </div>
                         </div>
+                    <!-- Unfold -->
+                    <div class="hs-unfold mr-2">
+                        <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40" href="javascript:;"
+                            data-hs-unfold-options='{
+                                    "target": "#usersExportDropdown",
+                                    "type": "css-animation"
+                                }'>
+                            <i class="tio-download-to mr-1"></i> {{ translate('messages.export') }}
+                        </a>
+
+                        <div id="usersExportDropdown"
+                            class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
+                            <span class="dropdown-header">{{ translate('messages.download_options') }}</span>
+                            <a id="export-excel" class="dropdown-item" href="{{route('admin.customer.order-export', ['type'=>'excel','id'=>$customer->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/excel.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.excel') }}
+                            </a>
+                            <a id="export-csv" class="dropdown-item" href="{{route('admin.customer.order-export', ['type'=>'csv','id'=>$customer->id,request()->getQueryString()])}}">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/placeholder-csv-format.svg"
+                                    alt="Image Description">
+                                .{{ translate('messages.csv') }}
+                            </a>
+                            {{-- <a id="export-pdf" class="dropdown-item" href="javascript:;">
+                                <img class="avatar avatar-xss avatar-4by3 mr-2"
+                                    src="{{ asset('public/assets/admin') }}/svg/components/pdf.svg"
+                                    alt="Image Description">
+                                {{ translate('messages.pdf') }}
+                            </a> --}}
+                        </div>
+                    </div>
+                    <!-- End Unfold -->
                     </div>
                     <!-- Table -->
                     <div class="table-responsive datatable-custom">
@@ -83,7 +117,7 @@
                             <thead class="thead-light">
                             <tr>
                                 <th class="border-0 pl-4">{{translate('sl')}}</th>
-                                <th class="border-0 text-center">{{translate('messages.order')}} {{translate('messages.id')}}</th>
+                                <th class="border-0 text-center">{{translate('messages.order_id')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.total_amount')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.action')}}</th>
                             </tr>
@@ -152,7 +186,8 @@
                         <div class="card-body">
                             <div class="customer--information-single media align-items-center" href="javascript:">
                                 <div class="avatar avatar-circle">
-                                    <img class="avatar-img" onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'" src="{{asset('storage/app/public/profile/'.$customer->image)}}" alt="Image Description">
+                                    <img class="avatar-img onerror-image" data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}" src="{{\App\CentralLogics\Helpers::onerror_image_helper($customer->image, asset('storage/app/public/profile/').'/'.$customer->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'profile/') }}"
+                                    alt="Image Description">
                                 </div>
                                 <div class="media-body">
                                     <ul class="list-unstyled m-0">
@@ -182,7 +217,7 @@
                                 <ul class="list-unstyled list-unstyled-py-2">
                                     <li class="d-flex align-items-center">
                                         <i class="tio-tab mr-2"></i>
-                                        <span>{{$address['address_type']}}</span>
+                                        <span>{{translate($address['address_type'])}}</span>
                                     </li>
                                     @if($address['contact_person_umber'])
                                     <li class="d-flex align-items-center">
@@ -217,7 +252,7 @@
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -238,7 +273,7 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
     </script>

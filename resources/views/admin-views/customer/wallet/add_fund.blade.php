@@ -28,7 +28,7 @@
                         <div class="col-sm-6 col-12">
                             <div class="form-group">
                                 <label class="input-label" for="customer">{{translate('messages.customer')}}</label>
-                                <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select')}} {{translate('messages.customer')}}" class="js-data-example-ajax form-control" required>
+                                <select id='customer' name="customer_id" data-placeholder="{{translate('messages.select_customer')}}" class="js-data-example-ajax form-control" required>
 
                                 </select>
                             </div>
@@ -36,14 +36,14 @@
                         <div class="col-sm-6 col-12">
                             <div class="form-group">
                                 <label class="input-label" for="amount">{{translate("messages.amount")}}</label>
-                        
+
                                 <input type="number" class="form-control" name="amount" id="amount" step=".01" required>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="input-label" for="referance">{{translate('messages.reference')}} <small>({{translate('messages.optional')}})</small></label>
-                        
+
                                 <input type="text" class="form-control" name="referance" id="referance">
                             </div>
                         </div>
@@ -94,10 +94,10 @@
     <script>
 
         $('#add_fund').on('submit', function (e) {
-            
+
             e.preventDefault();
             var formData = new FormData(this);
-            
+
             Swal.fire({
                 title: '{{translate('messages.are_you_sure')}}',
                 text: '{{translate('messages.you_want_to_add_fund')}}'+$('#amount').val()+' {{\App\CentralLogics\Helpers::currency_code().' '.translate('messages.to')}} '+$('#customer option:selected').text()+'{{translate('messages.to_wallet')}}',
@@ -141,7 +141,7 @@
                                 setTimeout(function () {
                                     window.location.reload();
                                 }, 2000);
-                                
+
                             }
                         }
                     });

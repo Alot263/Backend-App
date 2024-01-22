@@ -25,14 +25,21 @@
                         @method('PUT')
                         @php($language=\App\Models\BusinessSetting::where('key','language')->first())
                         @php($language = $language->value ?? null)
-                        @php($default_lang = 'en')
+                        @php($defaultLang = str_replace('_', '-', app()->getLocale()))
                         <div class="col-lg-12">
                             @if($language)
-                                @php($default_lang = json_decode($language)[0])
+                                @php($defaultLang = json_decode($language)[0])
                                 <ul class="nav nav-tabs mb-4">
-                                    @foreach(json_decode($language) as $lang)
+                                    <li class="nav-item">
+                                        <a class="nav-link lang_link active"
+                                        href="#"
+                                        id="default-link">{{translate('messages.default')}}</a>
+                                    </li>
+                                    @foreach (json_decode($language) as $lang)
                                         <li class="nav-item">
-                                            <a class="nav-link lang_link {{$lang == $default_lang? 'active':''}}" href="#" id="{{$lang}}-link">{{\App\CentralLogics\Helpers::get_language_name($lang).'('.strtoupper($lang).')'}}</a>
+                                            <a class="nav-link lang_link"
+                                                href="#"
+                                                id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -40,6 +47,17 @@
                         </div>
                         <div class="col-lg-6">
                             @if($language)
+                            <div class="lang_form" id="default-form">
+                                <div class="form-group">
+                                    <label class="input-label" for="default_name">{{translate('messages.name')}} ({{ translate('messages.default') }})</label>
+                                    <input type="text" name="name[]" id="default_name" class="form-control" placeholder="{{translate('messages.new_food')}}" value="{{$parcel_category?->getRawOriginal('name')}}">
+                                </div>
+                                <input type="hidden" name="lang[]" value="default">
+                                <div class="form-group">
+                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short_description')}} ({{ translate('messages.default') }})</label>
+                                    <textarea type="text" name="description[]" class="form-control ckeditor">{!! $parcel_category?->getRawOriginal('description') !!}</textarea>
+                                </div>
+                            </div>
                                 @foreach(json_decode($language) as $lang)
                                     <?php
                                         if(count($parcel_category['translations'])){
@@ -55,41 +73,32 @@
                                             }
                                         }
                                     ?>
-                                    <div class="{{$lang != $default_lang ? 'd-none':''}} lang_form" id="{{$lang}}-form">
+                                    <div class="d-none lang_form" id="{{$lang}}-form">
                                         <div class="form-group">
                                             <label class="input-label" for="{{$lang}}_name">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
-                                            <input type="text" name="name[]" id="{{$lang}}_name" class="form-control" placeholder="{{translate('messages.new_food')}}" value="{{$translate[$lang]['name']??$parcel_category['name']}}" {{$lang == $default_lang? 'required':''}} oninvalid="document.getElementById('en-link').click()">
+                                            <input type="text" name="name[]" id="{{$lang}}_name" class="form-control" placeholder="{{translate('messages.new_food')}}" value="{{$translate[$lang]['name']??''}}">
                                         </div>
                                         <input type="hidden" name="lang[]" value="{{$lang}}">
                                         <div class="form-group">
-                                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short')}} {{translate('messages.description')}} ({{strtoupper($lang)}})</label>
-                                            <textarea type="text" name="description[]" class="form-control ckeditor" {{$lang == $default_lang? 'required':''}} oninvalid="document.getElementById('en-link').click()">{!! $translate[$lang]['description']??$parcel_category['description'] !!}</textarea>
+                                            <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short_description')}} ({{strtoupper($lang)}})</label>
+                                            <textarea type="text" name="description[]" class="form-control ckeditor">{!! $translate[$lang]['description']??'' !!}</textarea>
                                         </div>
                                     </div>
                                 @endforeach
                             @else
-                                <div id="{{$default_lang}}-form">
+                                <div id="default-form">
                                     <div class="form-group">
                                         <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} (EN)</label>
                                         <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_food')}}" value="{{$parcel_category['name']}}" required>
                                     </div>
                                     <input type="hidden" name="lang[]" value="en">
                                     <div class="form-group">
-                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short')}} {{translate('messages.description')}}</label>
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short_description')}}</label>
                                         <textarea type="text" name="description[]" class="form-control ckeditor">{!! $parcel_category['description'] !!}</textarea>
                                     </div>
                                 </div>
                             @endif
                             @if($parcel_category->position == 0)
-                            {{-- <div class="form-group mb-0">
-                                <label class="input-label">{{translate('messages.module')}}</label>
-                                <select name="module_id" id="module_id" required class="form-control js-select2-custom"  data-placeholder="{{translate('messages.select')}} {{translate('messages.module')}}">
-                                        <option value="" selected disabled>{{translate('messages.select')}} {{translate('messages.module')}}</option>
-                                    @foreach(\App\Models\Module::parcel()->get() as $module)
-                                        <option value="{{$module->id}}" {{$parcel_category->module_id==$module->id?'selected':''}}>{{$module->module_name}}</option>
-                                    @endforeach
-                                </select>
-                            </div> --}}
                             @endif
                         </div>
                         <div class="col-lg-6">
@@ -98,13 +107,22 @@
                                     {{translate('messages.image')}}
                                     <small class="text-danger">* ( {{translate('messages.ratio')}} 200x200 )</small>
                                 </label>
-                                <center class="py-3 my-auto">
-                                    <img class="img--130" id="viewer" src="{{asset('storage/app/public/parcel_category')}}/{{$parcel_category['image']}}" alt="" onerror='this.src="{{asset('/public/assets/admin/img/400x400/img2.jpg')}}"' />
-                                </center>
+                                <div class="text-center py-3 my-auto">
+                                    <img class="img--130 onerror-image" id="viewer"
+
+                                    src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                                        $parcel_category['image'] ?? '',
+                                        asset('storage/app/public/parcel_category').'/'.$parcel_category['image'] ?? '',
+                                        asset('/public/assets/admin/img/400x400/img2.jpg'),
+                                        'parcel_category/'
+                                    ) }}"
+
+                                    data-onerror-image="{{asset('/public/assets/admin/img/400x400/img2.jpg')}}" />
+                                </div>
                                 <div class="custom-file">
                                     <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                             accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                    <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                                 </div>
                             </div>
                         </div>
@@ -139,9 +157,10 @@
 
 @push('script_2')
     <script>
+        "use strict";
         function readURL(input) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
 
                 reader.onload = function (e) {
                     $('#viewer').attr('src', e.target.result);
@@ -154,8 +173,7 @@
         $("#customFileEg1").change(function () {
             readURL(this);
         });
-    </script>
-    <script>
+
         $(".lang_link").click(function(e){
             e.preventDefault();
             $(".lang_link").removeClass('active');
@@ -166,17 +184,8 @@
             let lang = form_id.substring(0, form_id.length - 5);
             console.log(lang);
             $("#"+lang+"-form").removeClass('d-none');
-            if(lang == '{{$default_lang}}')
-            {
-                $(".from_part_2").removeClass('d-none');
-            }
-            else
-            {
-                $(".from_part_2").addClass('d-none');
-            }
         });
-    </script>
-        <script>
+
             $('#reset_btn').click(function(){
                 $('#module_id').val("{{$parcel_category->module_id}}").trigger('change');
                 $('#viewer').attr('src', "{{asset('storage/app/public/parcel_category')}}/{{$parcel_category['image']}}");

@@ -94,7 +94,7 @@ class WishlistController extends Controller
                 $query->whereHas('zone.modules', function($query){
                     $query->where('modules.id', config('module.current_module_data')['id']);
                 })->module(config('module.current_module_data')['id']);
-            })->withOpen($longitude,$latitude)->whereHas('module',function($query){
+            })->withOpen($longitude??0,$latitude??0)->whereHas('module',function($query){
                 $query->where('status',1);
             })->whereIn('zone_id', json_decode($zone_id, true));
         }])->get();

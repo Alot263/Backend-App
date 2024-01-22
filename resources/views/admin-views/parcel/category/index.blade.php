@@ -25,14 +25,20 @@
                     <div class="row g-3">
                     @php($language=\App\Models\BusinessSetting::where('key','language')->first())
                     @php($language = $language->value ?? null)
-                    @php($default_lang = 'en')
+                    @php($defaultLang = str_replace('_', '-', app()->getLocale()))
                     @if($language)
                     <div class="col-12">
-                        @php($default_lang = json_decode($language)[0])
                         <ul class="nav nav-tabs mb-3 border-0">
-                            @foreach(json_decode($language) as $lang)
+                            <li class="nav-item">
+                                <a class="nav-link lang_link active"
+                                href="#"
+                                id="default-link">{{translate('messages.default')}}</a>
+                            </li>
+                            @foreach (json_decode($language) as $lang)
                                 <li class="nav-item">
-                                    <a class="nav-link lang_link {{$lang == $default_lang? 'active':''}}" href="#" id="{{$lang}}-link">{{\App\CentralLogics\Helpers::get_language_name($lang).'('.strtoupper($lang).')'}}</a>
+                                    <a class="nav-link lang_link"
+                                        href="#"
+                                        id="{{ $lang }}-link">{{ \App\CentralLogics\Helpers::get_language_name($lang) . '(' . strtoupper($lang) . ')' }}</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -40,36 +46,47 @@
                     @endif
                     <div class="col-md-6">
                         @if ($language)
+                        <div class="lang_form" id="default-form">
+                            <div class="form-group">
+                                <label class="input-label" for="default_name">{{translate('messages.name')}} ({{ translate('messages.default') }})</label>
+                                <input type="text" name="name[]" id="default_name" class="form-control" placeholder="{{translate('messages.new_item')}}"  >
+                            </div>
+                            <input type="hidden" name="lang[]" value="default">
+                            <div class="form-group">
+                                <label class="input-label" for="description">{{translate('messages.short_description')}} ({{ translate('messages.default') }})</label>
+                                <textarea type="text" name="description[]" class="form-control ckeditor"  ></textarea>
+                            </div>
+                        </div>
                             @foreach(json_decode($language) as $lang)
-                                <div class="{{$lang != $default_lang ? 'd-none':''}} lang_form" id="{{$lang}}-form">
+                                <div class="d-none lang_form" id="{{$lang}}-form">
                                     <div class="form-group">
                                         <label class="input-label" for="{{$lang}}_name">{{translate('messages.name')}} ({{strtoupper($lang)}})</label>
-                                        <input type="text" name="name[]" id="{{$lang}}_name" class="form-control" placeholder="{{translate('messages.new_item')}}" {{$lang == $default_lang? 'required':''}} oninvalid="document.getElementById('en-link').click()">
+                                        <input type="text" name="name[]" id="{{$lang}}_name" class="form-control" placeholder="{{translate('messages.new_item')}}"  >
                                     </div>
                                     <input type="hidden" name="lang[]" value="{{$lang}}">
                                     <div class="form-group">
-                                        <label class="input-label" for="description">{{translate('messages.short')}} {{translate('messages.description')}} ({{strtoupper($lang)}})</label>
-                                        <textarea type="text" name="description[]" class="form-control ckeditor" {{$lang == $default_lang? 'required':''}} oninvalid="document.getElementById('en-link').click()"></textarea>
+                                        <label class="input-label" for="description">{{translate('messages.short_description')}} ({{strtoupper($lang)}})</label>
+                                        <textarea type="text" name="description[]" class="form-control ckeditor"  ></textarea>
                                     </div>
                                 </div>
                             @endforeach
                         @else
-                            <div id="{{$default_lang}}-form">
+                            <div id="default-form">
                                 <div class="form-group">
-                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} (EN)</label>
+                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.name')}} ({{ translate('messages.default') }})</label>
                                     <input type="text" name="name[]" class="form-control" placeholder="{{translate('messages.new_item')}}" required>
                                 </div>
-                                <input type="hidden" name="lang[]" value="en">
+                                <input type="hidden" name="lang[]" value="default">
                                 <div class="form-group">
-                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short')}} {{translate('messages.description')}}</label>
+                                    <label class="input-label" for="exampleFormControlInput1">{{translate('messages.short_description')}}</label>
                                     <textarea type="text" name="description[]" class="form-control ckeditor"></textarea>
                                 </div>
                             </div>
                         @endif
                         {{-- <div class="form-group mb-0">
                             <label class="input-label">{{translate('messages.module')}}</label>
-                            <select name="module_id" id="module_id" required class="form-control js-select2-custom"  data-placeholder="{{translate('messages.select')}} {{translate('messages.module')}}">
-                                    <option value="" selected disabled>{{translate('messages.select')}} {{translate('messages.module')}}</option>
+                            <select name="module_id" id="module_id" required class="form-control js-select2-custom"  data-placeholder="{{translate('messages.select_module')}}">
+                                    <option value="" selected disabled>{{translate('messages.select_module')}}</option>
                                 @foreach(\App\Models\Module::parcel()->get() as $module)
                                     <option value="{{$module->id}}" >{{$module->module_name}}</option>
                                 @endforeach
@@ -83,15 +100,15 @@
                                 {{translate('messages.image')}}
                                 <small class="text-danger">* ( {{translate('messages.ratio')}} 200x200)</small>
                             </label>
-                            <center class="py-3 my-auto">
+                            <div class="text-center py-3 my-auto">
                                 <img class="img--120" id="viewer"
                                     src="{{asset('public/assets/admin/img/900x400/img1.jpg')}}"
                                     alt="image"/>
-                            </center>
+                            </div>
                             <div class="custom-file">
                                 <input type="file" name="image" id="customFileEg1" class="custom-file-input"
                                     accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                <label class="custom-file-label" for="customFileEg1">{{translate('messages.choose_file')}}</label>
                             </div>
                         </div>
                     </div>
@@ -122,36 +139,11 @@
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper">
                     <h5 class="card-title">
-                        {{translate('messages.parcel_category')}} {{translate('messages.list')}}
+                        {{translate('messages.parcel_category_list')}}
                         <span class="badge badge-soft-dark ml-2" id="itemCount">{{$parcel_categories->total()}}</span>
                     </h5>
-                    {{-- <div class="min--240">
-                        <select name="module_id" class="form-control js-select2-custom" onchange="set_filter('{{url()->full()}}',this.value,'module_id')" title="{{translate('messages.select')}} {{translate('messages.modules')}}">
-                            <option value="" {{!request('module_id') ? 'selected':''}}>{{translate('messages.all')}} {{translate('messages.modules')}}</option>
-                            @foreach (\App\Models\Module::Parcel()->get() as $module)
-                                <option
-                                    value="{{$module->id}}" {{request('module_id') == $module->id?'selected':''}}>
-                                    {{$module['module_name']}}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div> --}}
-                </div>
 
-                {{--<form id="dataSearch" class="col">
-                    @csrf
-                    <!-- Search -->
-                    <div class="input-group input-group-merge input-group-flush">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <i class="tio-search"></i>
-                            </div>
-                        </div>
-                        <input type="search" name="search" class="form-control" placeholder="{{translate('messages.search_categories')}}" aria-label="{{translate('messages.search_categories')}}">
-                        <button type="submit" class="btn btn-light">{{translate('messages.search')}}</button>
-                    </div>
-                    <!-- End Search -->
-                </form>--}}
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive datatable-custom">
@@ -168,7 +160,7 @@
                                 <th class="border-0">{{translate('messages.name')}}</th>
                                 <th class="border-0">{{translate('messages.module')}}</th>
                                 <th class="border-0">{{translate('messages.status')}}</th>
-                                <th class="border-0 text-center">{{translate('messages.orders')}} {{translate('messages.count')}}</th>
+                                <th class="border-0 text-center">{{translate('messages.orders_count')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.per_km_shipping_charge')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.minimum_shipping_charge')}}</th>
                                 <th class="border-0 text-center">{{translate('messages.action')}}</th>
@@ -192,7 +184,7 @@
                                 </td>
                                 <td>
                                     <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$category->id}}">
-                                    <input type="checkbox" onclick="location.href='{{route('admin.parcel.category.status',[$category['id'],$category->status?0:1])}}'"class="toggle-switch-input" id="stocksCheckbox{{$category->id}}" {{$category->status?'checked':''}}>
+                                    <input type="checkbox" data-url="{{route('admin.parcel.category.status',[$category['id'],$category->status?0:1])}}" class="toggle-switch-input redirect-url" id="stocksCheckbox{{$category->id}}" {{$category->status?'checked':''}}>
                                         <span class="toggle-switch-label">
                                             <span class="toggle-switch-indicator"></span>
                                         </span>
@@ -216,10 +208,10 @@
                                 <td>
                                     <div class="btn--container justify-content-center">
                                         <a class="btn action-btn btn--primary btn-outline-primary"
-                                            href="{{route('admin.parcel.category.edit',[$category['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.category')}}"><i class="tio-edit"></i>
+                                            href="{{route('admin.parcel.category.edit',[$category['id']])}}" title="{{translate('messages.edit_category')}}"><i class="tio-edit"></i>
                                         </a>
-                                        <a class="btn action-btn btn--danger btn-outline-danger" href="javascript:"
-                                        onclick="form_alert('category-{{$category['id']}}','{{ translate('Want to delete this category') }}')" title="{{translate('messages.delete')}} {{translate('messages.category')}}"><i class="tio-delete-outlined"></i>
+                                        <a class="btn action-btn btn--danger btn-outline-danger form-alert" href="javascript:"
+                                        data-id="category-{{$category['id']}}" data-message="{{ translate('Want to delete this category') }}" title="{{translate('messages.delete_category')}}"><i class="tio-delete-outlined"></i>
                                         </a>
                                         <form action="{{route('admin.parcel.category.destroy',[$category['id']])}}" method="post" id="category-{{$category['id']}}">
                                             @csrf @method('delete')
@@ -254,52 +246,21 @@
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
 
-
-            $('#dataSearch').on('submit', function (e) {
-                e.preventDefault();
-                var formData = new FormData(this);
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $.post({
-                    url: '{{route('admin.category.search')}}',
-                    data: formData,
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    beforeSend: function () {
-                        $('#loading').show();
-                    },
-                    success: function (data) {
-                        $('#table-div').html(data.view);
-                        $('#itemCount').html(data.count);
-                        $('.page-area').hide();
-                    },
-                    complete: function () {
-                        $('#loading').hide();
-                    },
-                });
-            });
-
-
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
-    </script>
 
-    <script>
         function readURL(input) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
 
                 reader.onload = function (e) {
                     $('#viewer').attr('src', e.target.result);
@@ -312,8 +273,7 @@
         $("#customFileEg1").change(function () {
             readURL(this);
         });
-    </script>
-    <script>
+
         $(".lang_link").click(function(e){
             e.preventDefault();
             $(".lang_link").removeClass('active');
@@ -324,7 +284,7 @@
             let lang = form_id.substring(0, form_id.length - 5);
             console.log(lang);
             $("#"+lang+"-form").removeClass('d-none');
-            if(lang == '{{$default_lang}}')
+            if(lang == '{{$defaultLang}}')
             {
                 $(".from_part_2").removeClass('d-none');
             }
@@ -333,8 +293,7 @@
                 $(".from_part_2").addClass('d-none');
             }
         });
-    </script>
-    <script>
+
         $('#reset_btn').click(function(){
             $('#module_id').val(null).trigger('change');
             $('#viewer').attr('src', "{{asset('public/assets/admin/img/900x400/img1.jpg')}}");

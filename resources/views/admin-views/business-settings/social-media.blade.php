@@ -80,12 +80,7 @@
 @endsection
 @push('script_2')
     <script>
-        // $.ajaxSetup({
-        //     headers: {
-        //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //     }
-        // });
-
+        "use strict";
         fetch_social_media();
 
         function fetch_social_media() {
@@ -94,9 +89,9 @@
                 url: "{{ route('admin.business-settings.social-media.fetch') }}",
                 method: 'GET',
                 success: function(data) {
-                    if (data.length != 0) {
-                        var html = '';
-                        for (var count = 0; count < data.length; count++) {
+                    if (data.length !== 0) {
+                        let html = '';
+                        for (let count = 0; count < data.length; count++) {
                             html += '<tr>';
                             html += '<td class="column_name" data-column_name="sl" data-id="' + data[count].id +
                                 '">' + (count + 1) + '</td>';
@@ -106,13 +101,12 @@
                                 .id + '">' + data[count].link + '</td>';
                             html += `<td class="column_name" data-column_name="status" data-id="${data[count].id}">
                             <label class="toggle-switch toggle-switch-sm" for="${data[count].id}">
-                                    <input type="checkbox" class="toggle-switch-input status" id="${data[count].id}" ${data[count].status == 1 ? "checked" : ""}>
+                                    <input type="checkbox" class="toggle-switch-input status" id="${data[count].id}" ${data[count].status === 1 ? "checked" : ""}>
                                     <span class="toggle-switch-label">
                                         <span class="toggle-switch-indicator"></span>
                                     </span>
                                 </label>
                         </td>`;
-                            // html += '<td><a type="button" class="btn btn-primary btn-xs edit" id="' + data[count].id + '"><i class="fa fa-edit text-white"></i></a> <a type="button" class="btn btn-danger btn-xs delete" id="' + data[count].id + '"><i class="fa fa-trash text-white"></i></a></td></tr>';
                             html += '<td><a type="button" class="btn btn--primary btn-outline-primary edit action-btn" id="' + data[
                                 count].id + '"><i class="tio-edit"></i></a> </td></tr>';
                         }
@@ -124,13 +118,13 @@
 
         $('#add').on('click', function() {
             // $('#add').attr("disabled", true);
-            var name = $('#name').val();
-            var link = $('#link').val();
-            if (name == "") {
+            let name = $('#name').val();
+            let link = $('#link').val();
+            if (name === "") {
                 toastr.error('{{ translate('messages.social_media_required') }}.');
                 return false;
             }
-            if (link == "") {
+            if (link === "") {
                 toastr.error('{{ translate('messages.social_media_required') }}.');
                 return false;
             }
@@ -148,7 +142,7 @@
                     link: link
                 },
                 success: function(response) {
-                    if (response.error == 1) {
+                    if (response.error === 1) {
                         toastr.error('{{ translate('messages.social_media_exist') }}');
                     } else {
                         toastr.success('{{ translate('messages.social_media_inserted') }}.');
@@ -162,14 +156,14 @@
         $(document).on('click', '.edit', function() {
             $('#update').show();
             $('#add').hide();
-            var id = $(this).attr("id");
+            let id = $(this).attr("id");
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
             $.ajax({
-                url: "{{ url('admin/business-settings/social-media') }}/" + id,
+                url: "{{ url('admin/business-settings/pages/social-media') }}/" + id,
                 method: 'GET',
                 success: function(data) {
                     $(window).scrollTop(0);
@@ -183,9 +177,9 @@
 
         $('#update').on('click', function() {
             $('#update').attr("disabled", true);
-            var id = $('#id').val();
-            var name = $('#name').val();
-            var link = $('#link').val();
+            let id = $('#id').val();
+            let name = $('#name').val();
+            let link = $('#link').val();
 
             $.ajaxSetup({
                 headers: {
@@ -193,14 +187,14 @@
                 }
             });
             $.ajax({
-                url: "{{ url('admin/business-settings/social-media') }}/" + id,
+                url: "{{ url('admin/business-settings/pages/social-media') }}/" + id,
                 method: 'PUT',
                 data: {
                     id: id,
                     name: name,
                     link: link,
                 },
-                success: function(data) {
+                success: function() {
                     $('#name').val('');
                     $('#link').val('');
 
@@ -214,7 +208,7 @@
             $('#save').hide();
         });
         $(document).on('click', '.delete', function() {
-            var id = $(this).attr("id");
+            let id = $(this).attr("id");
             if (confirm("{{ translate('messages.are_u_sure_want_to_delete') }}?")) {
                 $.ajaxSetup({
                     headers: {
@@ -227,7 +221,7 @@
                     data: {
                         id: id
                     },
-                    success: function(data) {
+                    success: function() {
                         fetch_social_media();
                         toastr.success('{{ translate('messages.social_media_deleted') }}.');
                     }
@@ -236,11 +230,12 @@
         });
 
         $(document).on('change', '.status', function() {
-            var id = $(this).attr("id");
-            if ($(this).prop("checked") == true) {
-                var status = 1;
-            } else if ($(this).prop("checked") == false) {
-                var status = 0;
+            let id = $(this).attr("id");
+            let status;
+            if ($(this).prop("checked") === true) {
+                 status = 1;
+            } else if ($(this).prop("checked") === false) {
+                 status = 0;
             }
 
             $.ajaxSetup({

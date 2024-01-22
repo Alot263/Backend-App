@@ -3,7 +3,7 @@
         <td scope="row">{{$key+1}}</td>
         <td>
             @if ($exp->order)
-                                        
+
             <div>
                 <a
                     href="{{ route('admin.order.details', ['id' => $exp->order->id,'module_id'=>$exp->order->module_id]) }}">{{ $exp['order_id'] }}</a>
@@ -18,7 +18,7 @@
             @if (isset($exp->order->customer))
             {{ $exp->order->customer->f_name.' '.$exp->order->customer->l_name }}
             @else
-            <label class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+            <label class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
 
             @endif
         </td>

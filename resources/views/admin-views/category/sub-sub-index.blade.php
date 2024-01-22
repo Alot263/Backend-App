@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title','Add new sub sub category')
+@section('title',translate('Add new sub sub category'))
 
 @push('css_or_js')
 

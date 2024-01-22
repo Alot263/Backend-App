@@ -24,11 +24,11 @@
         <!-- Card -->
         <div class="card">
             <div class="card-header border-0 justify-content-end ">
-                <form action="javascript:" id="search-form" class="min--250">
+                <form  class="min--250">
                     @csrf
                     <!-- Search -->
                     <div class="input-group input--group">
-                        <input id="datatableSearch_" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_search_name')}}" aria-label="{{translate('messages.search')}}">
+                        <input id="datatableSearch_"  value="{{request()?->search ?? ''}}" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_search_name')}}" aria-label="{{translate('messages.search')}}">
                         <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                     </div>
                     <!-- End Search -->
@@ -66,7 +66,8 @@
                             </td>
                             <td>
                                 <div class="overflow-hidden">
-                                    <img class="img--vertical max--200 mw--200" src="{{asset('storage/app/public/campaign')}}/{{$campaign['image']}}"onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'">
+                                    <img class="img--vertical max--200 mw--200onerror-image" src="{{\App\CentralLogics\Helpers::onerror_image_helper($campaign['image'], asset('storage/app/public/campaign').'/'.$campaign['image'], asset('public/assets/admin/img/160x160/img2.jpg'), 'campaign/') }}"
+                                         data-onerror-image="{{asset('public/assets/admin/img/160x160/img2.jpg')}}"  alt="image">
                                 </div>
                             </td>
                             <td>
@@ -111,14 +112,20 @@
                                     <span class="badge badge-pill badge-danger">{{ translate('Rejected') }}</span>
                                 @else
                                     @if(in_array($store_id,$store_ids))
-                                    <!-- <button type="button" onclick="location.href='{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}'" title="You are already joined. Click to out from the campaign." class="btn btn-outline-danger">Out</button> -->
-                                    <span type="button" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_out_from_campaign')}}')" title="You are already joined. Click to out from the campaign." class="badge btn--danger text-white">{{translate('messages.leave')}}</span>
+
+                                    <span type="button"
+                                          data-id="campaign-{{$campaign['id']}}"
+                                          data-message="{{translate('messages.alert_store_out_from_campaign')}}"
+                                          title="You are already joined. Click to out from the campaign." class="badge btn--danger text-white  form-alert ">{{translate('messages.leave')}}</span>
                                     <form action="{{route('vendor.campaign.remove-store',[$campaign['id'],$store_id])}}"
                                             method="GET" id="campaign-{{$campaign['id']}}">
                                         @csrf
                                     </form>
                                     @else
-                                    <span type="button" class="badge btn--primary text-white" onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.alert_store_join_campaign')}}')" title="Click to join the campaign">{{translate('messages.join')}}</span>
+                                    <span type="button" class="badge btn--primary text-white form-alert"
+                                          data-id="campaign-{{$campaign['id']}}"
+                                          data-message="{{translate('messages.alert_store_join_campaign')}}"
+                                        title="Click to join the campaign">{{translate('messages.join')}}</span>
                                     <form action="{{route('vendor.campaign.add-store',[$campaign['id'],$store_id])}}"
                                             method="GET" id="campaign-{{$campaign['id']}}">
                                         @csrf
@@ -154,74 +161,3 @@
 
 @endsection
 
-@push('script_2')
-    <script>
-        $(document).on('ready', function () {
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
-
-            $('#column1_search').on('keyup', function () {
-                datatable
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column2_search').on('keyup', function () {
-                datatable
-                    .columns(2)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column3_search').on('change', function () {
-                datatable
-                    .columns(3)
-                    .search(this.value)
-                    .draw();
-            });
-
-            $('#column4_search').on('keyup', function () {
-                datatable
-                    .columns(4)
-                    .search(this.value)
-                    .draw();
-            });
-
-
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-        });
-    </script>
-    <script>
-        $('#search-form').on('submit', function (e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('vendor.campaign.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('.page-area').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-    </script>
-@endpush

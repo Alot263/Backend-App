@@ -14,20 +14,23 @@
                 <span class="page-header-icon">
                     <img src="{{asset('public/assets/admin/img/delivery-man.png')}}" class="w--26" alt="">
                 </span>
-                <span>{{$dm['f_name'].' '.$dm['l_name']}}</span>
+                <span>{{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}</span>
             </h1>
             <div class="row">
                 <div class="js-nav-scroller hs-nav-scroller-horizontal mt-2">
                     <!-- Nav -->
                     <ul class="nav nav-tabs nav--tabs border-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'info'])}}"  aria-disabled="true">{{translate('messages.info')}}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'transaction'])}}"  aria-disabled="true">{{translate('messages.transaction')}}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
+                            <a class="nav-link active" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}"  aria-disabled="true">{{translate('messages.conversations')}}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'disbursement'])}}"  aria-disabled="true">{{translate('messages.disbursements')}}</a>
                         </li>
                     </ul>
                     <!-- End Nav -->
@@ -39,7 +42,7 @@
         <div class="content container-fluid">
             <!-- Page Header -->
             <div class="page-header">
-                <h1 class="page-header-title">{{ translate('messages.conversation') }} {{ translate('messages.list') }}</h1>
+                <h1 class="page-header-title">{{ translate('messages.conversation_list') }}</h1>
             </div>
             <!-- End Page Header -->
 
@@ -57,7 +60,7 @@
                             </div>
                         </div>
                         <!-- Body -->
-                        <div class="card-body p-0 initial-19" style="overflow-y: scroll;height: 600px"  id="dm-conversation-list">
+                        <div class="card-body p-0 initial-19"  id="dm-conversation-list">
                             <div class="border-bottom"></div>
                             @include('admin-views.delivery-man.partials._conversation_list')
                         </div>
@@ -66,10 +69,10 @@
                     <!-- End Card -->
                 </div>
                 <div class="col-lg-8 col-nd-6" id="dm-view-conversation">
-                    <center class="mt-2">
-                        <h4 class="initial-20">{{ translate('messages.view') }} {{ translate('messages.conversation') }}
+                    <div class="text-center mt-2">
+                        <h4 class="initial-20">{{ translate('messages.view_conversation') }}
                         </h4>
-                    </center>
+                    </div>
                     {{-- view here --}}
                 </div>
             </div>
@@ -81,10 +84,19 @@
 
 @push('script_2')
 <script>
+    "use strict";
+
+    $('.view-conv').on('click', function (){
+        let url = $(this).data('url');
+        let id_to_active = $(this).data('active-id');
+        let conv_id = $(this).data('conv-id');
+        let sender_id = $(this).data('sender-id');
+        viewConvs(url, id_to_active, conv_id, sender_id);
+    })
     function viewConvs(url, id_to_active, conv_id, sender_id) {
         $('.customer-list').removeClass('conv-active');
         $('#' + id_to_active).addClass('conv-active');
-        let new_url= "{{route('admin.users.delivery-man.preview', ['id'=>$dm->id, 'tab'=> 'conversation'])}}" + '?conversation=' + conv_id+ '&user=' + sender_id;
+        let new_url= "{{route('admin.users.delivery-man.preview', ['id'=>$deliveryMan->id, 'tab'=> 'conversation'])}}" + '?conversation=' + conv_id+ '&user=' + sender_id;
             $.get({
                 url: url,
                 success: function(data) {
@@ -94,8 +106,8 @@
             });
     }
 
-    var page = 1;
-    var user_id =  $('#deliver_man').val();
+    let page = 1;
+    let user_id =  $('#deliver_man').val();
     $('#dm-conversation-list').scroll(function() {
         if ($('#dm-conversation-list').scrollTop() + $('#dm-conversation-list').height() >= $('#dm-conversation-list')
             .height()) {
@@ -106,7 +118,7 @@
 
     function loadMoreData(page) {
         $.ajax({
-                url: "{{ route('admin.delivery-man.message-list-search') }}" + '?page=' + page,
+                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page,
                 type: "get",
                 data:{"user_id":user_id},
                 beforeSend: function() {
@@ -126,7 +138,7 @@
 
     function fetch_data(page, query) {
             $.ajax({
-                url: "{{ route('admin.delivery-man.message-list-search') }}" + '?page=' + page + "&key=" + query,
+                url: "{{ route('admin.users.delivery-man.message-list-search') }}" + '?page=' + page + "&key=" + query,
                 type: "get",
                 data:{"user_id":user_id},
                 success: function(data) {
@@ -137,7 +149,7 @@
         };
 
         $(document).on('keyup', '#serach', function() {
-            var query = $('#serach').val();
+            let query = $('#serach').val();
             fetch_data(page, query);
         });
 </script>

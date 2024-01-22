@@ -7,15 +7,19 @@
     <section class="about-section py-5 position-relative">
         <div class=" container contact-container">
             <div class="section-header">
-                @php($landing_page_text = \App\Models\BusinessSetting::where(['key' => 'landing_page_text'])->first())
-                @php($landing_page_text = isset($landing_page_text->value) ? json_decode($landing_page_text->value, true) : null)
-                <h2 class="title mb-2">{{isset($landing_page_text['contact_us_title']) ? $landing_page_text['contact_us_title'] : ''}}</h2>
-                <div class="text">{{isset($landing_page_text['contact_us_sub_title']) ? $landing_page_text['contact_us_sub_title'] : ''}}</div>
+                @php($contact_us_title = \App\Models\DataSetting::where(['key' => 'contact_us_title'])->first())
+                @php($contact_us_title = isset($contact_us_title->value) ? $contact_us_title->value : null)
+                @php($contact_us_sub_title = \App\Models\DataSetting::where(['key' => 'contact_us_sub_title'])->first())
+                @php($contact_us_sub_title = isset($contact_us_sub_title->value) ? $contact_us_sub_title->value : null)
+                @php($contact_us_image = \App\Models\DataSetting::where(['key' => 'contact_us_image'])->first())
+                @php($contact_us_image = isset($contact_us_image->value) ? $contact_us_image->value : null)
+                <h2 class="title mb-2">{{$contact_us_title}}</h2>
+                <div class="text">{{$contact_us_sub_title}}</div>
             </div>
             @php($landing_page_images = \app\CentralLogics\Helpers::get_business_settings('landing_page_images'))
             @php($landing_page_images_value = isset($landing_page_images) ? $landing_page_images :null)
             <div class="contact-img">
-                <img src="{{ asset('public/assets/landing') }}/image/{{ isset($landing_page_images_value['contact_us_image']) ? $landing_page_images_value['contact_us_image'] : null }}" alt="">
+                <img src="{{ asset('storage/app/public/contact_us_image') }}/{{ $contact_us_image }}" alt="">
             </div>
             <div class="row gy-5 mt-0">
                 <div class="col-lg-6">
@@ -39,7 +43,7 @@
                                             </defs>
                                         </svg>
                                     </div>
-                                    <h5 class="subtitle">{{translate("messages.Call")}} {{translate("messages.Us")}} </h5>
+                                    <h5 class="subtitle">{{translate("messages.Call_Us")}} </h5>
                                 </div>
                                 <ul>
                                     <li>
@@ -173,7 +177,7 @@
                                 <textarea name="message" required class="form-control form--control" placeholder="Message"></textarea>
                             </div>
                             <div class="col-sm-12 text-center">
-                                <button class="cmn--btn border-0" type="submit">{{translate("messages.Send")}} {{translate("messages.Message")}} </button>
+                                <button class="cmn--btn border-0" type="submit">{{translate("messages.Send_Message")}} </button>
                             </div>
                         </div>
                     </form>

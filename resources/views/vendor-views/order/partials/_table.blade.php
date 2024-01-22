@@ -15,19 +15,23 @@
         </div>
     </td>
     <td>
-        @if($order->customer)
-            {{-- <a class="text-body text-capitalize"
-            href="{{route('vendor.customer.view',[$order['user_id']])}}"> --}}
-            <strong>
-                {{$order->customer['f_name'].' '.$order->customer['l_name']}}
-            </strong>
-            <div>
-                {{$order->customer['phone']}}
-            </div>
+        @if($order->is_guest)
+        @php($customer_details = json_decode($order['delivery_address'],true))
+        <strong>{{$customer_details['contact_person_name']}}</strong>
+        <div>{{$customer_details['contact_person_number']}}</div>
+        @elseif($order->customer)
+        {{-- <a class="text-body text-capitalize"
+        href="{{route('vendor.customer.view',[$order['user_id']])}}"> --}}
+        <strong>
+            {{$order->customer['f_name'].' '.$order->customer['l_name']}}
+        </strong>
+        <div>
+            {{$order->customer['phone']}}
+        </div>
         {{-- </a> --}}
         @else
             <label
-                class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
         @endif
     </td>
     <td>
@@ -38,6 +42,10 @@
             @if($order->payment_status=='paid')
             <strong class="text-success">
                 {{translate('messages.paid')}}
+            </strong>
+            @elseif($order->payment_status=='partially_paid')
+            <strong class="text-success">
+                {{translate('messages.partially_paid')}}
             </strong>
             @else
             <strong class="text-danger">
@@ -69,7 +77,7 @@
             </span>
         @elseif($order['order_status']=='failed')
             <span class="badge badge-soft-danger">
-            {{translate('messages.payment')}}  {{translate('messages.failed')}}
+            {{translate('messages.payment_failed')}}
             </span>
         @else
             <span class="badge badge-soft-danger">

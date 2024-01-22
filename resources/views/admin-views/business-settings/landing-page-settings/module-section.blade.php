@@ -48,16 +48,16 @@
                                             <textarea class="form-control" name="description" rows="8">{!! $module_value['description'] ?? '' !!}</textarea>
                                         </div>
                                     </div>
-        
+
                                     <div class="col-sm-6 col-xl-6">
                                         <div class="form-group">
                                             <label class="input-label" >{{translate('messages.image')}}<small class="text-danger">  ( {{translate('messages.size')}}: 140 X 140 px )</small></label>
                                             <div class="custom-file">
                                                 <input type="file" name="image" id="customFileEg-{{$key}}" class="custom-file-input"
                                                         accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                                <label class="custom-file-label" for="customFileEg-{{$key}}">{{translate('messages.choose')}} {{translate('messages.file')}}</label>
+                                                <label class="custom-file-label" for="customFileEg-{{$key}}">{{translate('messages.choose_file')}}</label>
                                             </div>
-        
+
                                             <center id="image-viewer-section-{{$key}}" class="pt-4">
                                                 <img class="img--120" id="viewer-{{$key}}" src="{{asset('public/assets/landing')}}/image/{{isset($module_value['img']) ? $module_value['img']:'double_screen_image.png'}}"
                                                 onerror="this.src='{{asset('public/assets/admin/img/400x400/img2.jpg')}}'" alt=""/>
@@ -65,7 +65,7 @@
                                         </div>
                                     </div>
                                 </div>
-        
+
                                 <div class="btn--container justify-content-end">
                                     <button type="reset" id="reset-button-{{$key}}" class="btn btn--reset">{{translate('messages.reset')}}</button>
                                     <button type="submit" class="btn btn--primary">{{translate('messages.submit')}}</button>

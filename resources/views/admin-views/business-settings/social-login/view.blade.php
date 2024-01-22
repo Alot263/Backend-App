@@ -15,151 +15,178 @@
                     {{translate('Social Login Setup')}}
                 </span>
             </h1>
+            @include('admin-views.business-settings.partials.third-party-links')
         </div>
         <!-- End Page Header -->
 
-        <div class="row mt-3">
+        <div class="row g-3">
             @if (isset($socialLoginServices))
             @foreach ($socialLoginServices as $socialLoginService)
-                    <div class="col-md-6 mt-4">
+                    <div class="col-md-6">
+                        <form
+                        action="{{route('admin.social-login.update',[$socialLoginService['login_medium']])}}"
+                        method="post">
+                        @csrf
                         <div class="card">
-                            <div class="card-body text-{{Session::get('direction') === "rtl" ? 'right' : 'left'}}">
-                                <div class="flex-between">
-                                    <h4 class="text-center">{{translate('messages.'.$socialLoginService['login_medium'])}}</h4>
-                                    <div class="btn cursor-pointer btn-dark p-2" data-toggle="modal" data-target="#{{$socialLoginService['login_medium']}}-modal">
-                                        <i class="tio-info-outined"></i> {{translate('messages.credentials_setup')}}
+                            <div class="card-header card-header-shadow">
+                                <h5 class="card-title align-items-center">
+                                    <img src="{{asset('/public/assets/admin/img')}}/{{$socialLoginService['login_medium']}}.png" class="mr-1 w-20" alt="">
+                                    {{translate('messages.'.$socialLoginService['login_medium'])}}
+                                </h5>
+                                <label class="toggle-switch toggle-switch-sm p-0">
+                                    <span class="d-flex align-items-center switch--label">
+                                        <span class="form-label-secondary text-danger d-flex" data-toggle="tooltip" data-placement="right" data-original-title="Lorem ipsum dolor set amet"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="Veg/non-veg toggle"> * </span>
+                                    </span>
+                                    <input id="{{$socialLoginService['login_medium']}}_status"
+
+                                           data-id="{{$socialLoginService['login_medium']}}_status"
+                                           data-type="toggle"
+                                           data-image-on="{{asset('/public/assets/admin/img/modal')}}/{{$socialLoginService['login_medium']}}-on.png"
+                                           data-image-off="{{asset('/public/assets/admin/img/modal')}}/{{$socialLoginService['login_medium']}}-off.png"
+                                           data-title-on="{{translate('messages.'.$socialLoginService['login_medium'])}} {{translate('Login Turned ON ')}}"
+                                           data-title-off="{{translate('messages.'.$socialLoginService['login_medium'])}} {{translate('Login Turned OFF ')}}"
+                                           data-text-on="<p>{{translate('messages.'.$socialLoginService['login_medium'])}} {{translate('Login is now enabled. Customers will be able to sign up or log in using their social media accounts.')}}</p>"
+                                           data-text-off="<p>{{translate('messages.'.$socialLoginService['login_medium'])}} {{translate('Login is now disabled. Customers will not be able to sign up or log in using their social media accounts. Please note that this may affect user experience and registration/login process.')}}</p>"
+                                           class="status toggle-switch-input dynamic-checkbox-toggle"
+
+
+                                           type="checkbox" name="status" value="1" {{$socialLoginService['status']==1?'checked' :''}}>
+                                    <span class="toggle-switch-label text p-0">
+                                        <span class="toggle-switch-indicator"></span>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-end">
+                                    <div class="text--primary-2 d-flex flex-wrap align-items-center" type="button" data-toggle="modal" data-target="#{{$socialLoginService['login_medium']}}-modal">
+                                        <strong class="mr-2 text--underline">{{translate('Credential Setup')}}</strong>
+                                        <div class="blinkings">
+                                            <i class="tio-info-outined"></i>
+                                        </div>
                                     </div>
                                 </div>
-                                <form
-                                    action="{{route('admin.social-login.update',[$socialLoginService['login_medium']])}}"
-                                    method="post">
-                                    @csrf
-                                    <div class="form-group mb-2 mt-5">
-                                        <input type="radio" name="status"
-                                               value="1" {{$socialLoginService['status']==1?'checked':''}}>
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.active')}}</label>
-                                        <br>
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <input type="radio" name="status"
-                                               value="0" {{$socialLoginService['status']==0?'checked':''}}>
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.inactive')}}</label>
-                                        <br>
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.callback_uri')}}</label>
-                                        <span class="btn btn-secondary btn-sm m-2" onclick="copyToClipboard('#id_{{$socialLoginService['login_medium']}}')"><i class="tio-copy"></i> {{translate('messages.copy_uri')}}</span>
-                                        <br>
+                                <div class="form-group">
+                                    <label class="form-label">{{translate('messages.callback_uri')}}</label>
+                                    <div class="position-relative">
+                                        <span class="btn-right-fixed copy-to-clipboard" data-id="#id_{{$socialLoginService['login_medium']}}"><i class="tio-copy"></i></span>
                                         <span class="form-control h-unset" id="id_{{$socialLoginService['login_medium']}}">{{ url('/') }}/customer/auth/login/{{$socialLoginService['login_medium']}}/callback</span>
                                     </div>
-                                    <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.client_id')}}</label><br>
-                                        <input type="text" class="form-control" name="client_id"
-                                               value="{{ $socialLoginService['client_id'] }}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.client_secret')}}</label><br>
-                                        <input type="text" class="form-control" name="client_secret"
-                                               value="{{ $socialLoginService['client_secret'] }}">
-                                    </div>
-                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                            class="btn btn--primary mb-2">{{translate('messages.save')}}</button>
-                                </form>
+                                </div>
+                                <div class="form-group">
+                                    <label for="client_id" class="form-label">{{translate('messages.client_id')}}</label>
+                                    <input id="client_id" type="text" class="form-control" name="client_id" value="{{ $socialLoginService['client_id'] }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="client_secret"
+                                        class="form-label">{{translate('messages.client_secret')}}</label>
+                                    <input id="client_secret" type="text" class="form-control" name="client_secret"
+                                            value="{{ $socialLoginService['client_secret'] }}">
+                                </div>
+                                <div class="btn--container justify-content-end">
+                                    <button type="reset" class="btn btn--reset mb-2">{{translate('Reset')}}</button>
+                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" class="btn btn--primary mb-2">{{translate('messages.save')}}</button>
+                                </div>
+                                </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
             @endforeach
             @endif
             @if (isset($appleLoginServices))
             @foreach ($appleLoginServices as $appleLoginService)
-                    <div class="col-md-6 mt-4">
+                    <div class="col-md-6">
                         <div class="card">
-                            <div class="card-body text-{{Session::get('direction') === "rtl" ? 'right' : 'left'}}">
-                                <div class="flex-between">
-                                    <h4 class="text-center">{{translate('messages.'.$appleLoginService['login_medium'])}}</h4>
-                                    <div class="btn cursor-pointer btn-dark p-2" data-toggle="modal" data-target="#{{$appleLoginService['login_medium']}}-modal">
-                                        <i class="tio-info-outined"></i> {{translate('messages.credentials_setup')}}
-                                    </div>
-                                    {{-- <button onclick="checkAppleFile()" class="btn btn-secondary">
-                                        {{ translate('Check Service Id file') }}
-                                    </button> --}}
+                            <form
+                            action="{{route('admin.apple-login.update',[$appleLoginService['login_medium']])}}"
+                            method="post" enctype="multipart/form-data">
+                            @csrf
+                                <div class="card-header card-header-shadow">
+                                    <h5 class="card-title align-items-center">
+                                        <img src="{{asset('/public/assets/admin/img/apple.png')}}" class="mr-1 w--20" alt="">
+                                        {{translate('messages.'.$appleLoginService['login_medium'])}}
+                                    </h5>
+                                    <label class="toggle-switch toggle-switch-sm p-0">
+                                        <span class="d-flex align-items-center switch--label">
+                                            <span class="form-label-secondary text-danger d-flex" data-toggle="tooltip" data-placement="right" data-original-title="Lorem ipsum dolor set amet"><img src="{{asset('public/assets/admin/img/info-circle.svg')}}" alt="Veg/non-veg toggle"> * </span>
+                                        </span>
+                                        <input  id="{{$appleLoginService['login_medium']}}_status"
+                                               data-id="{{$appleLoginService['login_medium']}}_status"
+                                               data-type="toggle"
+                                               data-image-on="{{asset('/public/assets/admin/img/modal')}}/{{$appleLoginService['login_medium']}}-on.png"
+                                               data-image-off="{{asset('/public/assets/admin/img/modal')}}/{{$appleLoginService['login_medium']}}-off.png"
+                                               data-title-on="{{translate('messages.'.$appleLoginService['login_medium'])}} {{translate('Login Turned ON ')}}"
+                                               data-title-off="{{translate('messages.'.$appleLoginService['login_medium'])}} {{translate('Login Turned OFF ')}}"
+                                               data-text-on="<p>{{translate('messages.'.$appleLoginService['login_medium'])}} {{translate('Login is now enabled. Customers will be able to sign up or log in using their social media accounts.')}}</p>"
+                                               data-text-off="<p>{{translate('messages.'.$appleLoginService['login_medium'])}} {{translate('Login is now disabled. Customers will not be able to sign up or log in using their social media accounts. Please note that this may affect user experience and registration/login process.')}}</p>"
+                                               class="status toggle-switch-input dynamic-checkbox-toggle"
+
+
+                                               type="checkbox" name="status" value="1" {{$appleLoginService['status']==1?'checked' :''}}>
+                                        <span class="toggle-switch-label text p-0">
+                                            <span class="toggle-switch-indicator"></span>
+                                        </span>
+                                    </label>
                                 </div>
-                                <form
-                                    action="{{route('admin.apple-login.update',[$appleLoginService['login_medium']])}}"
-                                    method="post" enctype="multipart/form-data">
-                                    @csrf
-                                    <div class="form-group mb-2 mt-5">
-                                        <input type="radio" name="status"
-                                               value="1" {{$appleLoginService['status']==1?'checked':''}}>
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.active')}}</label>
-                                        <br>
+                                <div class="card-body text-{{Session::get('direction') === "rtl" ? 'right' : 'left'}}">
+                                    <div class="d-flex justify-content-end">
+                                        <div class="text--primary-2 d-flex flex-wrap align-items-center" type="button" data-toggle="modal" data-target="#{{$appleLoginService['login_medium']}}-modal">
+                                            <strong class="mr-2 text--underline">{{translate('Credential Setup')}}</strong>
+                                            <div class="blinkings">
+                                                <i class="tio-info-outined"></i>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group mb-2">
-                                        <input type="radio" name="status"
-                                               value="0" {{$appleLoginService['status']==0?'checked':''}}>
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.inactive')}}</label>
-                                        <br>
+                                    <div class="form-group">
+                                        <label for="client_id"
+                                            class="form-label">{{translate('messages.client_id')}}</label>
+                                        <input id="client_id" type="text" class="form-control" name="client_id"
+                                            value="{{ $appleLoginService['client_id'] }}">
                                     </div>
-                                    {{-- <div class="form-group mb-2">
-                                        <label class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.callback_uri')}}</label>
-                                        <span class="btn btn-secondary btn-sm m-2" onclick="copyToClipboard('#id_{{$appleLoginService['login_medium']}}')"><i class="tio-copy"></i> {{translate('messages.copy_uri')}}</span>
-                                        <br>
-                                        <span class="form-control h-unset" id="id_{{$appleLoginService['login_medium']}}">{{ url('/') }}/customer/auth/login/{{$appleLoginService['login_medium']}}/callback</span>
-                                    </div> --}}
-                                    <div class="form-group mb-2">
+                                    <div class="form-group">
+                                        <label for="team_id"
+                                            class="form-label">{{translate('messages.team_id')}}</label>
+                                        <input id="team_id" type="text" class="form-control" name="team_id"
+                                            value="{{ $appleLoginService['team_id'] }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="key_id"
+                                            class="form-label">{{translate('messages.key_id')}}</label>
+                                        <input id="key_id" type="text" class="form-control" name="key_id"
+                                            value="{{ $appleLoginService['key_id'] }}">
+                                    </div>
+                                    <div class="form-group">
                                         <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.client_id')}}</label><br>
-                                        <input type="text" class="form-control" name="client_id"
-                                               value="{{ $appleLoginService['client_id'] }}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.team_id')}}</label><br>
-                                        <input type="text" class="form-control" name="team_id"
-                                               value="{{ $appleLoginService['team_id'] }}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.key_id')}}</label><br>
-                                        <input type="text" class="form-control" name="key_id"
-                                               value="{{ $appleLoginService['key_id'] }}">
-                                    </div>
-                                    <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.service_file')}} {{ $appleLoginService['service_file']?translate('(Already Exists)'):'' }}</label><br>
+                                            class="form-label">{{translate('messages.service_file')}} {{ $appleLoginService['service_file']?translate('(Already Exists)'):'' }}</label>
                                         <input type="file" accept=".p8" class="form-control" name="service_file"
-                                               value="{{ 'storage/app/public/apple-login/'.$appleLoginService['service_file'] }}">
+                                            value="{{ 'storage/app/public/apple-login/'.$appleLoginService['service_file'] }}">
                                     </div>
-                                    {{-- <div class="form-group mb-2">
-                                        <label
-                                            class="{{Session::get('direction') === "rtl" ? 'pr-1' : 'pl-1'}}">{{translate('messages.redirect_url')}}</label><br>
-                                        <input type="text" class="form-control" name="redirect_url"
-                                               value="{{ $appleLoginService['redirect_url'] }}">
-                                    </div> --}}
-                                    <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"
-                                            class="btn btn--primary mb-2">{{translate('messages.save')}}</button>
-                                </form>
-                            </div>
+                                    <div class="btn--container justify-content-end">
+                                        <button type="reset" class="btn btn--reset mb-2">{{translate('Reset')}}</button>
+                                        <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" class="btn btn--primary mb-2">{{translate('messages.save')}}</button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
             @endforeach
             @endif
         </div>
     </div>
-            {{-- Modal Starts--}}
+
         <!-- Google -->
         <div class="modal fade" id="google-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog status-warning-modal">
                 <div class="modal-content {{Session::get('direction') === "rtl" ? 'text-right' : 'text-left'}}">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">{{translate('messages.google_api_setup_instructions')}}</h5>
+                    <div class="modal-header pb-0">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body pb-0">
+                        <div class="text-center mb-20">
+                            <img src="{{asset('/public/assets/admin/img/modal/google.png')}}" alt="" class="mb-20">
+                            <h5 class="modal-title">{{translate('messages.google_api_setup_instructions')}}</h5>
+                        </div>
                         <ol>
                             <li>{{translate('messages.go_to_the_credentials_page')}} ({{translate('messages.click')}} <a href="https://console.cloud.google.com/apis/credentials" target="_blank">{{translate('here')}}</a>)</li>
                             <li>{{translate('messages.click')}} <b>{{translate('messages.create_credentials')}}</b> > <b>{{translate('messages.auth_client_id')}}</b>.</li>
@@ -169,23 +196,26 @@
                             <li>{{translate('messages.copy')}} <b>{{translate('messages.client_id')}}</b> {{translate('messages.and')}} <b>{{translate('messages.client_secret')}}</b>, {{translate('messages.past_in_the_input_field_below_and')}} <b>Save</b>.</li>
                         </ol>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn--primary" data-dismiss="modal">{{translate('messages.close')}}</button>
+                    <div class="modal-footer justify-content-center border-0">
+                        <button type="button" class="btn btn--primary w-100 mw-300px" data-dismiss="modal">{{translate('Got It')}}</button>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Facebook -->
         <div class="modal fade" id="facebook-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog status-warning-modal">
                 <div class="modal-content {{Session::get('direction') === "rtl" ? 'text-right' : 'text-left'}}">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">{{translate('messages.facebook_api_set_instruction')}}</h5>
+                    <div class="modal-header pb-0">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body"><b></b>
+                    <div class="modal-body pb-0"><b></b>
+                        <div class="text-center mb-20">
+                            <img src="{{asset('/public/assets/admin/img/modal/facebook.png')}}" alt="" class="mb-20">
+                            <h5 class="modal-title">{{translate('messages.facebook_api_set_instruction')}}</h5>
+                        </div>
                         <ol>
                             <li>{{translate('messages.goto_the_facebook_developer_page')}} (<a href="https://developers.facebook.com/apps/" target="_blank">{{translate('messages.click_here')}}</a>)</li>
                             <li>{{translate('messages.goto')}} <b>{{translate('messages.get_started')}}</b> {{translate('messages.from_navbar')}}</li>
@@ -208,26 +238,29 @@
                             <li>{{translate('messages.now_copy')}} <b>{{translate('messages.client_id')}}</b> & <b>{{translate('messages.client_secret')}}</b>, {{translate('messages.past_in_the_input_field_below_and')}} <b>{{translate('messages.save')}}</b>.</li>
                         </ol>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">{{translate('messages.close')}}</button>
+                    <div class="modal-footer justify-content-center border-0">
+                        <button type="button" class="btn btn--primary w-100 mw-300px" data-dismiss="modal">{{translate('Got It')}}</button>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Apple -->
         <div class="modal fade" id="apple-modal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog status-warning-modal">
                 <div class="modal-content {{Session::get('direction') === "rtl" ? 'text-right' : 'text-left'}}">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="staticBackdropLabel">{{translate('messages.apple_api_set_instruction')}}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body"><b></b>
+                    <div class="modal-body pb-0"><b></b>
+                        <div class="text-center mb-20">
+                            <img src="{{asset('/public/assets/admin/img/modal/apple.png')}}" alt="" class="mb-20">
+                            <h5 class="modal-title">{{translate('messages.apple_api_set_instruction')}}</h5>
+                        </div>
                         <ol>
                             <li>{{translate('Go to Apple Developer page')}} (<a href="https://developer.apple.com/account/resources/identifiers/list" target="_blank">{{translate('messages.click_here')}}</a>)</li>
-                            <li>{{translate('Here in top left corner you can see the')}} <b>{{ translate('Team ID') }}</b> {{ translate('[Apple_Deveveloper_Account_Name - Team_ID]')}}</li>
+                            <li>{{translate('Here in top left corner you can see the')}} <b>{{ translate('Team ID') }}</b> {{ translate('[Apple_Developer_Account_Name - Team_ID]')}}</li>
                             <li>{{translate('Click Plus icon -> select App IDs -> click on Continue')}}</li>
                             <li>{{translate('Put a description and also identifier (identifier that used for app) and this is the')}} <b>{{ translate('Client ID') }}</b> </li>
                             <li>{{translate('Click Continue and Download the file in device named AuthKey_ID.p8 (Store it safely and it is used for push notification)')}} </li>
@@ -236,8 +269,8 @@
                             <li>{{translate('Download the file in device named')}} <b>{{ translate('AuthKey_KeyID.p8') }}</b> {{translate('[This is the Service Key ID file and also after AuthKey_ that is the Key ID]')}}</li>
                         </ol>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">{{translate('messages.close')}}</button>
+                    <div class="modal-footer justify-content-center border-0">
+                        <button type="button" class="btn btn--primary w-100 mw-300px" data-dismiss="modal">{{translate('Got It')}}</button>
                     </div>
                 </div>
             </div>
@@ -256,40 +289,30 @@
                         {{translate('messages.instruction_will_be_available_very_soon')}}
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">{{translate('messages.close')}}</button>
+                        <button type="button" class="btn btn--primary" data-dismiss="modal">{{translate('messages.close')}}</button>
                     </div>
                 </div>
             </div>
         </div>
         {{-- Modal Ends--}}
+
+
+
 @endsection
 @push('script_2')
     <script>
-        function copyToClipboard(element) {
-            var $temp = $("<input>");
+        "use strict";
+        $(document).on('click', '.copy-to-clipboard', function () {
+            let id=  $(this).data('id');
+            let $temp = $("<input>");
             $("body").append($temp);
-            $temp.val($(element).text()).select();
+            $temp.val($(id).text()).select();
             document.execCommand("copy");
             $temp.remove();
-
             toastr.success("{{translate('Copied to the clipboard')}}");
-        }
-        function checkAppleFile() {
-            <?php
-            if (file_exists('AppleServiceId.p8')) {
-                $file = 1;
-            } else {
-                $file = 0;
-            }
-            ?>
-            var file = {{ $file }};
-            console.log(file);
-            if(file === 1){
-                toastr.success("{{translate('File Exists')}}");
-            }else{
-                toastr.error("{{translate('File not found')}}");
-            }
-        }
+
+        });
+
     </script>
 
 @endpush

@@ -18,7 +18,7 @@
                 <div class="content container-fluid">
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-header-title">{{ translate('messages.conversation') }} {{ translate('messages.list') }}</h1>
+                        <h1 class="page-header-title">{{ translate('messages.conversation_list') }}</h1>
                     </div>
                     <!-- End Page Header -->
 
@@ -31,7 +31,7 @@
                                         <div class="input-group-prepend border-inline-end-0">
                                             <span class="input-group-text border-inline-end-0" id="basic-addon1"><i class="tio-search"></i></span>
                                         </div>
-                                        <input type="text" class="form-control border-inline-start-0 pl-1" id="serach" placeholder="Search" aria-label="Username"
+                                        <input type="text" class="form-control border-inline-start-0 pl-1" id="serach" placeholder="{{translate('Search')}}" aria-label="Username"
                                             aria-describedby="basic-addon1" autocomplete="off">
                                     </div>
                                 </div>
@@ -46,10 +46,10 @@
                             <!-- End Card -->
                         </div>
                         <div class="col-lg-8 col-nd-6" id="vendor-view-conversation">
-                            <center style="margin-top: 10%">
-                                <h4 style="color: rgba(113,120,133,0.62)">{{ translate('messages.view') }} {{ translate('messages.conversation') }}
+                            <div class="text-center mt-2">
+                                <h4 class="initial-29">{{ translate('messages.view_conversation') }}
                                 </h4>
-                            </center>
+                            </div>
                             {{-- view here --}}
                         </div>
                     </div>
@@ -65,6 +65,14 @@
 
 @push('script_2')
 <script>
+    "use strict";
+    $('.view-dm-conv').on('click', function (){
+        let url = $(this).data('url');
+        let id_to_active = $(this).data('active-id');
+        let conv_id = $(this).data('conv-id');
+        let sender_id = $(this).data('sender-id');
+        viewConvs(url, id_to_active, conv_id, sender_id);
+    })
     function viewConvs(url, id_to_active, conv_id, sender_id) {
         $('.customer-list').removeClass('conv-active');
         $('#' + id_to_active).addClass('conv-active');
@@ -78,8 +86,8 @@
             });
     }
 
-    var page = 1;
-    var user_id =  $('#vendor_id').val();
+    let page = 1;
+    let user_id =  $('#vendor_id').val();
     $('#vendor-conversation-list').scroll(function() {
         if ($('#vendor-conversation-list').scrollTop() + $('#vendor-conversation-list').height() >= $('#vendor-conversation-list')
             .height()) {
@@ -121,7 +129,7 @@
         };
 
         $(document).on('keyup', '#serach', function() {
-            var query = $('#serach').val();
+            let query = $('#serach').val();
             fetch_data(page, query);
         });
 </script>

@@ -13,7 +13,7 @@
     </td>
     <td>
         <label class="toggle-switch toggle-switch-sm" for="stocksCheckbox{{$campaign->id}}">
-            <input type="checkbox" onclick="location.href='{{route('admin.campaign.status',['basic',$campaign['id'],$campaign->status?0:1])}}'"class="toggle-switch-input" id="stocksCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
+            <input type="checkbox" data-url="{{route('admin.campaign.status',['basic',$campaign['id'],$campaign->status?0:1])}}" class="toggle-switch-input redirect-url" id="stocksCheckbox{{$campaign->id}}" {{$campaign->status?'checked':''}}>
             <span class="toggle-switch-label">
                 <span class="toggle-switch-indicator"></span>
             </span>
@@ -22,10 +22,10 @@
     <td>
         <div class="btn--container justify-content-center">
             <a class="btn action-btn btn-outline-primary btn--primary"
-                href="{{route('admin.campaign.edit',['basic',$campaign['id']])}}" title="{{translate('messages.edit')}} {{translate('messages.campaign')}}"><i class="tio-edit"></i>
+                href="{{route('admin.campaign.edit',['basic',$campaign['id']])}}" title="{{translate('messages.edit_campaign')}}"><i class="tio-edit"></i>
             </a>
-            <a class="btn action-btn btn-outline-danger btn--danger" href="javascript:"
-                onclick="form_alert('campaign-{{$campaign['id']}}','{{translate('messages.Want_to_delete_this_item')}}')" title="{{translate('messages.delete')}} {{translate('messages.campaign')}}"><i class="tio-delete-outlined"></i>
+            <a class="btn action-btn btn-outline-danger btn--danger form-alert" href="javascript:" data-id="campaign-{{$campaign['id']}}" data-message="{{translate('messages.Want_to_delete_this_item')}}"
+               title="{{translate('messages.delete_campaign')}}"><i class="tio-delete-outlined"></i>
             </a>
             <form action="{{route('admin.campaign.delete',[$campaign['id']])}}"
                             method="post" id="campaign-{{$campaign['id']}}">

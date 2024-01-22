@@ -68,7 +68,7 @@
                             <a class="order--card h-100" href="#">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="card-subtitle d-flex justify-content-between m-0 align-items-center">
-                                        <img src="{{asset('public/assets/admin/img/dashboard/food/unassigned.svg')}}" 
+                                        <img src="{{asset('public/assets/admin/img/dashboard/food/unassigned.svg')}}"
                                         alt="dashboard" class="oder--card-icon">
                                         <span>{{translate('messages.unassigned_orders')}}</span>
                                     </h6>
@@ -82,7 +82,7 @@
                             <a class="order--card h-100" href="#">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="card-subtitle d-flex justify-content-between m-0 align-items-center">
-                                        <img src="{{asset('public/assets/admin/img/dashboard/food/accepted.svg')}}" 
+                                        <img src="{{asset('public/assets/admin/img/dashboard/food/accepted.svg')}}"
                                         alt="dashboard" class="oder--card-icon">
                                         <span>{{translate('Accepted by Delivery Man')}}</span>
                                     </h6>
@@ -96,7 +96,7 @@
                             <a class="order--card h-100" href="#">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h6 class="card-subtitle d-flex justify-content-between m-0 align-items-center">
-                                        <img src="{{asset('public/assets/admin/img/dashboard/food/out-for.svg')}}" 
+                                        <img src="{{asset('public/assets/admin/img/dashboard/food/out-for.svg')}}"
                                         alt="dashboard" class="oder--card-icon">
                                         <span>{{translate('Out for Delivery')}}</span>
                                     </h6>
@@ -134,11 +134,12 @@
     <script async defer src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initialize&libraries=drawing,places&v=3.49"></script>
 
     <script>
-        var map; // Global declaration of the map
-        var drawingManager;
-        var lastpolygon = null;
-        var polygons = [];
-        var dmMarkers = [];
+        "use strict";
+        let map; // Global declaration of the map
+        let drawingManager;
+        let lastpolygon = null;
+        let polygons = [];
+        let dmMarkers = [];
 
         function resetMap(controlDiv) {
             // Set CSS for the control border.
@@ -174,26 +175,26 @@
         function initialize() {
             @php($default_location=\App\Models\BusinessSetting::where('key','default_location')->first())
             @php($default_location=$default_location->value?json_decode($default_location->value, true):0)
-            var myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
-            var dmbounds = new google.maps.LatLngBounds(null);
-            var myOptions = {
+            let myLatlng = { lat: {{$default_location?$default_location['lat']:'23.757989'}}, lng: {{$default_location?$default_location['lng']:'90.360587'}} };
+            let dmbounds = new google.maps.LatLngBounds(null);
+            let myOptions = {
                 zoom: 13,
                 center: myLatlng,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
-            var deliveryMan = <?php echo json_encode($deliveryMen); ?>;
+            let deliveryMan = <?php echo json_encode($deliveryMen); ?>;
             map = new google.maps.Map(document.getElementById("map-canvas"), myOptions);
 
-            var infowindow = new google.maps.InfoWindow();
+            let infowindow = new google.maps.InfoWindow();
 
             map.fitBounds(dmbounds);
-            for (var i = 0; i < deliveryMan.length; i++) {
+            for (let i = 0; i < deliveryMan.length; i++) {
                 if (deliveryMan[i].lat) {
-                    var contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
-                    var point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
+                    let contentString = "<div style='float:left'><img style='max-height:40px;wide:auto;' src='{{ asset('storage/app/public/delivery-man') }}/"+deliveryMan[i].image+"'></div><div style='float:right; padding: 10px;'><b>"+deliveryMan[i].name+"</b><br/> "+deliveryMan[i].location+"</div>";
+                    let point = new google.maps.LatLng(deliveryMan[i].lat, deliveryMan[i].lng);
                     dmbounds.extend(point);
                     map.fitBounds(dmbounds);
-                    var marker = new google.maps.Marker({
+                    let marker = new google.maps.Marker({
                         position: point,
                         map: map,
                         title: deliveryMan[i].image,
@@ -217,7 +218,7 @@
         }
 
         $('#search-form').on('submit', function (e) {
-            var formData = new FormData(this);
+            let formData = new FormData(this);
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -230,8 +231,9 @@
                 contentType: false,
                 processData: false,
                 success: function (data) {
+                        console.log(data);
                     if(data.dm){
-                        var id = data.dm.id;
+                        let id = data.dm.id;
                         map.panTo(dmMarkers[id].getPosition());
                         map.setZoom(20);
                         dmMarkers[id].setAnimation(google.maps.Animation.BOUNCE);

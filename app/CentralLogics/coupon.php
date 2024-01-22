@@ -53,6 +53,10 @@ class CouponLogic
             return 404;   
         }
 
+        if($coupon->created_by == 'vendor' && $store_id != $coupon->store_id  ){
+            return 404;
+        }
+
         if((!in_array("all", $customer_ids) && !in_array($user_id,$customer_ids)) ){
             return 408; //unauthorized user
             }
@@ -89,6 +93,55 @@ class CouponLogic
             }else{
                 return 406;//Limite orer
             }
+        }
+        return 404; //not found
+    }
+
+    public static function is_valid_for_guest($coupon, $store_id, $module_id = null)
+    {
+
+        $start_date = Carbon::parse($coupon->start_date);
+        $expire_date = Carbon::parse($coupon->expire_date);
+
+        $today = Carbon::now();
+
+        $module_id = isset($module_id)?$module_id:config('module.current_module_data')['id'];
+
+        if(isset($module_id) && $coupon->module_id != $module_id)
+        {
+            return 404;
+        }
+
+        if($start_date->format('Y-m-d') > $today->format('Y-m-d') || $expire_date->format('Y-m-d') < $today->format('Y-m-d'))
+        {
+            return 407;  //coupon expire
+        }
+
+        if($coupon->coupon_type == 'store_wise' && !in_array($store_id, json_decode($coupon->data, true)))
+        {  
+            return 404;   
+        }
+
+        if($coupon->created_by == 'vendor' && $store_id != $coupon->store_id  ){
+            return 404;
+        }
+            
+        else if($coupon->coupon_type == 'zone_wise')
+        {
+            if(json_decode($coupon->data, true)){
+                $data = Store::whereIn('zone_id',json_decode($coupon->data, true))->where('id', $store_id)->first();
+                if(!$data)
+                {
+                    return 404;
+                }
+            }
+            else
+            {
+                return 404;
+            }
+        }
+        if ($coupon['limit'] == null) {
+            return 200;
         }
         return 404; //not found
     }

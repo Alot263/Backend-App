@@ -32,7 +32,7 @@
                         <p class="item-name">Book x <span id="summary-quantity"></span></p>
                     </div> -->
                     <p class="alert alert-danger initial-hidden" role="alert" id="error_alert"></p>
-                    <div class="total">{{translate('messages.amount_to_be_paid')}}<span class="price">{{\App\CentralLogics\Helpers::format_currency($order->order_amount)}}</span></div>
+                    <div class="total">{{translate('messages.amount_to_be_paid')}}<span class="price">{{\App\CentralLogics\Helpers::format_currency($order->order_amount- $order->partially_paid_amount)}}</span></div>
                 </div>
                 <div class="payment-details">
                     <form id="form-checkout">
@@ -96,7 +96,7 @@
 
     loadCardForm();
     function loadCardForm() {
-        const productCost = '{{$order->order_amount}}';
+        const productCost = '{{$order->order_amount- $order->partially_paid_amount}}';
         const productDescription = '{{'Payment for order id:'.$order->id}}';
 
         const cardForm = mercadopago.cardForm({

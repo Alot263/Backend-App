@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use App\Scopes\ZoneScope;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
@@ -16,23 +17,31 @@ class Order extends Model
         'coupon_discount_amount' => 'float',
         'total_tax_amount' => 'float',
         'store_discount_amount' => 'float',
+        'flash_admin_discount_amount' => 'float',
+        'flash_store_discount_amount' => 'float',
         'delivery_address_id' => 'integer',
         'delivery_man_id' => 'integer',
         'delivery_charge' => 'float',
-        'original_delivery_charge'=>'float',
+        'additional_charge' => 'float',
+        'original_delivery_charge' => 'float',
         'user_id' => 'integer',
+        'zone_id' => 'integer',
         'scheduled' => 'integer',
         'store_id' => 'integer',
         'details_count' => 'integer',
         'module_id' => 'integer',
         'dm_vehicle_id' => 'integer',
+        'processing_time' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'original_delivery_charge'=>'float',
-        'receiver_details'=>'array',
-        'dm_tips'=>'float',
-        'distance'=>'float', 
-        'prescription_order' => 'boolean'
+        'original_delivery_charge' => 'float',
+        'receiver_details' => 'array',
+        'dm_tips' => 'float',
+        'distance' => 'float',
+        'tax_percentage' => 'float',
+        'prescription_order' => 'boolean',
+        'cutlery' => 'boolean',
+        'is_guest' => 'boolean'
     ];
 
     protected $appends = ['module_type'];
@@ -42,9 +51,19 @@ class Order extends Model
         $this->attributes['delivery_charge'] = round($value, 3);
     }
 
+    public function offline_payments()
+    {
+        return $this->belongsTo(OfflinePayments::class,'id','order_id');
+    }
+
     public function details()
     {
         return $this->hasMany(OrderDetail::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(OrderPayment::class);
     }
 
     public function delivery_man()
@@ -55,6 +74,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function guest()
+    {
+        return $this->belongsTo(Guest::class, 'user_id','id');
     }
 
     public function coupon()
@@ -105,7 +129,7 @@ class Order extends Model
 
     public function getModuleTypeAttribute()
     {
-        return $this->module?$this->module->module_type:null;
+        return $this->module ? $this->module->module_type : null;
     }
 
     public function scopeAccepteByDeliveryman($query)
@@ -115,7 +139,7 @@ class Order extends Model
 
     public function scopePreparing($query)
     {
-        return $query->whereIn('order_status', ['confirmed','processing','handover']);
+        return $query->whereIn('order_status', ['confirmed', 'processing', 'handover']);
     }
 
     public function scopeModule($query, $module_id)
@@ -125,63 +149,63 @@ class Order extends Model
 
     public function scopeOngoing($query)
     {
-        return $query->whereIn('order_status', ['accepted','confirmed','processing','handover','picked_up']);
+        return $query->whereIn('order_status', ['accepted', 'confirmed', 'processing', 'handover', 'picked_up']);
     }
 
     public function scopeItemOnTheWay($query)
     {
-        return $query->where('order_status','picked_up');
+        return $query->where('order_status', 'picked_up');
     }
 
     public function scopePending($query)
     {
-        return $query->where('order_status','pending');
+        return $query->where('order_status', 'pending');
     }
 
     public function scopeFailed($query)
     {
-        return $query->where('order_status','failed');
+        return $query->where('order_status', 'failed');
     }
 
     public function scopeCanceled($query)
     {
-        return $query->where('order_status','canceled');
+        return $query->where('order_status', 'canceled');
     }
 
     public function scopeDelivered($query)
     {
-        return $query->where('order_status','delivered');
+        return $query->where('order_status', 'delivered');
     }
 
     public function scopeNotRefunded($query)
     {
-        return $query->where(function($query){
+        return $query->where(function ($query) {
             $query->whereNotIn('order_status', ['refunded']);
         });
     }
 
     public function scopeRefunded($query)
     {
-        return $query->where('order_status','refunded');
+        return $query->where('order_status', 'refunded');
     }
     public function scopeRefund_requested($query)
     {
-        return $query->where('order_status','refund_requested');
+        return $query->where('order_status', 'refund_requested');
     }
 
     public function scopeRefund_request_canceled($query)
     {
-        return $query->where('order_status','refund_request_canceled');
+        return $query->where('order_status', 'refund_request_canceled');
     }
 
     public function scopeSearchingForDeliveryman($query)
     {
-        return $query->whereNull('delivery_man_id')->whereIn('order_type' , ['delivery','parcel'])->whereNotIn('order_status',['delivered','failed','canceled', 'refund_requested','refund_request_canceled', 'refunded']);
+        return $query->whereNull('delivery_man_id')->whereIn('order_type', ['delivery', 'parcel'])->whereNotIn('order_status', ['delivered', 'failed', 'canceled', 'refund_requested', 'refund_request_canceled', 'refunded']);
     }
 
     public function scopeDelivery($query)
     {
-        return $query->where('order_type', '=' , 'delivery');
+        return $query->where('order_type', '=', 'delivery');
     }
 
     public function scopeScheduled($query)
@@ -191,25 +215,24 @@ class Order extends Model
 
     public function scopeOrderScheduledIn($query, $interval)
     {
-        return $query->where(function($query)use($interval){
-            $query->whereRaw('created_at <> schedule_at')->where(function($q) use ($interval) {
-            $q->whereBetween('schedule_at', [Carbon::now()->toDateTimeString(),Carbon::now()->addMinutes($interval)->toDateTimeString()]);
-            })->orWhere('schedule_at','<',Carbon::now()->toDateTimeString());
+        return $query->where(function ($query) use ($interval) {
+            $query->whereRaw('created_at <> schedule_at')->where(function ($q) use ($interval) {
+                $q->whereBetween('schedule_at', [Carbon::now()->toDateTimeString(), Carbon::now()->addMinutes($interval)->toDateTimeString()]);
+            })->orWhere('schedule_at', '<', Carbon::now()->toDateTimeString());
         })->orWhereRaw('created_at = schedule_at');
-
     }
 
 
     public function scopeStoreOrder($query)
     {
-        return $query->where(function($q){
+        return $query->where(function ($q) {
             $q->where('order_type', 'take_away')->orWhere('order_type', 'delivery');
         });
     }
 
     public function scopeDmOrder($query)
     {
-        return $query->where(function($q){
+        return $query->where(function ($q) {
             $q->where('order_type', 'parcel')->orWhere('order_type', 'delivery');
         });
     }
@@ -221,21 +244,33 @@ class Order extends Model
 
     public function scopePos($query)
     {
-        return $query->where('order_type', '=' , 'pos');
+        return $query->where('order_type', '=', 'pos');
     }
 
     public function scopeNotpos($query)
     {
-        return $query->where('order_type', '<>' , 'pos');
+        return $query->where('order_type', '<>', 'pos');
+    }
+
+    public function scopeNotDigitalOrder($query)
+    {
+        return $query->where(function ($q){
+            $q->whereNotIn('payment_method', ['digital_payment','offline_payment'])->orwhereNot('order_status' , 'pending');
+        });
     }
 
     public function getCreatedAtAttribute($value)
     {
-        return date('Y-m-d H:i:s',strtotime($value));
+        return date('Y-m-d H:i:s', strtotime($value));
     }
 
     protected static function booted()
     {
         static::addGlobalScope(new ZoneScope);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
     }
 }

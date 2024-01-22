@@ -15,17 +15,17 @@
             <div class="search--button-wrapper">
                 <ul class="nav nav-tabs mr-auto transaction--table-nav">
                     <li class="nav-item">
-                        @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'store')->where('from_id', $store->id)->count())
+                        @php($account_transaction = \App\Models\AccountTransaction::where('from_type', 'store')->where('type', 'collected')->where('from_id', $store->id)->count())
                         @php($account_transaction = isset($account_transaction) ? $account_transaction : 0)
                         <a class="nav-link text-capitalize {{$sub_tab=='cash'?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'transaction', 'sub_tab'=>'cash'])}}"  aria-disabled="true">{{translate('cash_transaction')}} ({{$account_transaction}})</a>
                     </li>
                     <li class="nav-item">
-                        @php($digital_transaction = \App\Models\OrderTransaction::where('vendor_id', $store->id)->count())
+                        @php($digital_transaction = \App\Models\OrderTransaction::where('vendor_id', $store->vendor->id)->count())
                         @php($digital_transaction = isset($digital_transaction) ? $digital_transaction : 0)
                         <a class="nav-link text-capitalize {{$sub_tab=='digital'?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'transaction', 'sub_tab'=>'digital'])}}"  aria-disabled="true">{{translate('order_transactions')}} ({{$digital_transaction}})</a>
                     </li>
                     <li class="nav-item">
-                        @php($withdraw_transaction = \App\Models\WithdrawRequest::where('vendor_id',$store->id)->count())
+                        @php($withdraw_transaction = \App\Models\WithdrawRequest::where('vendor_id',$store->vendor->id)->count())
                         @php($withdraw_transaction = isset($withdraw_transaction) ? $withdraw_transaction : 0)
                         <a class="nav-link text-capitalize {{$sub_tab=='withdraw'?'active':''}}" href="{{route('admin.store.view', ['store'=>$store->id, 'tab'=> 'transaction', 'sub_tab'=>'withdraw'])}}"  aria-disabled="true">{{translate('withdraw_transactions')}} ({{$withdraw_transaction}})</a>
                     </li>
@@ -42,21 +42,7 @@
 
                     <div id="usersExportDropdown"
                             class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
-                        {{-- <span class="dropdown-header">{{translate('messages.options')}}</span>
-                        <a id="export-copy" class="dropdown-item" href="javascript:;" title="{{translate('messages.current_page_only')}}">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{asset('public/assets/admin')}}/svg/illustrations/copy.svg"
-                                    alt="Image Description">
-                            {{translate('messages.copy')}}
-                        </a>
-                        <a id="export-print" class="dropdown-item" href="javascript:;" title="{{translate('messages.current_page_only')}}">
-                            <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                    src="{{asset('public/assets/admin')}}/svg/illustrations/print.svg"
-                                    alt="Image Description">
-                            {{translate('messages.print')}}
-                        </a>
-                        <div class="dropdown-divider"></div> --}}
-                        <span class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
+                        <span class="dropdown-header">{{translate('messages.download_options')}}</span>
                         @if($sub_tab=='cash')
                         <a id="export-excel" class="dropdown-item" href="{{route('admin.store.cash_export', ['type'=>'excel', 'store_id'=>$store->id]) }}">
                             <img class="avatar avatar-xss avatar-4by3 mr-2"
@@ -119,33 +105,13 @@
 @push('script_2')
     <!-- Page level plugins -->
     <script>
+        "use strict";
         // Call the dataTables jQuery plugin
         $(document).ready(function () {
             $('#dataTable').DataTable();
-        });
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{\App\Models\BusinessSetting::where('key', 'map_api_key')->first()->value}}&callback=initMap&v=3.45.8" ></script>
-    <script>
-        const myLatLng = { lat: {{$store->latitude}}, lng: {{$store->longitude}} };
-        let map;
-        initMap();
-        function initMap() {
-                 map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: myLatLng,
-            });
-            new google.maps.Marker({
-                position: myLatLng,
-                map,
-                title: "{{$store->name}}",
-            });
-        }
-    </script>
-    <script>
-        $(document).on('ready', function () {
             // INITIALIZATION OF DATATABLES
             // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
+            let datatable = $.HSCore.components.HSDatatables.init($('#columnSearchDatatable'));
 
             $('#column1_search').on('keyup', function () {
                 datatable
@@ -179,7 +145,7 @@
             // INITIALIZATION OF SELECT2
             // =======================================================
             $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
+                let select2 = $.HSCore.components.HSSelect2.init($(this));
             });
         });
     </script>

@@ -5,8 +5,12 @@
                 <!-- Logo -->
                 @php($store_logo = \App\Models\BusinessSetting::where(['key' => 'logo'])->first()->value)
                 <a class="navbar-brand" href="{{ route('admin.transactions.store.withdraw_list') }}" aria-label="Front">
-                    <img class="navbar-brand-logo initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
-                    <img class="navbar-brand-logo-mini initial--36" onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" src="{{ asset('storage/app/public/business/' . $store_logo) }}" alt="Logo">
+                    <img class="navbar-brand-logo initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img1.jpg') ,'business/' )}}"
+                    alt="Logo">
+                    <img class="navbar-brand-logo-mini initial--36 onerror-image onerror-image" data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
+                    src="{{\App\CentralLogics\Helpers::onerror_image_helper($store_logo, asset('storage/app/public/business/').'/' . $store_logo, asset('public/assets/admin/img/160x160/img2.jpg') ,'business/' )}}"
+                    alt="Logo">
                 </a>
                 <!-- End Logo -->
 
@@ -40,23 +44,46 @@
                 <ul class="navbar-nav navbar-nav-lg nav-tabs">
                 <!-- Business Section-->
                 <li class="nav-item">
-                    <small class="nav-subtitle" title="{{ translate('messages.business') }} {{ translate('messages.section') }}">{{ translate('messages.business') }}
-                        {{ translate('messages.management') }}</small>
+                    <small class="nav-subtitle" title="{{ translate('messages.business_section') }}">{{ translate('messages.business_management') }}</small>
                     <small class="tio-more-horizontal nav-subtitle-replacer"></small>
                 </li>
 
                 <!-- withdraw -->
                 @if (\App\CentralLogics\Helpers::module_permission_check('withdraw_list'))
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/store/withdraw*') ? 'active' : '' }}">
-                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.transactions.store.withdraw_list') }}" title="{{ translate('messages.store') }} {{ translate('messages.withdraws') }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.transactions.store.withdraw_list') }}" title="{{ translate('messages.store_withdraws') }}">
                         <i class="tio-table nav-icon"></i>
                         <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.Withdraw Requests') }}</span>
                     </a>
                 </li>
                 @endif
                 <!-- End withdraw -->
+                    @if (\App\CentralLogics\Helpers::module_permission_check('account'))
+                        <li
+                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/store-disbursement*') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link"
+                               href="{{ route('admin.transactions.store-disbursement.list', ['status' => 'all']) }}"
+                               title="{{ translate('messages.store_disbursement') }}">
+                                <i class="tio-wallet-outlined nav-icon"></i>
+                                <span
+                                    class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.store_disbursement') }}</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if (\App\CentralLogics\Helpers::module_permission_check('account'))
+                        <li
+                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/dm-disbursement*') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link"
+                               href="{{ route('admin.transactions.dm-disbursement.list', ['status' => 'all']) }}"
+                               title="{{ translate('messages.dm_disbursement') }}">
+                                <i class="tio-saving-outlined nav-icon"></i>
+                                <span
+                                    class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.delivery_man_disbursement') }}</span>
+                            </a>
+                        </li>
+                    @endif
                 <!-- account -->
-                @if (\App\CentralLogics\Helpers::module_permission_check('account'))
+                @if (\App\CentralLogics\Helpers::module_permission_check('collect_cash'))
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/account-transaction*') ? 'active' : '' }}">
                     <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{ route('admin.transactions.account-transaction.index') }}" title="{{ translate('messages.collect_cash') }}">
                         <i class="tio-money nav-icon"></i>
@@ -76,6 +103,19 @@
                 </li>
                 @endif
                 <!-- End provide_dm_earning -->
+
+                @if (\App\CentralLogics\Helpers::module_permission_check('settings'))
+                    <li
+                        class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/withdraw-method*') ? 'active' : '' }}">
+                        <a class="js-navbar-vertical-aside-menu-link nav-link"
+                           href="{{ route('admin.transactions.withdraw-method.list') }}"
+                           title="{{ translate('messages.withdraw_method') }}">
+                            <i class="tio-savings nav-icon"></i>
+                            <span
+                                class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.withdraw_method') }}</span>
+                        </a>
+                    </li>
+                @endif
 
                 <!-- Report -->
                 @if (\App\CentralLogics\Helpers::module_permission_check('report'))
@@ -112,6 +152,14 @@
                     </a>
                 </li>
 
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/report/disbursement-report') ? 'active' : '' }}">
+                    <a class="nav-link " href="{{ route('admin.transactions.report.disbursement_report') }}"
+                       title="{{ translate('messages.disbursement_report') }}">
+                        <span class="tio-saving nav-icon"></span>
+                        <span class="text-truncate">{{ translate('messages.disbursement_report') }}</span>
+                    </a>
+                </li>
+
                 <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/transactions/report/low-stock-report') ? 'active' : '' }}">
                     <a class="nav-link " href="{{ route('admin.transactions.report.low-stock-report') }}" title="{{ translate('messages.limited_stock_item') }}">
                         <span class="tio-chart-bar-4 nav-icon"></span>
@@ -134,7 +182,7 @@
                 </li>
 
 
-                <li class="__sidebar-hs-unfold px-2">
+                <li class="__sidebar-hs-unfold px-2" id="tourb-9">
                     <div class="hs-unfold w-100">
                         <a class="js-hs-unfold-invoker navbar-dropdown-account-wrapper" href="javascript:;"
                             data-hs-unfold-options='{
@@ -143,9 +191,11 @@
                                 }'>
                             <div class="cmn--media right-dropdown-icon d-flex align-items-center">
                                 <div class="avatar avatar-sm avatar-circle">
-                                    <img class="avatar-img"
-                                        onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
+                                    <img class="avatar-img onerror-image"
+                                        data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
                                         alt="Image Description">
                                     <span class="avatar-status avatar-sm-status avatar-status-success"></span>
                                 </div>
@@ -164,10 +214,12 @@
                             <div class="dropdown-item-text">
                                 <div class="media align-items-center">
                                     <div class="avatar avatar-sm avatar-circle mr-2">
-                                        <img class="avatar-img"
-                                                onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                                src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
-                                                alt="Image Description">
+                                        <img class="avatar-img onerror-image"
+                                        data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+
+                                        src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg') ,'admin/')}}"
+
+                                        alt="Image Description">
                                     </div>
                                     <div class="media-body">
                                         <span class="card-title h5">{{auth('admin')->user()->f_name}}</span>
@@ -184,21 +236,7 @@
 
                             <div class="dropdown-divider"></div>
 
-                            <a class="dropdown-item" href="javascript:" onclick="Swal.fire({
-                                title: '{{translate("logout_warning_message")}}',
-                                showDenyButton: true,
-                                showCancelButton: true,
-                                confirmButtonColor: '#FC6A57',
-                                cancelButtonColor: '#363636',
-                                confirmButtonText: `Yes`,
-                                denyButtonText: `Don't Logout`,
-                                }).then((result) => {
-                                if (result.value) {
-                                location.href='{{route('admin.auth.logout')}}';
-                                } else{
-                                Swal.fire('{{ translate('messages.canceled') }}', '', 'info')
-                                }
-                                })">
+                           <a class="dropdown-item log-out" href="javascript:">
                                 <span class="text-truncate pr-2" title="Sign out">{{translate('messages.sign_out')}}</span>
                             </a>
                         </div>

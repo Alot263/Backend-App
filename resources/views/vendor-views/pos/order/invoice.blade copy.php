@@ -31,9 +31,9 @@
                     @if ($order->order_type=='parcel')
                     <div class="col-12">
                         @php($address=json_decode($order->delivery_address,true))
-                        <h5><u>{{translate('messages.sender')}} {{translate('messages.info')}}</u></h5>
+                        <h5><u>{{translate('messages.sender_info')}}</u></h5>
                         <div>
-                            {{translate('messages.sender')}} {{translate('messages.name')}} : {{isset($address)?$address['contact_person_name']:$order->address['f_name'].' '.$order->customer['l_name']}}
+                            {{translate('messages.sender_name')}} : {{isset($address)?$address['contact_person_name']:$order->address['f_name'].' '.$order->customer['l_name']}}
                         </div>
                         <div>
                             {{translate('messages.phone')}} : {{isset($address)?$address['contact_person_number']:$order->customer['phone']}}
@@ -42,9 +42,9 @@
                             {{translate('messages.address')}} : {{isset($address)?$address['address']:''}}
                         </div>
                         @php($address=$order->receiver_details)
-                        <h5><u>{{translate('messages.receiver')}} {{translate('messages.info')}}</u></h5>
+                        <h5><u>{{translate('messages.receiver_info')}}</u></h5>
                         <div>
-                            {{translate('messages.receiver')}} {{translate('messages.name')}} : {{isset($address)?$address['contact_person_name']:$order->address['f_name'].' '.$order->customer['l_name']}}
+                            {{translate('messages.receiver_name')}} : {{isset($address)?$address['contact_person_name']:$order->address['f_name'].' '.$order->customer['l_name']}}
                         </div>
                         <div>
                             {{translate('messages.phone')}} : {{isset($address)?$address['contact_person_number']:$order->customer['phone']}}

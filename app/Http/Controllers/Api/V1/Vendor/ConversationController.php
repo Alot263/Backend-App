@@ -151,7 +151,7 @@ class ConversationController extends Controller
             }
 
         } catch (\Exception $e) {
-            info($e);
+            info($e->getMessage());
         }
 
         $messages = Message::where(['conversation_id' => $conversation->id])->latest()->paginate($limit, ['*'], 'page', $offset);

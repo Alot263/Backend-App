@@ -10,7 +10,9 @@ use App\Models\AccountTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Brian2694\Toastr\Facades\Toastr;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
+use App\Exports\DeliverymanPaymentExport;
 use Illuminate\Support\Facades\Validator;
 
 class ProvideDMEarningController extends Controller
@@ -20,9 +22,16 @@ class ProvideDMEarningController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $provide_dm_earning = ProvideDMEarning::latest()->paginate(config('default_pagination'));
+        $key = isset($request['search']) ? explode(' ', $request['search']) : [];
+        $provide_dm_earning = ProvideDMEarning::when(isset($key), function ($query) use ($key) {
+            return $query->whereHas('delivery_man',function($query)use($key){
+                foreach ($key as $value) {
+                    $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%");
+                }
+            });
+        })->latest()->paginate(config('default_pagination'));
         return view('admin-views.deliveryman-earning-provide.index', compact('provide_dm_earning'));
     }
 
@@ -56,7 +65,7 @@ class ProvideDMEarningController extends Controller
 
         $current_balance = $dm->wallet?$dm->wallet->total_earning - $dm->wallet->total_withdrawn:0;
 
-        if ($current_balance < $request['amount']) {
+        if (round($current_balance,2) < round($request['amount'],2)) {
             $validator->getMessageBag()->add('amount', 'Insufficient balance!');
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
@@ -137,11 +146,25 @@ class ProvideDMEarningController extends Controller
     }
 
     public function dm_earning_list_export(Request $request){
-        $dm_earnings = ProvideDMEarning::latest()->get();
-        if($request->type == 'excel'){
-            return (new FastExcel(Helpers::export_dm_earning($dm_earnings)))->download('ProvideDMEarning.xlsx');
-        }elseif($request->type == 'csv'){
-            return (new FastExcel(Helpers::export_dm_earning($dm_earnings)))->download('ProvideDMEarning.csv');
+        $key = isset($request['search']) ? explode(' ', $request['search']) : [];
+        $dm_earnings = ProvideDMEarning::when(isset($key), function ($query) use ($key) {
+            return $query->whereHas('delivery_man',function($query)use($key){
+                foreach ($key as $value) {
+                    $query->where('f_name', 'like', "%{$value}%")->orWhere('l_name', 'like', "%{$value}%");
+                }
+            });
+        })->latest()->get();
+
+        $data = [
+            'dm_earnings'=>$dm_earnings,
+            'search'=>$request->search??null,
+
+        ];
+        
+        if ($request->type == 'excel') {
+            return Excel::download(new DeliverymanPaymentExport($data), 'ProvideDMEarning.xlsx');
+        } else if ($request->type == 'csv') {
+            return Excel::download(new DeliverymanPaymentExport($data), 'ProvideDMEarning.csv');
         }
     }
 

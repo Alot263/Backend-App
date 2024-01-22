@@ -36,7 +36,7 @@
                             aria-label="Toggle navigation" aria-expanded="false" aria-controls="navbarVerticalNavMenu"
                             data-toggle="collapse" data-target="#navbarVerticalNavMenu">
                 <span class="d-flex justify-content-between align-items-center">
-                  <span class="h5 mb-0">Nav menu</span>
+                  <span class="h5 mb-0"> {{translate('messages.Nav_menu')}} </span>
 
                   <span class="navbar-toggle-default">
                     <i class="tio-menu-hamburger"></i>
@@ -55,7 +55,7 @@
                             class="js-sticky-block js-scrollspy navbar-nav navbar-nav-lg nav-tabs card card-navbar-nav">
                             <li class="nav-item">
                                 <a class="nav-link active" href="javascript:" id="generalSection">
-                                    <i class="tio-user-outlined nav-icon"></i>{{translate('messages.Basic')}} {{translate('messages.information')}}
+                                    <i class="tio-user-outlined nav-icon"></i>{{translate('messages.Basic_information')}}
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -86,9 +86,9 @@
                             class="avatar avatar-xxl avatar-circle avatar-border-lg avatar-uploader profile-cover-avatar"
                             for="avatarUploader">
                             <img id="viewer"
-                                 onerror="this.src='{{asset('public/assets/back-end/img/160x160/img1.jpg')}}'"
-                                 class="avatar-img"
-                                 src="{{asset('storage/app/public/seller')}}/{{$data->image}}"
+                                 data-onerror-image="{{asset('public/assets/back-end/img/160x160/img1.jpg')}}"
+                                 class="avatar-img onerror-image"
+                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper($data->image, asset('storage/app/public/seller/').'/'.$data->image, asset('public/assets/back-end/img/160x160/img1.jpg'), 'seller/') }}"
                                  alt="Image">
                         </label>
                         <!-- End Avatar -->
@@ -98,7 +98,7 @@
                     <!-- Card -->
                     <div class="card mb-3 mb-lg-5">
                         <div class="card-header">
-                            <h2 class="card-title h4">{{translate('messages.Basic')}} {{translate('messages.information')}}</h2>
+                            <h2 class="card-title h4">{{translate('messages.Basic_information')}}</h2>
                         </div>
 
                         <!-- Body -->
@@ -106,10 +106,10 @@
                             <!-- Form -->
                             <!-- Form Group -->
                             <div class="row form-group">
-                                <label for="firstNameLabel" class="col-sm-3 col-form-label input-label">{{translate('messages.Full')}} {{translate('messages.name')}}  <i
+                                <label for="firstNameLabel" class="col-sm-3 col-form-label input-label">{{translate('messages.Full_name')}}  <i
                                         class="tio-help-outlined text-body ml-1" data-toggle="tooltip"
                                         data-placement="top"
-                                        title="Display name"></i></label>
+                                        title="{{ translate('Display_name') }}"></i></label>
 
                                 <div class="col-sm-9 row">
                                     <div class="col-md-6">
@@ -118,7 +118,7 @@
                                                required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="name">{{translate('messages.Last')}} {{translate('messages.Name')}}  <span class="text-danger">*</span></label>
+                                        <label for="name">{{translate('messages.Last_Name')}}  <span class="text-danger">*</span></label>
                                         <input type="text" name="l_name" value="{{$data->l_name}}" class="form-control" id="name"
                                                required>
                                     </div>
@@ -129,7 +129,7 @@
                             <!-- Form Group -->
                             <div class="row form-group">
                                 <label for="phoneLabel" class="col-sm-3 col-form-label input-label">{{translate('messages.Phone')}} <span
-                                        class="input-label-secondary">(Optional)</span></label>
+                                        class="input-label-secondary">({{ translate('Optional') }})</span></label>
 
                                 <div class="col-sm-9">
                                     <input type="tel" class="js-masked-input form-control" name="phone" id="phoneLabel"
@@ -159,13 +159,13 @@
                                     <div class="custom-file">
                                         <input type="file" name="image" id="customFileUpload" class="custom-file-input"
                                             accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                        <label class="custom-file-label" for="customFileUpload">{{translate('messages.image')}} {{translate('messages.Upload')}}</label>
+                                        <label class="custom-file-label" for="customFileUpload">{{translate('messages.image_Upload')}}</label>
                                     </div>
                                 </div>
                                 </div>
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="{{env('APP_MODE')!='demo'?"form_alert('seller-profile-form','Want to update seller info ?')":"call_demo()"}}" class="btn btn-primary">Save changes</button>
+                                <button type="button" data-id="seller-profile-form" data-message="{{ translate('Want to update seller info') }}" class="btn btn-primary {{env('APP_MODE')!='demo'?'form-alert':'call-demo'}}">{{ translate('messages.Save_changes') }}</button>
                             </div>
 
                             <!-- End Form -->
@@ -178,7 +178,7 @@
                 <!-- Card -->
                 <div id="passwordDiv" class="card mb-3 mb-lg-5">
                     <div class="card-header">
-                        <h4 class="card-title">{{translate('messages.Change')}} {{translate('messages.your')}} {{translate('messages.password')}}</h4>
+                        <h4 class="card-title">{{translate('messages.Change_your_password')}}</h4>
                     </div>
 
                     <!-- Body -->
@@ -190,13 +190,14 @@
 
                         <!-- Form Group -->
                             <div class="row form-group">
-                                <label for="newPassword" class="col-sm-3 col-form-label input-label"> {{translate('messages.New')}}
-                                    {{translate('messages.password')}}</label>
+                                <label for="newPassword" class="col-sm-3 col-form-label input-label"> {{translate('messages.New_password')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+        data-original-title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"><img src="{{ asset('/public/assets/admin/img/info-circle.svg') }}" alt="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"></span></label>
 
                                 <div class="col-sm-9">
                                     <input type="password" class="js-pwstrength form-control" name="password"
-                                           id="newPassword" placeholder="{{translate('messages.enter_new_password')}}"
-                                           aria-label="{{translate('messages.enter_new_password')}}"
+                                           id="newPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                           placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                           aria-label="8+ characters required"
                                            data-hs-pwstrength-options='{
                                            "ui": {
                                              "container": "#changePasswordForm",
@@ -216,21 +217,21 @@
 
                             <!-- Form Group -->
                             <div class="row form-group">
-                                <label for="confirmNewPasswordLabel" class="col-sm-3 col-form-label input-label"> {{translate('messages.Confirm')}}
-                                    {{translate('messages.password')}} </label>
+                                <label for="confirmNewPasswordLabel" class="col-sm-3 col-form-label input-label"> {{translate('messages.Confirm_password')}} </label>
 
                                 <div class="col-sm-9">
                                     <div class="mb-3">
                                         <input type="password" class="form-control" name="confirm_password"
-                                               id="confirmNewPasswordLabel" placeholder="{{translate('messages.confirm_new_password')}}"
-                                               aria-label="{{translate('messages.confirm_new_password')}}">
+                                               id="confirmNewPasswordLabel" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                               placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                               aria-label="8+ characters required">
                                     </div>
                                 </div>
                             </div>
                             <!-- End Form Group -->
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="{{env('APP_MODE')!='demo'?"form_alert('changePasswordForm','{{translate('messages.want_to_update_password')}}')":"call_demo()"}}" class="btn btn-primary">{{translate('messages.Save')}} {{translate('messages.changes')}}</button>
+                                <button type="button" data-id="changePasswordForm" data-message="{{translate('messages.want_to_update_password')}}" class="btn btn-primary {{env('APP_MODE')!='demo'?'form-alert':'call-demo'}}">{{translate('messages.Save_changes')}}</button>
                             </div>
                         </form>
                         <!-- End Form -->
@@ -246,40 +247,6 @@
        <!--modal-->
 
 @push('script_2')
-    <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-
-                reader.onload = function (e) {
-                    $('#viewer').attr('src', e.target.result);
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        $("#customFileUpload").change(function () {
-            readURL(this);
-        });
-    </script>
-
-    <script>
-        $("#generalSection").click(function() {
-            $("#passwordSection").removeClass("active");
-            $("#generalSection").addClass("active");
-            $('html, body').animate({
-                scrollTop: $("#generalDiv").offset().top
-            }, 2000);
-        });
-
-        $("#passwordSection").click(function() {
-            $("#generalSection").removeClass("active");
-            $("#passwordSection").addClass("active");
-            $('html, body').animate({
-                scrollTop: $("#passwordDiv").offset().top
-            }, 2000);
-        });
-    </script>
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/vendor/profile-edit.js"></script>
 @endpush
 

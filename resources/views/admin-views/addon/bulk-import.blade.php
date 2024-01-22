@@ -14,7 +14,7 @@
                     <img src="{{asset('public/assets/admin/img/addon.png')}}" class="w--20" alt="">
                 </span>
                 <span>
-                    {{translate('messages.addons')}} {{translate('messages.bulk_import')}}
+                    {{translate('messages.addons_bulk_import')}}
                 </span>
             </h1>
         </div>
@@ -53,8 +53,7 @@
 
                     <p>{{ translate('2. You can download the example file to understand how the data must be filled.') }}</p>
 
-                    <p>{{ translate('3. Once you have downloaded and filled the format file, upload it in the form below and
-                        submit.') }}</p>
+                    <p>{{ translate('3. Once you have downloaded and filled the format file, upload it in the form below and submit.') }}</p>
 
                 </div>
                 <div class="text-center pb-4">
@@ -66,9 +65,10 @@
                 </div>
             </div>
         </div>
-        <form class="product-form" action="{{route('admin.addon.bulk-import')}}" method="POST"
+        <form class="product-form" id="import_form" action="{{route('admin.addon.bulk-import')}}" method="POST"
         enctype="multipart/form-data">
         @csrf
+        <input type="hidden" name="button" id="btn_value">
         <div class="card mt-3">
             <div class="card-body">
                 <div class="mt-2 rest-part">
@@ -78,15 +78,62 @@
                         <label class="custom-file-label" for="products_file">{{ translate('messages.Choose File') }}</label>
                     </div>
                     <div class="btn--container justify-content-end mt-3">
-                        <button type="reset" class="btn btn--reset">{{translate('reset')}}</button>
-                        <button type="submit" class="btn btn--primary">{{translate('submit')}}</button>
+                        <button id="reset_btn" type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
+                        <button type="submit" name="button" value="update" class="btn btn--warning submit_btn change-Form-Action"
+                        data-value="update">{{translate('messages.update')}}</button>
+                        <button type="submit" name="button" value="import" class="btn btn--primary submit_btn">{{translate('messages.Import')}}</button>
                     </div>
                 </div>
+            </div>
             </div>
         </form>
     </div>
 @endsection
 
-@push('script')
+@push('script_2')
+<script src="{{asset('public/assets/admin')}}/js/view-pages/addon-import-export.js"></script>
+<script>
+    "use strict";
+    $(document).on("click", ".submit_btn", function(e){
+        e.preventDefault();
+        var data = $(this).val();
+        myFunction(data)
+    });
 
+    function myFunction(data) {
+        Swal.fire({
+        title: '{{ translate('Are you sure?') }}' ,
+        text: "{{ translate('You_want_to_') }}" +data,
+        type: 'warning',
+        showCancelButton: true,
+        cancelButtonColor: 'default',
+        confirmButtonColor: '#FC6A57',
+        cancelButtonText: '{{translate('messages.no')}}',
+        confirmButtonText: '{{translate('messages.yes')}}',
+        reverseButtons: true
+        }).then((result) => {
+            if (result.value) {
+                $('#btn_value').val(data);
+                $("#import_form").submit();
+            }
+        })
+    }
+
+    $('.change-Form-Action').on('click',function (){
+        let buttonValue = $(this).data('value');
+        let form = document.getElementById('import_form');
+        if (buttonValue === 'update') {
+            form.action = '{{ route('admin.addon.bulk-update') }}';
+        } else {
+            form.action = '{{ route('admin.addon.bulk-import') }}';
+        }
+
+    });
+
+
+
+    function changeFormAction(buttonValue) {
+
+    }
+</script>
 @endpush

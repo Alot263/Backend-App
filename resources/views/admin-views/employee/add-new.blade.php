@@ -34,12 +34,12 @@
                     <div class="col-md-8">
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <label class="input-label qcont" for="fname">{{translate('messages.first')}} {{translate('messages.name')}}</label>
+                                <label class="input-label qcont" for="fname">{{translate('messages.first_name')}}</label>
                                 <input type="text" name="f_name" class="form-control" id="fname"
                                     placeholder="{{translate('messages.first_name')}}" value="{{old('f_name')}}" required>
                             </div>
                             <div class="col-sm-6">
-                                <label class="input-label qcont" for="lname">{{translate('messages.last')}} {{translate('messages.name')}}</label>
+                                <label class="input-label qcont" for="lname">{{translate('messages.last_name')}}</label>
                                 <input type="text" name="l_name" class="form-control" id="lname" value="{{old('l_name')}}"
                                     placeholder="{{translate('messages.last_name')}}" value="{{old('name')}}">
                             </div>
@@ -50,7 +50,6 @@
                                         @if(!isset(auth('admin')->user()->zone_id))
                                         <option value="" {{!isset($e->zone_id)?'selected':''}}>{{translate('messages.all')}}</option>
                                         @endif
-                                        @php($zones=\App\Models\Zone::all())
                                         @foreach($zones as $zone)
                                             <option value="{{$zone['id']}}">{{$zone['name']}}</option>
                                         @endforeach
@@ -61,9 +60,9 @@
                                 <div >
                                     <label class="input-label qcont" for="role_id">{{translate('messages.Role')}}</label>
                                     <select class="form-control js-select2-custom w-100" name="role_id" id="role_id" required>
-                                        <option value="" selected disabled>{{translate('messages.select')}} {{translate('messages.Role')}}</option>
-                                        @foreach($rls as $r)
-                                            <option value="{{$r->id}}">{{$r->name}}</option>
+                                        <option value="" selected disabled>{{translate('messages.select_Role')}}</option>
+                                        @foreach($roles as $role)
+                                            <option value="{{$role->id}}">{{$role->name}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -77,14 +76,14 @@
                         </div>
                     <div class="col-md-4">
                         <label class="h-100 d-flex flex-column">
-                            <center class="py-3 my-auto">
+                            <div class="text-center py-3 my-auto">
                                 <img class="img--100" id="viewer"
                                 src="{{asset('public\assets\admin\img\400x400\img2.jpg')}}" alt="Employee thumbnail"/>
-                            </center>
+                            </div>
                             <div class="custom-file">
                                 <input type="file" name="image" id="customFileUpload" class="custom-file-input"
                                     accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" value="{{old('image')}}" required>
-                                <div class="custom-file-label">{{translate('messages.choose')}} {{translate('messages.file')}}</div>
+                                <div class="custom-file-label">{{translate('messages.choose_file')}}</div>
                             </div>
                         </label>
                     </div>
@@ -109,10 +108,13 @@
                     </div>
                     <div class="col-md-4">
                         <div class="js-form-message form-group mb-0">
-                            <label class="input-label" for="signupSrPassword">{{translate('messages.password')}}</label>
+                            <label class="input-label" for="signupSrPassword">{{translate('messages.password')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+        data-original-title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"><img src="{{ asset('/public/assets/admin/img/info-circle.svg') }}" alt="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"></span></label>
 
                             <div class="input-group input-group-merge">
-                                <input type="password" class="js-toggle-password form-control" name="password" id="signupSrPassword" placeholder="{{translate('messages.password_length_placeholder',['length'=>'8+'])}}" aria-label="{{translate('messages.password_length_placeholder',['length'=>'8+'])}}" required
+                                <input type="password" class="js-toggle-password form-control" name="password" id="signupSrPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                aria-label="8+ characters required" required
                                 data-msg="Your password is invalid. Please try again."
                                 data-hs-toggle-password-options='{
                                 "target": [".js-toggle-password-target-1", ".js-toggle-password-target-2"],
@@ -121,7 +123,7 @@
                                 "classChangeTarget": ".js-toggle-passowrd-show-icon-1"
                                 }'>
                                 <div class="js-toggle-password-target-1 input-group-append">
-                                    <a class="input-group-text" href="javascript:;">
+                                    <a class="input-group-text" href="javascript:">
                                         <i class="js-toggle-passowrd-show-icon-1 tio-visible-outlined"></i>
                                     </a>
                                 </div>
@@ -132,7 +134,9 @@
                         <div class="js-form-message form-group mb-0">
                             <label class="input-label" for="signupSrConfirmPassword">{{translate('messages.confirm_password')}}</label>
                             <div class="input-group input-group-merge">
-                            <input type="password" class="js-toggle-password form-control" name="confirmPassword" id="signupSrConfirmPassword" placeholder="{{translate('messages.password_length_placeholder',['length'=>'8+'])}}" aria-label="{{translate('messages.password_length_placeholder',['length'=>'8+'])}}" required
+                            <input type="password" class="js-toggle-password form-control" name="confirmPassword" id="signupSrConfirmPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                            placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                            aria-label="8+ characters required" required
                                     data-msg="Password does not match the confirm password."
                                     data-hs-toggle-password-options='{
                                     "target": [".js-toggle-password-target-1", ".js-toggle-password-target-2"],
@@ -141,7 +145,7 @@
                                     "classChangeTarget": ".js-toggle-passowrd-show-icon-2"
                                     }'>
                                 <div class="js-toggle-password-target-2 input-group-append">
-                                    <a class="input-group-text" href="javascript:;">
+                                    <a class="input-group-text" href="javascript:">
                                     <i class="js-toggle-passowrd-show-icon-2 tio-visible-outlined"></i>
                                     </a>
                                 </div>
@@ -160,54 +164,29 @@
 @endsection
 
 @push('script_2')
+    <script src="{{asset('public/assets/admin')}}/js/view-pages/employee.js"></script>
 <script>
+    "use strict";
     $(document).on('ready', function () {
-      // INITIALIZATION OF SHOW PASSWORD
-      // =======================================================
-      $('.js-toggle-password').each(function () {
-        new HSTogglePassword(this).init()
-      });
-
-
-      // INITIALIZATION OF FORM VALIDATION
-      // =======================================================
-      $('.js-validate').each(function() {
-        $.HSCore.components.HSValidation.init($(this), {
-          rules: {
-            confirmPassword: {
-              equalTo: '#signupSrPassword'
-            }
-          }
+        // INITIALIZATION OF SHOW PASSWORD
+        // =======================================================
+        $('.js-toggle-password').each(function () {
+            new HSTogglePassword(this).init()
         });
-      });
-    });
-  </script>
-    <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
 
-                reader.onload = function (e) {
-                    $('#viewer').attr('src', e.target.result);
+
+        // INITIALIZATION OF FORM VALIDATION
+        // =======================================================
+        $('.js-validate').each(function() {
+            $.HSCore.components.HSValidation.init($(this), {
+                rules: {
+                    confirmPassword: {
+                        equalTo: '#signupSrPassword'
+                    }
                 }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        $("#customFileUpload").change(function () {
-            readURL(this);
+            });
         });
-
-        $(".js-example-theme-single").select2({
-            theme: "classic"
-        });
-
-        $(".js-example-responsive").select2({
-            width: 'resolve'
-        });
-    </script>
-    <script>
+    });
         $('#reset_btn').click(function(){
             $('#viewer').attr('src', "{{ asset('public/assets/admin/img/400x400/img2.jpg') }}");
             $('#customFileUpload').val(null);

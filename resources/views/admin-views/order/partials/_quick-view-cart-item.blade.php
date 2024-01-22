@@ -9,9 +9,15 @@
     <div class="d-flex flex-row">
         <!-- Product gallery-->
         <div class="d-flex align-items-center justify-content-center active">
-            <img class="img-responsive initial--20"
-                src="{{ asset($item_type == 'item' ? 'storage/app/public/product' : 'storage/app/public/campaign') }}/{{ $product['image'] }}"
-                onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'" alt="Product image"
+            <img class="img-responsive initial--20 onerror-image"
+            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                $product['image'],
+                asset($item_type == 'item' ? 'storage/app/public/product/' : 'storage/app/public/campaign/') . $product['image'],
+                asset('public/assets/admin/img/160x160/img2.jpg'),
+                $item_type == 'item' ? 'product/' : 'campaign/'
+            ) }}"
+
+                data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}" alt="Product image"
                 width="">
             <div class="cz-image-zoom-pane"></div>
         </div>
@@ -135,7 +141,7 @@
                                             name="variations[{{ $key }}][values][label][]"
                                             value="{{ $option->label }}"
                                             @if (isset($values[$key]))
-                                                
+
                                             {{ in_array($option->label, $values[$key]) ? 'checked' : '' }}
                                             @endif
                                             autocomplete="off">
@@ -204,8 +210,7 @@
                             <div class="flex-column pb-2">
                                 <input type="hidden" name="addon-price{{ $add_on->id }}"
                                     value="{{ $add_on->price }}">
-                                <input class="btn-check addon-chek" type="checkbox" id="addon{{ $key }}"
-                                    onchange="addon_quantity_input_toggle(event)" name="addon_id[]"
+                                <input class="btn-check addon-chek addon_quantity_input_toggle" type="checkbox" id="addon{{ $key }}" name="addon_id[]"
                                     value="{{ $add_on->id }}" {{ $checked ? 'checked' : '' }} autocomplete="off">
                                 <label class="d-flex align-items-center btn btn-sm check-label mx-1 addon-input"
                                     for="addon{{ $key }}">{{ Str::limit($add_on->name, 20, '...') }} <br>
@@ -213,15 +218,13 @@
                                 <label
                                     class="input-group addon-quantity-input mx-1 shadow bg-white rounded px-1 @if ($checked) visiblity-visible @endif"
                                     for="addon{{ $key }}">
-                                    <button class="btn btn-sm h-100 text-dark px-0" type="button"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepDown(), getVariantPrice()"><i
+                                    <button class="btn btn-sm h-100 text-dark px-0 addon-stepup" type="button"><i
                                             class="tio-remove  font-weight-bold"></i></button>
                                     <input type="number" name="addon-quantity{{ $add_on->id }}"
                                         class="form-control text-center border-0 h-100" placeholder="1"
                                         value="{{ $checked ? $addons[$add_on->id] : 1 }}" min="1"
                                         max="100" readonly>
-                                    <button class="btn btn-sm h-100 text-dark px-0" type="button"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepUp(), getVariantPrice()"><i
+                                    <button class="btn btn-sm h-100 text-dark px-0 addon-stepdown" type="button"><i
                                             class="tio-add  font-weight-bold"></i></button>
                                 </label>
                             </div>
@@ -240,11 +243,11 @@
                 </div>
 
                 <div class="btn--container justify-content-end mt-2">
-                    <button class="btn btn--danger" onclick="removeFromCart({{ $item_key }})" type="button">
+                    <button class="btn btn--danger removeFromCart" data-key="{{ $item_key }}" type="button">
                         <i class="tio-delete"></i>
                         {{ translate('messages.delete') }}
                     </button>
-                    <button class="btn btn--primary" onclick="update_order_item()" type="button">
+                    <button class="btn btn--primary update_order_item" type="button">
                         <i class="tio-edit"></i>
                         {{ translate('messages.update') }}
                     </button>
@@ -254,11 +257,17 @@
         </div>
     </div>
 </div>
-
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script type="text/javascript">
     cartQuantityInitialize();
     getVariantPrice();
     $('#add-to-cart-form input').on('change', function() {
         getVariantPrice();
+    });
+    $('.addon-stepup').on('change', function() {
+        this.parentNode.querySelector('input[type=number]').stepDown(), getVariantPrice()
+    });
+    $('.addon-stepdown').on('change', function() {
+        this.parentNode.querySelector('input[type=number]').stepUp(), getVariantPrice()
     });
 </script>

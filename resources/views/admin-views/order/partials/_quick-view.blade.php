@@ -9,9 +9,14 @@
     <div class="d-flex flex-row">
         <!-- Product gallery-->
         <div class="d-flex align-items-center justify-content-center active">
-            <img class="img-responsive initial--20"
-                src="{{ asset('storage/app/public/product') }}/{{ $product['image'] }}"
-                onerror="this.src='{{ asset('public/assets/admin/img/160x160/img2.jpg') }}'"
+            <img class="img-responsive initial--20 onerror-image"
+            src="{{ \App\CentralLogics\Helpers::onerror_image_helper(
+                $product['image'],
+                asset('storage/app/public/product/').'/'.$product['image'],
+                asset('public/assets/admin/img/160x160/img2.jpg'),
+                'product/'
+            ) }}"
+                data-onerror-image="{{ asset('public/assets/admin/img/160x160/img2.jpg') }}"
                 data-zoom="{{ asset('storage/app/public/product') }}/{{ $product['image'] }}" alt="Product image"
                 width="">
             <div class="cz-image-zoom-pane"></div>
@@ -161,22 +166,19 @@
                             <div class="flex-column pb-2">
                                 <input type="hidden" name="addon-price{{ $add_on->id }}"
                                     value="{{ $add_on->price }}">
-                                <input class="btn-check addon-chek" type="checkbox" id="addon{{ $key }}"
-                                    onchange="addon_quantity_input_toggle(event)" name="addon_id[]"
+                                <input class="btn-check addon-chek addon_quantity_input_toggle" type="checkbox" id="addon{{ $key }}" name="addon_id[]"
                                     value="{{ $add_on->id }}" autocomplete="off">
                                 <label class="d-flex align-items-center btn btn-sm check-label mx-1 addon-input"
                                     for="addon{{ $key }}">{{ Str::limit($add_on->name, 20, '...') }} <br>
                                     {{ \App\CentralLogics\Helpers::format_currency($add_on->price) }}</label>
                                 <label class="input-group addon-quantity-input mx-1 shadow bg-white rounded px-1"
                                     for="addon{{ $key }}">
-                                    <button class="btn btn-sm h-100 text-dark px-0" type="button"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepDown(), getVariantPrice()"><i
+                                    <button class="btn btn-sm h-100 text-dark px-0 addon-stepup" type="button"><i
                                             class="tio-remove  font-weight-bold"></i></button>
                                     <input type="number" name="addon-quantity{{ $add_on->id }}"
                                         class="form-control text-center border-0 h-100" placeholder="1"
                                         value="1" min="1" max="100" readonly>
-                                    <button class="btn btn-sm h-100 text-dark px-0" type="button"
-                                        onclick="this.parentNode.querySelector('input[type=number]').stepUp(), getVariantPrice()"><i
+                                    <button class="btn btn-sm h-100 text-dark px-0 addon-stepdown" type="button"><i
                                             class="tio-add  font-weight-bold"></i></button>
                                 </label>
                             </div>
@@ -195,7 +197,7 @@
                 </div>
 
                 <div class="d-flex justify-content-center mt-2">
-                    <button class="btn btn--primary h--45px" onclick="update_order_item()" type="button">
+                <button class="btn btn--primary h--45px update_order_item" type="button">
                         <i class="tio-shopping-cart"></i>
                         {{ translate('messages.add_to_cart') }}
                     </button>
@@ -205,10 +207,17 @@
     </div>
 </div>
 
+<script src="{{asset('public/assets/admin')}}/js/view-pages/common.js"></script>
 <script type="text/javascript">
     cartQuantityInitialize();
     getVariantPrice();
     $('#add-to-cart-form input').on('change', function() {
         getVariantPrice();
+    });
+    $('.addon-stepup').on('change', function() {
+        this.parentNode.querySelector('input[type=number]').stepDown(), getVariantPrice()
+    });
+    $('.addon-stepdown').on('change', function() {
+        this.parentNode.querySelector('input[type=number]').stepUp(), getVariantPrice()
     });
 </script>

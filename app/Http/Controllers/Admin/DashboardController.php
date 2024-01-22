@@ -12,6 +12,7 @@ use App\Models\Module;
 use App\Models\Review;
 use App\Models\Wishlist;
 use App\Models\AdminRole;
+use App\Scopes\ZoneScope;
 use App\Models\DeliveryMan;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
@@ -355,18 +356,18 @@ class DashboardController extends Controller
             $total_stores = Store::where('module_id', $module_id);
             $total_customers = User::all();
         } elseif($module_id && $params['statistics_type'] == 'this_year'){
-            $searching_for_dm = Order::SearchingForDeliveryman()->where('module_id', $module_id)->whereDate('created_at', now()->format('Y'));
-            $accepted_by_dm = Order::AccepteByDeliveryman()->where('module_id', $module_id)->whereDate('accepted', now()->format('Y'));
-            $preparing_in_rs = Order::Preparing()->where('module_id', $module_id)->whereDate('processing', now()->format('Y'));
-            $picked_up = Order::ItemOnTheWay()->where('module_id', $module_id)->whereDate('picked_up', now()->format('Y'));
-            $delivered = Order::Delivered()->where('module_id', $module_id)->whereDate('delivered', now()->format('Y'));
-            $canceled = Order::where('module_id', $module_id)->where(['order_status' => 'canceled'])->whereDate('canceled', now()->format('Y'));
-            $refund_requested = Order::where('module_id', $module_id)->where(['order_status' => 'refund_requested'])->whereDate('refund_requested', now()->format('Y'));
-            $refunded = Order::where('module_id', $module_id)->where(['order_status' => 'refunded'])->whereDate('refunded', now()->format('Y'));
-            $new_orders = Order::where('module_id', $module_id)->whereDate('schedule_at', now()->format('Y'));
-            $new_items = Item::where('module_id', $module_id)->whereDate('created_at', now()->format('Y'));
-            $new_stores = Store::where('module_id', $module_id)->whereDate('created_at', now()->format('Y'));
-            $new_customers = User::whereDate('created_at', now()->format('Y'));
+            $searching_for_dm = Order::SearchingForDeliveryman()->where('module_id', $module_id)->whereYear('created_at', now()->format('Y'));
+            $accepted_by_dm = Order::AccepteByDeliveryman()->where('module_id', $module_id)->whereYear('accepted', now()->format('Y'));
+            $preparing_in_rs = Order::Preparing()->where('module_id', $module_id)->whereYear('processing', now()->format('Y'));
+            $picked_up = Order::ItemOnTheWay()->where('module_id', $module_id)->whereYear('picked_up', now()->format('Y'));
+            $delivered = Order::Delivered()->where('module_id', $module_id)->whereYear('delivered', now()->format('Y'));
+            $canceled = Order::where('module_id', $module_id)->where(['order_status' => 'canceled'])->whereYear('canceled', now()->format('Y'));
+            $refund_requested = Order::where('module_id', $module_id)->where(['order_status' => 'refund_requested'])->whereYear('refund_requested', now()->format('Y'));
+            $refunded = Order::where('module_id', $module_id)->where(['order_status' => 'refunded'])->whereYear('refunded', now()->format('Y'));
+            $new_orders = Order::where('module_id', $module_id)->whereYear('schedule_at', now()->format('Y'));
+            $new_items = Item::where('module_id', $module_id)->whereYear('created_at', now()->format('Y'));
+            $new_stores = Store::where('module_id', $module_id)->whereYear('created_at', now()->format('Y'));
+            $new_customers = User::whereYear('created_at', now()->format('Y'));
             $total_orders = Order::where('module_id', $module_id);
             $total_items = Item::where('module_id', $module_id);
             $total_stores = Store::where('module_id', $module_id);
@@ -389,18 +390,18 @@ class DashboardController extends Controller
             $total_stores = Store::where('module_id', $module_id);
             $total_customers = User::all();
         } elseif($module_id && $params['statistics_type'] == 'this_week'){
-            $searching_for_dm = Order::SearchingForDeliveryman()->where('module_id', $module_id)->whereDate('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $accepted_by_dm = Order::AccepteByDeliveryman()->where('module_id', $module_id)->whereDate('accepted', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $preparing_in_rs = Order::Preparing()->where('module_id', $module_id)->whereDate('processing', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $picked_up = Order::ItemOnTheWay()->where('module_id', $module_id)->whereDate('picked_up', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $delivered = Order::Delivered()->where('module_id', $module_id)->whereDate('delivered', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $canceled = Order::where('module_id', $module_id)->where(['order_status' => 'canceled'])->whereDate('canceled', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $refund_requested = Order::where('module_id', $module_id)->where(['order_status' => 'refund_requested'])->whereDate('refund_requested', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $refunded = Order::where('module_id', $module_id)->where(['order_status' => 'refunded'])->whereDate('refunded', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $new_orders = Order::where('module_id', $module_id)->whereDate('schedule_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $new_items = Item::where('module_id', $module_id)->whereDate('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $new_stores = Store::where('module_id', $module_id)->whereDate('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
-            $new_customers = User::whereDate('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $searching_for_dm = Order::SearchingForDeliveryman()->where('module_id', $module_id)->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $accepted_by_dm = Order::AccepteByDeliveryman()->where('module_id', $module_id)->whereBetween('accepted', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $preparing_in_rs = Order::Preparing()->where('module_id', $module_id)->whereBetween('processing', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $picked_up = Order::ItemOnTheWay()->where('module_id', $module_id)->whereBetween('picked_up', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $delivered = Order::Delivered()->where('module_id', $module_id)->whereBetween('delivered', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $canceled = Order::where('module_id', $module_id)->where(['order_status' => 'canceled'])->whereBetween('canceled', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $refund_requested = Order::where('module_id', $module_id)->where(['order_status' => 'refund_requested'])->whereBetween('refund_requested', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $refunded = Order::where('module_id', $module_id)->where(['order_status' => 'refunded'])->whereBetween('refunded', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $new_orders = Order::where('module_id', $module_id)->whereBetween('schedule_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $new_items = Item::where('module_id', $module_id)->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $new_stores = Store::where('module_id', $module_id)->whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
+            $new_customers = User::whereBetween('created_at', [now()->startOfWeek()->format('Y-m-d H:i:s'), now()->endOfWeek()->format('Y-m-d H:i:s')]);
             $total_orders = Order::where('module_id', $module_id);
             $total_items = Item::where('module_id', $module_id);
             $total_stores = Store::where('module_id', $module_id);
@@ -528,6 +529,7 @@ class DashboardController extends Controller
             'new_stores' => $new_stores,
             'new_customers' => $new_customers,
         ];
+
         return $data;
     }
 
@@ -597,7 +599,7 @@ class DashboardController extends Controller
                 });
             })
             ->select('store_id', DB::raw('COUNT(store_id) as count'))->groupBy('store_id')->orderBy('count', 'DESC')->limit(6)->get();
-        $top_sell = Item::withoutGlobalScopes()
+        $top_sell = Item::withoutGlobalScope(ZoneScope::class)
             ->when(is_numeric($params['module_id']), function ($q) use ($params) {
                 return $q->whereHas('store', function ($query) use ($params) {
                     return $query->where('module_id', $params['module_id']);
@@ -611,7 +613,7 @@ class DashboardController extends Controller
             ->orderBy("order_count", 'desc')
             ->take(6)
             ->get();
-        $top_rated_foods = Item::withoutGlobalScopes()
+        $top_rated_foods = Item::withoutGlobalScope(ZoneScope::class)
             ->when(is_numeric($params['module_id']), function ($q) use ($params) {
                 return $q->whereHas('store', function ($query) use ($params) {
                     return $query->where('module_id', $params['module_id']);
@@ -654,27 +656,27 @@ class DashboardController extends Controller
 
         // custom filtering for bar chart
         $months = array(
-            '"Jan"',
-            '"Feb"',
-            '"Mar"',
-            '"Apr"',
-            '"May"',
-            '"Jun"',
-            '"Jul"',
-            '"Aug"',
-            '"Sep"',
-            '"Oct"',
-            '"Nov"',
-            '"Dec"'
+            '"'.translate('Jan').'"',
+            '"'.translate('Feb').'"',
+            '"'.translate('Mar').'"',
+            '"'.translate('Apr').'"',
+            '"'.translate('May').'"',
+            '"'.translate('Jun').'"',
+            '"'.translate('Jul').'"',
+            '"'.translate('Aug').'"',
+            '"'.translate('Sep').'"',
+            '"'.translate('Oct').'"',
+            '"'.translate('Nov').'"',
+            '"'.translate('Dec').'"'
         );
         $days = array(
-            '"Sun"',
-            '"Mon"',
-            '"Tue"',
-            '"Wed"',
-            '"Thu"',
-            '"Fri"',
-            '"Sat"'
+            '"'.translate('Sun').'"',
+            '"'.translate('Mon').'"',
+            '"'.translate('Tue').'"',
+            '"'.translate('Wed').'"',
+            '"'.translate('Thu').'"',
+            '"'.translate('Fri').'"',
+            '"'.translate('Sat').'"'
         );
         $total_sell = [];
         $commission = [];
@@ -689,10 +691,22 @@ class DashboardController extends Controller
             switch ($params['commission_overview']) {
                 case "this_year":
                     for ($i = 1; $i <= 12; $i++) {
-                        $total_sell[$i] = $query
+                        $total_sell[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereMonth('created_at', $i)->whereYear('created_at', now()->format('Y'))
                             ->sum('order_amount');
-                        $commission[$i] = $query
+                        $commission[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereMonth('created_at', $i)->whereYear('created_at', now()->format('Y'))
                             ->sum(DB::raw('admin_commission + admin_expense - delivery_fee_comission'));
                         $delivery_commission[$i] = OrderTransaction::when(is_numeric($params['module_id']), function ($q) use ($params) {
@@ -709,10 +723,22 @@ class DashboardController extends Controller
                 case "this_week":
                     $weekStartDate = now()->startOfWeek();
                     for ($i = 1; $i <= 7; $i++) {
-                        $total_sell[$i] = $query
+                        $total_sell[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereDay('created_at', $weekStartDate->format('d'))->whereMonth('created_at', now()->format('m'))
                             ->sum('order_amount');
-                        $commission[$i] = $query
+                        $commission[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereDay('created_at', $weekStartDate->format('d'))->whereMonth('created_at', now()->format('m'))
                             ->sum(DB::raw('admin_commission + admin_expense - delivery_fee_comission'));
                         $delivery_commission[$i] = OrderTransaction::when(is_numeric($params['module_id']), function ($q) use ($params) {
@@ -738,10 +764,22 @@ class DashboardController extends Controller
                         '"Day 22-' . $total_day . '"',
                     );
                     for ($i = 1; $i <= 4; $i++) {
-                        $total_sell[$i] = $query
+                        $total_sell[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereBetween('created_at', ["{$start->format('Y-m-d')} 00:00:00", "{$end->format('Y-m-d')} 23:59:59"])
                             ->sum('order_amount');
-                        $commission[$i] = $query
+                        $commission[$i] = OrderTransaction::NotRefunded()
+                            ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                                return $q->where('module_id', $params['module_id']);
+                            })
+                            ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                                return $q->where('zone_id', $params['zone_id']);
+                            })
                             ->whereBetween('created_at', ["{$start->format('Y-m-d')} 00:00:00", "{$end->format('Y-m-d')} 23:59:59"])
                             ->sum(DB::raw('admin_commission + admin_expense - delivery_fee_comission'));
                         $delivery_commission[$i] = OrderTransaction::when(is_numeric($params['module_id']), function ($q) use ($params) {
@@ -760,10 +798,22 @@ class DashboardController extends Controller
                     break;
                 default:
                 for ($i = 1; $i <= 12; $i++) {
-                    $total_sell[$i] = $query
+                    $total_sell[$i] = OrderTransaction::NotRefunded()
+                        ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                            return $q->where('module_id', $params['module_id']);
+                        })
+                        ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                            return $q->where('zone_id', $params['zone_id']);
+                        })
                         ->whereMonth('created_at', $i)->whereYear('created_at', now()->format('Y'))
                         ->sum('order_amount');
-                    $commission[$i] = $query
+                    $commission[$i] = OrderTransaction::NotRefunded()
+                        ->when(is_numeric($params['module_id']), function ($q) use ($params) {
+                            return $q->where('module_id', $params['module_id']);
+                        })
+                        ->when(is_numeric($params['zone_id']), function ($q) use ($params) {
+                            return $q->where('zone_id', $params['zone_id']);
+                        })
                         ->whereMonth('created_at', $i)->whereYear('created_at', now()->format('Y'))
                         ->sum(DB::raw('admin_commission + admin_expense - delivery_fee_comission'));
                     $delivery_commission[$i] = OrderTransaction::when(is_numeric($params['module_id']), function ($q) use ($params) {
@@ -777,6 +827,7 @@ class DashboardController extends Controller
                 }
                     $label = $months;
             }
+
         if (!url()->current() == $request->is('admin/users')) {
             $dash_data = array_merge($data_os, $data_uo);
         }

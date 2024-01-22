@@ -18,6 +18,7 @@
                     {{translate('messages.third_party_apis')}}
                 </span>
             </h1>
+            @include('admin-views.business-settings.partials.third-party-links')
         </div>
         <!-- End Page Header -->
         <div class="card">
@@ -26,33 +27,53 @@
 
         @php($map_api_key_server=\App\Models\BusinessSetting::where(['key'=>'map_api_key_server'])->first())
         @php($map_api_key_server=$map_api_key_server?$map_api_key_server->value:null)
-        <div class="card-header d-block p-3">
-            <span class="badge badge-soft-primary white--space m-1 text-left">{{translate('messages.map_api_hint')}}</span>
-            <span class="badge badge-soft-primary white--space m-1 text-left">{{translate('messages.map_api_hint_2')}}</span>
-        </div>
+            <div class="card-header card-header-shadow border-0 align-items-center">
+                <h5 class="card-title align-items-center text--title">
+                    {{translate('Google Map API Setup')}}
+                </h5>
+                <div class="blinkings active lg-top">
+                    <i class="tio-info-outined"></i>
+                    <div class="business-notes">
+                        <h6><img src="{{asset('/public/assets/admin/img/notes.png')}}" alt=""> {{translate('Note')}}</h6>
+                        <div>
+                            {{translate('Without configuring this section map functionality will not work properly. Thus the whole
+                                 system will not work as it planned')}}
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card-body">
-                <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.config-update'):'javascript:'}}" method="post"
+                <div class="alert alert--primary d-flex" role="alert">
+                    <div class="alert--icon">
+                        <i class="tio-info"></i>
+                    </div>
+                    <div>
+                        {{translate('messages.map_api_hint_map_api_hint_2')}}
+                    </div>
+                </div>
+                <div class="py-1"></div>
+                <form action="{{env('APP_MODE')!='demo'?route('admin.business-settings.third-party.config-update'):'javascript:'}}" method="post"
                       enctype="multipart/form-data">
                     @csrf
                     <div class="row gy-3">
                         <div class="col-md-6">
                             <div class="form-group mb-0">
-                                <label class="input-label">{{translate('messages.map_api_key')}} ({{translate('messages.client')}})</label>
-                                <input type="text" placeholder="{{translate('messages.map_api_key')}} ({{translate('messages.client')}})" class="form-control" name="map_api_key"
+                                <label for="map_api_key" class="input-label">{{translate('messages.map_api_key')}} ({{translate('messages.client')}})</label>
+                                <input id="map_api_key" type="text" placeholder="{{translate('messages.map_api_key')}} ({{translate('messages.client')}})" class="form-control" name="map_api_key"
                                     value="{{env('APP_MODE')!='demo'?$map_api_key??'':''}}" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-0">
-                                <label class="input-label">{{translate('messages.map_api_key')}} ({{translate('messages.server')}})</label>
-                                <input type="text" placeholder="{{translate('messages.map_api_key')}} ({{translate('messages.server')}})" class="form-control" name="map_api_key_server"
+                                <label for="map_api_key_server" class="input-label">{{translate('messages.map_api_key')}} ({{translate('messages.server')}})</label>
+                                <input id="map_api_key_server" type="text" placeholder="{{translate('messages.map_api_key')}} ({{translate('messages.server')}})" class="form-control" name="map_api_key_server"
                                     value="{{env('APP_MODE')!='demo'?$map_api_key_server??'':''}}" required>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="btn--container justify-content-end">
                                 <button type="reset" class="btn btn--reset">{{translate('messages.reset')}}</button>
-                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}" onclick="{{env('APP_MODE')!='demo'?'':'call_demo()'}}" class="btn btn--primary">{{translate('messages.save')}}</button>
+                                <button type="{{env('APP_MODE')!='demo'?'submit':'button'}}"  class="btn btn--primary call-demo">{{translate('messages.save')}}</button>
                             </div>
                         </div>
                     </div>
@@ -62,6 +83,3 @@
     </div>
 @endsection
 
-@push('script_2')
-
-@endpush

@@ -27,18 +27,18 @@
             <!-- Header -->
             <div class="card-header py-2 border-0">
                 <div class="search--button-wrapper justify-content-end">
-                        <form action="javascript:" id="search-form" class="search-form min--260">
-                            @csrf
+                        <form class="search-form min--260">
+
                             <!-- Search -->
                             <div class="input-group input--group">
-                                <input id="datatableSearch_" type="search" name="search" class="form-control" placeholder="{{translate('messages.ex_:_search_order_id')}}" aria-label="{{translate('messages.search')}}" required>
+                                <input  type="search" value="{{  request()?->search ?? null }}" name="search" class="form-control" placeholder="{{translate('messages.ex_:_search_order_id')}}" aria-label="{{translate('messages.search')}}" >
                                 <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
                             </div>
                             <!-- End Search -->
                         </form>
                         <!-- Unfold -->
                         <div class="hs-unfold mr-2">
-                            <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:;"
+                            <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle h--40px" href="javascript:"
                                 data-hs-unfold-options='{
                                     "target": "#usersExportDropdown",
                                     "type": "css-animation"
@@ -49,36 +49,36 @@
                             <div id="usersExportDropdown"
                                     class="hs-unfold-content dropdown-unfold dropdown-menu dropdown-menu-sm-right">
                                 <span class="dropdown-header">{{translate('messages.options')}}</span>
-                                <a id="export-copy" class="dropdown-item" href="javascript:;">
+                                <a id="export-copy" class="dropdown-item" href="javascript:">
                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{asset('public/assets/admin')}}/svg/illustrations/copy.svg"
+                                            src="{{asset('public/assets/admin/svg/illustrations/copy.svg')}}"
                                             alt="Image Description">
                                     {{translate('messages.copy')}}
                                 </a>
-                                <a id="export-print" class="dropdown-item" href="javascript:;">
+                                <a id="export-print" class="dropdown-item" href="javascript:">
                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{asset('public/assets/admin')}}/svg/illustrations/print.svg"
+                                            src="{{asset('public/assets/admin/svg/illustrations/print.svg')}}"
                                             alt="Image Description">
                                     {{translate('messages.print')}}
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <span
-                                    class="dropdown-header">{{translate('messages.download')}} {{translate('messages.options')}}</span>
-                                <a id="export-excel" class="dropdown-item" href="javascript:;">
+                                    class="dropdown-header">{{translate('messages.download_options')}}</span>
+                                <a id="export-excel" class="dropdown-item" href="javascript:">
                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{asset('public/assets/admin')}}/svg/components/excel.svg"
+                                            src="{{asset('public/assets/admin/svg/components/excel.svg')}}"
                                             alt="Image Description">
                                     {{translate('messages.excel')}}
                                 </a>
-                                <a id="export-csv" class="dropdown-item" href="javascript:;">
+                                <a id="export-csv" class="dropdown-item" href="javascript:">
                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{asset('public/assets/admin')}}/svg/components/placeholder-csv-format.svg"
+                                            src="{{asset('public/assets/admin/svg/components/placeholder-csv-format.svg')}}"
                                             alt="Image Description">
                                     .{{translate('messages.csv')}}
                                 </a>
-                                <a id="export-pdf" class="dropdown-item" href="javascript:;">
+                                <a id="export-pdf" class="dropdown-item" href="javascript:">
                                     <img class="avatar avatar-xss avatar-4by3 mr-2"
-                                            src="{{asset('public/assets/admin')}}/svg/components/pdf.svg"
+                                            src="{{asset('public/assets/admin/svg/components/pdf.svg')}}"
                                             alt="Image Description">
                                     {{translate('messages.pdf')}}
                                 </a>
@@ -88,7 +88,7 @@
 
                         <!-- Unfold -->
                         <div class="hs-unfold">
-                            <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:;"
+                            <a class="js-hs-unfold-invoker btn btn-sm btn-white h--40px" href="javascript:"
                                 data-hs-unfold-options='{
                                     "target": "#showHideDropdown",
                                     "type": "css-animation"
@@ -145,7 +145,7 @@
 
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <span
-                                                class="mr-2 text-capitalize">{{translate('messages.total')}} {{translate('messages.amount')}}</span>
+                                                class="mr-2 text-capitalize">{{translate('messages.total_amount')}}</span>
 
                                             <!-- Checkbox Switch -->
                                             <label class="toggle-switch toggle-switch-sm"
@@ -160,7 +160,7 @@
                                         </div>
 
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <span class="mr-2">{{translate('messages.order')}} {{translate('messages.status')}}</span>
+                                            <span class="mr-2">{{translate('messages.order_status')}}</span>
 
                                             <!-- Checkbox Switch -->
                                             <label class="toggle-switch toggle-switch-sm" for="toggleColumn_order_status">
@@ -215,7 +215,7 @@
                             <th class="border-0">{{translate('messages.order_date')}}</th>
                             <th class="border-0">{{translate('messages.customer_information')}}</th>
                             <th class="border-0">{{translate('messages.total_amount')}}</th>
-                            <th class="border-0 text-center">{{translate('messages.order')}} {{translate('messages.status')}}</th>
+                            <th class="border-0 text-center">{{translate('messages.order_status')}}</th>
                             <th class="border-0 text-center">{{translate('messages.actions')}}</th>
                         </tr>
                         </thead>
@@ -238,19 +238,21 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($order->customer)
-                                        {{-- <a class="text-body text-capitalize"
-                                        href="{{route('vendor.customer.view',[$order['user_id']])}}"> --}}
-                                        <strong>
-                                            {{$order->customer['f_name'].' '.$order->customer['l_name']}}
-                                        </strong>
-                                        <div>
-                                            {{$order->customer['phone']}}
-                                        </div>
-                                    {{-- </a> --}}
+                                    @if($order->is_guest)
+                                    @php($customer_details = json_decode($order['delivery_address'],true))
+                                    <strong>{{$customer_details['contact_person_name']}}</strong>
+                                    <div>{{$customer_details['contact_person_number']}}</div>
+                                    @elseif($order->customer)
+
+                                    <strong>
+                                        {{$order->customer['f_name'].' '.$order->customer['l_name']}}
+                                    </strong>
+                                    <div>
+                                        {{$order->customer['phone']}}
+                                    </div>
                                     @else
                                         <label
-                                            class="badge badge-danger">{{translate('messages.invalid')}} {{translate('messages.customer')}} {{translate('messages.data')}}</label>
+                                            class="badge badge-danger">{{translate('messages.invalid_customer_data')}}</label>
                                     @endif
                                 </td>
                                 <td>
@@ -261,6 +263,10 @@
                                         @if($order->payment_status=='paid')
                                         <strong class="text-success">
                                             {{translate('messages.paid')}}
+                                        </strong>
+                                        @elseif($order->payment_status=='partially_paid')
+                                        <strong class="text-success">
+                                            {{translate('messages.partially_paid')}}
                                         </strong>
                                         @else
                                         <strong class="text-danger">
@@ -292,7 +298,7 @@
                                         </span>
                                     @elseif($order['order_status']=='failed')
                                         <span class="badge badge-soft-danger">
-                                        {{translate('messages.payment')}}  {{translate('messages.failed')}}
+                                        {{translate('messages.payment_failed')}}
                                         </span>
                                     @else
                                         <span class="badge badge-soft-danger">
@@ -337,28 +343,15 @@
             <!-- End Footer -->
         </div>
         <!-- End Card -->
-    </div>
+
 @endsection
 
 @push('script_2')
     <script>
+        "use strict";
         $(document).on('ready', function () {
-            // INITIALIZATION OF NAV SCROLLER
-            // =======================================================
-            $('.js-nav-scroller').each(function () {
-                new HsNavScroller($(this)).init()
-            });
 
-            // INITIALIZATION OF SELECT2
-            // =======================================================
-            $('.js-select2-custom').each(function () {
-                var select2 = $.HSCore.components.HSSelect2.init($(this));
-            });
-
-
-            // INITIALIZATION OF DATATABLES
-            // =======================================================
-            var datatable = $.HSCore.components.HSDatatables.init($('#datatable'), {
+            let datatable = $.HSCore.components.HSDatatables.init($('#datatable'), {
                 dom: 'Bfrtip',
                 buttons: [
                     {
@@ -367,11 +360,19 @@
                     },
                     {
                         extend: 'excel',
-                        className: 'd-none'
+                        className: 'd-none',
+                        action: function ()
+                        {
+                            window.location.href = '{{route("vendor.order.export",['status'=>$status,'file_type'=>'excel','type'=>'order', request()->getQueryString()])}}';
+                        }
                     },
                     {
                         extend: 'csv',
-                        className: 'd-none'
+                        className: 'd-none',
+                        action: function ()
+                        {
+                            window.location.href = '{{route("vendor.order.export",['status'=>$status,'file_type'=>'csv','type'=>'order', request()->getQueryString()])}}';
+                        }
                     },
                     {
                         extend: 'pdf',
@@ -443,39 +444,7 @@
                 datatable.columns(6).visible(e.target.checked)
             })
 
-            // INITIALIZATION OF TAGIFY
-            // =======================================================
-            $('.js-tagify').each(function () {
-                var tagify = $.HSCore.components.HSTagify.init($(this));
-            });
         });
     </script>
 
-    <script>
-        $('#search-form').on('submit', function () {
-            var formData = new FormData(this);
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.post({
-                url: '{{route('vendor.order.search')}}',
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                beforeSend: function () {
-                    $('#loading').show();
-                },
-                success: function (data) {
-                    $('#set-rows').html(data.view);
-                    $('.card-footer').hide();
-                },
-                complete: function () {
-                    $('#loading').hide();
-                },
-            });
-        });
-    </script>
 @endpush

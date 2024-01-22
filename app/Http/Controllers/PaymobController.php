@@ -2,14 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\CentralLogics\Helpers;
-use App\CentralLogics\OrderLogic;
-use Brian2694\Toastr\Facades\Toastr;
-use App\Models\Order;
+
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Payment;
+use App\Traits\Processor;
+use App\Models\PaymentRequest;
 
 class PaymobController extends Controller
 {
+    use Processor;
+
+    private $config_values;
+
+    private PaymentRequest $payment;
+    private $user;
+
+    public function __construct(PaymentRequest $payment, User $user)
+    {
+        $config = $this->payment_config('paymob_accept', 'payment_config');
+        if (!is_null($config) && $config->mode == 'live') {
+            $this->config_values = json_decode($config->live_values);
+        } elseif (!is_null($config) && $config->mode == 'test') {
+            $this->config_values = json_decode($config->test_values);
+        }
+        $this->payment = $payment;
+        $this->user = $user;
+    }
+
     protected function cURL($url, $json)
     {
         // Create curl resource
@@ -54,56 +77,66 @@ class PaymobController extends Controller
         return json_decode($output);
     }
 
-    public function credit()
+    public function credit(Request $request)
     {
-        $currency_code = Helpers::currency_code();
-        if ($currency_code != "EGP") {
-            Toastr::error(translate('messages.paymob_supports_EGP_currency'));
-            return back();
+        $validator = Validator::make($request->all(), [
+            'payment_id' => 'required|uuid'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_400, null, $this->error_processor($validator)), 400);
         }
 
-        $config = Helpers::get_business_settings('paymob_accept');
+        $data = $this->payment::where(['id' => $request['payment_id']])->where(['is_paid' => 0])->first();
+        if (!isset($data)) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_204), 200);
+        }
+
+        session()->put('payment_id', $data->id);
+
+        if ($data['additional_data'] != null) {
+            $business = json_decode($data['additional_data']);
+            $business_name = $business->business_name ?? "my_business";
+        } else {
+            $business_name = "my_business";
+        }
+
+        $payer = json_decode($data['payer_information']);
+
         try {
             $token = $this->getToken();
-            $order = $this->createOrder($token);
-            $paymentToken = $this->getPaymentToken($order, $token);
-        }catch (\Exception $exception){
-            Toastr::error(translate('messages.country_permission_denied_or_misconfiguration'));
-            return back();
+            $order = $this->createOrder($token, $data, $business_name);
+            $paymentToken = $this->getPaymentToken($order, $token, $data, $payer);
+        } catch (\Exception $exception) {
+            return response()->json($this->response_formatter(GATEWAYS_DEFAULT_404), 200);
         }
-        return \Redirect::away('https://portal.weaccept.co/api/acceptance/iframes/' . $config['iframe_id'] . '?payment_token=' . $paymentToken);
+        return Redirect::away('https://accept.paymobsolutions.com/api/acceptance/iframes/' . $this->config_values->iframe_id . '?payment_token=' . $paymentToken);
     }
 
     public function getToken()
     {
-        $config = Helpers::get_business_settings('paymob_accept');
         $response = $this->cURL(
-            'https://accept.paymobsolutions.com/api/auth/tokens',
-            ['api_key' => $config['api_key']]
+            'https://accept.paymob.com/api/auth/tokens',
+            ['api_key' => $this->config_values->api_key]
         );
 
         return $response->token;
     }
 
-    public function createOrder($token)
+    public function createOrder($token, $payment_data, $business_name)
     {
-        $order = Order::with(['details'])->where(['id' => session('order_id')])->first();
-
-        $items = [];
-        foreach ($order->details as $detail) {
-            array_push($items, [
-                'name' => $detail->campaign?$detail->campaign->title:$detail->food['name'],
-                'amount_cents' => round($detail['price'],2) * 100,
-                'description' => $detail->campaign?$detail->campaign->title:$detail->food['name'],
-                'quantity' => $detail['quantity']
-            ]);
-        }
+        $items[] = [
+            'name' => $business_name,
+            'amount_cents' => round($payment_data->payment_amount * 100),
+            'description' => 'payment ID :' . $payment_data->id,
+            'quantity' => 1
+        ];
 
         $data = [
             "auth_token" => $token,
             "delivery_needed" => "false",
-            "amount_cents" => round($order->order_amount,2) * 100,
-            "currency" => "EGP",
+            "amount_cents" => round($payment_data->payment_amount * 100),
+            "currency" => $payment_data->currency_code,
             "items" => $items,
 
         ];
@@ -115,35 +148,33 @@ class PaymobController extends Controller
         return $response;
     }
 
-    public function getPaymentToken($order, $token)
+    public function getPaymentToken($order, $token, $payment_data, $payer)
     {
-        $ord = Order::with(['details'])->where(['id' => session('order_id')])->first();
-
-        $value = $ord->order_amount;
-        $config = Helpers::get_business_settings('paymob_accept');
+        $value = $payment_data->payment_amount;
         $billingData = [
-            "apartment" => "not given",
-            "email" => "not given",
-            "floor" => "not given",
-            "first_name" => "not given",
-            "street" => "not given",
-            "building" => "not given",
-            "phone_number" => "not given",
+            "apartment" => "N/A",
+            "email" => $payer->email,
+            "floor" => "N/A",
+            "first_name" => $payer->name,
+            "street" => "N/A",
+            "building" => "N/A",
+            "phone_number" => $payer->phone ?? "N/A",
             "shipping_method" => "PKG",
-            "postal_code" => "not given",
-            "city" => "not given",
-            "country" => "not given",
-            "last_name" => "not given",
-            "state" => "not given",
+            "postal_code" => "N/A",
+            "city" => "N/A",
+            "country" => "N/A",
+            "last_name" => $payer->name,
+            "state" => "N/A",
         ];
+
         $data = [
             "auth_token" => $token,
-            "amount_cents" => round($value,2) * 100,
+            "amount_cents" => round($value * 100),
             "expiration" => 3600,
             "order_id" => $order->id,
             "billing_data" => $billingData,
-            "currency" => "EGP",
-            "integration_id" => $config['integration_id']
+            "currency" => $payment_data->currency_code,
+            "integration_id" => $this->config_values->integration_id
         ];
 
         $response = $this->cURL(
@@ -156,7 +187,6 @@ class PaymobController extends Controller
 
     public function callback(Request $request)
     {
-        $config = Helpers::get_business_settings('paymob_accept');
         $data = $request->all();
         ksort($data);
         $hmac = $data['hmac'];
@@ -188,36 +218,28 @@ class PaymobController extends Controller
                 $connectedString .= $element;
             }
         }
-        $secret = $config['hmac'];
+        $secret = $this->config_values->hmac;
         $hased = hash_hmac('sha512', $connectedString, $secret);
-        $order = Order::where('id', session('order_id'))->first();
 
-        if ($hased == $hmac) {
-            $order->transaction_reference = 'tran-' . session('order_id');
-            $order->payment_method = 'paymob_accept';
-            $order->order_status = 'confirmed';
-            $order->confirmed = now();
-            $order->updated_at = now();
-            $order->save();
-            try {
-                Helpers::send_order_notification($order);
-            } catch (\Exception $e) {
+        if ($hased == $hmac && $data['success'] === "true") {
+
+            $this->payment::where(['id' => session('payment_id')])->update([
+                'payment_method' => 'paymob_accept',
+                'is_paid' => 1,
+                'transaction_id' => session('payment_id'),
+            ]);
+
+            $payment_data = $this->payment::where(['id' => session('payment_id')])->first();
+
+            if (isset($payment_data) && function_exists($payment_data->success_hook)) {
+                call_user_func($payment_data->success_hook, $payment_data);
             }
-
-            if ($order->callback != null) {
-                return redirect($order->callback . '&status=success');
-            }else{
-                return \redirect()->route('payment-success');
-            }
+            return $this->payment_response($payment_data,'success');
         }
-
-        $order->order_status = 'failed';
-        $order->failed = now();
-        $order->save();
-        if ($order->callback != null) {
-            return redirect($order->callback . '&status=fail');
-        }else{
-            return \redirect()->route('payment-fail');
+        $payment_data = $this->payment::where(['id' => session('payment_id')])->first();
+        if (isset($payment_data) && function_exists($payment_data->failure_hook)) {
+            call_user_func($payment_data->failure_hook, $payment_data);
         }
+        return $this->payment_response($payment_data,'fail');
     }
 }

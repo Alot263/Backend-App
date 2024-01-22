@@ -25,6 +25,30 @@ class ParcelCategory extends Model
         return $this->morphMany(Translation::class, 'translationable');
     }
 
+    public function getNameAttribute($value){
+        if (count($this->translations) > 0) {
+            foreach ($this->translations as $translation) {
+                if ($translation['key'] == 'name') {
+                    return $translation['value'];
+                }
+            }
+        }
+
+        return $value;
+    }
+
+    public function getDescriptionAttribute($value){
+        if (count($this->translations) > 0) {
+            foreach ($this->translations as $translation) {
+                if ($translation['key'] == 'description') {
+                    return $translation['value'];
+                }
+            }
+        }
+
+        return $value;
+    }
+
     public function scopeModule($query, $module_id)
     {
         return $query->where('module_id', $module_id);

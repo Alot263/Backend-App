@@ -85,9 +85,9 @@
                             class="avatar avatar-xxl avatar-circle avatar-border-lg avatar-uploader profile-cover-avatar"
                             for="avatarUploader">
                             <img id="viewer"
-                                 onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                 class="avatar-img"
-                                 src="{{asset('storage/app/public/admin')}}/{{auth('admin')->user()->image}}"
+                                 data-onerror-image="{{asset('public/assets/admin/img/160x160/img1.jpg')}}"
+                                 class="avatar-img onerror-image"
+                                 src="{{\App\CentralLogics\Helpers::onerror_image_helper(auth('admin')->user()->image, asset('storage/app/public/admin/').'/'.auth('admin')->user()->image, asset('public/assets/admin/img/160x160/img1.jpg'), 'admin/') }}"
                                  alt="Image">
 
                             <input type="file" name="image" class="js-file-attach avatar-uploader-input"
@@ -115,7 +115,7 @@
                                 <label for="firstNameLabel" class="col-sm-3 col-form-label input-label d-flex"><span>{{translate('messages.full_name')}}</span> <i
                                         class="tio-help-outlined text-body ml-1" data-toggle="tooltip"
                                         data-placement="top"
-                                        title="Display name"></i></label>
+                                        title="{{ translate('Display_name') }}"></i></label>
 
                                 <div class="col-sm-9">
                                     <div class="input-group input-group-sm-down-break">
@@ -157,7 +157,7 @@
                             </div>
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="{{env('APP_MODE')!='demo'?"form_alert('admin-settings-form','Want to update admin info ?')":"call_demo()"}}" class="btn btn-primary">{{translate('messages.save')}}</button>
+                                <button type="button" data-id="admin-settings-form" data-message="{{translate('Want to update admin info ?')}}" class="btn btn-primary {{env('APP_MODE')!='demo'?"form-alert":"call-demo"}}">{{translate('messages.save')}}</button>
                             </div>
 
                             <!-- End Form -->
@@ -182,12 +182,14 @@
 
                         <!-- Form Group -->
                             <div class="row form-group">
-                                <label for="newPassword" class="col-sm-3 col-form-label input-label">{{translate('messages.new_password')}}</label>
+                                <label for="newPassword" class="col-sm-3 col-form-label input-label">{{translate('messages.new_password')}}<span class="form-label-secondary" data-toggle="tooltip" data-placement="right"
+        data-original-title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"><img src="{{ asset('/public/assets/admin/img/info-circle.svg') }}" alt="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"></span></label>
 
                                 <div class="col-sm-9">
                                     <input type="password" class="js-pwstrength form-control" name="password"
-                                           id="newPassword" placeholder="{{translate('messages.enter_new_password')}}"
-                                           aria-label="{{translate('messages.enter_new_password')}}"
+                                           id="newPassword" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                           placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                           aria-label="8+ characters required"
                                            data-hs-pwstrength-options='{
                                            "ui": {
                                              "container": "#changePasswordForm",
@@ -212,15 +214,16 @@
                                 <div class="col-sm-9">
                                     <div class="mb-3">
                                         <input type="password" class="form-control" name="confirm_password"
-                                               id="confirmNewPasswordLabel" placeholder="{{translate('messages.confirm_new_password')}}"
-                                               aria-label="{{translate('messages.confirm_new_password')}}" required>
+                                               id="confirmNewPasswordLabel" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="{{ translate('messages.Must_contain_at_least_one_number_and_one_uppercase_and_lowercase_letter_and_symbol,_and_at_least_8_or_more_characters') }}"
+                                               placeholder="{{ translate('messages.password_length_placeholder', ['length' => '8+']) }}"
+                                               aria-label="8+ characters required" required>
                                     </div>
                                 </div>
                             </div>
                             <!-- End Form Group -->
 
                             <div class="d-flex justify-content-end">
-                                <button type="button" onclick="{{env('APP_MODE')!='demo'?"form_alert('changePasswordForm','".translate('messages.want_to_update_admin_password')."')":"call_demo()"}}" class="btn btn-primary">{{translate('messages.save')}}</button>
+                                <button type="button" data-id="changePasswordForm" data-message="{{translate('messages.want_to_update_admin_password')}}" class="btn btn-primary {{env('APP_MODE')!='demo'?"form-alert":"call-demo"}}">{{translate('messages.save')}}</button>
                             </div>
                         </form>
                         <!-- End Form -->
@@ -240,9 +243,10 @@
 
 @push('script_2')
     <script>
+        "use strict";
         function readURL(input) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
 
                 reader.onload = function (e) {
                     $('#viewer').attr('src', e.target.result);
@@ -255,9 +259,7 @@
         $("#customFileEg1").change(function () {
             readURL(this);
         });
-    </script>
 
-    <script>
         $("#generalSection").click(function() {
             $("#passwordSection").removeClass("active");
             $("#generalSection").addClass("active");

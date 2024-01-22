@@ -68,7 +68,7 @@ class ZoneScope implements Scope
                     break;
 
                 case 'App\Models\Zone':
-                    $builder->where('id', auth('admin')->user()->zone_id);
+                    $builder->where('zones.id', auth('admin')->user()->zone_id);
                     break;
 
                 case 'App\Models\ProvideDMEarning':
