@@ -68,6 +68,7 @@ trait Payment
             'swish' => 'payment/swish/pay',
             'momo' => 'payment/momo/pay',
             'payfast' => 'payment/payfast/pay',
+            'paynow' => 'payment/paynow/pay',
             'worldpay' => 'payment/worldpay/pay',
             'sixcash' => 'payment/sixcash/pay',
             'phonepe' => 'payment/phonepe/pay',

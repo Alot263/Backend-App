@@ -679,6 +679,8 @@
   'razorkey' => 'مفتاح الحلاقة',
   'razorsecret' => 'سر الشفرة',
   'paypal' => 'PayPal',
+  'payfast' => 'Payfast',
+  'paynow' => 'Paynow',
   'stripe' => 'شريط',
   'client' => 'عميل',
   'published' => 'نشرت',

@@ -33,6 +33,7 @@ const GATEWAYS_PAYMENT_METHODS = [
     ['key' => 'swish', 'value' => 'Swish'],
     ['key' => 'momo', 'value' => 'Momo'],
     ['key' => 'payfast', 'value' => 'Pay Fast'],
+	['key' => 'paynow', 'value' => 'PayNow'],
     ['key' => 'worldpay', 'value' => 'World Pay'],
     ['key' => 'sixcash', 'value' => 'Six Cash'],
 ];

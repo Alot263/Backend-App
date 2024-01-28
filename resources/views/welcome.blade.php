@@ -189,6 +189,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body p-20">
@@ -210,11 +211,11 @@
                                     <label class="d-block">Inactive</label>
                                 </div>
                                 <div class="form-group mb-2">
-                                    <label class="d-block">Paypal client id</label>
+                                    <label class="d-block">Payfast client id</label>
                                     <input type="text" class="form-control" name="paypal_client_id">
                                 </div>
                                 <div class="form-group mb-2">
-                                    <label class="d-block">Paypal secret </label>
+                                    <label class="d-block">Payfast secret </label>
                                     <input type="text" class="form-control" name="paypal_secret">
                                 </div>
                                 <button type="button" onclick="call_admin()" class="btn btn-primary mb-2">Save</button>
@@ -228,14 +229,14 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body p-20">
-                        <h5 class="text-center">Payfast</h5>
-                        @php($config=\App\CentralLogics\Helpers::get_business_settings('payfast'))
-                        <form action="{{route('admin.business-settings.payment-method-update',['payfast'])}}"
+                        <h5 class="text-center">Paynow</h5>
+                        @php($config=\App\CentralLogics\Helpers::get_business_settings('paynow'))
+                        <form action="{{route('admin.business-settings.payment-method-update',['paynow'])}}"
                               method="post">
                             @csrf
                             @if(isset($config))
                                 <div class="form-group mb-2">
-                                    <label class="control-label">Payfast</label>
+                                    <label class="control-label">Paynow</label>
                                 </div>
                                 <div class="form-group mb-2 mt-2">
                                     <input type="radio" name="status" value="1" {{$config['status']==1?'checked':''}}>
@@ -246,11 +247,11 @@
                                     <label class="d-block">Inactive</label>
                                 </div>
                                 <div class="form-group mb-2">
-                                    <label class="d-block">Paypal client id</label>
+                                    <label class="d-block">Paynow client id</label>
                                     <input type="text" class="form-control" name="paypal_client_id">
                                 </div>
                                 <div class="form-group mb-2">
-                                    <label class="d-block">Paypal secret </label>
+                                    <label class="d-block">Paynow secret </label>
                                     <input type="text" class="form-control" name="paypal_secret">
                                 </div>
                                 <button type="button" onclick="call_admin()" class="btn btn-primary mb-2">Save</button>

@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  # MariaDB service
+  db:
+    image: mariadb:10.4
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+      - MYSQL_INIT_CONNECT_TIMEOUT=6000
+    env_file:
+      - .env
+    command: --init-file /docker-entrypoint-initdb.d/alot263.sql  # Updated command
+    ports:
+      - "3320:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./opentrade.sql:/docker-entrypoint-initdb.d/alot263.sql
+    networks:
+      - my_network  # Specify a network name
+
+  # Laravel + Apache service
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9800:80"
+    depends_on:
+      - db
+    volumes:
+      - .:/var/www/html
+    environment:
+      - PHP_VERSION=8.2   # Specify the PHP version here
+    networks:
+      - my_network  # Specify the same network name
+
+networks:
+  my_network:  # Define the network
+    driver: bridge
+volumes:
+  db_data:
