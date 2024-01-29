@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Mail\PasswordResetRequestMail;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Session;
+use Mockery\Exception;
 use Modules\Gateways\Traits\SmsGateway;
 use Illuminate\Validation\Rules\Password;
 
@@ -80,8 +81,13 @@ class LoginController extends Controller
         $locale = $locals[$role];
         App::setLocale($locale);
         $custome_recaptcha = new CaptchaBuilder;
-        $custome_recaptcha->build();
-        Session::put('six_captcha', $custome_recaptcha->getPhrase());
+
+		try{
+			$custome_recaptcha->build();
+			Session::put('six_captcha', $custome_recaptcha->getPhrase());
+		}catch(Exception $ex){
+
+		}
 
         $email =  null;
         $password = null;

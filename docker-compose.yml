@@ -6,7 +6,9 @@ services:
     image: mariadb:10.4
     environment:
       - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
-      - MYSQL_INIT_CONNECT_TIMEOUT=6000
+      - MARIADB_EXTRA_ARGS=--sql-mode=''
+      - MARIADB_EXTRA_ARGS=--max_allowed_packet=512M
+      - MYSQL_INIT_CONNECT_TIMEOUT=6000000
     env_file:
       - .env
     command: --init-file /docker-entrypoint-initdb.d/alot263.sql  # Updated command
@@ -14,7 +16,8 @@ services:
       - "3320:3306"
     volumes:
       - db_data:/var/lib/mysql
-      - ./opentrade.sql:/docker-entrypoint-initdb.d/alot263.sql
+      - ./my.cnf:/etc/mysql/my.cnf
+      - ./alot263.sql:/docker-entrypoint-initdb.d/alot263.sql
     networks:
       - my_network  # Specify a network name
 
