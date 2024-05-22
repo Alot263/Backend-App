@@ -690,7 +690,7 @@ class BusinessSettingsController extends Controller
                 }
             }
         }
-        $data_values = Setting::whereIn('settings_type', ['payment_config'])->whereIn('key_name', ['ssl_commerz','paypal','stripe','razor_pay','senang_pay','paytabs','paystack','paymob_accept','paytm','flutterwave','liqpay','bkash','mercadopago'])->get();
+        $data_values = Setting::whereIn('settings_type', ['payment_config'])->whereIn('key_name', ['ssl_commerz','paypal','stripe','razor_pay','senang_pay','paytabs','paystack','paymob_accept','paytm','flutterwave','liqpay','bkash','mercadopago', 'paynow'])->get();
 
         return view('admin-views.business-settings.payment-index', compact('published_status', 'payment_url','data_values'));
     }
@@ -779,7 +779,8 @@ class BusinessSettingsController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-            } else {
+            }
+            else {
                 DB::table('business_settings')->where(['key' => 'razor_pay'])->update([
                     'key'        => 'razor_pay',
                     'value'      => json_encode([
@@ -812,6 +813,37 @@ class BusinessSettingsController extends Controller
                         'mode'              => $request['mode'],
                         'paypal_client_id' => $request['paypal_client_id'],
                         'paypal_secret'    => $request['paypal_secret'],
+                    ]),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+        elseif ($name == 'paynow') {
+            $payment = BusinessSetting::where('key', 'paynow')->first();
+            if (isset($payment) == false) {
+                DB::table('business_settings')->insert([
+                    'key'        => 'paynow',
+                    'value'      => json_encode([
+                        'status'           => 1,
+                        'mode'              => '',
+                        'integration_id' => '',
+                        'integration_key'    => '',
+                        'result_url' => '',
+                        'return_url'    => '',
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                DB::table('business_settings')->where(['key' => 'paynow'])->update([
+                    'key'        => 'paypal',
+                    'value'      => json_encode([
+                        'status'           => $request['status'],
+                        'mode'              => $request['mode'],
+                        'integration_id' => $request['INTEGRATION_ID'],
+                        'integration_key'    => $request['INTEGRATION_KEY'],
+                        'result_url' => '',
+                        'return_url'    => '',
                     ]),
                     'updated_at' => now(),
                 ]);

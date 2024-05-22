@@ -16,7 +16,7 @@
         "gregwar/captcha": "^1.1",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.5",
-        "laravel/framework": "^10.0",
+        "laravel/framework": "^10.48",
         "laravel/passport": "^11.0",
         "laravel/tinker": "^2.5",
         "laravelpkg/laravelchk": "dev-master",

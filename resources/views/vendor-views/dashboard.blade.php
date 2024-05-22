@@ -22,6 +22,13 @@
                 </div>
                 <div class="col-sm text-sm-right">
                     <span class="d-inline-flex align-items-center">
+                     <a href="{{asset('/public/assets/apks/Alot263Store.apk')}}" class="btn btn-info" download="">
+                            <i class="tio-download-to mr-1" style="font-size: 24px;"></i>
+                            <span>Download Store APK</span>
+                    </a>
+                    </span>
+
+                    <span class="d-inline-flex align-items-center">
                         <span class="mr-2">{{translate('messages.followup')}}</span>
                         <i class="tio-restaurant fz-30px"></i>
                     </span>

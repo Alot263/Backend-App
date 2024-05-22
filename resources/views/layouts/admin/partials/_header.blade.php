@@ -106,6 +106,31 @@
                         </a>
                     </li>
                     @endif
+                    @if(auth('admin')->user()->role_id == 2)
+                        <li class="nav-item __nav-item">
+                            <div class="d-flex justify-content-center align-items-center" style="height: 50px;">
+                                <a href="{{asset('/public/assets/apks/Alot263Store.apk')}}" class="btn btn-info" download="">
+                                    <i class="tio-download-to mr-1" style="font-size: 24px;"></i>
+                                    <span>Download Store APK</span>
+                                </a>
+                            </div>
+                        </li>
+                    @endif
+
+                    @php
+                    print_r(auth('delivery_men')->user())
+                    @endphp
+
+                    @if(auth('admin')->user()->role_id == 3 )
+                        <li class="nav-item __nav-item">
+                            <div class="d-flex justify-content-center align-items-center" style="height: 50px;">
+                                <a href="{{asset('/public/assets/apks/Alot263Delivery.apk')}}" class="btn btn-info" download="">
+                                    <i class="tio-download-to mr-1" style="font-size: 24px;"></i>
+                                    <span>Download Delivery APK</span>
+                                </a>
+                            </div>
+                        </li>
+                    @endif
 
                     <li class="nav-item max-sm-m-0 ml-auto mr-lg-3">
                         <a class="btn btn-icon rounded-circle nav-msg-icon"

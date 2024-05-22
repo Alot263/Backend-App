@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\ItemTag;
+    use App\Http\Controllers\HomeController;
+    use App\Models\ItemTag;
 
 use App\Models\Translation;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,7 @@ use App\Http\Controllers\SslCommerzPaymentController;
 
 
 
-Route::get('/', 'UpdateController@update_software_index')->name('index');
+//Route::get('/', 'UpdateController@update_software_index')->name('index');
 Route::post('update-system', 'UpdateController@update_software')->name('update-system');
 
 Route::fallback(function () {
@@ -71,7 +72,7 @@ Route::get('authentication-failed', function () {
 })->name('authentication-failed');
 
 Route::group(['prefix' => 'payment-mobile'], function () {
-    Route::get('/', 'PaymentController@payment')->name('payment-mobile');
+    //Route::get('/', 'PaymentController@payment')->name('payment-mobile');
     Route::get('set-payment-method/{name}', 'PaymentController@set_payment_method')->name('set-payment-method');
 });
 
